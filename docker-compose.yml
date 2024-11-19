@@ -1,0 +1,5 @@
+services:
+  pong:
+    build: services/pong
+    volumes: services/pong/src:/src
+    working_dir: /src

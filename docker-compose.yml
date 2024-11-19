@@ -8,6 +8,19 @@ services:
       - 5173:5173
     networks:
       - default
+  users:
+    container_name: users
+    build: services/users
+    volumes:
+      - ./services/users/:/app
+    ports:
+      - 8000:8000
+  postgres:
+    image: postgres:14
+    volumes:
+      - ./.data/postgres:/var/lib/postgresql/data/
+    environment:
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
 
 networks:
   default:

@@ -1,6 +1,6 @@
 ## Modules
 
-- Web: Django (major) ? by [@FirePh0enix]
+- Web: Django (major) by [@FirePh0enix]
 - Web: Bootstrap (minor) by [@Vpekdas]
 - Web: PostgresSQL (minor) by [@FirePh0enix]
 

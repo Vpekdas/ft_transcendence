@@ -24,5 +24,5 @@
 
 - Accessibility: Multiple language (minor)
 
-- Server-Side Pong: API (major)
+- Server-Side Pong: API (major) by @FirePh0enix
 - Server-Side Pong: CLI (major)

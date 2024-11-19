@@ -1,5 +1,14 @@
 services:
-  pong:
-    build: services/pong
-    volumes: services/pong/src:/src
-    working_dir: /src
+  frontend:
+    container_name: frontend
+    build: services/frontend
+    volumes:
+      - ./services/frontend:/app
+    ports:
+      - 5173:5173
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge

@@ -6,10 +6,11 @@ export default class extends Component {
     constructor() {
         super();
         this.login = new Login();
-        // this.setTitle("Profile");
     }
 
     async render() {
+        this.setTitle("Profile");
+
         const navBar = await new NavBar().render();
         const login = await new Login().render();
 

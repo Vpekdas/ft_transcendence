@@ -5,6 +5,7 @@ import Profile from "./views/Profile";
 import Settings from "./views/Settings";
 import NotFound from "./views/NotFound";
 import Counter from "./views/Counter";
+import Registration from "./views/Registration";
 
 const router = async () => {
     // Define routes and their associated views.

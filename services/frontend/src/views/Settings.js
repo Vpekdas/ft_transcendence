@@ -4,10 +4,10 @@ import NavBar from "./NavBar";
 export default class extends Component {
     constructor() {
         super();
-        // this.setTitle("Settings");
     }
 
     async render() {
+        this.setTitle("Settings");
         const navBar = await new NavBar().render();
 
         return navBar;

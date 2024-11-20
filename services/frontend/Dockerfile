@@ -11,5 +11,5 @@ ENV PATH="$PATH:/app/node_modules/.bin"
 EXPOSE 8080
 
 # CMD ["tail", "-f"]
-ENTRYPOINT [ "bash", "/app/entrypoint.sh" ]
+ENTRYPOINT [ "bash", "/app/tools/entrypoint.sh" ]
 CMD [ "npm", "run", "dev" ]

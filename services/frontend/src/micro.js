@@ -26,6 +26,10 @@ export class Component {
         this.updateHandler = undefined;
     }
 
+    setTitle(title) {
+        document.title = title;
+    }
+
     /**
      * @returns {Promise<string>} The generated HTML
      */

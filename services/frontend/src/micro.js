@@ -4,10 +4,22 @@ class Store {
     }
 }
 
+class ElementAccessor {
+    constructor() {
+        this.eventCallbacks = new Map();
+    }
+
+    on(eventName, callback) {
+        this.eventCallbacks.set(eventName, callback);
+    }
+}
+
 export class Component {
     constructor(parent, name = "default") {
         /** @type Map<string, Store> */
         this.stores = new Map();
+        /** @type Map<string, Selector>  */
+        this.accessors = new Map();
         this.parent = parent;
         /** @type string */
         this.name = name;
@@ -21,7 +33,13 @@ export class Component {
         return "";
     }
 
-    events() {}
+    events() {
+        for (let [selector, values] of this.accessors) {
+            for (let [eventName, callback] of values.eventCallbacks) {
+                document.querySelector(selector).addEventListener(eventName, callback);
+            }
+        }
+    }
 
     /**
      * @param {string} name
@@ -64,6 +82,21 @@ export class Component {
     async update() {
         if (this.updateHandler != undefined) await this.updateHandler();
         if (this.parent != undefined) await this.parent.update();
+    }
+
+    /**
+     * @param {string} selector
+     * @returns {ElementAccessor}
+     */
+    query(selector) {
+        var accessor;
+        if (!this.accessors.has(selector)) {
+            accessor = new ElementAccessor();
+            this.accessors.set(selector, accessor);
+        } else {
+            accessor = this.accessors.get(selector);
+        }
+        return accessor;
     }
 
     getFullPath() {

@@ -1,17 +1,17 @@
-import AbstractView from "./AbstractView";
+import { Component } from "../micro";
 import NavBar from "./NavBar";
 import Login from "./Login";
 
-export default class extends AbstractView {
+export default class extends Component {
     constructor() {
         super();
         this.login = new Login();
-        this.setTitle("Profile");
+        // this.setTitle("Profile");
     }
 
-    async getHtml() {
-        const navBar = await new NavBar().getHtml();
-        const login = await new Login().getHtml();
+    async render() {
+        const navBar = await new NavBar().render();
+        const login = await new Login().render();
 
         return navBar + login;
     }

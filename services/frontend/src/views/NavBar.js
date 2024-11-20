@@ -1,11 +1,11 @@
-import AbstractView from "./AbstractView";
+import { Component } from "../micro";
 
-export default class extends AbstractView {
+export default class extends Component {
     constructor() {
         super();
     }
 
-    async getHtml() {
+    async render() {
         return `
         <ul class="nav nav-underline">
             <li class="nav-item">
@@ -16,6 +16,9 @@ export default class extends AbstractView {
             </li>
             <li class="nav-item">
                 <a class="nav-link" data-link href="/settings">Settings</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-link href="/counter">Counter</a>
             </li>
         </ul>`;
     }

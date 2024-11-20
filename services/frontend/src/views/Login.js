@@ -1,11 +1,11 @@
-import AbstractView from "./AbstractView";
+import { Component } from "../micro";
 
-export default class Login extends AbstractView {
+export default class Login extends Component {
     constructor() {
         super();
     }
 
-    async getHtml() {
+    async render() {
         return `
 <div class="container-fluid">
     <form class="login-form" action="javascript:void(0)">

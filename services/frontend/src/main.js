@@ -5,9 +5,8 @@ import Profile from "./views/Profile";
 import Settings from "./views/Settings";
 import NotFound from "./views/NotFound";
 import Counter from "./views/Counter";
-import Registration from "./views/Registration";
 
-const router = async () => {
+export const router = async () => {
     // Define routes and their associated views.
     // This allows us to dynamically render HTML content based on the current view.
     const routes = [
@@ -54,7 +53,7 @@ const router = async () => {
 };
 
 // Update the browser's history with the new URL and render the corresponding view.
-const navigateTo = (url) => {
+export const navigateTo = (url) => {
     history.pushState(null, null, url);
     router();
 };

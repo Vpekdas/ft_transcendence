@@ -1,4 +1,5 @@
 import AbstractView from "./AbstractView";
+import NavBar from "./NavBar";
 
 export default class extends AbstractView {
     constructor() {
@@ -7,6 +8,8 @@ export default class extends AbstractView {
     }
 
     async getHtml() {
-        return this.readPage("/settings.html");
+        const navBar = await new NavBar().getHtml();
+
+        return "<h1> Hello you are at Settings !</h1>" + navBar;
     }
 }

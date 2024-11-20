@@ -3,12 +3,13 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import Home from "./views/Home";
 import Profile from "./views/Profile";
 import Settings from "./views/Settings";
+import NotFound from "./views/NotFound";
 
 const router = async () => {
     // Define routes and their associated views.
     // This allows us to dynamically render HTML content based on the current view.
     const routes = [
-        { path: "/404", view: () => console.log("Viewing 404") },
+        { path: "/404", view: NotFound },
         { path: "/", view: Home },
         { path: "/profile", view: Profile },
         { path: "/settings", view: Settings },

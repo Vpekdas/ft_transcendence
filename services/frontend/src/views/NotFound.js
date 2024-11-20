@@ -1,17 +1,15 @@
 import AbstractView from "./AbstractView";
 import NavBar from "./NavBar";
-import Validation from "./Validation"
 
 export default class extends AbstractView {
     constructor() {
         super();
-        this.setTitle("Profile");
+        this.setTitle("Not Found");
     }
 
     async getHtml() {
         const navBar = await new NavBar().getHtml();
-        const validation = await new Validation().getHtml();
 
-        return "<h1> Hello you are at Profile !</h1>" + navBar + validation;
+        return "<h1> Hello, It seems like you're lost !</h1>" + navBar;
     }
 }

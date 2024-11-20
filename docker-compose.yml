@@ -9,6 +9,8 @@ services:
     networks:
       - default
   users:
+    depends_on:
+      - postgres
     container_name: users
     build: services/users
     volumes:

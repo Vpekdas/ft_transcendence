@@ -14,4 +14,8 @@ export default class {
             .then((res) => res.text())
             .catch((e) => console.error(e));
     }
+
+    getOrigin() {
+        return window.location.origin.substring(0, window.location.origin.lastIndexOf(":"));
+    }
 }

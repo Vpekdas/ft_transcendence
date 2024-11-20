@@ -4,3 +4,4 @@ psycopg2==2.9.10
 setuptools==69.0.2
 sqlparse==0.5.2
 wheel==0.42.0
+django-cors-headers==4.6.0

@@ -1,44 +1,40 @@
 import AbstractView from "./AbstractView";
 
-export default class Validation extends AbstractView {
+export default class Login extends AbstractView {
     constructor() {
         super();
     }
 
     async getHtml() {
         return `
-<div class="center-form">
-    <form class="login-form row g-3" action="javascript:void(0)">
-        <div class="col-md-4">
-            <label for="validationServer01" class="form-label">Username</label>
-            <input name="username" type="text" class="form-control is-valid" id="validationServer01" value="Mark" required />
-            <div class="valid-feedback">Looks good!</div>
-        </div>
-        <div class="col-12">
-            <div class="col-md-4">
-                <label for="inputPassword5" class="form-label">Password</label>
-                <input name="password" type="password" id="inputPassword5" class="form-control" aria-describedby="passwordHelpBlock" />
-                <div id="passwordHelpBlock" class="form-text">
-                    Your password must be 8-20 characters long, contain letters and numbers, and must not contain spaces,
-                    special characters, or emoji.
-                </div>
+<div class="container-fluid">
+    <form class="login-form" action="javascript:void(0)">
+        <div class="row mb-3">
+            <label for="username" class="col-sm-2 col-form-label">Username</label>
+            <div class="col-sm-10">
+                <input name=username type="text" class="form-control" id="username" />
             </div>
         </div>
-        <div class="col-12">
-            <input type="submit" class="btn btn-primary" value="Submit form" />
+        <div class="row mb-3">
+            <label for="password" class="col-sm-2 col-form-label">Password</label>
+            <div class="col-sm-10">
+                <input name=password type="password" class="form-control" id="password" />
+            </div>
         </div>
+        <button type="submit" class="btn btn-primary">Login</button>
     </form>
 </div>
         `;
     }
 
     addEventListeners() {
-        this.submitForm();
+        this.loginForm();
     }
 
-    submitForm() {
+    loginForm() {
         /** @type HTMLFormElement */
         const form = document.querySelector(".login-form");
+
         form.addEventListener("submit", async (event) => {
             const form = event.target;
             const data = new FormData(form);

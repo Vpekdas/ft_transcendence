@@ -10,6 +10,6 @@ export default class extends AbstractView {
     async getHtml() {
         const navBar = await new NavBar().getHtml();
 
-        return "<h1> Hello, It seems like you're lost !</h1>" + navBar;
+        return navBar;
     }
 }

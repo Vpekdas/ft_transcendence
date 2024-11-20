@@ -1,4 +1,17 @@
-.center-form {
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.container-fluid {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.col-sm-2.col-form-label {
     display: flex;
     justify-content: center;
     align-items: center;

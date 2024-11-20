@@ -9,13 +9,13 @@ export default class {
         return "";
     }
 
-    async readPage(source) {
-        return fetch(source)
-            .then((res) => res.text())
-            .catch((e) => console.error(e));
-    }
+    addEventListeners() {}
 
     getOrigin() {
         return window.location.origin.substring(0, window.location.origin.lastIndexOf(":"));
+    }
+
+    api(route) {
+        return this.getOrigin() + ":8000" + route;
     }
 }

@@ -21,5 +21,6 @@ from app import views
 
 urlpatterns = [
     path('api/signin', views.signin),
-    path('api/login', views.login)
+    path('api/login', views.login),
+    path('api/allUsers', views.allUsers)
 ]

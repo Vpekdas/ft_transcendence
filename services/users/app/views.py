@@ -59,6 +59,9 @@ def login(request: HttpRequest):
     username = request.POST.get('username')
     password = request.POST.get('password')
 
+    if username == None or password == None:
+        return HttpResponseBadRequest()
+
     if request.user.is_authenticated:
         return JsonResponse({})
 
@@ -82,3 +85,8 @@ def allUsers(request: HttpRequest):
         usernames.append(player.nickname)
 
     return JsonResponse({ "users": usernames })
+
+"""
+"""
+def playerProfile(request: HttpRequest):
+    pass

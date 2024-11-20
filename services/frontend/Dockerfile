@@ -5,7 +5,11 @@ WORKDIR /app
 
 ENV PATH="$PATH:/app/node_modules/.bin"
 
-EXPOSE 5173
+COPY package*.json ./
+
+RUN npm install
+
+EXPOSE 8080
 
 # CMD ["tail", "-f"]
 CMD [ "npm", "run", "dev" ]

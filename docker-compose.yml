@@ -5,7 +5,7 @@ services:
     volumes:
       - ./services/frontend:/app
     ports:
-      - 5173:5173
+      - 8080:5173
     networks:
       - default
   users:

@@ -5,10 +5,12 @@ class Store {
 }
 
 export class Component {
-    constructor(parent) {
+    constructor(parent, name = "default") {
         /** @type Map<string, Store> */
         this.stores = new Map();
         this.parent = parent;
+        /** @type string */
+        this.name = name;
         this.updateHandler = undefined;
     }
 
@@ -41,8 +43,32 @@ export class Component {
         ];
     }
 
+    usePersistentStore(name, defaultValue) {
+        var key = this.getFullPath() + "__" + name;
+        var item = window.localStorage.getItem(key);
+
+        if (item == null) {
+            item = JSON.stringify(defaultValue);
+            window.localStorage.setItem(key, item);
+        }
+
+        return [
+            JSON.parse(item),
+            (value) => {
+                window.localStorage.setItem(key, value);
+                setTimeout(() => this.update(), 0);
+            },
+        ];
+    }
+
     async update() {
-        if (this.updateHandler !== undefined) await this.updateHandler();
+        if (this.updateHandler != undefined) await this.updateHandler();
         if (this.parent != undefined) await this.parent.update();
+    }
+
+    getFullPath() {
+        if (this.parent != undefined)
+            return this.parent.getFullPath() + "_" + (this.constructor.name + "#" + this.name);
+        return this.constructor.name + "#" + this.name;
     }
 }

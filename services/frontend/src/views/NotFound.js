@@ -4,7 +4,7 @@ import NavBar from "./NavBar";
 export default class extends Component {
     constructor() {
         super();
-        this.setTitle("Not Found");
+        // this.setTitle("Not Found");
     }
 
     async render() {

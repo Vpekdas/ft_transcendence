@@ -10,11 +10,11 @@ const router = async () => {
     // Define routes and their associated views.
     // This allows us to dynamically render HTML content based on the current view.
     const routes = [
-        { path: "/404", view: NotFound },
-        { path: "/", view: Home },
-        { path: "/profile", view: Profile },
-        { path: "/settings", view: Settings },
-        { path: "/counter", view: Counter },
+        { path: "/404", view: new NotFound() },
+        { path: "/", view: new Home() },
+        { path: "/profile", view: new Profile() },
+        { path: "/settings", view: new Settings() },
+        { path: "/counter", view: new Counter() },
     ];
 
     // Create an array of potential matches by mapping routes to their match status.
@@ -36,7 +36,7 @@ const router = async () => {
     }
 
     // Instantiate the view associated with the matched route.
-    const view = new match.route.view();
+    const view = match.route.view;
 
     view.updateHandler = async () => {
         document.getElementById("app").innerHTML = await view.render();

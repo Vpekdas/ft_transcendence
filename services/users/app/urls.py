@@ -20,5 +20,6 @@ from django.urls import path
 from app import views
 
 urlpatterns = [
-    path('api/testing', views.testing)
+    path('api/signin', views.signin),
+    path('api/login', views.login)
 ]

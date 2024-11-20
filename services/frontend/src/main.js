@@ -1,8 +1,8 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
-import Home from "../views/Home";
-import Profile from "../views/Profile";
-import Settings from "../views/Settings";
+import Home from "./views/Home";
+import Profile from "./views/Profile";
+import Settings from "./views/Settings";
 
 const router = async () => {
     // Define routes and their associated views.

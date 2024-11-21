@@ -17,9 +17,6 @@ export default class NavBar extends Component {
                 <a class="nav-link" data-link href="/profile">Profile</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" data-link href="/settings">Settings</a>
-            </li>
-            <li class="nav-item">
                 <a class="nav-link" data-link href="/counter">Counter</a>
             </li>
         </ul>`

@@ -1,15 +1,14 @@
-import { Component } from "../micro";
+import { Component, globalComponents, html } from "../micro";
 import NavBar from "./NavBar";
 
-export default class extends Component {
+export default class Home extends Component {
     constructor() {
         super();
-        this.navBar = new NavBar();
     }
 
     async render() {
         this.setTitle("Home");
-
-        return "<h1> Hello you are at Home !</h1>" + (await this.navBar.render());
+        return html(this.parent, /*html*/ `<div><NavBar /><h1> Hello you are at Home !</h1></div>`);
     }
 }
+globalComponents.set("Home", Home);

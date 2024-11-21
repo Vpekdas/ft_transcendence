@@ -2,7 +2,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import Home from "./views/Home";
 import Profile from "./views/Profile";
-import Settings from "./views/Settings";
 import NotFound from "./views/NotFound";
 import Counter from "./views/Counter";
 import Registration from "./views/Registration";
@@ -12,10 +11,9 @@ export const router = async () => {
     // Define routes and their associated views.
     // This allows us to dynamically render HTML content based on the current view.
     const routes = [
-        // { path: "/404", view: new NotFound() },
-        // { path: "/", view: new Home() },
-        // { path: "/profile", view: new Profile() },
-        // { path: "/settings", view: new Settings() },
+        { path: "/404", view: html(null, /*html*/ `<NotFound />`) },
+        { path: "/", view: html(null, /*html*/ `<Home />`) },
+        { path: "/profile", view: html(null, /*html*/ `<Profile />`) },
         { path: "/counter", view: html(null, /*html*/ `<Counter />`) },
     ];
 

@@ -1,21 +1,38 @@
-import { Component } from "../micro";
+import { Component, globalComponents, html } from "../micro";
 import NavBar from "./NavBar";
 import Login from "./Login";
 import Registration from "./Registration";
 
-export default class extends Component {
+export default class Profile extends Component {
     constructor() {
         super();
         this.registration = new Registration();
     }
 
     async render() {
+        const [isLogged, setLogged] = this.useGlobalStore("isLogged", false);
+
         this.setTitle("Profile");
 
-        const navBar = await new NavBar().render();
-        const registration = await new Registration().render();
-
-        return localStorage.getItem("isLogged") ? navBar + "Hello dear connected stranger !" : navBar + registration;
+        if (isLogged) {
+            return html(
+                this.parent,
+                /*html*/ `
+            <div>
+                <NavBar />
+                <p>Hello dear connected stranger !</p>
+            </div>`
+            );
+        } else {
+            return html(
+                this.parent,
+                /*html*/ `
+            <div>
+                <NavBar />
+                <Registration />
+            </div>`
+            );
+        }
     }
 
     events() {
@@ -28,3 +45,4 @@ export default class extends Component {
         this.registration.addEventListeners();
     }
 }
+globalComponents.set("Profile", Profile);

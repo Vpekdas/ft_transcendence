@@ -157,14 +157,20 @@ class ParsingError extends Error {
     static errorString(err, token, source, data) {
         switch (err) {
             case ParsingError.EXPECTING_TAG:
-                return `Expecting an element but found ${token.s}`;
+                return (
+                    `Expecting an element but found ${token.s}` +
+                    ParsingError.errorLocation(source, token.line, token.column, token.s.length)
+                );
             case ParsingError.UNKNOWN_ELEMENT:
                 return `Unknown element <${token.s}>`;
             case ParsingError.ONE_TOP_LEVEL_ELEMENT:
                 return `Only top element is supported` /*+
                     ParsingError.errorLocation(source, token.line, token.column, 2 + token.s.length)*/;
             case ParsingError.NO_CLOSING_TAG:
-                return `No closing tag for <${token.s}>`;
+                return (
+                    `No closing tag for <${token.s}>` +
+                    ParsingError.errorLocation(source, token.line, token.column, token.s.length)
+                );
             case ParsingError.EXPECTING_IDENT:
                 return (
                     `Expecting identifier but got \`${token.s}\`` +
@@ -359,10 +365,10 @@ export function html(parent, str) {
         }
     }
 
-    // console.log(...tokens);
-
     function parseTags(parent, tokens, start, end) {
         let index = start;
+
+        // console.log(...tokens.slice(start, end).map((v) => v.s));
 
         if (tokens[index].type != Token.OPEN_TAG) {
             throw new ParsingError(ParsingError.EXPECTING_TAG, tokens[index], str); // Expected opening tag!!!
@@ -418,7 +424,7 @@ export function html(parent, str) {
             index++;
         } else if (tokens[index].type == Token.SLASH) {
             if (tokens[index + 1].type != Token.CLOSE_TAG) {
-                throw new ParsingError(); // Expeced `>` after `/` !!!
+                throw new ParsingError(); // Expected `>` after `/` !!!
             }
             index += 2;
         }
@@ -436,6 +442,10 @@ export function html(parent, str) {
             el.component.updateHandler = () => {
                 el.updateHTML();
             };
+
+            for (let [key, value] of attributes) {
+                el.setAttribute(key, value);
+            }
         } else {
             el = document.createElement(name);
             if (el == undefined) {
@@ -461,16 +471,28 @@ export function html(parent, str) {
                 return true;
             }
 
+            openTags.set(tagName, 1);
+
             while (index2 < end) {
                 if (tokens[index2].type == Token.OPEN_TAG) {
                     if (tokens[index2 + 1].type == Token.SLASH) {
+                        // We reach a closing tag.
+
                         index2 += 2;
 
                         const name = tokens[index2].s;
+                        if (!openTags.has(name)) {
+                            openTags.set(name, -1);
+                        } else {
+                            openTags.set(name, openTags.get(name) - 1);
+                        }
+
                         if (name == tagName && checkAllClosed()) {
                             return index2 - 2;
                         }
                     } else {
+                        // We reach an opening tag.
+
                         index2++;
                         const name = tokens[index2].s;
                         while (
@@ -480,11 +502,14 @@ export function html(parent, str) {
                         ) {
                             index2++;
                         }
-                        if (index2 == Token.CLOSE_TAG) {
-                            openTags[name] += 1;
+                        if (tokens[index2].type == Token.CLOSE_TAG) {
+                            if (!openTags.has(name)) {
+                                openTags.set(name, 1);
+                            } else {
+                                openTags.set(name, openTags.get(name) + 1);
+                            }
+                        } else if (tokens[index2].type == Token.SLASH) {
                             index2++;
-                        } else if (index2 == Token.SLASH) {
-                            index2 += 2;
                         }
                     }
                 }
@@ -492,22 +517,28 @@ export function html(parent, str) {
                 index2++;
             }
 
-            return -1;
+            return Infinity;
         }
 
         if (hasInnerHTML) {
+            // console.log(name, startToken);
             const newEnd = findClosingTag(name);
 
             if (newEnd >= tokens.length) {
                 throw new ParsingError(ParsingError.NO_CLOSING_TAG, startToken, str);
             }
 
+            // console.log(newEnd, tokens.length);
+
             if (tokens[index].type == Token.CONTENT) {
                 el.innerText = tokens[index].s;
                 index++;
             } else {
+                var newParent = el instanceof HTMLComponent ? el.component : null;
+
                 while (index < newEnd) {
-                    const [child, stoppedIndex] = parseTags(el, tokens, index, newEnd); // `el` here could mess up events.
+                    const [child, stoppedIndex] = parseTags(newParent, tokens, index, newEnd); // `el` here could mess up events.
+                    // console.log(child, tokens[stoppedIndex]);
                     index = stoppedIndex;
                     el.appendChild(child);
                 }

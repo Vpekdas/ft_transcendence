@@ -1,38 +1,40 @@
 import { navigateTo } from "../main";
-import { Component } from "../micro";
+import { Component, globalComponents, html } from "../micro";
 import { router } from "../main";
 
-export default class Login extends Component {
+export default class Registration extends Component {
     constructor() {
         super();
     }
 
     async render() {
-        return `
-<div class="container-fluid">
-    <form class="login-form" action="javascript:void(0)">
-        <div class="row mb-3">
-            <label for="username" class="col-sm-2 col-form-label">Username</label>
-            <div class="col-sm-10">
-                <input name=username type="text" class="form-control" id="username" />
+        return html(
+            this.parent,
+            /*html*/ `
+    <div class="container-fluid">
+        <form class="login-form" action="javascript:void(0)">
+            <div class="row mb-3">
+                <label for="username" class="col-sm-2 col-form-label">Username</label>
+                <div class="col-sm-10">
+                    <input name=username type="text" class="form-control" id="username" />
+                </div>
             </div>
-        </div>
-        <div class="row mb-3">
-            <label for="username" class="col-sm-2 col-form-label">Nickname</label>
-            <div class="col-sm-10">
-                <input name=nickname type="text" class="form-control" id="nickname" />
+            <div class="row mb-3">
+                <label for="username" class="col-sm-2 col-form-label">Nickname</label>
+                <div class="col-sm-10">
+                    <input name=nickname type="text" class="form-control" id="nickname" />
+                </div>
             </div>
-        </div>
-        <div class="row mb-3">
-            <label for="password" class="col-sm-2 col-form-label">Password</label>
-            <div class="col-sm-10">
-                <input name=password type="password" class="form-control" id="password" />
+            <div class="row mb-3">
+                <label for="password" class="col-sm-2 col-form-label">Password</label>
+                <div class="col-sm-10">
+                    <input name=password type="password" class="form-control" id="password" />
+                </div>
             </div>
-        </div>
-        <button type="submit" class="btn btn-primary">Login</button>
+            <button type="submit" class="btn btn-primary">Login</button>
         </form>
-</div>
-        `;
+    </div>`
+        );
     }
 
     addEventListeners() {
@@ -77,3 +79,4 @@ export default class Login extends Component {
     //
     // username, nickname, password
 }
+globalComponents.set("Registration", Registration);

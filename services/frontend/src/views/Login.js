@@ -1,12 +1,13 @@
-import { Component } from "../micro";
+import { Component, html } from "../micro";
 
 export default class Login extends Component {
     constructor() {
         super();
     }
     async render() {
-        /*html*/
-        return `
+        return html(
+            this.parent,
+            /*html*/ `
         <div class="container-fluid">
             <form class="login-form" action="javascript:void(0)">
                 <div class="row mb-3">
@@ -22,10 +23,10 @@ export default class Login extends Component {
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary">Login</button>
-            </div>
             </form>
         </div>
-        `;
+        `
+        );
     }
 
     addEventListeners() {

@@ -1,16 +1,14 @@
-import { Component } from "../micro";
+import { Component, globalComponents } from "../micro";
 import NavBar from "./NavBar";
 
-export default class extends Component {
+export default class NotFound extends Component {
     constructor() {
         super();
     }
 
     async render() {
         this.setTitle("Not Found");
-
-        const navBar = await new NavBar().render();
-
-        return navBar;
+        return html(this.parent, /*html*/ `<NavBar />`);
     }
 }
+globalComponents.set("NotFound", NotFound);

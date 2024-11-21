@@ -1,5 +1,5 @@
 """
-Common logic shared by both games.
+Common logic shared by all games.
 """
 
 import sys

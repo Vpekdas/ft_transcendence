@@ -1,6 +1,6 @@
 FROM node:20
 
-VOLUME [ "/app" ]
+# VOLUME [ "/app" ]
 WORKDIR /app
 
 ENV PATH="$PATH:/app/node_modules/.bin"
@@ -10,6 +10,9 @@ ENV PATH="$PATH:/app/node_modules/.bin"
 
 EXPOSE 8080
 
+COPY . /app
+RUN npm install
+
 # CMD ["tail", "-f"]
-ENTRYPOINT [ "bash", "/app/tools/entrypoint.sh" ]
+# ENTRYPOINT [ "bash", "/app/tools/entrypoint.sh" ]
 CMD [ "npm", "run", "dev" ]

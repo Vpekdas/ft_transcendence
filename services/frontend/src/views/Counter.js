@@ -1,10 +1,10 @@
-import { Component } from "../micro";
+import { Component, globalComponents, html } from "../micro";
 import NavBar from "./NavBar";
 
 export default class Counter extends Component {
     constructor() {
         super();
-        this.navBar = new NavBar();
+        // this.navBar = new NavBar();
     }
 
     async render() {
@@ -18,6 +18,10 @@ export default class Counter extends Component {
             setCount(count - 1);
         });
 
-        return `${await this.navBar.render()} <p>Count is ${count}</p><button id="add">Add !</button><button id="sub">Sub !</button>`;
+        return html(
+            this.parent,
+            /*html*/ `<div><NavBar /><p>Count is ${count}</p><button id="add">Add !</button><button id="sub">Sub !</button></div>`
+        );
     }
 }
+globalComponents.set("Counter", Counter);

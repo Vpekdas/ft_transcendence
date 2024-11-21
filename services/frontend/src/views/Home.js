@@ -1,5 +1,4 @@
 import { Component, globalComponents, html } from "../micro";
-import Chart from "./Chart";
 
 export default class Home extends Component {
     constructor() {
@@ -8,7 +7,14 @@ export default class Home extends Component {
 
     async render() {
         this.setTitle("Home");
-        return html(this.parent, /*html*/ `<div><NavBar /><h1> Hello you are at Home !</h1><Chart /></div>`);
+        return html(
+            this.parent,
+            /* HTML */
+            `<div>
+                <NavBar />
+                <h1>Hello you are at Home !</h1>
+            </div>`
+        );
     }
 }
 globalComponents.set("Home", Home);

@@ -24,29 +24,36 @@ export default class Login extends Component {
                     error: "Bad input";
                 });
 
-            console.log(response);
+            console.log("login response: ", response);
         });
 
         return html(
             this.parent,
-            /*html*/ `<div class="container-fluid">
-            <form class="login-form" action="javascript:void(0)">
-                <div class="row mb-3">
-                    <label for="username" class="col-sm-2 col-form-label">Username</label>
-                    <div class="col-sm-10">
-                        <input name=username type="text" class="form-control" id="username" />
+            /* HTML */
+            `<div class="container-fluid">
+                <form class="login-form" action="javascript:void(0)">
+                    <div class="row mb-3">
+                        <label for="username" class="col-sm-2 col-form-label">Username</label>
+                        <div class="col-sm-10">
+                            <input name="username" autocomplete="off" type="text" class="form-control" id="username" />
+                        </div>
                     </div>
-                </div>
-                <div class="row mb-3">
-                    <label for="password" class="col-sm-2 col-form-label">Password</label>
-                    <div class="col-sm-10">
-                        <input name=password type="password" class="form-control" id="password" />
+                    <div class="row mb-3">
+                        <label for="password" class="col-sm-2 col-form-label">Password</label>
+                        <div class="col-sm-10">
+                            <input
+                                name="password"
+                                autocomplete="off"
+                                type="password"
+                                class="form-control"
+                                id="password"
+                            />
+                        </div>
                     </div>
-                </div>
-                <button type="submit" class="btn btn-primary">Login</button>
-                <a class="create-account-redirect" href="javascript:void(0)">Create an account</a>
-            </form>
-        </div>`
+                    <button type="submit" class="btn btn-primary">Login</button>
+                    <a class="create-account-redirect" href="javascript:void(0)">Create an account</a>
+                </form>
+            </div>`
         ); // FIXME: Error when
     }
 

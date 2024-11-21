@@ -1,5 +1,5 @@
 import { Component, globalComponents, html } from "../micro";
-import NavBar from "./NavBar";
+import NavBar from "../components/NavBar";
 
 export default class Counter extends Component {
     constructor() {
@@ -20,7 +20,11 @@ export default class Counter extends Component {
 
         return html(
             this.parent,
-            /*html*/ `<div><NavBar /><p>Count is ${count}</p><button id="add">Add !</button><button id="sub">Sub !</button></div>`
+            /* HTML */ `<div>
+                <NavBar />
+                <p>Count is ${count}</p>
+                <button id="add">Add !</button><button id="sub">Sub !</button>
+            </div>`
         );
     }
 }

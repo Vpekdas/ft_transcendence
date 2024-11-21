@@ -16,3 +16,38 @@ form {
     justify-content: center;
     align-items: center;
 }
+
+.container-fluid.dashboard-container {
+    display: flex;
+    justify-content: left;
+    border-radius: 10px;
+    border: 2px solid blue;
+    height: 100vh;
+    flex-direction: row;
+}
+
+.nav.flex-column.nav-underline.dashboard-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 10vw;
+}
+
+.list-group.match-history {
+    display: flex;
+    flex-direction: column; 
+    height: 100%; 
+    width: 100%;
+    border: 2px solid blue;
+    overflow-y: auto;
+}
+
+.list-group.match-history > .list-group-item {
+    flex: 0 0 auto;
+    height: 50px; 
+    display: flex;
+    align-items: center;
+    justify-content: center; 
+    border: 1px solid black; 
+}

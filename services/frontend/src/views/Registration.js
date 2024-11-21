@@ -22,10 +22,6 @@ export default class Registration extends Component {
             const nickname = data.get("nickname");
             const password = data.get("password");
 
-            console.log(username);
-            console.log(nickname);
-            console.log(password);
-
             const response = await fetch(this.api("/api/signin"), {
                 method: "POST",
                 body: JSON.stringify({
@@ -39,7 +35,7 @@ export default class Registration extends Component {
                     error: "Bad input";
                 });
 
-            console.log(response);
+            console.log("registration response: ", response);
 
             // setLogged(true);
             // navigateTo("/profile");
@@ -48,30 +44,36 @@ export default class Registration extends Component {
 
         return html(
             this.parent,
-            /*html*/ `
-    <div class="container-fluid">
-        <form class="login-form" action="javascript:void(0)">
-            <div class="row mb-3">
-                <label for="username" class="col-sm-2 col-form-label">Username</label>
-                <div class="col-sm-10">
-                    <input name="username" type="text" class="form-control" id="username" />
-                </div>
-            </div>
-            <div class="row mb-3">
-                <label for="username" class="col-sm-2 col-form-label">Nickname</label>
-                <div class="col-sm-10">
-                    <input name="nickname" type="text" class="form-control" id="nickname" />
-                </div>
-            </div>
-            <div class="row mb-3">
-                <label for="password" class="col-sm-2 col-form-label">Password</label>
-                <div class="col-sm-10">
-                    <input name="password" type="password" class="form-control" id="password" />
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary">Register</button>
-        </form>
-    </div>`
+            /* HTML */
+            `<div class="container-fluid">
+                <form class="login-form" action="javascript:void(0)">
+                    <div class="row mb-3">
+                        <label for="username" class="col-sm-2 col-form-label">Username</label>
+                        <div class="col-sm-10">
+                            <input name="username" autocomplete="off" type="text" class="form-control" id="username" />
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="username" class="col-sm-2 col-form-label">Nickname</label>
+                        <div class="col-sm-10">
+                            <input name="nickname" autocomplete="off" type="text" class="form-control" id="nickname" />
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="password" class="col-sm-2 col-form-label">Password</label>
+                        <div class="col-sm-10">
+                            <input
+                                name="password"
+                                autocomplete="off"
+                                type="password"
+                                class="form-control"
+                                id="password"
+                            />
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Register</button>
+                </form>
+            </div>`
         );
     }
 

@@ -1,5 +1,5 @@
 import { Component, globalComponents, html } from "../micro";
-import NavBar from "./NavBar";
+import NavBar from "../components/NavBar";
 import Login from "./Login";
 import Registration from "./Registration";
 
@@ -16,43 +16,30 @@ export default class Profile extends Component {
         if (isLogged) {
             return html(
                 this.parent,
-                /*html*/ `
-            <div>
-                <NavBar />
-                <p>Hello dear connected stranger !</p>
-            </div>`
+                /* HTML */ ` <div>
+                    <NavBar />
+                    <p>Hello dear connected stranger !</p>
+                </div>`
             );
         } else {
             if (false) {
                 return html(
                     this.parent,
-                    /*html*/ `
-                <div>
-                    <NavBar />
-                    <Registration />
-                </div>`
+                    /* HTML */ ` <div>
+                        <NavBar />
+                        <Registration />
+                    </div>`
                 );
             } else {
                 return html(
                     this.parent,
-                    /*html*/ `
-                <div>
-                    <NavBar />
-                    <Login />
-                </div>`
+                    /* HTML */ ` <div>
+                        <NavBar />
+                        <Login />
+                    </div>`
                 );
             }
         }
     }
-
-    // events() {
-    //     super.events();
-    //     this.registration.events();
-    //     this.registration.addEventListeners();
-    // }
-
-    // addEventListeners() {
-    //     this.registration.addEventListeners();
-    // }
 }
 globalComponents.set("Profile", Profile);

@@ -6,15 +6,19 @@ import NotFound from "./views/NotFound";
 import Counter from "./views/Counter";
 import Registration from "./views/Registration";
 import { Component, html } from "./micro";
+import ProfileDashboard from "./views/ProfileDashboard";
+import MatchHistory from "./views/MatchHistory";
 
 export const router = async () => {
     // Define routes and their associated views.
     // This allows us to dynamically render HTML content based on the current view.
     const routes = [
-        { path: "/404", view: html(null, /*html*/ `<NotFound />`) },
-        { path: "/", view: html(null, /*html*/ `<Home />`) },
-        { path: "/profile", view: html(null, /*html*/ `<Profile />`) },
-        { path: "/counter", view: html(null, /*html*/ `<Counter />`) },
+        { path: "/404", view: html(null, /* HTML */ `<NotFound />`) },
+        { path: "/", view: html(null, /* HTML */ `<Home />`) },
+        { path: "/profile", view: html(null, /* HTML */ `<Profile />`) },
+        { path: "/counter", view: html(null, /* HTML */ `<Counter />`) },
+        { path: "/profile/dashboard", view: html(null, /* HTML */ `<ProfileDashboard />`) },
+        { path: "/profile/match-history", view: html(null, /* HTML */ `<MatchHistory />`) },
     ];
 
     // Create an array of potential matches by mapping routes to their match status.

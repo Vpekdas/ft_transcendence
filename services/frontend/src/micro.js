@@ -224,16 +224,14 @@ class HTMLComponent extends HTMLElement {
 
     attributeChangedCallback(name, oldValue, newValue) {}
 
-    updateHTML() {
-        setTimeout(async () => {
-            if (this.component != undefined) {
-                const newChild = await this.component.render();
-                if (this.children.length > 0) this.removeChild(this.children[0]);
-                this.appendChild(newChild);
+    async updateHTML() {
+        if (this.component != undefined) {
+            const newChild = await this.component.render();
+            if (this.children.length > 0) this.removeChild(this.children[0]);
+            this.appendChild(newChild);
 
-                this.component.events();
-            }
-        }, 0);
+            this.component.events();
+        }
     }
 }
 
@@ -442,9 +440,7 @@ export function html(parent, str) {
 
             el.component = new c();
             el.component.parent = parent;
-            el.component.updateHandler = () => {
-                el.updateHTML();
-            };
+            el.component.updateHandler = async () => await el.updateHTML();
 
             for (let [key, value] of attributes) {
                 el.setAttribute(key, value);

@@ -1,4 +1,4 @@
-import { Component, globalComponents } from "../micro";
+import { Component, globalComponents, html } from "../micro";
 import NavBar from "./NavBar";
 
 export default class NotFound extends Component {

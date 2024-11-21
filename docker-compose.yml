@@ -21,3 +21,8 @@ services:
       - ./.data/postgres:/var/lib/postgresql/data/
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
+  pong:
+    container_name: pong
+    build: services/games/pong
+    volumes:
+      - ./services/games/pong:/app

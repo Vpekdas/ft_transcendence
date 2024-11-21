@@ -8,47 +8,13 @@ export default class Registration extends Component {
     }
 
     async render() {
-        return html(
-            this.parent,
-            /*html*/ `
-    <div class="container-fluid">
-        <form class="login-form" action="javascript:void(0)">
-            <div class="row mb-3">
-                <label for="username" class="col-sm-2 col-form-label">Username</label>
-                <div class="col-sm-10">
-                    <input name=username type="text" class="form-control" id="username" />
-                </div>
-            </div>
-            <div class="row mb-3">
-                <label for="username" class="col-sm-2 col-form-label">Nickname</label>
-                <div class="col-sm-10">
-                    <input name=nickname type="text" class="form-control" id="nickname" />
-                </div>
-            </div>
-            <div class="row mb-3">
-                <label for="password" class="col-sm-2 col-form-label">Password</label>
-                <div class="col-sm-10">
-                    <input name=password type="password" class="form-control" id="password" />
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary">Login</button>
-        </form>
-    </div>`
-        );
-    }
+        const [isLogged, setLogged] = this.useGlobalStore("isLogged", false);
 
-    addEventListeners() {
-        this.registrationForm();
-    }
+        this.query(".login-form").on("submit", async (event) => {
+            if (isLogged) {
+                return;
+            }
 
-    registrationForm() {
-        /** @type HTMLFormElement */
-        if (localStorage.getItem("isLogged")) {
-            return;
-        }
-        const form = document.querySelector(".login-form");
-
-        form.addEventListener("submit", async (event) => {
             const form = event.target;
             const data = new FormData(form);
 
@@ -56,7 +22,11 @@ export default class Registration extends Component {
             const nickname = data.get("nickname");
             const password = data.get("password");
 
-            const response = await fetch(this.api("/api/login"), {
+            console.log(username);
+            console.log(nickname);
+            console.log(password);
+
+            const response = await fetch(this.api("/api/signin"), {
                 method: "POST",
                 body: JSON.stringify({
                     username: username,
@@ -69,10 +39,40 @@ export default class Registration extends Component {
                     error: "Bad input";
                 });
 
-            localStorage.setItem("isLogged", true);
-            navigateTo("/profile");
+            console.log(response);
+
+            // setLogged(true);
+            // navigateTo("/profile");
             router();
         });
+
+        return html(
+            this.parent,
+            /*html*/ `
+    <div class="container-fluid">
+        <form class="login-form" action="javascript:void(0)">
+            <div class="row mb-3">
+                <label for="username" class="col-sm-2 col-form-label">Username</label>
+                <div class="col-sm-10">
+                    <input name="username" type="text" class="form-control" id="username" />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="username" class="col-sm-2 col-form-label">Nickname</label>
+                <div class="col-sm-10">
+                    <input name="nickname" type="text" class="form-control" id="nickname" />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="password" class="col-sm-2 col-form-label">Password</label>
+                <div class="col-sm-10">
+                    <input name="password" type="password" class="form-control" id="password" />
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+    </div>`
+        );
     }
 
     // /api/signin

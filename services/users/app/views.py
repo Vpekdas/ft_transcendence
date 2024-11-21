@@ -1,3 +1,8 @@
+import sys
+import json
+
+import django
+
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.http.request import HttpRequest
 
@@ -26,25 +31,24 @@ def signin(request: HttpRequest):
     if request.method != "POST":
         return HttpResponseBadRequest()
 
-    username = request.POST.get('username')
-    password = request.POST.get('password')
-    nickname = request.POST.get('nickname')
+    data = json.loads(request.body)
 
-    if username == None or password == None or nickname == None:
+    if not "username" in data or not "password" in data or not "nickname" in data:
         return HttpResponseBadRequest()
 
-    user = User(username=username, password=password)
+    username = data["username"]
+    password = data["password"]
+    nickname = data["nickname"]
 
-    if User.objects.count(username=username) > 0:
+    if User.objects.filter(username=username).count() > 0:
         return JsonResponse({"error": "Username is already taken"})
 
-    user.save()
-    player = Player(user=user, nickname=nickname)
-    player.save()
+    user = User.objects.create(username=username, password=password)
+    player = Player.objects.create(user=user, nickname=nickname)
 
-    user = authenticate(username=username, password=password)
+    user = authenticate(request=request, username=username, password=password)
 
-    if not user.is_authenticated:
+    if user is None:
         return JsonResponse({"error": "Internal error"})
 
     return JsonResponse({})
@@ -56,11 +60,13 @@ def login(request: HttpRequest):
     if request.method != "POST":
         return HttpResponseBadRequest()
 
-    username = request.POST.get('username')
-    password = request.POST.get('password')
+    data = json.loads(request.body)
 
-    if username == None or password == None:
+    if not "username" in data or not "password" in data:
         return HttpResponseBadRequest()
+
+    username = data["username"]
+    password = data["password"]
 
     if request.user.is_authenticated:
         return JsonResponse({})

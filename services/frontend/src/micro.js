@@ -40,7 +40,11 @@ export class Component {
     events() {
         for (let [selector, values] of this.accessors) {
             for (let [eventName, callback] of values.eventCallbacks) {
-                document.querySelector(selector).addEventListener(eventName, callback);
+                const el = document.querySelector(selector);
+
+                if (el == null) continue;
+
+                el.addEventListener(eventName, callback);
             }
         }
     }
@@ -65,21 +69,19 @@ export class Component {
         ];
     }
 
-    // TODO:
-    // Dont return a function for the getter if possible !!!
-
     useGlobalStore(name, defaultValue) {
-        var item = localStorage.getItem(name);
+        const key = "global__" + name;
+        var item = localStorage.getItem(key);
 
         if (item == null) {
             item = JSON.stringify(defaultValue);
-            localStorage.setItem(name, item);
+            localStorage.setItem(key, item);
         }
 
         return [
-            JSON.parse(localStorage.getItem(name)),
+            JSON.parse(localStorage.getItem(key)),
             (value) => {
-                localStorage.setItem(name, value);
+                localStorage.setItem(key, value);
                 setTimeout(() => this.update(), 0);
             },
         ];
@@ -228,6 +230,7 @@ class HTMLComponent extends HTMLElement {
                 const newChild = await this.component.render();
                 if (this.children.length > 0) this.removeChild(this.children[0]);
                 this.appendChild(newChild);
+
                 this.component.events();
             }
         }, 0);

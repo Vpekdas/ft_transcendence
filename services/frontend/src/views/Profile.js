@@ -11,7 +11,6 @@ export default class Profile extends Component {
 
     async render() {
         const [isLogged, setLogged] = this.useGlobalStore("isLogged", false);
-
         this.setTitle("Profile");
 
         if (isLogged) {
@@ -24,25 +23,36 @@ export default class Profile extends Component {
             </div>`
             );
         } else {
-            return html(
-                this.parent,
-                /*html*/ `
-            <div>
-                <NavBar />
-                <Registration />
-            </div>`
-            );
+            if (false) {
+                return html(
+                    this.parent,
+                    /*html*/ `
+                <div>
+                    <NavBar />
+                    <Registration />
+                </div>`
+                );
+            } else {
+                return html(
+                    this.parent,
+                    /*html*/ `
+                <div>
+                    <NavBar />
+                    <Login />
+                </div>`
+                );
+            }
         }
     }
 
-    events() {
-        super.events();
-        this.registration.events();
-        this.registration.addEventListeners();
-    }
+    // events() {
+    //     super.events();
+    //     this.registration.events();
+    //     this.registration.addEventListeners();
+    // }
 
-    addEventListeners() {
-        this.registration.addEventListeners();
-    }
+    // addEventListeners() {
+    //     this.registration.addEventListeners();
+    // }
 }
 globalComponents.set("Profile", Profile);

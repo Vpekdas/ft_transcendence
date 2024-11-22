@@ -1,6 +1,5 @@
-import { navigateTo } from "../main";
+import { navigateTo } from "../router";
 import { Component, globalComponents, html } from "../micro";
-import { router } from "../main";
 
 export default class Registration extends Component {
     constructor() {
@@ -35,7 +34,6 @@ export default class Registration extends Component {
 
             // setLogged(true);
             // navigateTo("/profile");
-            router();
         });
 
         this.query(".login-redirect").on("click", () => navigateTo("login"));

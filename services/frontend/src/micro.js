@@ -232,8 +232,6 @@ class HTMLComponent extends HTMLElement {
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-        console.log(newValue);
-
         if (oldValue == newValue) {
             return;
         }
@@ -249,19 +247,17 @@ class HTMLComponent extends HTMLElement {
             const newChild = await this.component.render();
             if (this.children.length > 0) this.removeChild(this.children[0]);
             this.appendChild(newChild);
-
-            this.component.events();
         }
+
+        this.events();
     }
 
     events() {
         if (this.component != undefined) {
-            for (let [selector, values] of this.accessors) {
+            for (let [selector, values] of this.component.accessors) {
                 for (let [eventName, callback] of values.eventCallbacks) {
-                    const el = document.querySelector(selector);
-
+                    const el = this.querySelector(selector);
                     if (el == null) continue;
-
                     el.addEventListener(eventName, callback);
                 }
             }

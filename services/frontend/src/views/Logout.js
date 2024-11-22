@@ -1,6 +1,6 @@
 import { post } from "../api";
 import { Component, globalComponents, html } from "../micro";
-import { navigateTo } from "../main";
+import { navigateTo } from "../router";
 
 export default class Logout extends Component {
     constructor() {

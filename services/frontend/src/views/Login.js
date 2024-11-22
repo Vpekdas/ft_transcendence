@@ -1,5 +1,5 @@
 import { fetchApi } from "../api";
-import { navigateTo } from "../main";
+import { navigateTo } from "../router";
 import { Component, globalComponents, html } from "../micro";
 
 export default class Login extends Component {

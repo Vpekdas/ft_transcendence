@@ -1,6 +1,6 @@
 import { Component, globalComponents, html } from "../micro";
 import NavBar from "../components/NavBar";
-import { navigateTo } from "../main";
+import { navigateTo } from "../router";
 import { isLoggedIn } from "../api";
 
 export default class ProfileDashboard extends Component {

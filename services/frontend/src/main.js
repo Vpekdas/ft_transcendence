@@ -56,7 +56,7 @@ export const router = async () => {
 };
 
 // Update the browser's history with the new URL and render the corresponding view.
-export const navigateTo = (url) => {
+export const    navigateTo = (url) => {
     history.pushState(null, null, url);
     router();
 };

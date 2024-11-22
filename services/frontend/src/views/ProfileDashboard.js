@@ -11,10 +11,9 @@ export default class ProfileDashboard extends Component {
     async render() {
         this.setTitle("Profile Dashboard");
 
-        if (!isLoggedIn()) {
-            navigateTo("login");
-            return;
-        }
+        // if (!(await isLoggedIn())) {
+        //     navigateTo("login");
+        // }
 
         return html(
             this.parent,

@@ -11,5 +11,9 @@ export async function fetchApi(url, init) {
 }
 
 export async function isLoggedIn() {
-    return await fetchApi("/api/", {});
+    const response = (await fetchApi("/api/isLoggedIn", {
+        method: "POST"
+    }).then((res) => res.json()));
+    console.log(response);
+    return response["error"] == undefined;
 }

@@ -59,7 +59,7 @@ def login(request: HttpRequest):
         return JsonResponse({})
 
     user = authenticate(username=username, password=password)
-    if user is None:
+    if user is None or not user.is_authenticated:
         return JsonResponse({ "error": "Mismatch username and password" })
     else:
         return JsonResponse({})
@@ -74,7 +74,7 @@ def isLoggedIn(request: HttpRequest):
     if request.user.is_authenticated:
         return JsonResponse({})
     else:
-        return JsonResponse({ "error": "" })
+        return JsonResponse({ "error": "User is not logged in" })
 
 """
 Returns all existing users.

@@ -1,9 +1,12 @@
+import { fetchApi } from "../api";
+import { navigateTo } from "../main";
 import { Component, globalComponents, html } from "../micro";
 
 export default class Login extends Component {
     constructor() {
         super();
     }
+
     async render() {
         this.query(".login-form").on("submit", async (event) => {
             const form = event.target;
@@ -12,7 +15,7 @@ export default class Login extends Component {
             const username = data.get("username");
             const password = data.get("password");
 
-            const response = await fetch(this.api("/api/login"), {
+            const response = await fetchApi("/api/login", {
                 method: "POST",
                 body: JSON.stringify({
                     username: username,
@@ -24,37 +27,52 @@ export default class Login extends Component {
                     error: "Bad input";
                 });
 
-            console.log("login response: ", response);
+            if (response["error"] != undefined) {
+                console.log("login response: ", response);
+            } else {
+                navigateTo("profile");
+            }
         });
+
+        this.query(".create-account-redirect").on("click", () => navigateTo("register"));
 
         return html(
             this.parent,
             /* HTML */
-            `<div class="container-fluid">
-                <form class="login-form" action="javascript:void(0)">
-                    <div class="row mb-3">
-                        <label for="username" class="col-sm-2 col-form-label">Username</label>
-                        <div class="col-sm-10">
-                            <input name="username" autocomplete="off" type="text" class="form-control" id="username" />
+            ` <div>
+                <NavBar />
+                <div class="container-fluid">
+                    <form class="login-form" action="javascript:void(0)">
+                        <div class="row mb-3">
+                            <label for="username" class="col-sm-2 col-form-label">Username</label>
+                            <div class="col-sm-10">
+                                <input
+                                    name="username"
+                                    autocomplete="off"
+                                    type="text"
+                                    class="form-control"
+                                    id="username"
+                                />
+                            </div>
                         </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label for="password" class="col-sm-2 col-form-label">Password</label>
-                        <div class="col-sm-10">
-                            <input
-                                name="password"
-                                autocomplete="off"
-                                type="password"
-                                class="form-control"
-                                id="password"
-                            />
+                        <div class="row mb-3">
+                            <label for="password" class="col-sm-2 col-form-label">Password</label>
+                            <div class="col-sm-10">
+                                <input
+                                    name="password"
+                                    autocomplete="off"
+                                    type="password"
+                                    class="form-control"
+                                    id="password"
+                                />
+                            </div>
                         </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Login</button>
-                    <a class="create-account-redirect" href="javascript:void(0)">Create an account</a>
-                </form>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                        <a class="create-account-redirect" href="javascript:void(0)">Create an account</a>
+                    </form>
+                </div>
             </div>`
-        ); // FIXME: Error when
+        );
     }
 
     // /api/signin

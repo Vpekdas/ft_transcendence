@@ -1,5 +1,7 @@
 import { Component, globalComponents, html } from "../micro";
 import NavBar from "../components/NavBar";
+import { navigateTo } from "../main";
+import { isLoggedIn } from "../api";
 
 export default class ProfileDashboard extends Component {
     constructor() {
@@ -8,6 +10,12 @@ export default class ProfileDashboard extends Component {
 
     async render() {
         this.setTitle("Profile Dashboard");
+
+        if (!isLoggedIn()) {
+            navigateTo("login");
+            return;
+        }
+
         return html(
             this.parent,
             /* HTML */

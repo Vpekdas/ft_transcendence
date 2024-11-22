@@ -1,7 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import Home from "./views/Home";
-import Profile from "./views/Profile";
 import NotFound from "./views/NotFound";
 import Counter from "./views/Counter";
 import Registration from "./views/Registration";
@@ -9,6 +8,7 @@ import { Component, html } from "./micro";
 import ProfileDashboard from "./views/ProfileDashboard";
 import MatchHistory from "./views/MatchHistory";
 import Statistics from "./views/Statistics";
+import Login from "./views/Login";
 
 export const router = async () => {
     // Define routes and their associated views.
@@ -16,9 +16,10 @@ export const router = async () => {
     const routes = [
         { path: "/404", view: html(null, /* HTML */ `<NotFound />`) },
         { path: "/", view: html(null, /* HTML */ `<Home />`) },
-        { path: "/profile", view: html(null, /* HTML */ `<Profile />`) },
+        { path: "/profile", view: html(null, /* HTML */ `<ProfileDashboard />`) },
+        { path: "/register", view: html(null, /* HTML */ `<Registration />`) },
+        { path: "/login", view: html(null, /* HTML */ `<Login />`) },
         { path: "/counter", view: html(null, /* HTML */ `<Counter />`) },
-        { path: "/profile/dashboard", view: html(null, /* HTML */ `<ProfileDashboard />`) },
         { path: "/profile/match-history", view: html(null, /* HTML */ `<MatchHistory />`) },
         { path: "/profile/statistics", view: html(null, /* HTML */ `<Statistics />`) },
     ];

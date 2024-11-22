@@ -10,19 +10,6 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 
 from app.models import Player
-# from app.models import AuthToken
-
-# import jwt
-
-# JWT_SECRET = "yh55ei3oouedi64nh89regwhegfio3U90J34fi203fj238th"
-
-# def createAuthToken(user: User) -> AuthToken:
-#     payload = {
-#         "name": user.username,
-#     }
-
-#     token = jwt.encode(payload=payload, key=JWT_SECRET)
-#     return AuthToken(user=user, data=token)
 
 """
 Create a new user.
@@ -46,10 +33,10 @@ def signin(request: HttpRequest):
     user = User.objects.create(username=username, password=password)
     player = Player.objects.create(user=user, nickname=nickname)
 
-    user = authenticate(request=request, username=username, password=password)
+    # user = authenticate(request=request, username=username, password=password)
 
-    if user is None:
-        return JsonResponse({"error": "Internal error"})
+    # if user is None:
+    #     return JsonResponse({"error": "Internal error"})
 
     return JsonResponse({})
 
@@ -76,6 +63,18 @@ def login(request: HttpRequest):
         return JsonResponse({ "error": "Mismatch username and password" })
     else:
         return JsonResponse({})
+
+"""
+Check if the user is logged in,
+"""
+def isLoggedIn(request: HttpRequest):
+    if request.method != "POST":
+        return HttpResponseBadRequest()
+
+    if request.user.is_authenticated:
+        return JsonResponse({})
+    else:
+        return JsonResponse({ "error": "" })
 
 """
 Returns all existing users.

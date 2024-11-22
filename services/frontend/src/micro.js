@@ -232,7 +232,9 @@ class HTMLComponent extends HTMLElement {
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-        if (oldValue != newValue) {
+        console.log(newValue);
+
+        if (oldValue == newValue) {
             return;
         }
 
@@ -468,6 +470,8 @@ export function html(parent, str) {
         if (globalComponents.has(name)) {
             el = document.createElement("micro-component");
 
+            el.setAttribute("c", name);
+
             const c = globalComponents.get(name);
 
             el.component = new c();
@@ -475,12 +479,17 @@ export function html(parent, str) {
             el.component.updateHandler = async () => await el.updateHTML();
 
             for (let [key, value] of attributes) {
-                el.setAttribute(key, value);
+                el.component.attributes.set(key, value);
             }
         } else {
-            el = document.createElement(name);
-            if (el == undefined) {
-                throw new ParsingError(ParsingError.UNKNOWN_ELEMENT, tokens[startToken], str); // Unknown element!!!
+            if (name === "svg" || name === "circle" /*|| name === "a" */) {
+                el = document.createElementNS("http://www.w3.org/2000/svg", name);
+            } else {
+                el = document.createElement(name);
+            }
+
+            if (el instanceof HTMLUnknownElement) {
+                throw new ParsingError(ParsingError.UNKNOWN_ELEMENT, { s: name }, str); // Unknown element!!!
             }
 
             for (let [key, value] of attributes) {

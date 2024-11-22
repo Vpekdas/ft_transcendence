@@ -1,8 +1,7 @@
 import { Component, globalComponents, html } from "../micro";
 import NavBar from "../components/NavBar";
 import ProfileDashboard from "./ProfileDashboard";
-
-// https://heyoka.medium.com/scratch-made-svg-donut-pie-charts-in-html5-2c587e935d72
+import Chart from "../components/Chart";
 
 export default class Statistics extends Component {
     constructor() {
@@ -10,6 +9,7 @@ export default class Statistics extends Component {
     }
 
     async render() {
+        this.setTitle("Statistics");
         return html(
             this.parent,
             /* HTML */
@@ -30,6 +30,12 @@ export default class Statistics extends Component {
                         <li class="nav-item">
                             <a class="nav-link" data-link href="/profile/settings">Settings</a>
                         </li>
+                    </ul>
+                    <ul class="list-group statistics">
+                        <Chart width="200" color1="#4287f5" color2="#42f58d" />
+                        <Chart width="200" color1="#4287f5" color2="#42f58d" />
+                        <Chart width="200" color1="#4287f5" color2="#42f58d" />
+                        <Chart width="200" color1="#4287f5" color2="#42f58d" />
                     </ul>
                 </div>
             </div>`

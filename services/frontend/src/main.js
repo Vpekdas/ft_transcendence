@@ -44,7 +44,6 @@ export const router = async () => {
         };
     }
 
-    // Instantiate the view associated with the matched route.
     const view = match.route.view;
     const app = document.getElementById("app");
 

@@ -31,6 +31,7 @@ form {
     border: 2px solid blue;
     height: 100vh;
     flex-direction: row;
+    overflow: hidden;
 }
 
 .nav.flex-column.nav-underline.dashboard-tab {
@@ -57,6 +58,15 @@ form {
     align-items: center;
     justify-content: center;
     border: 1px solid black;
+}
+
+.list-group.statistics {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+    border: 2px solid blue;
+    overflow-y: auto;
 }
 
 #background {

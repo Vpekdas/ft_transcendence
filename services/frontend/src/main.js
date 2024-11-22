@@ -8,6 +8,7 @@ import Registration from "./views/Registration";
 import { Component, html } from "./micro";
 import ProfileDashboard from "./views/ProfileDashboard";
 import MatchHistory from "./views/MatchHistory";
+import Statistics from "./views/Statistics";
 
 export const router = async () => {
     // Define routes and their associated views.
@@ -19,6 +20,7 @@ export const router = async () => {
         { path: "/counter", view: html(null, /* HTML */ `<Counter />`) },
         { path: "/profile/dashboard", view: html(null, /* HTML */ `<ProfileDashboard />`) },
         { path: "/profile/match-history", view: html(null, /* HTML */ `<MatchHistory />`) },
+        { path: "/profile/statistics", view: html(null, /* HTML */ `<Statistics />`) },
     ];
 
     // Create an array of potential matches by mapping routes to their match status.

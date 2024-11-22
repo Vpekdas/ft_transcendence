@@ -7,15 +7,21 @@ export default class NotFound extends Component {
     }
 
     async render() {
-        this.setTitle("Not Found");
+        this.setTitle("404 - Divergence");
         return html(
             this.parent,
             /* HTML */
-            `<div>
-                <NavBar />
-                <h1>404</h1>
-                <p>Oh no! It seems like you got lost in time during your previous time travel.</p>
-                <p>The page you are looking for does not exist.</p>
+            ` <div>
+                <div id="background">
+                    <div class="glitch-wrapper">
+                        <div class="glitch" data-glitch="404 - Divergence">404 - Divergence</div>
+                    </div>
+                    <p>It seems you've diverged from the main timeline. This page doesn't exist in this world line.</p>
+                    <p>Return to the main timeline and continue your journey.</p>
+                    <button type="button" onclick="window.location.href='/'" class="btn btn-warning return home">
+                        Return to Main Timeline
+                    </button>
+                </div>
             </div>`
         );
     }

@@ -20,6 +20,8 @@ export class Component {
         this.stores = new Map();
         /** @type Map<string, Selector>  */
         this.accessors = new Map();
+        /** @type Map<string, any> */
+        this.attributes = new Map();
         this.parent = parent;
         /** @type string */
         this.name = name;
@@ -37,16 +39,11 @@ export class Component {
         return null;
     }
 
-    events() {
-        for (let [selector, values] of this.accessors) {
-            for (let [eventName, callback] of values.eventCallbacks) {
-                const el = document.querySelector(selector);
-
-                if (el == null) continue;
-
-                el.addEventListener(eventName, callback);
-            }
+    attrib(name) {
+        if (this.attributes.has(name)) {
+            return this.attributes.get(name);
         }
+        return null;
     }
 
     /**
@@ -123,6 +120,18 @@ export class Component {
             accessor = this.accessors.get(selector);
         }
         return accessor;
+    }
+
+    events() {
+        for (let [selector, values] of this.accessors) {
+            for (let [eventName, callback] of values.eventCallbacks) {
+                const el = document.querySelector(selector);
+
+                if (el == null) continue;
+
+                el.addEventListener(eventName, callback);
+            }
+        }
     }
 
     getFullPath() {
@@ -222,7 +231,16 @@ class HTMLComponent extends HTMLElement {
         this.updateHTML();
     }
 
-    attributeChangedCallback(name, oldValue, newValue) {}
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue != newValue) {
+            return;
+        }
+
+        if (this.component != undefined) {
+            this.component.attributes.set(name, newValue);
+            this.updateHTML();
+        }
+    }
 
     async updateHTML() {
         if (this.component != undefined) {
@@ -231,6 +249,20 @@ class HTMLComponent extends HTMLElement {
             this.appendChild(newChild);
 
             this.component.events();
+        }
+    }
+
+    events() {
+        if (this.component != undefined) {
+            for (let [selector, values] of this.accessors) {
+                for (let [eventName, callback] of values.eventCallbacks) {
+                    const el = document.querySelector(selector);
+
+                    if (el == null) continue;
+
+                    el.addEventListener(eventName, callback);
+                }
+            }
         }
     }
 }

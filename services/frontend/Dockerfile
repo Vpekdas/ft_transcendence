@@ -1,18 +1,14 @@
 FROM node:20
+RUN useradd -ms /bin/sh -u 1001 app
+USER app
 
-# VOLUME [ "/app" ]
 WORKDIR /app
 
 ENV PATH="$PATH:/app/node_modules/.bin"
 
-# COPY package.json package-lock.json /app/
-# RUN npm i
-
 EXPOSE 8080
 
-COPY . /app
+COPY --chown=app:app . /app
 RUN npm install
 
-# CMD ["tail", "-f"]
-# ENTRYPOINT [ "bash", "/app/tools/entrypoint.sh" ]
 CMD [ "npm", "run", "dev" ]

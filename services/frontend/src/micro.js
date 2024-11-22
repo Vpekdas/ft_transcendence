@@ -571,7 +571,11 @@ export function html(parent, str) {
             // console.log(newEnd, tokens.length);
 
             if (tokens[index].type == Token.CONTENT) {
-                el.innerText = tokens[index].s;
+                const unescapeHTML = (msg) => {
+                    return msg.replace("&lt;", "<").replace("&gt;", ">");
+                };
+
+                el.innerText = unescapeHTML(tokens[index].s);
                 index++;
             } else {
                 var newParent = el instanceof HTMLComponent ? el.component : null;

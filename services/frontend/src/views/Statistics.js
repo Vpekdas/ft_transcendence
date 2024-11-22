@@ -10,6 +10,7 @@ export default class Statistics extends Component {
 
     async render() {
         this.setTitle("Statistics");
+
         return html(
             this.parent,
             /* HTML */
@@ -32,10 +33,16 @@ export default class Statistics extends Component {
                         </li>
                     </ul>
                     <ul class="list-group statistics">
-                        <Chart width="200" color1="#4287f5" color2="#42f58d" />
-                        <Chart width="200" color1="#4287f5" color2="#42f58d" />
-                        <Chart width="200" color1="#4287f5" color2="#42f58d" />
-                        <Chart width="200" color1="#4287f5" color2="#42f58d" />
+                        <Chart
+                            width="200"
+                            colorNumber="3"
+                            color1="#4287f5"
+                            color2="#42f58d"
+                            color3="#7211D8"
+                            fillPercent1="30"
+                            fillPercent2="25"
+                            fillPercent3="45"
+                        />
                     </ul>
                 </div>
             </div>`

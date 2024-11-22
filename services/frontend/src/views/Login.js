@@ -27,9 +27,9 @@ export default class Login extends Component {
                     error: "Bad input";
                 });
 
-            if (response["error"] != undefined) {
-                console.log("login response: ", response);
-            } else {
+            console.log("login response: ", response);
+
+            if (response["error"] == undefined) {
                 navigateTo("profile");
             }
         });

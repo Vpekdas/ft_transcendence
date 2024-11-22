@@ -7,13 +7,19 @@ function api(route) {
 }
 
 export async function fetchApi(url, init) {
+    init.credentials = "include";
+    return await fetch(api(url), init);
+}
+
+export async function post(url, init) {
+    init.credentials = "include";
+    init.method = "POST";
     return await fetch(api(url), init);
 }
 
 export async function isLoggedIn() {
-    const response = (await fetchApi("/api/isLoggedIn", {
-        method: "POST"
-    }).then((res) => res.json()));
-    console.log(response);
-    return response["error"] == undefined;
+    const response = await post("/api/isLoggedIn", {
+        method: "POST",
+    }).then((res) => res.json());
+    return response["error"] === undefined;
 }

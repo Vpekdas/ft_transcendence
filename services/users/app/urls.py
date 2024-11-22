@@ -22,7 +22,7 @@ from app import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/signin', views.signin),
-    path('api/login', views.login),
+    path('api/login', views.loginRoute),
+    path('api/logout', views.logoutRoute),
     path('api/isLoggedIn', views.isLoggedIn),
-    path('api/allUsers', views.allUsers)
 ]

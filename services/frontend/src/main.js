@@ -9,6 +9,7 @@ import ProfileDashboard from "./views/ProfileDashboard";
 import MatchHistory from "./views/MatchHistory";
 import Statistics from "./views/Statistics";
 import Login from "./views/Login";
+import Logout from "./views/Logout";
 
 export const router = async () => {
     // Define routes and their associated views.
@@ -19,6 +20,7 @@ export const router = async () => {
         { path: "/profile", view: html(null, /* HTML */ `<ProfileDashboard />`) },
         { path: "/register", view: html(null, /* HTML */ `<Registration />`) },
         { path: "/login", view: html(null, /* HTML */ `<Login />`) },
+        { path: "/logout", view: html(null, /* HTML */ `<Logout />`) },
         { path: "/counter", view: html(null, /* HTML */ `<Counter />`) },
         { path: "/profile/match-history", view: html(null, /* HTML */ `<MatchHistory />`) },
         { path: "/profile/statistics", view: html(null, /* HTML */ `<Statistics />`) },
@@ -56,7 +58,7 @@ export const router = async () => {
 };
 
 // Update the browser's history with the new URL and render the corresponding view.
-export const    navigateTo = (url) => {
+export const navigateTo = (url) => {
     history.pushState(null, null, url);
     router();
 };

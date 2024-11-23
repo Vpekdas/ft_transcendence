@@ -1,14 +1,16 @@
 import { Component, globalComponents, html } from "../micro";
 import NavBar from "../components/NavBar";
+import { tr } from "../i18n";
 
 export default class Counter extends Component {
     constructor() {
         super();
-        // this.navBar = new NavBar();
     }
 
     async render() {
         const [count, setCount] = this.usePersistentStore("count", 0);
+
+        this.setTitle(tr("Counter"));
 
         this.query("#add").on("click", (event) => {
             setCount(count + 1);

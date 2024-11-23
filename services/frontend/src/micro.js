@@ -396,6 +396,10 @@ export function html(str) {
         }
     }
 
+    function isInSvg() {
+        return false;
+    }
+
     function parseTags(tokens, start, end) {
         let index = start;
 
@@ -478,7 +482,7 @@ export function html(str) {
                 el.component.attributes.set(key, value);
             }
         } else {
-            if (name === "svg" || name === "circle" || name === "text" || name ==="tspan"/*|| name === "a" */) {
+            if (name === "svg" || (isInSvg() && (name === "circle" || name === "a" || name == "text"))) {
                 el = document.createElementNS("http://www.w3.org/2000/svg", name);
             } else {
                 el = document.createElement(name);

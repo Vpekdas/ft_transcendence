@@ -9,7 +9,6 @@ export default class NotFound extends Component {
     async render() {
         this.setTitle("404 - Divergence");
         return html(
-            this.parent,
             /* HTML */
             ` <div>
                 <div id="background">

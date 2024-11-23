@@ -8,7 +8,6 @@ export default class Home extends Component {
     async render() {
         this.setTitle("Home");
         return html(
-            this.parent,
             /* HTML */
             `<div>
                 <NavBar />

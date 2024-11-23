@@ -12,7 +12,6 @@ export default class Statistics extends Component {
         this.setTitle("Statistics");
 
         return html(
-            this.parent,
             /* HTML */
             ` <div>
                 <NavBar />

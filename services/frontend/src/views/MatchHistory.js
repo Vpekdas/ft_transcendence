@@ -10,7 +10,6 @@ export default class MatchHistory extends Component {
     async render() {
         this.setTitle("Match History");
         return html(
-            this.parent,
             /* HTML */
             ` <div>
                 <NavBar />

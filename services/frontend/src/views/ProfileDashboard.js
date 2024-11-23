@@ -16,7 +16,6 @@ export default class ProfileDashboard extends Component {
         }
 
         return html(
-            this.parent,
             /* HTML */
             `<div>
                 <NavBar />

@@ -48,7 +48,7 @@ export const router = async () => {
     // console.log(new Error().stack);
 
     try {
-        const view = html(null, `<${viewName} />`);
+        const view = html(`<${viewName} />`);
 
         if (app.children.length > 0) app.removeChild(app.children[0]);
         app.appendChild(view);
@@ -82,7 +82,7 @@ export const escapeHTML = (msg) => {
 export const errorPage = (err) => {
     let s = "";
 
-    console.log(err.stack);
+    console.log(err);
 
     let lines = err.stack.split("\n").map((line) => {
         const parts = line.split("@");
@@ -96,8 +96,6 @@ export const errorPage = (err) => {
         } else {
             return `<li>???</li>`;
         }
-
-        return `<li>${functionName} at ${location}</li>`;
     });
 
     return html(

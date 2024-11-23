@@ -7,7 +7,6 @@ export default class NavBar extends Component {
 
     async render() {
         return html(
-            this.parent,
             /* HTML */ ` <ul class="nav nav-underline">
                 <li class="nav-item">
                     <a class="nav-link" data-link href="/">Home</a>

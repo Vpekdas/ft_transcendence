@@ -19,7 +19,6 @@ export default class Counter extends Component {
         });
 
         return html(
-            this.parent,
             /* HTML */ `<div>
                 <NavBar />
                 <p>Count is ${count}</p>

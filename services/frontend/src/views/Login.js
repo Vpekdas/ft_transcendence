@@ -37,7 +37,6 @@ export default class Login extends Component {
         this.query(".create-account-redirect").on("click", () => navigateTo("register"));
 
         return html(
-            this.parent,
             /* HTML */
             ` <div>
                 <NavBar />

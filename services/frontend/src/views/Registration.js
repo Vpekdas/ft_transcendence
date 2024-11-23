@@ -7,8 +7,6 @@ export default class Registration extends Component {
     }
 
     async render() {
-        const [isLogged, setLogged] = this.useGlobalStore("isLogged", false);
-
         this.query(".login-form").on("submit", async (event) => {
             const form = event.target;
             const data = new FormData(form);
@@ -31,9 +29,6 @@ export default class Registration extends Component {
                 });
 
             console.log("registration response: ", response);
-
-            // setLogged(true);
-            // navigateTo("/profile");
         });
 
         this.query(".login-redirect").on("click", () => navigateTo("login"));

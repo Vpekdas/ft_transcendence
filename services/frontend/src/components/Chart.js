@@ -67,7 +67,6 @@ export default class Chart extends Component {
         }
 
         return html(
-            this.parent,
             /* HTML */ ` <svg width="${width}" height="${width}" viewBox="0 0 42 42" class="donut">
                 <circle class="donut-hole" cx="21" cy="21" r="${r}" fill="#fff"></circle>
                 <circle

@@ -10,7 +10,7 @@ export default class Logout extends Component {
     async render() {
         await post("/api/logout", {});
         navigateTo("login");
-        return html(this.parent, /* HTML */ `<div></div>`);
+        return html(/* HTML */ `<div></div>`);
     }
 }
 globalComponents.set("Logout", Logout);

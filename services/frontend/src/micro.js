@@ -221,24 +221,24 @@ class HTMLComponent extends HTMLElement {
         this.component = undefined;
     }
 
-    connectedCallback() {
-        this.updateHTML();
+    async connectedCallback() {
+        await this.updateHTML();
     }
 
     disconnectedCallback() {}
 
-    adoptedCallback() {
-        this.updateHTML();
+    async adoptedCallback() {
+        await this.updateHTML();
     }
 
-    attributeChangedCallback(name, oldValue, newValue) {
+    async attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue == newValue) {
             return;
         }
 
         if (this.component != undefined) {
             this.component.attributes.set(name, newValue);
-            this.updateHTML();
+            await this.updateHTML();
         }
     }
 
@@ -269,7 +269,7 @@ class HTMLComponent extends HTMLElement {
  * @param {string} str
  * @returns {HTMLElement | ParsingError}
  */
-export function html(parent, str) {
+export function html(str) {
     // There is probably a better place to put this. This maybe should go away when parsing is done.
     if (customElements.get("micro-component") == undefined) {
         customElements.define("micro-component", HTMLComponent);
@@ -396,7 +396,7 @@ export function html(parent, str) {
         }
     }
 
-    function parseTags(parent, tokens, start, end) {
+    function parseTags(tokens, start, end) {
         let index = start;
 
         // console.log(...tokens.slice(start, end).map((v) => v.s));
@@ -471,10 +471,10 @@ export function html(parent, str) {
             const c = globalComponents.get(name);
 
             el.component = new c();
-            el.component.parent = parent;
             el.component.updateHandler = async () => await el.updateHTML();
 
             for (let [key, value] of attributes) {
+                el.setAttribute(key, value);
                 el.component.attributes.set(key, value);
             }
         } else {
@@ -574,10 +574,8 @@ export function html(parent, str) {
                 el.innerText = unescapeHTML(tokens[index].s);
                 index++;
             } else {
-                var newParent = el instanceof HTMLComponent ? el.component : null;
-
                 while (index < newEnd) {
-                    const [child, stoppedIndex] = parseTags(newParent, tokens, index, newEnd); // `el` here could mess up events.
+                    const [child, stoppedIndex] = parseTags(tokens, index, newEnd); // `el` here could mess up events.
                     // console.log(child, tokens[stoppedIndex]);
                     index = stoppedIndex;
                     el.appendChild(child);
@@ -590,7 +588,7 @@ export function html(parent, str) {
         return [el, index];
     }
 
-    const [el, stoppedIndex] = parseTags(parent, tokens, 0, tokens.length);
+    const [el, stoppedIndex] = parseTags(tokens, 0, tokens.length);
 
     if (stoppedIndex < tokens.length) {
         throw new ParsingError(ParsingError.ONE_TOP_LEVEL_ELEMENT, tokens[stoppedIndex], str);

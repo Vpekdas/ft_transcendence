@@ -13,18 +13,27 @@ export default class Chart extends Component {
     // stroke-dashoffset="25" -> stroke-dashoffset moves counter-clockwise.
     // So, we’d need to set this value for 25% in the opposite direction from 3:00 back to 12:00)
 
-    generateSegment(color, dashArray, dashOffset) {
-        return /* HTML */ ` <circle
-            class="donut-segment"
-            cx="21"
-            cy="21"
-            r="${r}"
-            fill="transparent"
-            stroke="${color}"
-            stroke-width="3"
-            stroke-dasharray="${dashArray}"
-            stroke-dashoffset="${dashOffset}"
-        ></circle>`;
+    generateSegment(color, dashArray, dashOffset, textPosition, content) {
+        return /* HTML */ `<circle
+                class="donut-segment"
+                cx="21"
+                cy="21"
+                r="${r}"
+                fill="transparent"
+                stroke="${color}"
+                stroke-width="6"
+                stroke-dasharray="${dashArray}"
+                stroke-dashoffset="${dashOffset}"
+            ></circle>
+            <text
+                x="${textPosition.x}"
+                y="${textPosition.y}"
+                text-anchor="middle"
+                alignment-baseline="middle"
+                font-size="3"
+                fill="#000"
+                >${content}</text
+            > `;
     }
 
     calculateOffset(circles, length) {
@@ -37,8 +46,17 @@ export default class Chart extends Component {
         for (let i = 0; i < length; i++) {
             precedingSegments += Number(circles[i].fillPercent.split(" ")[0]);
         }
-        offset = 100 - precedingSegments + 25;
-        return offset.toString();
+        return 100 - precedingSegments + 25;
+    }
+
+    calculateTextPosition(dashArray, dashOffset) {
+        const angle = (dashOffset + dashArray / 2) * 3.6;
+        const radians = (angle * Math.PI) / 180;
+        const radius = r;
+        const x = 21 + radius * Math.cos(radians);
+        const y = 21 - radius * Math.sin(radians);
+
+        return { x, y };
     }
 
     async render() {
@@ -49,7 +67,13 @@ export default class Chart extends Component {
         const circles = [];
 
         for (let i = 0; i < colorNumber; i++) {
-            const circle = { color: "", fillPercent: "", fillOffset: "" };
+            const circle = {
+                color: "",
+                fillPercent: "",
+                fillOffset: "",
+                textPosition: { x: 0, y: 0 },
+                content: "",
+            };
             circle.color = this.attrib("color" + (i + 1));
 
             const fillingPercent = parseInt(this.attrib("fillPercent" + (i + 1)));
@@ -57,27 +81,26 @@ export default class Chart extends Component {
 
             circle.fillPercent = this.attrib("fillPercent" + (i + 1)) + " " + notFilledPercent.toString();
             circle.fillOffset = this.calculateOffset(circles, i);
+            circle.textPosition = this.calculateTextPosition(fillingPercent, circle.fillOffset);
+            circle.content = 123;
 
             circles.push(circle);
         }
 
         let segment = "";
         for (let i = 0; i < circles.length; i++) {
-            segment += this.generateSegment(circles[i].color, circles[i].fillPercent, circles[i].fillOffset);
+            segment += this.generateSegment(
+                circles[i].color,
+                circles[i].fillPercent,
+                circles[i].fillOffset,
+                circles[i].textPosition,
+                circles[i].content
+            );
         }
 
         return html(
             /* HTML */ ` <svg width="${width}" height="${width}" viewBox="0 0 42 42" class="donut">
                 <circle class="donut-hole" cx="21" cy="21" r="${r}" fill="#fff"></circle>
-                <circle
-                    class="donut-ring"
-                    cx="21"
-                    cy="21"
-                    r="${r}"
-                    fill="transparent"
-                    stroke="#d2d3d4"
-                    stroke-width="3"
-                ></circle>
                 ${segment}
             </svg>`
         );

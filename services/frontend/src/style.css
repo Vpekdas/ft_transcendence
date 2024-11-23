@@ -370,3 +370,13 @@ form {
         transform: skewX(10deg) skewY(-10deg);
     }
 }
+
+.donut-segment {
+    pointer-events: stroke;
+}
+
+.donut-segment:hover {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+    z-index: 1;
+}

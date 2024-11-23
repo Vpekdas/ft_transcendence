@@ -5,6 +5,7 @@
     font-style: normal;
 }
 
+/* FORM */
 form {
     display: flex;
     flex-direction: column;
@@ -24,6 +25,8 @@ form {
     align-items: center;
 }
 
+/* DASHBOARD */
+
 .container-fluid.dashboard-container {
     display: flex;
     justify-content: left;
@@ -41,6 +44,8 @@ form {
     height: 100vh;
     width: 10vw;
 }
+
+/* MATCH HISTORY */
 
 .list-group.match-history {
     display: flex;
@@ -60,14 +65,17 @@ form {
     border: 1px solid black;
 }
 
+/* STATISTICS */
+
 .list-group.statistics {
     display: flex;
     flex-direction: row;
     height: 100%;
     width: 100%;
     border: 2px solid blue;
-    overflow-y: auto;
 }
+
+/* 404 PAGE */
 
 #background {
     background-color: #222;
@@ -371,12 +379,34 @@ form {
     }
 }
 
+/* CHART */
+
 .donut-segment {
     pointer-events: stroke;
+    transition:
+        transform 0.3s ease,
+        filter 0.3s ease;
 }
 
 .donut-segment:hover {
     transform: scale(1.05);
-    transition: transform 0.3s ease;
-    z-index: 1;
+    animation: neonPulse 2s infinite;
+}
+
+@keyframes neonPulse {
+    0% {
+        stroke: var(--neon-color, #fff);
+        stroke-width: 6;
+        filter: drop-shadow(0 0 5px var(--neon-color, #fff)) drop-shadow(0 0 10px var(--neon-color, #fff));
+    }
+    50% {
+        stroke: var(--neon-color, #fff);
+        stroke-width: 8;
+        filter: drop-shadow(0 0 10px var(--neon-color, #fff)) drop-shadow(0 0 20px var(--neon-color, #fff));
+    }
+    100% {
+        stroke: var(--neon-color, #fff);
+        stroke-width: 6;
+        filter: drop-shadow(0 0 5px var(--neon-color, #fff)) drop-shadow(0 0 10px var(--neon-color, #fff));
+    }
 }

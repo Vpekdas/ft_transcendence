@@ -8,8 +8,10 @@ export default class NavBar extends Component {
     async render() {
         return html(
             /* HTML */ ` <ul class="nav nav-underline">
-                <li class="nav-item">
-                    <a class="nav-link" data-link href="/">Home</a>
+                <li class="nav-item icon-link">
+                    <a class="icon-link" data-link href="/">
+                        <img src="/favicon.svg" width="21" height="21" />
+                    </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" data-link href="/profile">Profile</a>

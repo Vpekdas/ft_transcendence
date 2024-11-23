@@ -410,3 +410,14 @@ form {
         filter: drop-shadow(0 0 5px var(--neon-color, #fff)) drop-shadow(0 0 10px var(--neon-color, #fff));
     }
 }
+
+/* SETTINGS */
+
+.list-group.settings {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    border: 2px solid blue;
+    overflow-y: auto;
+}

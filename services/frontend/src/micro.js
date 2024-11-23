@@ -494,7 +494,8 @@ export function html(str) {
         } else {
             if (
                 name === "svg" ||
-                (isInSvg(parent) && (name == "circle" || name === "a" || name == "text" || name == "tspan"))
+                (isInSvg(parent) &&
+                    (name == "circle" || name === "a" || name == "text"))
             ) {
                 el = document.createElementNS("http://www.w3.org/2000/svg", name);
             } else {

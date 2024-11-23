@@ -8,6 +8,7 @@ import MatchHistory from "./views/MatchHistory";
 import Statistics from "./views/Statistics";
 import Login from "./views/Login";
 import Logout from "./views/Logout";
+import Settings from "./views/Settings";
 
 export const router = async () => {
     // Define routes and their associated views.
@@ -22,6 +23,7 @@ export const router = async () => {
         { path: "/counter", view: Counter },
         { path: "/profile/match-history", view: MatchHistory },
         { path: "/profile/statistics", view: Statistics },
+        { path: "/profile/settings", view: Settings },
     ];
 
     // Create an array of potential matches by mapping routes to their match status.
@@ -33,7 +35,6 @@ export const router = async () => {
         };
     });
 
-    // TODO: Implement a 404 page for unmatched routes.
     let match = potentialMatches.find((potentialMatch) => potentialMatch.isMatch);
     if (!match) {
         match = {

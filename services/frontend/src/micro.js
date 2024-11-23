@@ -396,11 +396,21 @@ export function html(str) {
         }
     }
 
-    function isInSvg() {
-        return false;
+    /**
+     * @param {HTMLElement} el
+     * @returns
+     */
+    function isInSvg(el) {
+        if (el == null) {
+            return false;
+        } else if (el instanceof SVGElement) {
+            return true;
+        } else {
+            return isInSvg(el.parentElement);
+        }
     }
 
-    function parseTags(tokens, start, end) {
+    function parseTags(parent, tokens, start, end) {
         let index = start;
 
         // console.log(...tokens.slice(start, end).map((v) => v.s));
@@ -482,7 +492,10 @@ export function html(str) {
                 el.component.attributes.set(key, value);
             }
         } else {
-            if (name === "svg" || (isInSvg() && (name === "circle" || name === "a" || name == "text"))) {
+            if (
+                name === "svg" ||
+                (isInSvg(parent) && (name == "circle" || name === "a" || name == "text" || name == "tspan"))
+            ) {
                 el = document.createElementNS("http://www.w3.org/2000/svg", name);
             } else {
                 el = document.createElement(name);
@@ -575,11 +588,11 @@ export function html(str) {
                     return msg.replace("&lt;", "<").replace("&gt;", ">");
                 };
 
-                el.innerText = unescapeHTML(tokens[index].s);
+                el.textContent = unescapeHTML(tokens[index].s);
                 index++;
             } else {
                 while (index < newEnd) {
-                    const [child, stoppedIndex] = parseTags(tokens, index, newEnd); // `el` here could mess up events.
+                    const [child, stoppedIndex] = parseTags(el, tokens, index, newEnd); // `el` here could mess up events.
                     // console.log(child, tokens[stoppedIndex]);
                     index = stoppedIndex;
                     el.appendChild(child);
@@ -592,7 +605,7 @@ export function html(str) {
         return [el, index];
     }
 
-    const [el, stoppedIndex] = parseTags(tokens, 0, tokens.length);
+    const [el, stoppedIndex] = parseTags(null, tokens, 0, tokens.length);
 
     if (stoppedIndex < tokens.length) {
         throw new ParsingError(ParsingError.ONE_TOP_LEVEL_ELEMENT, tokens[stoppedIndex], str);

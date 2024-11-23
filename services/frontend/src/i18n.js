@@ -1,4 +1,8 @@
 export function tr(str) {
+    if (languageDb == undefined) {
+        return str;
+    }
+
     if (languageDb[str] != undefined) {
         return languageDb[str];
     }

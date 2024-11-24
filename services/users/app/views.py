@@ -3,7 +3,7 @@ import json
 
 import django
 
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.http.request import HttpRequest
 from django.views.decorators.http import require_POST
 
@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 
-from app.models import Player
+from app.models import Player, MatchmakingPlayer, duck
 
 """
 Create a new user.
@@ -123,5 +123,55 @@ def updateNickname(request: HttpRequest):
     
     player.nickname = newNickname
     player.save()
+
+    return JsonResponse({})
+
+"""
+Return the profile picture of a user
+"""
+def getProfilePicture(request: HttpRequest):
+    if "nickname" not in request.GET:
+        return HttpResponse(duck, content_type="image/svg+xml")
+
+    return HttpResponse(duck, content_type="image/svg+xml")
+
+"""
+Enter the matchmaking
+"""
+@require_POST
+def enterMatchmaking(request: HttpRequest):
+    if not request.user.is_authenticated:
+        return JsonResponse({})
+
+    data = json.loads(request.body)
+
+    # game can be "pong"
+    # mode can be "1v1", "1v1v1v1", "tournament" of "pong"
+
+    game = data["game"]
+    mode = data["mode"]
+
+    if game == "pong":
+        if mode == "1v1" or mode == "1v1v1v1" or mode == "tournament":
+            player = Player.objects.filter(user=request.user).first()
+            entry = MatchmakingPlayer.objects.create(player=player, game=game, mode=mode)
+        else:
+            return JsonResponse({"error": "invalid gamemode"})
+    else:
+        return JsonResponse({"error": "invalid game"})
+
+"""
+Quit matchmaking
+"""
+@require_POST
+def quitMatchmaking(request: HttpRequest):
+    if not request.user.is_authenticated:
+        return JsonResponse({})
+
+    # TODO: Maybe check if the player is not already into a game ?
+
+    player = Player.objects.filter(user=request.user).first()
+    entry = MatchmakingPlayer.objects.filter(player=player).first()
+    entry.delte()
 
     return JsonResponse({})

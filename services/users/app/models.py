@@ -17,3 +17,8 @@ class Player(models.Model):
 
 class Game(models.Model):
     pass #players = ArrayField(models.ForeignKey(Player, on_delete=models.DO_NOTHING))
+
+class MatchmakingPlayer(models.Model):
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    game = models.TextField()
+    mode = models.TextField()

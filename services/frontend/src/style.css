@@ -421,3 +421,14 @@ form {
     border: 2px solid blue;
     overflow-y: auto;
 }
+
+.card {
+    display: flex;
+    width: 40%;
+    height: auto;
+    align-items: center;
+}
+
+.card-img-top.profile {
+    width: 50%;
+}

@@ -132,8 +132,36 @@ Return the profile picture of a user
 def getProfilePicture(request: HttpRequest):
     if "nickname" not in request.GET:
         return HttpResponse(duck, content_type="image/svg+xml")
+    
+    player = Player.objects.filter(nickname=request.GET["nickname"]).first()
 
-    return HttpResponse(duck, content_type="image/svg+xml")
+    if not player or player.icon is None:
+        return HttpResponse(duck, content_type="image/svg+xml")
+
+    return HttpResponse(player.icon["data"], content_type=player.icon["type"])
+
+"""
+Update profile picture
+"""
+@require_POST
+def updateProfilePicture(request: HttpRequest):
+    data = json.loads(request.body)
+
+    type = data["type"]
+    image = data["image"]
+
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "User is not authenticated"})
+
+    valid_types = [ "image/svg+xml", "image/png", "image/jpeg", "image/gif" ]
+
+    if type not in valid_types:
+        return JsonResponse({"error": "Invalid image format"})
+
+    player = Player.objects.filter(user=request.user).first()
+    player.icon = { "type": type, "data": image }
+
+    player.save()
 
 """
 Enter the matchmaking

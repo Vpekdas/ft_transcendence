@@ -163,6 +163,8 @@ def updateProfilePicture(request: HttpRequest):
 
     player.save()
 
+    return JsonResponse({})
+
 """
 Enter the matchmaking
 """

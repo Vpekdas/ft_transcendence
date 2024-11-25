@@ -9,6 +9,7 @@ import Statistics from "./views/Statistics";
 import Login from "./views/Login";
 import Logout from "./views/Logout";
 import Settings from "./views/Settings";
+import Game from "./views/Game";
 
 export const router = async () => {
     // Define routes and their associated views.
@@ -24,6 +25,7 @@ export const router = async () => {
         { path: "/profile/match-history", view: MatchHistory },
         { path: "/profile/statistics", view: Statistics },
         { path: "/profile/settings", view: Settings },
+        { path: "/game", view: Game },
     ];
 
     // Create an array of potential matches by mapping routes to their match status.

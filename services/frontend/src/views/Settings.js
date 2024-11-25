@@ -21,6 +21,7 @@ export default class Settings extends Component {
 
             reader.onload = async (e) => {
                 const content = e.target.result;
+                console.log(content);
                 const response = await fetchApi("/api/updateProfilePicture", {
                     method: "POST",
                     body: JSON.stringify({ type: picture.type, image: content }),
@@ -56,7 +57,10 @@ export default class Settings extends Component {
                     </ul>
                     <ul class="list-group settings">
                         <div class="card">
-                            <img src="/favicon.svg" class="card-img-top profile" />
+                            <img
+                                src="${this.api(`/api/getProfilePicture?nickname=test`)}"
+                                class="card-img-top profile"
+                            />
                             <div class="card-body">
                                 <h5 class="card-title">Profile Picture</h5>
                                 <div class="input-group">

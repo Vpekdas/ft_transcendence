@@ -25,7 +25,6 @@ services:
           path: ./services/users
           target: /app
           ignore:
-            - node_modules/
             - Dockerfile
   postgres:
     image: postgres:14
@@ -33,14 +32,15 @@ services:
       - ./.data/postgres:/var/lib/postgresql/data/
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
-  # pong:
-  #   container_name: pong
-  #   build: services/pong
-  #   develop:
-  #     watch:
-  #       - action: sync
-  #         path: ./services/pong
-  #         target: /app
-  #         ignore:
-  #           - node_modules/
-  #           - Dockerfile
+  pong:
+    container_name: pong
+    build: services/pong
+    ports:
+      - 1972:1972
+    develop:
+      watch:
+        - action: sync
+          path: ./services/pong
+          target: /app
+          ignore:
+            - Dockerfile

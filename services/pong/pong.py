@@ -1,9 +1,14 @@
 import sys
 import os
-from gameframework import log
+import asyncio
+from gameframework import log, Game
 
-def main():
-    log("Hello world!")
+class Pong(Game):
+    def __init__(self):
+        log("Hello world!")
+
+async def main():
+    await Pong().run()
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())

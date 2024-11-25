@@ -139,10 +139,10 @@ def getPlayerProfile(request: HttpRequest):
     player = Player.objects.filter(user=request.user).first()
 
     return JsonResponse({
-        nickname: player.nickname,
-        money: player.money,
-        skins: player.skins,
-        pongElo: player.pongElo,
+        "nickname": player.nickname,
+        "money": player.money,
+        "skins": player.skins,
+        "pongElo": player.pongElo,
     })
 
 """

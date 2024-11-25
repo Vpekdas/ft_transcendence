@@ -7,10 +7,15 @@ class Store {
 class ElementAccessor {
     constructor() {
         this.eventCallbacks = new Map();
+        this.doCallback = undefined;
     }
 
     on(eventName, callback) {
         this.eventCallbacks.set(eventName, callback);
+    }
+
+    do(callback) {
+        this.doCallback = callback;
     }
 }
 
@@ -247,9 +252,18 @@ class HTMLComponent extends HTMLElement {
             const newChild = await this.component.render();
             if (this.children.length > 0) this.removeChild(this.children[0]);
             this.appendChild(newChild);
+            this.do();
         }
 
         this.events();
+    }
+
+    do() {
+        if (this.component != undefined) {
+            for (let [selector, values] of this.component.accessors) {
+                values.doCallback(this.querySelector(selector));
+            }
+        }
     }
 
     events() {
@@ -492,11 +506,7 @@ export function html(str) {
                 el.component.attributes.set(key, value);
             }
         } else {
-            if (
-                name === "svg" ||
-                (isInSvg(parent) &&
-                    (name == "circle" || name === "a" || name == "text"))
-            ) {
+            if (name === "svg" || (isInSvg(parent) && (name == "circle" || name === "a" || name == "text"))) {
                 el = document.createElementNS("http://www.w3.org/2000/svg", name);
             } else {
                 el = document.createElement(name);

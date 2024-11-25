@@ -2,6 +2,7 @@ import sys
 import json
 
 import django
+import base64
 
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.http.request import HttpRequest
@@ -85,19 +86,19 @@ Update the password
 @require_POST
 def updatePassword(request: HttpRequest):
     data = json.loads(request.body)
-    
+
     oldPassword = data["oldPassword"]
     newPassword = data["newPassword"]
 
     if passwod is None:
         return HttpResponseBadRequest()
-    
+
     if request.user.is_authenticated:
         user = authenticate(username=username, password=oldPassword)
 
         if user is None:
             return JsonResponse({ "error": "Invalid password" })
-        
+
         user.set_password(newPassword)
         user.save()
 
@@ -116,15 +117,33 @@ def updateNickname(request: HttpRequest):
 
     if not request.user.is_authenticated:
         return JsonResponse({"error": "User is not authenticated"})
-    
+
     player = Player.objects.filter(user=request.user).first()
     if not player:
         return JsonResponse({"error": "Internal error"})
-    
+
     player.nickname = newNickname
     player.save()
 
     return JsonResponse({})
+
+"""
+"""
+@require_POST
+def getPlayerProfile(request: HttpRequest):
+    data = json.loads(request.body)
+
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "User is not authenticated"})
+
+    player = Player.objects.filter(user=request.user).first()
+
+    return JsonResponse({
+        nickname: player.nickname,
+        money: player.money,
+        skins: player.skins,
+        pongElo: player.pongElo,
+    })
 
 """
 Return the profile picture of a user
@@ -132,13 +151,13 @@ Return the profile picture of a user
 def getProfilePicture(request: HttpRequest):
     if "nickname" not in request.GET:
         return HttpResponse(duck, content_type="image/svg+xml")
-    
+
     player = Player.objects.filter(nickname=request.GET["nickname"]).first()
 
     if not player or player.icon is None:
         return HttpResponse(duck, content_type="image/svg+xml")
 
-    return HttpResponse(player.icon["data"], content_type=player.icon["type"])
+    return HttpResponse(base64.b64decode(player.icon["data"]), content_type=player.icon["type"])
 
 """
 Update profile picture

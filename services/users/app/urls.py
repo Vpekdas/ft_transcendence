@@ -21,7 +21,7 @@ from app import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    
+
     # Account management
     path('api/signin', views.signin),
     path('api/login', views.loginRoute),
@@ -31,6 +31,7 @@ urlpatterns = [
     path('api/updateNickname', views.updateNickname),
 
     path('api/getProfilePicture', views.getProfilePicture),
+    path('api/updateProfilePicture', views.updateProfilePicture),
 
     # Matchmaking
     path('api/enterMachmaking', views.enterMatchmaking),

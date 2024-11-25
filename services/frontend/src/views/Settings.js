@@ -2,6 +2,7 @@ import { Component, globalComponents, html } from "../micro";
 import NavBar from "../components/NavBar";
 import ProfileDashboard from "./ProfileDashboard";
 import Chart from "../components/Chart";
+import { fetchApi } from "../api";
 
 export default class Settings extends Component {
     constructor() {
@@ -13,10 +14,24 @@ export default class Settings extends Component {
 
         this.query(".form-control").on("change", async (event) => {
             const picture = event.target.files[0];
-            const data = new FormData();
-            data.append("picture", picture);
 
-            console.log(data.get("picture"));
+            console.log(picture);
+
+            const reader = new FileReader();
+
+            reader.onload = async (e) => {
+                const content = e.target.result;
+                const response = await fetchApi("/api/updateProfilePicture", {
+                    method: "POST",
+                    body: JSON.stringify({ type: picture.type, image: content }),
+                })
+                    .then((res) => res.json())
+                    .catch((err) => {
+                        error: "Bad input";
+                    });
+                console.log("Update profile picture response:", response);
+            };
+            reader.readAsDataURL(picture);
         });
 
         return html(

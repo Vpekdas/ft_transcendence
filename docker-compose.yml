@@ -37,6 +37,7 @@ services:
     build: services/pong
     ports:
       - 1972:1972
+      - 1973:1973
     develop:
       watch:
         - action: sync

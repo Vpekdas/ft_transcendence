@@ -12,4 +12,6 @@ RUN pip3 install -r requirements.txt
 COPY --chown=app:app . /app
 
 # CMD [ "jurigged", "-v", "pong.py" ]
+
+ENTRYPOINT [ "bash", "entrypoint.sh" ]
 CMD [ "python3", "pong.py" ]

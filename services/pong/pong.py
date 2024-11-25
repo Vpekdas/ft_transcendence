@@ -2,7 +2,7 @@ import sys
 import os
 import asyncio
 import json
-from gameframework import log, Game
+from gameframework import log, Game, GameServer
 
 class Pong(Game):
     def __init__(self):
@@ -21,8 +21,19 @@ class Pong(Game):
 
         await ws.send(json.dumps({ "player1": { "pos": { "y": self.playerY } } }))
 
-async def main():
-    await Pong().run()
+class PongServer(GameServer):
+    def on_create_game(self, data) -> bool:
+        id = self.make_id()
+
+        log("Creating new game with id", id)
+        self.run_game(id, Pong())
+
+        return id
+
+def main():
+    httpd = PongServer(("0.0.0.0", 1973))
+    log("Listening on 0.0.0.0:1973")
+    httpd.serve_forever()
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()

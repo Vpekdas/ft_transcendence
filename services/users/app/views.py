@@ -154,6 +154,7 @@ def getProfilePicture(request: HttpRequest):
 
     player = Player.objects.filter(nickname=request.GET["nickname"]).first()
 
+
     if not player or player.icon is None:
         return HttpResponse(duck, content_type="image/svg+xml")
 

@@ -1,5 +1,6 @@
 import { Component, globalComponents, html } from "../micro";
 import NavBar from "../components/NavBar";
+import GameCanvas from "../components/Canvas";
 
 export default class Game extends Component {
     constructor() {
@@ -13,7 +14,7 @@ export default class Game extends Component {
             /* HTML */
             ` <div>
                 <NavBar />
-                <canvas id="myCanvas" width="1920" height="780" style="border:1px solid #000000;"> </canvas>
+                <GameCanvas />
             </div>`
         );
     }

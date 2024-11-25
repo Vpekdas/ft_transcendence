@@ -432,3 +432,9 @@ form {
 .card-img-top.profile {
     width: 50%;
 }
+
+/* CANVAS */
+
+#myCanvas {
+    width: 100%;
+}

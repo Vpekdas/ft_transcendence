@@ -15,13 +15,11 @@ export default class Settings extends Component {
         this.query(".form-control").on("change", async (event) => {
             const picture = event.target.files[0];
 
-            console.log(picture);
 
             const reader = new FileReader();
 
             reader.onload = async (e) => {
                 const content = e.target.result;
-                console.log(content);
                 const response = await fetchApi("/api/updateProfilePicture", {
                     method: "POST",
                     body: JSON.stringify({ type: picture.type, image: content }),

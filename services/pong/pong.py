@@ -2,7 +2,7 @@ import sys
 import os
 import asyncio
 import json
-from gameframework import log, Game, GameServer, Vec3
+from gameframework import log, Game, GameServer, Connection, Vec3
 
 class Player:
     pos = Vec3()
@@ -41,7 +41,7 @@ class Pong(Game):
         self.ball.pos = Vec3(1920 / 2, 780 / 2, 0)
 
     async def on_update(self, ws):
-        await ws.send(json.dumps({ "player1": self.player1.to_dict(), "player2": self.player2.to_dict(), "ball": self.ball.to_dict() }))
+        await ws.send(json.dumps({ "type": "update", "player1": self.player1.to_dict(), "player2": self.player2.to_dict(), "ball": self.ball.to_dict() }))
 
     async def on_message(self, ws, message):
         if "action" in message:
@@ -56,20 +56,14 @@ class Pong(Game):
                 elif message["action"] == "move_down":
                     self.player2.move_down()
 
-        # log(self.player1.pos, self.player2.pos)
-
 class PongServer(GameServer):
-    def on_create_game(self, data) -> bool:
-        id = self.make_id()
-
-        log("Creating new game with id", id)
-        self.run_game(id, Pong())
-
+    def do_matchmaking(self, conn: Connection, mode: str):
+        game = Pong()
+        id = self.start_game(game)
         return id
 
 def main():
-    httpd = PongServer(("0.0.0.0", 1973))
-    log("Listening on 0.0.0.0:1973")
+    httpd = PongServer(("0.0.0.0", 1972))
     httpd.serve_forever()
 
 if __name__ == '__main__':

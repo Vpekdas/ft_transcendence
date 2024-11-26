@@ -252,13 +252,13 @@ class HTMLComponent extends HTMLElement {
             const newChild = await this.component.render();
             if (this.children.length > 0) this.removeChild(this.children[0]);
             this.appendChild(newChild);
-            this.do();
+            await this.do();
         }
 
         this.events();
     }
 
-    do() {
+    async do() {
         if (this.component != undefined) {
             for (let [selector, values] of this.component.accessors) {
                 if (values.doCallback != undefined) values.doCallback(this.querySelector(selector));

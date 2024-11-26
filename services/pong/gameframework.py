@@ -8,10 +8,10 @@ import websockets
 import json
 import random
 import string
-import threading
 
 from websockets import WebSocketServer
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from threading import Thread
 
 def log(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
@@ -40,8 +40,22 @@ class Box:
         return a.min.x <= b.max.x and a.max.x >= b.min.x and a.min.y <= b.max.y and a.max.y >= b.min.y and a.min.z <= b.max.z and a.max.z >= b.min.z
 
 class Game:
+    class Runner:
+        def __init__(self, game):
+            self.game = game
+
+        def run():
+            asyncio.run(self.game.run())
+
+    connections = list()
+    thread: Thread = None
+
     def __init__(self):
         pass
+
+    def start():
+        thread = Thread(target=self.Runner(self))
+        thread.start()
 
     async def on_update(self, ws):
         pass
@@ -49,104 +63,110 @@ class Game:
     async def on_message(self, ws: WebSocketServer, message):
         pass
 
-    async def run(self, ws):
+    async def run_forever(self, ws):
         while True:
-            log("DNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN")
             await self.on_update(ws.ws)
 
-"""
-createGame(config) => Create a new game and return an handle to it.
-"""
-class GameServer(HTTPServer):
-    class WebSocket:
-        def __init__(self, server):
-            self.server = server
-            self.ws = websockets.serve()
+class Connection:
+    server = None
+    thread: Thread
 
-        async def message_handler(self, ws: WebSocketServer):
-            async for message in ws:
+    address: str
+    listening_port: int
+
+    class Runner:
+        def __init__(self, conn):
+            self.conn = conn
+
+        def run(self):
+            asyncio.run(self.conn.run())
+
+    def __init__(self, server, address, listening_port):
+        self.server = server
+        self.address = address
+        self.listening_port = listening_port
+
+        log(f"New connection listening on 0.0.0.0:{listening_port}")
+        thread = Thread(target=self.Runner(self).run)
+        thread.start()
+
+    async def message_handler(self, ws):
+        async for message in ws:
+            try:
                 data = json.loads(message)
 
-                if "game" in data and data["game"] in self.server.games:
-                    game = self.server.games[data["game"]]
+                if "type" not in data:
+                    continue
 
-                    await game.on_message(ws, data)
+                if data["type"] == "matchmaking" and "mode" in data:
+                    id = self.server.do_matchmaking(self, ws, data["mode"])
 
-        async def run(self):
-            async with websockets.serve(self.message_handler, "0.0.0.0", 1972) as server:
-                log("Websocket listening on 0.0.0.0:1972")
-                await server.serve_forever()
+                    if id is not None:
+                        await ws.send({ "type": "matchFound", "id": id })
+                    else:
+                        pass
+            except json.JSONDecodeError:
+                pass
 
+    async def run(self):
+        async with websockets.serve(self.message_handler, "0.0.0.0", self.listening_port) as server:
+            await server.serve_forever()
+
+class GameServer(HTTPServer):
     class HTTPHandler(BaseHTTPRequestHandler):
         def do_POST(self):
             data = self.rfile.read(int(self.headers.get('Content-Length')))
 
-            if self.path == "/createGame":
-                data = json.loads(data)
-                result = self.server.on_create_game(data)
+            if self.path == "/connect":
+                ws_port = self.server.find_valid_port()
+                conn = Connection(self.server, self.address_string(), ws_port)
+                self.server.connections.append(conn)
 
-                if result is None:
-                    self.send_response_ex(json.dumps({ "error": "No game was created" }))
-                else:
-                    self.send_response_ex(json.dumps({ "id": result }))
+                self.send_response_ex(json.dumps({ "port": ws_port }))
             else:
-                self.send_response_ex(json.dumps({ "error": "Invalid route" }), 404)
+                self.send_response_ex("", code=404)
 
         def send_response_ex(self, content: str, code=200, content_type="application/json"):
             self.send_response(code)
             self.send_header("Content-Type", content_type)
+            self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             self.wfile.write(content.encode())
 
-    games = {}
-    ws = None
-
-    def ws_thread(self):
-        loop = asyncio.new_event_loop()
-        tasks = set()
-
-        self.ws = self.WebSocket(self)
-
-        task = loop.create_task(self.ws.run(), name="Websocket")
-        task.add_done_callback(tasks.discard)
-        tasks.add(task)
-
-        loop.run_until_complete(asyncio.wait(tasks))
-        loop.close()
-
-    class GameThread:
-        def __init__(self, game, ws):
-            self.game = game
-            self.ws = ws
-
-        def run(self):
-            loop = asyncio.new_event_loop()
-            tasks = set()
-
-            task = loop.create_task(self.game.run(self.ws), name="Game")
-            task.add_done_callback(tasks.discard)
-            tasks.add(task)
-
-            loop.run_until_complete(asyncio.wait(tasks))
-            loop.close()
+    games: dict[str, Game] = dict()
+    connections: list[Connection] = list()
 
     def __init__(self, server_address, RequestHandlerClass=HTTPHandler):
         HTTPServer.__init__(self, server_address, RequestHandlerClass)
 
-        t = threading.Thread(target=self.ws_thread)
-        t.start()
+        log(f"Listening for new connections on {server_address[0]}:{server_address[1]}")
 
-    def make_id(self) -> str:
-        return ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
+    def make_id(self, k=8) -> str:
+        return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
 
-    def is_gid_unique(self, id) -> str:
-        return id in self.games
+    """
+    Find a port in the range `2000-3000` which is not already in used.
+    """
+    def find_valid_port(self):
+        for port in range(2000, 3000):
+            lst = filter(lambda conn: conn.listening_port == port, self.connections)
 
-    def run_game(self, id, game):
+            try:
+                next(lst)
+            except:
+                return port
+        return None
+
+    def start_game(self, game: Game) -> str:
+        id = self.make_id()
         self.games[id] = game
 
-        t2 = threading.Thread(target=self.GameThread(game, self.ws).run)
-        t2.start()
+        log("Creating new game with id", id)
+        game.start()
 
-    def on_create_game(self, data):
-        return False
+    ##
+    ## Handlers
+    ##
+
+    def do_matchmaking(self, conn: Connection, mode: str):
+        pass

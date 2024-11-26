@@ -1,3 +1,4 @@
+import { post } from "../api";
 import { Component, globalComponents, html } from "../micro";
 
 export default class Pong extends Component {
@@ -11,33 +12,47 @@ export default class Pong extends Component {
 
     async render() {
         const id = this.attrib("id");
+        const [port, setPort] = this.useGlobalStore("wsPort", 0);
 
-        this.query("#myCanvas").do((c) => {
+        this.query("#myCanvas").do(async (c) => {
+            if (port == 0) {
+                const response = await post("/connect", { body: "{}" }, 1972).then((res) => res.json());
+                const port = response["port"];
+                setPort(port);
+            }
+
             var ctx = c.getContext("2d");
 
-            var ws = new WebSocket("ws://localhost:1972");
+            var ws = new WebSocket(`ws://localhost:${port}`);
+            ws.onopen = (event) => {
+                ws.send(JSON.stringify({ type: "matchmaking", mode: "1v1local" }));
+            };
+
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
 
-                const player1Y = data["player1"]["pos"]["y"];
-                const player2Y = data["player2"]["pos"]["y"];
+                if (data.type == "update") {
+                    const player1Y = data["player1"]["pos"]["y"];
+                    const player2Y = data["player2"]["pos"]["y"];
 
-                const ballPos = data["ball"]["pos"];
+                    const ballPos = data["ball"]["pos"];
 
-                const width = 20;
-                const height = 250;
+                    const width = 20;
+                    const height = 250;
 
-                ctx.clearRect(0, 0, 1920, 780);
+                    ctx.clearRect(0, 0, 1920, 780);
 
-                ctx.beginPath();
-                ctx.arc(ballPos.x, ballPos.y, 30, 0, 2 * Math.PI);
-                ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(ballPos.x, ballPos.y, 30, 0, 2 * Math.PI);
+                    ctx.stroke();
 
-                ctx.fillStyle = "red";
-                ctx.fillRect(0, player1Y - height / 2, width, height);
+                    ctx.fillStyle = "red";
+                    ctx.fillRect(0, player1Y - height / 2, width, height);
 
-                ctx.fillStyle = "green";
-                ctx.fillRect(1900, player2Y - height / 2, width, height);
+                    ctx.fillStyle = "green";
+                    ctx.fillRect(1900, player2Y - height / 2, width, height);
+                } else if (data.type == "matchFound") {
+                }
             };
 
             window.addEventListener("keydown", (event) => {

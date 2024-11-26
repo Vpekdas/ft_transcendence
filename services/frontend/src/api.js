@@ -2,8 +2,8 @@ function getOrigin() {
     return window.location.origin.substring(0, window.location.origin.lastIndexOf(":"));
 }
 
-function api(route) {
-    return getOrigin() + ":8000" + route;
+function api(route, port = 8000) {
+    return getOrigin() + ":" + port + route;
 }
 
 export async function fetchApi(url, init) {
@@ -11,10 +11,9 @@ export async function fetchApi(url, init) {
     return await fetch(api(url), init);
 }
 
-export async function post(url, init = { body: "{}" }) {
-    init.credentials = "include";
+export async function post(url, init = { body: "{}", credentials: "include" }, port = 8000) {
     init.method = "POST";
-    return await fetch(api(url), init);
+    return await fetch(api(url, port), init);
 }
 
 export async function isLoggedIn() {

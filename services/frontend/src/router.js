@@ -65,7 +65,7 @@ export const router = async () => {
         { path: "/profile/match-history", view: MatchHistory },
         { path: "/profile/statistics", view: Statistics },
         { path: "/profile/settings", view: Settings },
-        { path: "/game/[id]", view: Pong },
+        { path: "/play", view: Pong },
         // /api/enterMatchmaking { "game": "pong", "mode": "1v1local" }
     ];
 

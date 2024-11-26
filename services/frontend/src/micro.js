@@ -261,7 +261,7 @@ class HTMLComponent extends HTMLElement {
     do() {
         if (this.component != undefined) {
             for (let [selector, values] of this.component.accessors) {
-                values.doCallback(this.querySelector(selector));
+                if (values.doCallback != undefined) values.doCallback(this.querySelector(selector));
             }
         }
     }

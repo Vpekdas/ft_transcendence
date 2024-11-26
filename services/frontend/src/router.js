@@ -11,6 +11,46 @@ import Logout from "./views/Logout";
 import Settings from "./views/Settings";
 import Game from "./views/Game";
 
+/**
+ * @param {*} routes
+ * @param {string} path
+ */
+function matchRoute(routes, path) {
+    const parts = path.substring(1).split("/");
+
+    for (let route of routes) {
+        const routeParts = route.path.substring(1).split("/");
+
+        if (routeParts.length !== parts.length) {
+            continue;
+        }
+
+        // console.log(parts, routeParts);
+        let params = new Map();
+
+        let index = 0;
+        for (; index < parts.length; index++) {
+            let part = parts[index];
+            let routePart = routeParts[index];
+
+            if (routePart[0] == "[" && routePart[routePart.length - 1] == "]") {
+                let param = routePart.substring(1, routePart.length - 1);
+                let value = part;
+
+                params.set(param, value);
+            } else if (routePart != part) {
+                break;
+            }
+        }
+
+        if (index == parts.length) {
+            return { isMatch: true, route: route, params: params };
+        }
+    }
+
+    return { isMatch: false };
+}
+
 export const router = async () => {
     // Define routes and their associated views.
     // This allows us to dynamically render HTML content based on the current view.
@@ -25,33 +65,46 @@ export const router = async () => {
         { path: "/profile/match-history", view: MatchHistory },
         { path: "/profile/statistics", view: Statistics },
         { path: "/profile/settings", view: Settings },
+        { path: "/game/[id]", view: Game },
         { path: "/game", view: Game },
     ];
 
     // Create an array of potential matches by mapping routes to their match status.
     // This helps us determine if the current path exists in our routes array.
-    const potentialMatches = routes.map((route) => {
-        return {
-            route: route,
-            isMatch: location.pathname === route.path,
-        };
-    });
+    // const potentialMatches = routes.map((route) => {
+    //     return {
+    //         route: route,
+    //         isMatch: location.pathname === route.path,
+    //     };
+    // });
 
-    let match = potentialMatches.find((potentialMatch) => potentialMatch.isMatch);
-    if (!match) {
-        match = {
-            route: routes[0],
-            isMatch: true,
-        };
+    // let match = potentialMatches.find((potentialMatch) => potentialMatch.isMatch);
+    // if (!match) {
+    //     match = {
+    //         route: routes[0],
+    //         isMatch: true,
+    //     };
+    // }
+
+    let match = matchRoute(routes, location.pathname);
+    if (!match.isMatch) {
+        match = { isMatch: true, route: routes[0] };
     }
 
     const app = document.getElementById("app");
     const viewName = match.route.view.name;
 
     // console.log(new Error().stack);
+    // console.log(matchRoute(routes, location.pathname), viewName);
 
     try {
         const view = html(`<${viewName} />`);
+
+        if (match.params != undefined) {
+            for (let [key, value] of match.params) {
+                view.component.attributes.set(key, value);
+            }
+        }
 
         if (app.children.length > 0) app.removeChild(app.children[0]);
         app.appendChild(view);

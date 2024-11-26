@@ -19,9 +19,6 @@ export default class NavBar extends Component {
                 <li class="nav-item">
                     <a class="nav-link" data-link href="/counter">Counter</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-link href="/game">Game</a>
-                </li>
             </ul>`
         );
     }

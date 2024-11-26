@@ -9,7 +9,7 @@ import Statistics from "./views/Statistics";
 import Login from "./views/Login";
 import Logout from "./views/Logout";
 import Settings from "./views/Settings";
-import Game from "./views/Game";
+import Pong from "./views/Pong";
 
 /**
  * @param {*} routes
@@ -65,26 +65,9 @@ export const router = async () => {
         { path: "/profile/match-history", view: MatchHistory },
         { path: "/profile/statistics", view: Statistics },
         { path: "/profile/settings", view: Settings },
-        { path: "/game/[id]", view: Game },
-        { path: "/game", view: Game },
+        { path: "/game/[id]", view: Pong },
+        // /api/enterMatchmaking { "game": "pong", "mode": "1v1local" }
     ];
-
-    // Create an array of potential matches by mapping routes to their match status.
-    // This helps us determine if the current path exists in our routes array.
-    // const potentialMatches = routes.map((route) => {
-    //     return {
-    //         route: route,
-    //         isMatch: location.pathname === route.path,
-    //     };
-    // });
-
-    // let match = potentialMatches.find((potentialMatch) => potentialMatch.isMatch);
-    // if (!match) {
-    //     match = {
-    //         route: routes[0],
-    //         isMatch: true,
-    //     };
-    // }
 
     let match = matchRoute(routes, location.pathname);
     if (!match.isMatch) {
@@ -93,9 +76,6 @@ export const router = async () => {
 
     const app = document.getElementById("app");
     const viewName = match.route.view.name;
-
-    // console.log(new Error().stack);
-    // console.log(matchRoute(routes, location.pathname), viewName);
 
     try {
         const view = html(`<${viewName} />`);

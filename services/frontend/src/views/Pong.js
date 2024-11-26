@@ -1,6 +1,6 @@
 import { Component, globalComponents, html } from "../micro";
 
-export default class GameCanvas extends Component {
+export default class Pong extends Component {
     constructor() {
         super();
     }
@@ -48,4 +48,4 @@ export default class GameCanvas extends Component {
         );
     }
 }
-globalComponents.set("GameCanvas", GameCanvas);
+globalComponents.set("Pong", Pong);

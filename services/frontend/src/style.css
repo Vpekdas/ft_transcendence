@@ -438,3 +438,11 @@ form {
 #myCanvas {
     width: 100%;
 }
+
+/* CHANGE PASSWORD FORM */
+
+.container-fluid.ChangePasswordForm {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}

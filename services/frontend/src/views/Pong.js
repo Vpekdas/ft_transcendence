@@ -58,7 +58,10 @@ export default class Pong extends Component {
         });
 
         return html(
-            /* HTML */ ` <canvas id="myCanvas" width="1920" height="780" style="border:1px solid #000000;"></canvas>`
+            /* HTML */ ` <div>
+                <NavBar />
+                <canvas id="myCanvas" width="1920" height="780" style="border:1px solid #000000;"></canvas>
+            </div>`
         );
     }
 }

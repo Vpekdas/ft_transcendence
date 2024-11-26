@@ -10,9 +10,11 @@ export function tr(str) {
     return str;
 }
 
+const defaultLanguage = "fr";
+
 export function getLanguage() {
     if (localStorage.getItem("lang") == undefined) {
-        setLanguage("en");
+        setLanguage(defaultLanguage);
     }
     return localStorage.getItem("lang");
 }

@@ -91,17 +91,17 @@ def updatePassword(request: HttpRequest):
     oldPassword = data["oldPassword"]
     newPassword = data["newPassword"]
 
-    if passwod is None:
+    if oldPassword is None or newPassword is None:
         return HttpResponseBadRequest()
 
     if request.user.is_authenticated:
-        user = authenticate(username=username, password=oldPassword)
+        user = authenticate(username=request.user.username, password=oldPassword)
 
-        if user is None:
-            return JsonResponse({ "error": "Invalid password" })
+        # if user is None:
+        #     return JsonResponse({ "error": "Invalid password" })
 
-        user.set_password(newPassword)
-        user.save()
+        request.user.set_password(newPassword)
+        request.user.save()
 
         return JsonResponse({})
     else:

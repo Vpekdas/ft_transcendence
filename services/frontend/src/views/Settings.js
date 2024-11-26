@@ -3,6 +3,7 @@ import NavBar from "../components/NavBar";
 import ProfileDashboard from "./ProfileDashboard";
 import Chart from "../components/Chart";
 import { fetchApi } from "../api";
+import ChangePasswordForm from "../components/ChangePassword";
 
 export default class Settings extends Component {
     constructor() {
@@ -12,9 +13,9 @@ export default class Settings extends Component {
     async render() {
         this.setTitle("Settings");
 
-        this.query(".form-control").on("change", async (event) => {
-            const picture = event.target.files[0];
-
+        this.query("#profilePictureUpload").on("click", async (event) => {
+            const target = document.getElementById("inputGroupFile04");
+            const picture = target.files[0];
 
             const reader = new FileReader();
 
@@ -66,14 +67,15 @@ export default class Settings extends Component {
                                         type="file"
                                         class="form-control"
                                         id="inputGroupFile04"
-                                        aria-describedby="inputGroupFileAddon04"
+                                        aria-describedby="profilePictureUpload"
                                         aria-label="Upload"
                                     />
-                                    <button class="btn btn-outline-secondary" type="button" id="inputGroupFileAddon04">
+                                    <button class="btn btn-outline-secondary" type="button" id="profilePictureUpload">
                                         Upload
                                     </button>
                                 </div>
                             </div>
+                            <ChangePasswordForm />
                         </div>
                     </ul>
                 </div>

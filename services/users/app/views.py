@@ -205,7 +205,7 @@ def enterMatchmaking(request: HttpRequest):
     if game == "pong":
         if mode == "1v1local":
             player = Player.objects.filter(user=request.user).first()
-            data = requests.post("http://localhost:1973/createGame", data={}).json()
+            data = requests.post("http://pong:1973/createGame", data="{}").json()
 
             return JsonResponse({"id": data["id"]})
         # if mode == "1v1" or mode == "1v1local" or mode == "1v1v1v1" or mode == "tournament":

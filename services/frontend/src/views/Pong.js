@@ -10,6 +10,8 @@ export default class Pong extends Component {
     // void ctx.arc(x, y, rayon, angleDépart, angleFin, sensAntiHoraire);
 
     async render() {
+        const id = this.attrib("id");
+
         this.query("#myCanvas").do((c) => {
             var ctx = c.getContext("2d");
 
@@ -33,12 +35,12 @@ export default class Pong extends Component {
             };
 
             window.addEventListener("keydown", (event) => {
-                console.log(event);
+                // console.log(event);
                 if (event.key === "w") {
-                    ws.send(JSON.stringify({ action: "move_up", player: "player1" }));
+                    ws.send(JSON.stringify({ game: id, action: "move_up", player: "player1" }));
                 }
                 if (event.key === "s") {
-                    ws.send(JSON.stringify({ action: "move_down", player: "player1" }));
+                    ws.send(JSON.stringify({ game: id, action: "move_down", player: "player1" }));
                 }
             });
         });

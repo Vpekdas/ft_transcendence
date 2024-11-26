@@ -1,5 +1,6 @@
 import { fetchApi } from "../api";
 import { Component, globalComponents, html } from "../micro";
+import { navigateTo } from "../router";
 
 export default class Home extends Component {
     constructor() {
@@ -22,7 +23,12 @@ export default class Home extends Component {
                     error: "Bad input";
                 });
 
-            console.log("game response: ", response);
+            if (response["error"] != undefined) {
+                console.log("game response: ", response);
+            } else {
+                const id = response["id"];
+                navigateTo(`game/${id}`);
+            }
         });
         return html(
             /* HTML */

@@ -420,12 +420,12 @@ form {
     width: 100%;
     border: 2px solid blue;
     overflow-y: auto;
+    align-items: center;
 }
 
 .card {
     display: flex;
     width: 40%;
-    height: auto;
     align-items: center;
 }
 
@@ -444,11 +444,11 @@ form {
 .container-fluid.ChangePasswordForm {
     display: flex;
     height: 100%;
-    width: 50%;
+    width: 100%;
 }
 
 .container-fluid.ChangeNicknameForm {
     display: flex;
     height: 100%;
-    width: 50%;
+    width: 100%;
 }

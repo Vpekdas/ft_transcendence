@@ -10,7 +10,7 @@ export default class NavBar extends Component {
             /* HTML */ ` <ul class="nav nav-underline">
                 <li class="nav-item icon-link">
                     <a class="icon-link" data-link href="/">
-                        <img src="/favicon.svg" width="21" height="21" />
+                        <img src="/favicon.svg" class="img-fluid" width="21" height="21" />
                     </a>
                 </li>
                 <li class="nav-item">

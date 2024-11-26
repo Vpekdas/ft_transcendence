@@ -12,6 +12,11 @@
 - Gameplay: Multiple player (major)
 - Gameplay: Another game (major) ?
 - Gameplay: Game customization (minor)
+    - [ ] Rewind time
+    - [ ] Ball turn into bomb and blow the bar in two
+    - [ ] Spawn obstacles
+    - [ ] Illusions with glitches
+    - [ ] Supersonic ball
 - Gameplay: Live Chat (major) by [@Vpekdas]
 
 - AI: AI Opponent (major)

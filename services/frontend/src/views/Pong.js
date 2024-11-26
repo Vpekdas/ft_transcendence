@@ -19,19 +19,25 @@ export default class Pong extends Component {
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
 
-                const playerY = data["player1"]["pos"]["y"];
+                const player1Y = data["player1"]["pos"]["y"];
+                const player2Y = data["player2"]["pos"]["y"];
+
+                const ballPos = data["ball"]["pos"];
+
+                const width = 20;
+                const height = 250;
 
                 ctx.clearRect(0, 0, 1920, 780);
 
                 ctx.beginPath();
-                ctx.arc(95, 50, 30, 0, 2 * Math.PI);
+                ctx.arc(ballPos.x, ballPos.y, 30, 0, 2 * Math.PI);
                 ctx.stroke();
 
                 ctx.fillStyle = "red";
-                ctx.fillRect(0, playerY, 20, 250);
+                ctx.fillRect(0, player1Y - height / 2, width, height);
 
                 ctx.fillStyle = "green";
-                ctx.fillRect(1900, 20, 20, 250);
+                ctx.fillRect(1900, player2Y - height / 2, width, height);
             };
 
             window.addEventListener("keydown", (event) => {
@@ -41,6 +47,12 @@ export default class Pong extends Component {
                 }
                 if (event.key === "s") {
                     ws.send(JSON.stringify({ game: id, action: "move_down", player: "player1" }));
+                }
+                if (event.key === "ArrowUp") {
+                    ws.send(JSON.stringify({ game: id, action: "move_up", player: "player2" }));
+                }
+                if (event.key === "ArrowDown") {
+                    ws.send(JSON.stringify({ game: id, action: "move_down", player: "player2" }));
                 }
             });
         });

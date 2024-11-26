@@ -2,24 +2,61 @@ import sys
 import os
 import asyncio
 import json
-from gameframework import log, Game, GameServer
+from gameframework import log, Game, GameServer, Vec3
+
+class Player:
+    pos = Vec3()
+    speed = 10
+
+    def move_up(self):
+        self.pos.y -= self.speed
+        self.pos.y = self.pos.y if self.pos.y >= 125 else 125
+
+    def move_down(self):
+        self.pos.y += self.speed
+        self.pos.y = self.pos.y if self.pos.y <= 780 - 125 else 780 - 125
+
+    def to_dict(self):
+        return { "pos": self.pos.to_dict() }
+
+class Ball:
+    pos = Vec3()
+    speed = 10
+
+    def to_dict(self):
+        return { "pos": self.pos.to_dict() }
 
 class Pong(Game):
-    def __init__(self):
-        log("Hello world!")
+    player1: Player
+    player2: Player
+    ball: Ball
 
-        self.playerY = 20
+    def __init__(self):
+        self.player1 = Player()
+        self.player1.pos = Vec3(0, 125 + 40, 0)
+        self.player2 = Player()
+        self.player2.pos = Vec3(0, 400, 0)
+
+        self.ball = Ball()
+        self.ball.pos = Vec3(1920 / 2, 780 / 2, 0)
+
+    async def on_update(self, ws):
+        await ws.send(json.dumps({ "player1": self.player1.to_dict(), "player2": self.player2.to_dict(), "ball": self.ball.to_dict() }))
 
     async def on_message(self, ws, message):
         if "action" in message:
-            if message["action"] == "move_up":
-                self.playerY -= 1
-                self.playerY = self.playerY if self.playerY >= 0 else 0
-            elif message["action"] == "move_down":
-                self.playerY += 1
-                self.playerY = self.playerY if self.playerY <= 780 else 780
+            if message["player"] == "player1":
+                if message["action"] == "move_up":
+                    self.player1.move_up()
+                elif message["action"] == "move_down":
+                    self.player1.move_down()
+            elif message["player"] == "player2":
+                if message["action"] == "move_up":
+                    self.player2.move_up()
+                elif message["action"] == "move_down":
+                    self.player2.move_down()
 
-        await ws.send(json.dumps({ "player1": { "pos": { "y": self.playerY } } }))
+        # log(self.player1.pos, self.player2.pos)
 
 class PongServer(GameServer):
     def on_create_game(self, data) -> bool:

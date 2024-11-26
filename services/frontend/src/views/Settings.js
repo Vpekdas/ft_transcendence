@@ -4,6 +4,7 @@ import ProfileDashboard from "./ProfileDashboard";
 import Chart from "../components/Chart";
 import { fetchApi } from "../api";
 import ChangePasswordForm from "../components/ChangePassword";
+import ChangeNicknameForm from "../components/changeNickname";
 
 export default class Settings extends Component {
     constructor() {
@@ -75,8 +76,9 @@ export default class Settings extends Component {
                                     </button>
                                 </div>
                             </div>
-                            <ChangePasswordForm />
                         </div>
+                        <ChangePasswordForm />
+                        <ChangeNicknameForm />
                     </ul>
                 </div>
             </div>`

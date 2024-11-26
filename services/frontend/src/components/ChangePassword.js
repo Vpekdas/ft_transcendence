@@ -14,8 +14,6 @@ export default class ChangePasswordForm extends Component {
             const oldPassword = document.getElementById("oldPassword").value;
             const newPassword = document.getElementById("newPassword").value;
 
-            console.log(oldPassword, newPassword);
-
             const response = await fetchApi("/api/updatePassword", {
                 method: "POST",
                 body: JSON.stringify({
@@ -28,7 +26,7 @@ export default class ChangePasswordForm extends Component {
                     error: "Bad input";
                 });
 
-            console.log("login response: ", response);
+            console.log("changePassword response: ", response);
         });
         return html(
             /* HTML */ `<div class="container-fluid ChangePasswordForm">

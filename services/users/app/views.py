@@ -159,7 +159,8 @@ def getProfilePicture(request: HttpRequest):
     if not player or player.icon is None:
         return HttpResponse(duck, content_type="image/svg+xml")
 
-    return HttpResponse(base64.b64decode(player.icon["data"]), content_type=player.icon["type"])
+    return HttpResponse(duck, content_type="image/svg+xml")
+    # return HttpResponse(base64.b64decode(player.icon["data"]), content_type=player.icon["type"])
 
 """
 Update profile picture

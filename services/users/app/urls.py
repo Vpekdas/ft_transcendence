@@ -29,6 +29,7 @@ urlpatterns = [
     path('api/isLoggedIn', views.isLoggedIn),
     path('api/updatePassword', views.updatePassword),
     path('api/updateNickname', views.updateNickname),
+    path('api/getPlayerProfile', views.getPlayerProfile),
 
     path('api/getProfilePicture', views.getProfilePicture),
     path('api/updateProfilePicture', views.updateProfilePicture),

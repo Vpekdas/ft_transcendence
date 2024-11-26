@@ -444,5 +444,11 @@ form {
 .container-fluid.ChangePasswordForm {
     display: flex;
     height: 100%;
-    width: 100%;
+    width: 50%;
+}
+
+.container-fluid.ChangeNicknameForm {
+    display: flex;
+    height: 100%;
+    width: 50%;
 }

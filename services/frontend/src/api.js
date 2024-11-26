@@ -11,7 +11,7 @@ export async function fetchApi(url, init) {
     return await fetch(api(url), init);
 }
 
-export async function post(url, init) {
+export async function post(url, init = { body: "{}" }) {
     init.credentials = "include";
     init.method = "POST";
     return await fetch(api(url), init);

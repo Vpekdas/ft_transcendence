@@ -13,6 +13,9 @@ from websockets import WebSocketServer
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from threading import Thread
 
+# https://stackoverflow.com/questions/71384132/best-approach-to-multiple-websocket-client-connections-in-python
+# https://discuss.python.org/t/websocket-messages-sent-to-multiple-clients-are-not-being-received/62781
+
 def log(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 

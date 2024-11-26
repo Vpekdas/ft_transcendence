@@ -34,6 +34,6 @@ urlpatterns = [
     path('api/updateProfilePicture', views.updateProfilePicture),
 
     # Matchmaking
-    path('api/enterMachmaking', views.enterMatchmaking),
+    path('api/enterMatchmaking', views.enterMatchmaking),
     path('api/quitMatchmaking', views.quitMatchmaking)
 ]

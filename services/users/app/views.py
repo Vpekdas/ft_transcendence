@@ -3,6 +3,7 @@ import json
 
 import django
 import base64
+import requests
 
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.http.request import HttpRequest
@@ -191,7 +192,7 @@ Enter the matchmaking
 @require_POST
 def enterMatchmaking(request: HttpRequest):
     if not request.user.is_authenticated:
-        return JsonResponse({})
+        return JsonResponse({ "error": "User is not authenticated" })
 
     data = json.loads(request.body)
 
@@ -202,9 +203,14 @@ def enterMatchmaking(request: HttpRequest):
     mode = data["mode"]
 
     if game == "pong":
-        if mode == "1v1" or mode == "1v1v1v1" or mode == "tournament":
+        if mode == "1v1local":
             player = Player.objects.filter(user=request.user).first()
-            entry = MatchmakingPlayer.objects.create(player=player, game=game, mode=mode)
+            data = requests.post("http://localhost:1973/createGame", data={}).json()
+
+            return JsonResponse({"id": data["id"]})
+        # if mode == "1v1" or mode == "1v1local" or mode == "1v1v1v1" or mode == "tournament":
+        #     player = Player.objects.filter(user=request.user).first()
+        #     entry = MatchmakingPlayer.objects.create(player=player, game=game, mode=mode)
         else:
             return JsonResponse({"error": "invalid gamemode"})
     else:

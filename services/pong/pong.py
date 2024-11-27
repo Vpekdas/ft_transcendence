@@ -57,9 +57,9 @@ class Pong(Game):
                     self.player2.move_down()
 
 class PongServer(GameServer):
-    async def do_matchmaking(self, mode: str):
+    async def do_matchmaking(self, conn, mode: str):
         game = Pong()
-        await self.start_game(game)
+        await self.start_game(conn, game)
         return game
 
 def main():

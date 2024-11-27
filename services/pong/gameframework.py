@@ -10,6 +10,7 @@ import random
 import string
 
 from websockets.asyncio.server import serve, broadcast, Server, ServerConnection
+from websockets.protocol import State
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from threading import Thread
 
@@ -46,6 +47,7 @@ class Game:
     id: str
     port: int = 2000
     ws: Server
+    conns: list[ServerConnection] = []
 
     async def start(self):
         # await asyncio.create_task(self.run())
@@ -53,16 +55,17 @@ class Game:
         thread.start()
 
     async def run(self):
-        while True:
+        while len(self.active_connections()) > 0:
             await self.on_update()
             await asyncio.sleep(0.010)
 
+        log("Game with id exited", self.id)
+
     async def broadcast(self, data):
-        try:
-            for conn in self.ws.connections:
-                await conn.send(data)
-        except:
-            pass
+        broadcast(self.conns, data)
+
+    def active_connections(self) -> list[ServerConnection]:
+        return list(filter(lambda conn: conn.state == State.OPEN, self.conns))
 
     #
     # Callbacks
@@ -83,25 +86,28 @@ class GameServer:
         asyncio.run(self.run())
 
     async def message_handler(self, ws: ServerConnection):
-        async for message in ws:
-            try:
-                data = json.loads(message)
+        try:
+            async for message in ws:
+                try:
+                    data = json.loads(message)
 
-                if "type" not in data:
-                    continue
+                    if "type" not in data:
+                        continue
 
-                if data["type"] == "matchmake" and "gamemode" in data:
-                    game = await self.do_matchmaking(data["gamemode"])
+                    if data["type"] == "matchmake" and "gamemode" in data:
+                        game = await self.do_matchmaking(ws, data["gamemode"])
 
-                    if game is not None:
-                        await ws.send(json.dumps({ "type": "matchFound", "id": game.id }))
-                    else:
-                        log("Something went wrong...")
-                elif "id" in data and data["id"] in self.games:
-                    game = self.games[data["id"]]
-                    await game.on_message(data)
-            except json.JSONDecodeError:
-                pass
+                        if game is not None:
+                            await ws.send(json.dumps({ "type": "matchFound", "id": game.id }))
+                        else:
+                            log("Something went wrong...")
+                    elif "id" in data and data["id"] in self.games:
+                        game = self.games[data["id"]]
+                        await game.on_message(data)
+                except json.JSONDecodeError:
+                    pass
+        except:
+            pass
 
     async def run(self):
         self.ws = await serve(self.message_handler, "0.0.0.0", 1972)
@@ -111,12 +117,13 @@ class GameServer:
     def make_id(self, k=8) -> str:
         return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
 
-    async def start_game(self, game: Game) -> str:
+    async def start_game(self, conn: ServerConnection, game: Game) -> str:
         id = self.make_id()
         self.games[id] = game
 
         game.id = id
         game.ws = self.ws
+        game.conns.append(conn)
 
         log(f"Game started with id", game.id)
         await game.start()

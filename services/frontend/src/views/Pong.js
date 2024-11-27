@@ -11,21 +11,16 @@ export default class Pong extends Component {
     // void ctx.arc(x, y, rayon, angleDépart, angleFin, sensAntiHoraire);
 
     async render() {
-        const id = this.attrib("id");
         const [port, setPort] = this.useGlobalStore("wsPort", 0);
+        let id = "";
 
         this.query("#myCanvas").do(async (c) => {
-            if (port == 0) {
-                const response = await post("/connect", { body: "{}" }, 1972).then((res) => res.json());
-                const port = response["port"];
-                setPort(port);
-            }
-
+            /** @type CanvasRenderingContext2D */
             var ctx = c.getContext("2d");
 
-            var ws = new WebSocket(`ws://localhost:${port}`);
+            var ws = new WebSocket(`ws://localhost:1972`);
             ws.onopen = (event) => {
-                ws.send(JSON.stringify({ type: "matchmaking", mode: "1v1local" }));
+                ws.send(JSON.stringify({ type: "matchmake", gamemode: "1v1local" }));
             };
 
             ws.onmessage = (event) => {
@@ -43,6 +38,7 @@ export default class Pong extends Component {
                     ctx.clearRect(0, 0, 1920, 780);
 
                     ctx.beginPath();
+                    ctx.fillStyle = "yellow";
                     ctx.arc(ballPos.x, ballPos.y, 30, 0, 2 * Math.PI);
                     ctx.stroke();
 
@@ -52,22 +48,23 @@ export default class Pong extends Component {
                     ctx.fillStyle = "green";
                     ctx.fillRect(1900, player2Y - height / 2, width, height);
                 } else if (data.type == "matchFound") {
+                    id = data.id;
                 }
             };
 
             window.addEventListener("keydown", (event) => {
                 // console.log(event);
                 if (event.key === "w") {
-                    ws.send(JSON.stringify({ game: id, action: "move_up", player: "player1" }));
+                    ws.send(JSON.stringify({ type: "input", id: id, action: "move_up", player: "player1" }));
                 }
                 if (event.key === "s") {
-                    ws.send(JSON.stringify({ game: id, action: "move_down", player: "player1" }));
+                    ws.send(JSON.stringify({ type: "input", id: id, action: "move_down", player: "player1" }));
                 }
                 if (event.key === "ArrowUp") {
-                    ws.send(JSON.stringify({ game: id, action: "move_up", player: "player2" }));
+                    ws.send(JSON.stringify({ type: "input", id: id, action: "move_up", player: "player2" }));
                 }
                 if (event.key === "ArrowDown") {
-                    ws.send(JSON.stringify({ game: id, action: "move_down", player: "player2" }));
+                    ws.send(JSON.stringify({ type: "input", id: id, action: "move_down", player: "player2" }));
                 }
             });
         });

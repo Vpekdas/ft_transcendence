@@ -1,4 +1,4 @@
 jurigged==0.6.0
-websockets==13.1
-setuptools==69.0.2
-wheel==0.42.0
+websockets==14.1
+setuptools==75.6.0
+wheel==0.45.1

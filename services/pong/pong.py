@@ -2,7 +2,7 @@ import sys
 import os
 import asyncio
 import json
-from gameframework import log, Game, GameServer, Connection, Vec3
+from gameframework import log, Game, GameServer, Vec3
 
 class Player:
     pos = Vec3()
@@ -40,31 +40,31 @@ class Pong(Game):
         self.ball = Ball()
         self.ball.pos = Vec3(1920 / 2, 780 / 2, 0)
 
-    async def on_update(self, ws):
-        await ws.send(json.dumps({ "type": "update", "player1": self.player1.to_dict(), "player2": self.player2.to_dict(), "ball": self.ball.to_dict() }))
+    async def on_update(self):
+        await self.broadcast(json.dumps({ "type": "update", "player1": self.player1.to_dict(), "player2": self.player2.to_dict(), "ball": self.ball.to_dict() }))
 
-    async def on_message(self, ws, message):
-        if "action" in message:
-            if message["player"] == "player1":
-                if message["action"] == "move_up":
+    async def on_message(self, msg):
+        if "action" in msg:
+            if msg["player"] == "player1":
+                if msg["action"] == "move_up":
                     self.player1.move_up()
-                elif message["action"] == "move_down":
+                elif msg["action"] == "move_down":
                     self.player1.move_down()
-            elif message["player"] == "player2":
-                if message["action"] == "move_up":
+            elif msg["player"] == "player2":
+                if msg["action"] == "move_up":
                     self.player2.move_up()
-                elif message["action"] == "move_down":
+                elif msg["action"] == "move_down":
                     self.player2.move_down()
 
 class PongServer(GameServer):
-    def do_matchmaking(self, conn: Connection, mode: str):
+    async def do_matchmaking(self, mode: str):
         game = Pong()
-        id = self.start_game(game)
-        return id
+        await self.start_game(game)
+        return game
 
 def main():
-    httpd = PongServer(("0.0.0.0", 1972))
-    httpd.serve_forever()
+    serve = PongServer()
+    serve.serve_forever()
 
 if __name__ == '__main__':
     main()

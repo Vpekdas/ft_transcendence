@@ -28,6 +28,7 @@ services:
             - Dockerfile
   postgres:
     image: postgres:14
+    container_name: database
     volumes:
       - ./.data/postgres:/var/lib/postgresql/data/
     environment:
@@ -37,7 +38,6 @@ services:
     build: services/pong
     ports:
       - 1972:1972
-      - 2000-3000:2000-3000
     develop:
       watch:
         - action: sync

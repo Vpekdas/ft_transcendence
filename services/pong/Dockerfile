@@ -1,15 +1,14 @@
-FROM python:3.12.0
+FROM python:3.13.0-bullseye
 RUN useradd -ms /bin/sh -u 1001 app
 USER app
 
 EXPOSE 1972
 
-COPY requirements.txt /app/requirements.txt
 WORKDIR /app
 
+COPY --chown=app:app . /app
 RUN pip3 install -r requirements.txt
 
-COPY --chown=app:app . /app
-
-ENTRYPOINT [ "bash", "entrypoint.sh" ]
+# ENTRYPOINT [ "bash", "entrypoint.sh" ]
 CMD [ "python3", "-m", "jurigged", "pong.py" ]
+# CMD [ "python3", "pong.py" ]

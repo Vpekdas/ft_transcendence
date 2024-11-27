@@ -35,7 +35,8 @@ export default class Pong extends Component {
                     const width = 20;
                     const height = 250;
 
-                    ctx.clearRect(0, 0, 1920, 780);
+                    ctx.fillStyle = "white";
+                    ctx.fillRect(0, 0, 1920, 780);
 
                     ctx.beginPath();
                     ctx.fillStyle = "yellow";

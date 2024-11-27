@@ -26,24 +26,30 @@
     font-style: normal;
 }
 
-/* FORM */
-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+/* LOGIN FORM */
 
-.container-fluid {
+.container-fluid.login-container {
+    position: absolute;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    top: 50%;
+}
+
+.login-form {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
 
 .col-sm-2.col-form-label {
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
+    color: red;
 }
 
 /* DASHBOARD */
@@ -479,11 +485,13 @@ form {
 body {
     background: linear-gradient(to bottom, #000000, #1a1a1a);
     color: #ffffff;
+    height: 100%;
+    width: 100%;
 }
 
 @keyframes light-streams {
     0% {
-        background-position: 0 0;
+        background-position: 0% 0%;
     }
     100% {
         background-position: 100% 100%;
@@ -503,6 +511,7 @@ body::before {
     opacity: 0.1;
     z-index: -1;
     animation: light-streams 20s linear infinite;
+    background-size: cover;
 }
 
 .background-elements {
@@ -516,8 +525,13 @@ body::before {
 
 .text-layer {
     position: absolute;
+    display: flex;
     font-size: 2em;
     margin-top: 5%;
+    height: 100%;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
 }
 
 .text-layer-1 {
@@ -557,7 +571,41 @@ body::before {
     height: 200%;
     background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 10%, rgba(255, 255, 255, 0) 90%);
     background-size: 100% 50%;
-    animation: flow 10s linear infinite;
+    animation: flow 5s linear infinite;
     opacity: 0.5;
     pointer-events: none;
+}
+
+/* NAV BAR */
+
+.nav.nav-underline.navbar {
+    display: flex;
+    position: relative;
+    align-items: center;
+    justify-content: left;
+}
+
+.nav-link.custom-link {
+    color: #8b1919;
+}
+
+.nav-link.custom-link:hover {
+    animation: pulse 0.6s infinite;
+    color: #d89123;
+    box-shadow:
+        0 0 10px #d89123,
+        0 0 20px #d89123,
+        0 0 30px #d89123;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
 }

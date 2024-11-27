@@ -4,7 +4,7 @@ import ProfileDashboard from "./ProfileDashboard";
 import Chart from "../components/Chart";
 import { fetchApi } from "../api";
 import ChangePasswordForm from "../components/ChangePassword";
-import ChangeNicknameForm from "../components/changeNickname";
+import ChangeNicknameForm from "../components/ChangeNickname";
 
 export default class Settings extends Component {
     constructor() {

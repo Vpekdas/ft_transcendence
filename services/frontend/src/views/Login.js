@@ -40,7 +40,7 @@ export default class Login extends Component {
             /* HTML */
             ` <div>
                 <NavBar />
-                <div class="container-fluid">
+                <div class="container-fluid login-container">
                     <form class="login-form" action="javascript:void(0)">
                         <div class="row mb-3">
                             <label for="username" class="col-sm-2 col-form-label">Username</label>

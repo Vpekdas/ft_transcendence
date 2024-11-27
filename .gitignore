@@ -2,3 +2,4 @@
 .venv
 games/
 .DS_Store
+.vscode

@@ -9,6 +9,8 @@ import json
 import random
 import string
 
+from math import sqrt
+
 from websockets.asyncio.server import serve, broadcast, Server, ServerConnection
 from websockets.protocol import State
 from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -33,15 +35,121 @@ class Vec3:
     def __str__(self):
         return f"[{self.x}, {self.y}, {self.z}]"
 
+    def __add__(self, other):
+        if isinstance(other, Vec3):
+            return Vec3(self.x + other.x, self.y + other.y, self.z + other.z)
+
     def to_dict(self):
         return { "x": self.x, "y": self.y, "z": self.z }
+
+class CollisionResult:
+    normal: Vec3
+    collider = None
+
+    def __init__(self, normal=Vec3(), collider=None):
+        self.normal = normal
+        self.collider = collider
+
+class Boundary:
+    min = Vec3()
+    max = Vec3()
+
+    def __init__(self, min, max):
+        self.min = min
+        self.max = max
+
+class Sphere:
+    center = Vec3()
+    radius: float = 1.0
+
+    def __init__(self, radius, center=Vec3()):
+        self.radius = radius
+        self.center = center
+
+    def translate(self, pos: Vec3):
+        return Sphere(self.radius, pos)
+
+    def test_collision(self, other) -> CollisionResult:
+        if isinstance(other, Box):
+            return other.test_collision(self)
+        return None
 
 class Box:
     min: Vec3
     max: Vec3
 
-    def is_colliding(other) -> bool:
-        return a.min.x <= b.max.x and a.max.x >= b.min.x and a.min.y <= b.max.y and a.max.y >= b.min.y and a.min.z <= b.max.z and a.max.z >= b.min.z
+    def __init__(self, min, max):
+        self.min = min
+        self.max = max
+
+    def translate(self, pos: Vec3):
+        return Box(self.min + pos, self.max + pos)
+
+    def test_collision(self, other) -> CollisionResult:
+        if isinstance(other, Box):
+            if self.min.x <= other.max.x and self.max.x >= other.min.x and self.min.y <= other.max.y and self.max.y >= other.min.y and self.min.z <= other.max.z and self.max.z >= other.min.z:
+                return CollisionResult(collider=other)
+        elif isinstance(other, Sphere):
+            test_x = other.center.x
+            test_y = other.center.y
+            test_z = other.center.z
+
+            if other.center.x < self.min.x: test_x = self.min.x
+            elif other.center.x > self.max.x: test_x = self.max.x
+
+            if other.center.y < self.min.y: test_y = self.min.y
+            elif other.center.y > self.max.y: test_y = self.max.y
+
+            if other.center.z < self.min.z: test_z = self.min.z
+            elif other.center.z > self.max.z: test_z = self.max.z
+
+            dist_x = other.center.x - test_x
+            dist_y = other.center.y - test_y
+            dist_z = other.center.z - test_z
+
+            dist = sqrt((dist_x * dist_x) + (dist_y * dist_y) + (dist_z * dist_z))
+
+            if dist <= other.radius:
+                return CollisionResult(collider=other)
+        return None
+
+class Scene:
+    bodies: list = []
+
+    def add_body(self, body):
+        body.scene = self
+        self.bodies.append(body)
+
+    def update(self):
+        for body in self.bodies:
+            body.try_move()
+
+    def test_collision(self, ibody) -> CollisionResult:
+        for body in self.bodies:
+            if body is ibody:
+                continue
+            r = body.test_collision(ibody)
+            if r is not None:
+                #if isinstance(r.collider, Box): print(r.collider, r.collider.min, r.collider.max)
+                return r
+        return None
+
+class Body:
+    scene: Scene
+    pos: Vec3 = Vec3()
+    velocity: Vec3 = Vec3()
+    shape = None
+
+    def __init__(self):
+        pass
+
+    def try_move(self):
+        if self.scene.test_collision(self) is None:
+            self.pos += self.velocity
+
+    def test_collision(self, rb) -> CollisionResult:
+        if rb.shape is None or self.shape is None: return None
+        return self.shape.translate(self.pos).test_collision(rb.shape.translate(rb.pos))
 
 class Game:
     id: str

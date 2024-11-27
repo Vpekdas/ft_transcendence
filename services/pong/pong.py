@@ -41,7 +41,7 @@ class Pong(Game):
         self.ball.pos = Vec3(1920 / 2, 780 / 2, 0)
 
     async def on_update(self):
-        await self.broadcast(json.dumps({ "type": "update", "player1": self.player1.to_dict(), "player2": self.player2.to_dict(), "ball": self.ball.to_dict() }))
+        await self.broadcast(json.dumps({ "type": "update", "id": self.id, "player1": self.player1.to_dict(), "player2": self.player2.to_dict(), "ball": self.ball.to_dict() }))
 
     async def on_message(self, msg):
         if "action" in msg:

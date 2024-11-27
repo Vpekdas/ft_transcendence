@@ -26,7 +26,7 @@ export default class Pong extends Component {
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
 
-                if (data.type == "update") {
+                if (data.type == "update" && data.id == id) {
                     const player1Y = data["player1"]["pos"]["y"];
                     const player2Y = data["player2"]["pos"]["y"];
 

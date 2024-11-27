@@ -1,5 +1,6 @@
 import { post } from "../api";
 import { Component, globalComponents, html } from "../micro";
+import { action } from "../game";
 
 export default class Pong extends Component {
     constructor() {
@@ -44,7 +45,7 @@ export default class Pong extends Component {
                     ctx.stroke();
 
                     ctx.fillStyle = "red";
-                    ctx.fillRect(0,      player1Y - height / 2, width, height);
+                    ctx.fillRect(0, player1Y - height / 2, width, height);
 
                     ctx.fillStyle = "green";
                     ctx.fillRect(1900, player2Y - height / 2, width, height);
@@ -53,20 +54,41 @@ export default class Pong extends Component {
                 }
             };
 
+            let lastKey;
+
             window.addEventListener("keydown", (event) => {
-                // console.log(event);
+                if (event.key == lastKey) return;
+
                 if (event.key === "w") {
-                    ws.send(JSON.stringify({ type: "input", id: id, action: "move_up", player: "player1" }));
+                    ws.send(JSON.stringify(action(id, "player1", "up", "press")));
                 }
                 if (event.key === "s") {
-                    ws.send(JSON.stringify({ type: "input", id: id, action: "move_down", player: "player1" }));
+                    ws.send(JSON.stringify(action(id, "player1", "down", "press")));
                 }
                 if (event.key === "ArrowUp") {
-                    ws.send(JSON.stringify({ type: "input", id: id, action: "move_up", player: "player2" }));
+                    ws.send(JSON.stringify(action(id, "player2", "up", "press")));
                 }
                 if (event.key === "ArrowDown") {
-                    ws.send(JSON.stringify({ type: "input", id: id, action: "move_down", player: "player2" }));
+                    ws.send(JSON.stringify(action(id, "player2", "down", "press")));
                 }
+
+                lastKey = event.key;
+            });
+
+            window.addEventListener("keyup", (event) => {
+                if (event.key === "w") {
+                    ws.send(JSON.stringify(action(id, "player1", "up", "release")));
+                }
+                if (event.key === "s") {
+                    ws.send(JSON.stringify(action(id, "player1", "down", "release")));
+                }
+                if (event.key === "ArrowUp") {
+                    ws.send(JSON.stringify(action(id, "player2", "up", "release")));
+                }
+                if (event.key === "ArrowDown") {
+                    ws.send(JSON.stringify(action(id, "player2", "down", "release")));
+                }
+                lastKey = undefined;
             });
         });
 

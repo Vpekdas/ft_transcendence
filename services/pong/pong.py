@@ -2,13 +2,20 @@ import sys
 import os
 import asyncio
 import json
-from gameframework import log, Game, GameServer, Vec3, Box, Sphere, Body, Scene
+from gameframework import log, Game, GameServer, Vec3, Box, Sphere, Body, Scene, Client
 
 class Player(Body):
-    speed = 10
+    speed = 3
 
-    def __init__(self):
+    def __init__(self, client: Client):
+        self.client = client
         self.shape = Box(Vec3(-10, -1, 0), Vec3(10, 1, 0))
+
+    def process(self):
+        if self.client.is_pressed("up"):
+            self.move_up()
+        if self.client.is_pressed("down"):
+            self.move_down()
 
     def move_up(self):
         self.pos.y -= self.speed
@@ -40,9 +47,12 @@ class Pong(Game):
     def __init__(self):
         self.scene = Scene()
 
-        self.player1 = Player()
+        self.clients["player1"] = Client("player1")
+        self.clients["player2"] = Client("player2")
+
+        self.player1 = Player(self.clients["player1"])
         self.player1.pos = Vec3(10, 125 + 40, 0)
-        self.player2 = Player()
+        self.player2 = Player(self.clients["player2"])
         self.player2.pos = Vec3(1920 - 10, 400, 0)
 
         self.ball = Ball()
@@ -57,18 +67,8 @@ class Pong(Game):
         self.scene.update()
         await self.broadcast(json.dumps({ "type": "update", "id": self.id, "player1": self.player1.to_dict(), "player2": self.player2.to_dict(), "ball": self.ball.to_dict() }))
 
-    async def on_message(self, msg):
-        if "action" in msg:
-            if msg["player"] == "player1":
-                if msg["action"] == "move_up":
-                    self.player1.move_up()
-                elif msg["action"] == "move_down":
-                    self.player1.move_down()
-            elif msg["player"] == "player2":
-                if msg["action"] == "move_up":
-                    self.player2.move_up()
-                elif msg["action"] == "move_down":
-                    self.player2.move_down()
+    async def on_unhandled_message(self, msg):
+        pass
 
 class PongServer(GameServer):
     async def do_matchmaking(self, conn, mode: str):

@@ -122,7 +122,7 @@ class Scene:
 
     def update(self):
         for body in self.bodies:
-            body.try_move()
+            body.process()
 
     def test_collision(self, ibody) -> CollisionResult:
         for body in self.bodies:
@@ -134,11 +134,36 @@ class Scene:
                 return r
         return None
 
+"""
+Represent a remote client in a game.
+"""
+class Client:
+    id: str
+    inputs: dict[str, bool] = dict()
+
+    def __init__(self, id: str):
+        self.id = id
+        self.inputs = dict()
+
+    def is_pressed(self, name):
+        return name in self.inputs and self.inputs[name]
+
+    def on_input(self, data):
+        action_name = data["action_name"]
+        action_type = data["action"]
+
+        if action_type == "press":
+            self.inputs[action_name] = True
+        elif action_type == "release":
+            self.inputs[action_name] = False
+
 class Body:
     scene: Scene
     pos: Vec3 = Vec3()
     velocity: Vec3 = Vec3()
     shape = None
+
+    client: Client = None
 
     def __init__(self):
         pass
@@ -151,14 +176,17 @@ class Body:
         if rb.shape is None or self.shape is None: return None
         return self.shape.translate(self.pos).test_collision(rb.shape.translate(rb.pos))
 
+    def process(self):
+        pass
+
 class Game:
     id: str
     port: int = 2000
     ws: Server
     conns: list[ServerConnection] = []
+    clients: dict[str, Client] = {}
 
     async def start(self):
-        # await asyncio.create_task(self.run())
         thread = Thread(target=lambda: asyncio.run(self.run()))
         thread.start()
 
@@ -167,19 +195,25 @@ class Game:
             await self.on_update()
             await asyncio.sleep(0.010)
 
-        log("Game with id exited", self.id)
+        log(f"Game with id {self.id} exited")
 
     async def broadcast(self, data):
-        broadcast(self.conns, data)
+        try:
+            broadcast(self.conns, data, raise_exceptions=True)
+        except:
+            pass
 
     def active_connections(self) -> list[ServerConnection]:
         return list(filter(lambda conn: conn.state == State.OPEN, self.conns))
+
+    def get_client(self, id) -> Client:
+        return self.clients[id] if id in self.clients else None
 
     #
     # Callbacks
     #
 
-    async def on_message(self, msg):
+    async def on_unhandled_message(self, msg):
         pass
 
     async def on_update(self):
@@ -211,7 +245,12 @@ class GameServer:
                             log("Something went wrong...")
                     elif "id" in data and data["id"] in self.games:
                         game = self.games[data["id"]]
-                        await game.on_message(data)
+
+                        if data["type"] == "input":
+                            client = game.get_client(data["player"])
+                            if client is not None: client.on_input(data)
+                        else:
+                            await game.on_unhandled_message(data)
                 except json.JSONDecodeError:
                     pass
         except:

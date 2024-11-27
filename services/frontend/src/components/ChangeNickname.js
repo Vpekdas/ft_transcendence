@@ -12,8 +12,8 @@ export default class ChangeNicknameForm extends Component {
 
         const info = await post("/api/getPlayerProfile").then((res) => res.json());
 
-        this.query(".btn.btn-primary.ChangeNickname").on("click", async (event) => {
-            const oldNickname = document.getElementById("newNickname").value;
+        this.query(".btn.btn-primary.change-nickname-button").on("click", async (event) => {
+            const oldNickname = document.getElementById("new-nickname").value;
 
             const response = await fetchApi("/api/updateNickname", {
                 method: "POST",
@@ -29,16 +29,16 @@ export default class ChangeNicknameForm extends Component {
             console.log("changeNickname response: ", response);
         });
         return html(
-            /* HTML */ `<div class="container-fluid ChangeNicknameForm">
+            /* HTML */ `<div class="container-fluid change-nickname-form">
                 <input
                     type="text"
-                    id="newNickname"
+                    id="new-nickname"
                     class="form-control"
                     aria-describedby="passwordHelpBlock"
                     value="${info["nickname"]}"
                     autocomplete="off"
                 />
-                <button type="submit" class="btn btn-primary ChangeNickname">${changeLanguage}</button>
+                <button type="submit" class="btn btn-primary change-nickname-button">${changeLanguage}</button>
             </div>`
         );
     }

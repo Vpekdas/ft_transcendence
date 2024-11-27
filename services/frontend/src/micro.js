@@ -506,7 +506,10 @@ export function html(str) {
                 el.component.attributes.set(key, value);
             }
         } else {
-            if (name === "svg" || (isInSvg(parent) && (name == "circle" || name === "a" || name == "text"))) {
+            if (
+                name === "svg" ||
+                (isInSvg(parent) && (name == "circle" || name === "a" || name == "text" || name === "polyline"))
+            ) {
                 el = document.createElementNS("http://www.w3.org/2000/svg", name);
             } else {
                 el = document.createElement(name);

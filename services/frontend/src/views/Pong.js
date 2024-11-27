@@ -44,7 +44,7 @@ export default class Pong extends Component {
                     ctx.stroke();
 
                     ctx.fillStyle = "red";
-                    ctx.fillRect(0, player1Y - height / 2, width, height);
+                    ctx.fillRect(0,      player1Y - height / 2, width, height);
 
                     ctx.fillStyle = "green";
                     ctx.fillRect(1900, player2Y - height / 2, width, height);

@@ -3,7 +3,7 @@ import { Component, globalComponents, html } from "../micro";
 // https://heyoka.medium.com/scratch-made-svg-donut-pie-charts-in-html5-2c587e935d72
 
 const r = 15.91549430918954;
-export default class Chart extends Component {
+export default class DonutChart extends Component {
     constructor() {
         super();
     }
@@ -103,13 +103,13 @@ export default class Chart extends Component {
 
         return html(
             /* HTML */ ` <svg width="${width}" height="${width * 1.2}" viewBox="0 0 42 42" class="donut">
-                <text x="21" y="0" text-anchor="middle" alignment-baseline="middle" font-size="4" fill="#000">
+                <text x="21" y="0" text-anchor="middle" alignment-baseline="middle" font-size="4" fill="#d2320a">
                     Chart Title
                 </text>
-                <circle class="donut-hole" cx="21" cy="21" r="${r}" fill="#fff"></circle>
+                <circle class="donut-hole" cx="21" cy="21" r="${r}" fill="transparent"></circle>
                 ${segment}
             </svg>`
         );
     }
 }
-globalComponents.set("Chart", Chart);
+globalComponents.set("DonutChart", DonutChart);

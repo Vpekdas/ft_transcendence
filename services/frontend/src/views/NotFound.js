@@ -17,7 +17,7 @@ export default class NotFound extends Component {
                     </div>
                     <p>It seems you've diverged from the main timeline. This page doesn't exist in this world line.</p>
                     <p>Return to the main timeline and continue your journey.</p>
-                    <button type="button" onclick="window.location.href='/'" class="btn btn-warning return home">
+                    <button type="button" onclick="window.location.href='/'" class="btn btn-warning return-home-button">
                         Return to Main Timeline
                     </button>
                 </div>

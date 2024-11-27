@@ -34,7 +34,6 @@ export default class Registration extends Component {
         this.query(".login-redirect").on("click", () => navigateTo("login"));
 
         return html(
-            this.parent,
             /* HTML */
             ` <div>
                 <NavBar />

@@ -11,9 +11,9 @@ export default class ProfileDashboard extends Component {
     async render() {
         this.setTitle("Profile Dashboard");
 
-        isLoggedIn().then((value) => {
-            if (!value) navigateTo("login");
-        });
+        // isLoggedIn().then((value) => {
+        //     if (!value) navigateTo("login");
+        // });
 
         return html(
             /* HTML */
@@ -22,16 +22,16 @@ export default class ProfileDashboard extends Component {
                 <div class="container-fluid dashboard-container">
                     <ul class="nav flex-column nav-underline dashboard-tab">
                         <li class="nav-item">
-                            <a class="nav-link" data-link href="/profile/match-history">Match History</a>
+                            <a class="nav-link custom-link" data-link href="/profile/match-history">Match History</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-link href="/profile/statistics">Statistics</a>
+                            <a class="nav-link custom-link" data-link href="/profile/statistics">Statistics</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-link href="/profile/skins">Skins</a>
+                            <a class="nav-link custom-link" data-link href="/profile/skins">Skins</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-link href="/profile/settings">Settings</a>
+                            <a class="nav-link custom-link" data-link href="/profile/settings">Settings</a>
                         </li>
                     </ul>
                 </div>

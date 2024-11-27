@@ -10,9 +10,9 @@ export default class ChangePasswordForm extends Component {
     async render() {
         const changeLanguage = tr("Change");
 
-        this.query(".btn.btn-primary.ChangePassword").on("click", async (event) => {
-            const oldPassword = document.getElementById("oldPassword").value;
-            const newPassword = document.getElementById("newPassword").value;
+        this.query(".btn.btn-primary.change-password-button").on("click", async (event) => {
+            const oldPassword = document.getElementById("old-password").value;
+            const newPassword = document.getElementById("new-password").value;
 
             const response = await fetchApi("/api/updatePassword", {
                 method: "POST",
@@ -29,10 +29,10 @@ export default class ChangePasswordForm extends Component {
             console.log("changePassword response: ", response);
         });
         return html(
-            /* HTML */ `<div class="container-fluid ChangePasswordForm">
+            /* HTML */ `<div class="container-fluid change-password-form">
                 <input
                     type="password"
-                    id="oldPassword"
+                    id="old-password"
                     class="form-control"
                     aria-describedby="passwordHelpBlock"
                     placeholder="${tr("New password")}"
@@ -40,13 +40,13 @@ export default class ChangePasswordForm extends Component {
                 />
                 <input
                     type="password"
-                    id="newPassword"
+                    id="new-password"
                     class="form-control"
                     aria-describedby="passwordHelpBlock"
                     placeholder="${tr("Old password")}"
                     autocomplete="off"
                 />
-                <button type="submit" class="btn btn-primary ChangePassword">${changeLanguage}</button>
+                <button type="submit" class="btn btn-primary change-password-button">${changeLanguage}</button>
             </div>`
         );
     }

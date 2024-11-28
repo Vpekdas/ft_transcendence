@@ -32,9 +32,14 @@ class Ball(Body):
 
     def __init__(self):
         self.shape = Sphere(30)
+        self.last_collision = None
 
     def process(self):
-        self.try_move()
+        if self.last_collision is not None:
+            self.velocity.x = -self.velocity.x
+            log(self.velocity)
+
+        self.last_collision = self.try_move()
 
     def to_dict(self):
         return { "pos": self.pos.to_dict() }

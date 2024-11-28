@@ -35,6 +35,13 @@ class Vec3:
         if isinstance(other, Vec3):
             return Vec3(self.x + other.x, self.y + other.y, self.z + other.z)
 
+    def __neg__(self):
+        return Vec3(-self.x, -self.y, -self.z)
+
+    def is_zero_approx(self):
+        e = 10e-5;
+        return abs(self.x) <= e and abs(self.y) <= e and abs(self.z) <= e
+
     def to_dict(self):
         return { "x": self.x, "y": self.y, "z": self.z }
 
@@ -179,12 +186,23 @@ class Body:
         self.client = client
 
     def try_move(self):
-        res = self.scene.test_collision(self)
+        res = None
+        while True:
+            res = self.scene.test_collision(self)
 
-        if res is None:
-            self.pos += self.velocity
-        # else:
-        #     print(self, res.collider)
+            if res is None:
+                self.pos += self.velocity
+                break
+            else:
+                self.velocity.x *= 1.0 - 0.1
+                self.velocity.y *= 1.0 - 0.1
+                self.velocity.z *= 1.0 - 0.1
+                if self.velocity.is_zero_approx():
+                    break
+        return res
+
+    def test_collision_only(self):
+        return self.scene.test_collision(self)
 
     def test_collision(self, rb) -> CollisionResult:
         if rb.shape is None or self.shape is None: return None

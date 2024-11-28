@@ -23,10 +23,6 @@ def log(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 class Vec3:
-    x: float
-    y: float
-    z: float
-
     def __init__(self, x=0, y=0, z=0):
         self.x = x
         self.y = y
@@ -43,26 +39,17 @@ class Vec3:
         return { "x": self.x, "y": self.y, "z": self.z }
 
 class CollisionResult:
-    normal: Vec3
-    collider = None
-
     def __init__(self, normal=Vec3(), collider=None):
         self.normal = normal
         self.collider = collider
 
 class Boundary:
-    min = Vec3()
-    max = Vec3()
-
     def __init__(self, min, max):
         self.min = min
         self.max = max
 
 class Sphere:
-    center = Vec3()
-    radius: float = 1.0
-
-    def __init__(self, radius, center=Vec3()):
+    def __init__(self, radius=1.0, center=Vec3()):
         self.radius = radius
         self.center = center
 
@@ -71,13 +58,30 @@ class Sphere:
 
     def test_collision(self, other) -> CollisionResult:
         if isinstance(other, Box):
-            return other.test_collision(self)
+            test_x = self.center.x
+            test_y = self.center.y
+            test_z = self.center.z
+
+            if self.center.x < other.min.x: test_x = other.min.x
+            elif self.center.x > other.max.x: test_x = other.max.x
+
+            if self.center.y < other.min.y: test_y = other.min.y
+            elif self.center.y > other.max.y: test_y = other.max.y
+
+            if self.center.z < other.min.z: test_z = other.min.z
+            elif self.center.z > other.max.z: test_z = other.max.z
+
+            dist_x = self.center.x - test_x
+            dist_y = self.center.y - test_y
+            dist_z = self.center.z - test_z
+
+            dist = sqrt((dist_x * dist_x) + (dist_y * dist_y) + (dist_z * dist_z))
+
+            if dist <= self.radius:
+                return CollisionResult(collider=other)
         return None
 
 class Box:
-    min: Vec3
-    max: Vec3
-
     def __init__(self, min, max):
         self.min = min
         self.max = max
@@ -114,7 +118,10 @@ class Box:
         return None
 
 class Scene:
-    bodies: list = []
+    # bodies: list = []
+
+    def __init__(self):
+        self.bodies = []
 
     def add_body(self, body):
         body.scene = self
@@ -126,11 +133,10 @@ class Scene:
 
     def test_collision(self, ibody) -> CollisionResult:
         for body in self.bodies:
-            if body is ibody:
+            if body == ibody:
                 continue
             r = body.test_collision(ibody)
             if r is not None:
-                #if isinstance(r.collider, Box): print(r.collider, r.collider.min, r.collider.max)
                 return r
         return None
 
@@ -138,8 +144,8 @@ class Scene:
 Represent a remote client in a game.
 """
 class Client:
-    id: str
-    inputs: dict[str, bool] = dict()
+    # id: str
+    # inputs: dict[str, bool] = dict()
 
     def __init__(self, id: str):
         self.id = id
@@ -158,33 +164,51 @@ class Client:
             self.inputs[action_name] = False
 
 class Body:
-    scene: Scene
-    pos: Vec3 = Vec3()
-    velocity: Vec3 = Vec3()
-    shape = None
+    # scene: Scene
+    # pos: Vec3 = Vec3()
+    # velocity: Vec3 = Vec3()
+    # shape = None
 
-    client: Client = None
+    # client: Client = None
 
-    def __init__(self):
-        pass
+    def __init__(self, *, scene=None, shape=None, client=None):
+        self.scene = scene
+        self.pos = Vec3()
+        self.velocity = Vec3()
+        self.shape = shape
+        self.client = client
 
     def try_move(self):
-        if self.scene.test_collision(self) is None:
+        res = self.scene.test_collision(self)
+
+        if res is None:
             self.pos += self.velocity
+        # else:
+        #     print(self, res.collider)
 
     def test_collision(self, rb) -> CollisionResult:
         if rb.shape is None or self.shape is None: return None
-        return self.shape.translate(self.pos).test_collision(rb.shape.translate(rb.pos))
+
+        shape_a = self.shape.translate(self.pos)
+        shape_b = rb.shape.translate(rb.pos)
+
+        return shape_a.test_collision(shape_b)
 
     def process(self):
         pass
 
 class Game:
-    id: str
-    port: int = 2000
-    ws: Server
-    conns: list[ServerConnection] = []
-    clients: dict[str, Client] = {}
+    # id: str
+    # ws: Server
+    # conns: list[ServerConnection] = []
+    # clients: dict[str, Client] = {}
+
+    def __init__(self):
+        self.id = ""
+        self.ws = None
+        self.conns = []
+        self.clients = {}
+        self.scene = Scene()
 
     async def start(self):
         thread = Thread(target=lambda: asyncio.run(self.run()))
@@ -220,9 +244,14 @@ class Game:
         pass
 
 class GameServer:
-    games: dict[str, Game] = {}
-    ws: Server
-    loop = None
+    # games: dict[str, Game] = {}
+    # ws: Server
+    # loop = None
+
+    def __init__(self):
+        self.games = {}
+        self.ws = None
+        self.loop = None
 
     def serve_forever(self):
         asyncio.run(self.run())
@@ -232,6 +261,7 @@ class GameServer:
             async for message in ws:
                 try:
                     data = json.loads(message)
+
 
                     if "type" not in data:
                         continue

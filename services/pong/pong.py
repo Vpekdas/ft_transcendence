@@ -1,6 +1,5 @@
 import sys
 import os
-import asyncio
 import json
 from gameframework import log, Game, GameServer, Vec3, Box, Sphere, Body, Scene, Client
 
@@ -9,7 +8,7 @@ class Player(Body):
 
     def __init__(self, client: Client):
         self.client = client
-        self.shape = Box(Vec3(-10, -1, 0), Vec3(10, 1, 0))
+        self.shape = Box(Vec3(-10, -125, 0), Vec3(10, 125, 0))
 
     def process(self):
         if self.client.is_pressed("up"):
@@ -34,30 +33,27 @@ class Ball(Body):
     def __init__(self):
         self.shape = Sphere(30)
 
+    def process(self):
+        self.try_move()
+
     def to_dict(self):
         return { "pos": self.pos.to_dict() }
 
 class Pong(Game):
-    player1: Player
-    player2: Player
-    ball: Ball
-
-    scene: Scene
-
     def __init__(self):
-        self.scene = Scene()
+        super().__init__()
 
         self.clients["player1"] = Client("player1")
         self.clients["player2"] = Client("player2")
 
         self.player1 = Player(self.clients["player1"])
-        self.player1.pos = Vec3(10, 125 + 40, 0)
+        self.player1.pos = Vec3(10, 780 / 2, 0)
         self.player2 = Player(self.clients["player2"])
         self.player2.pos = Vec3(1920 - 10, 400, 0)
 
         self.ball = Ball()
         self.ball.pos = Vec3(1920 / 2, 780 / 2, 0)
-        self.ball.velocity = Vec3(-10, 0, 0)
+        self.ball.velocity = Vec3(10, 0, 0)
 
         self.scene.add_body(self.player1)
         self.scene.add_body(self.player2)

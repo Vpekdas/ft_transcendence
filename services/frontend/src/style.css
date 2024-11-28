@@ -1,11 +1,4 @@
 @font-face {
-    font-family: "Monotype Garamond";
-    src: url("fonts/MonotypeGaramondBold.ttf") format("truetype");
-    font-weight: bold;
-    font-style: normal;
-}
-
-@font-face {
     font-family: "BONX Frame";
     src: url("fonts/BONX-Frame.otf") format("opentype");
     font-weight: normal;
@@ -59,7 +52,21 @@
 
 /* DASHBOARD */
 
-.container-fluid.dashboard-container {
+@keyframes pulsing-glow {
+    0%,
+    100% {
+        box-shadow:
+            0 0 10px #d89123,
+            0 0 20px #d89123;
+    }
+    50% {
+        box-shadow:
+            0 0 20px #d89123,
+            0 0 40px #d89123;
+    }
+}
+
+.dashboard-container {
     display: flex;
     position: relative;
     justify-content: left;
@@ -69,9 +76,19 @@
     overflow: hidden;
     height: 85vh;
     width: 100vw;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
+    color: #ffffff;
+    font-family: "Roboto Mono", monospace;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #d89123;
+    box-shadow:
+        0 0 10px #d89123,
+        0 0 20px #d89123;
+    animation: pulsing-glow 2s infinite;
 }
 
-.nav.flex-column.nav-underline.dashboard-tab {
+.dashboard-tab {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -118,17 +135,16 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    font-family: "Roboto Mono", monospace;
 }
 
 #background > p {
     color: #ffa500;
-    font-family: "Monotype Garamond", monospace;
 }
 
 .btn.btn-warning.return-home-button {
     display: flex;
     background: linear-gradient(45deg, #8b1919, #d89123);
-    font-family: "Monotype Garamond", monospace;
     width: 10vw;
     border: 2px solid #d2320a;
     margin-bottom: 10px;
@@ -612,29 +628,81 @@ body::before {
     position: relative;
     align-items: center;
     justify-content: left;
+    font-family: "Roboto Mono", monospace;
+}
+
+@keyframes flicker {
+    0%,
+    18%,
+    22%,
+    25%,
+    53%,
+    57%,
+    100% {
+        opacity: 1;
+        text-shadow:
+            -1px -1px 0 rgba(255, 255, 255, 0.4),
+            1px -1px 0 rgba(255, 255, 255, 0.4),
+            -1px 1px 0 rgba(255, 255, 255, 0.4),
+            1px 1px 0 rgba(255, 255, 255, 0.4),
+            0 -2px 8px,
+            0 0 2px,
+            0 0 5px #ff7e00,
+            0 0 15px #ff4444,
+            0 0 2px #ff7e00,
+            0 2px 3px #000;
+    }
+    20%,
+    24%,
+    55% {
+        opacity: 0.4;
+        text-shadow: none;
+    }
+    30%,
+    40%,
+    60%,
+    80% {
+        opacity: 0.7;
+        text-shadow:
+            -1px -1px 0 rgba(255, 255, 255, 0.2),
+            1px -1px 0 rgba(255, 255, 255, 0.2),
+            -1px 1px 0 rgba(255, 255, 255, 0.2),
+            1px 1px 0 rgba(255, 255, 255, 0.2),
+            0 -2px 8px,
+            0 0 2px,
+            0 0 5px #ff7e00,
+            0 0 15px #ff4444,
+            0 0 2px #ff7e00,
+            0 2px 3px #000;
+    }
 }
 
 .nav-link.custom-link {
+    position: relative;
     color: #8b1919;
+    text-decoration: none;
+    transition: color 0.3s ease;
 }
 
 .nav-link.custom-link:hover {
-    animation: pulse 0.6s infinite;
+    animation: flicker 2.3s infinite;
     color: #d89123;
-    box-shadow:
-        0 0 10px #d89123,
-        0 0 20px #d89123,
-        0 0 30px #d89123;
 }
 
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.2);
-    }
-    100% {
-        transform: scale(1);
-    }
+.nav-link.custom-link::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: #d89123;
+    visibility: hidden;
+    transform: scaleX(0);
+    transition: all 0.3s ease-in-out;
+}
+
+.nav-link.custom-link:hover::after {
+    visibility: visible;
+    transform: scaleX(1);
 }

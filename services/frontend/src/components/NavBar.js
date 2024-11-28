@@ -33,3 +33,6 @@ export default class NavBar extends Component {
     }
 }
 globalComponents.set("NavBar", NavBar);
+
+// TODO Add a dynamic function to update the "active" class on nav links based on the current URL.
+// TODO This ensures that the user can visually see which page they are currently on.

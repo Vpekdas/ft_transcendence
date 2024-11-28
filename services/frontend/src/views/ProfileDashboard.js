@@ -31,7 +31,7 @@ export default class ProfileDashboard extends Component {
                             <a class="nav-link custom-link" data-link href="/profile/skins">Skins</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link custom-link" data-link href="/profile/settings">Settings</a>
+                            <a class="nav-link custom-link " data-link href="/profile/settings">Settings</a>
                         </li>
                     </ul>
                 </div>
@@ -40,3 +40,6 @@ export default class ProfileDashboard extends Component {
     }
 }
 globalComponents.set("ProfileDashboard", ProfileDashboard);
+
+// TODO Add a dynamic function to update the "active" class on nav links based on the current URL.
+// TODO This ensures that the user can visually see which page they are currently on.

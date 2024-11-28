@@ -43,7 +43,7 @@ export default class Statistics extends Component {
                             fillPercent2="25"
                             fillPercent3="45"
                         />
-                        <LineChart />
+                        <LineChart width="400" height="200" viewWidth="380" viewHeight="100" points="0,0 10,10 50,100" />
                     </ul>
                 </div>
             </div>`

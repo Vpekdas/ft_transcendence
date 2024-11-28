@@ -462,12 +462,10 @@
     }
 }
 
-.chart {
+.line-chart {
     display: flex;
     position: relative;
-    background: white;
-    width: 500px;
-    height: 200px;
+    background: #d89123;
 }
 
 /* SETTINGS */
@@ -705,4 +703,14 @@ body::before {
 .nav-link.custom-link:hover::after {
     visibility: visible;
     transform: scaleX(1);
+}
+
+/* Ensures that clicking with the middle mouse button also applies our custom styles,
+   preventing the default browser styles from being applied */
+.nav-link.custom-link:hover,
+.nav-link.custom-link:focus,
+.nav-link.custom-link:active {
+    animation: flicker 2.3s infinite;
+    color: #d89123;
+    outline: none;
 }

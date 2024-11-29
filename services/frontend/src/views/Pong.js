@@ -6,6 +6,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 // https://www.youtube.com/watch?v=Ou3Ykcp_-D8
 // timestamp: 9:27
+
 export default class Pong extends Component {
     constructor() {
         super();
@@ -31,7 +32,7 @@ export default class Pong extends Component {
             return cube;
         }
 
-        function addSphere(x, y, radius = 1, widthSegments = 32, heightSegments = 16, color = 0xffffff) {
+        function addSphere(x, y, radius, widthSegments, heightSegments, color) {
             const geometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
             const material = new THREE.MeshBasicMaterial({ color: color });
             const sphere = new THREE.Mesh(geometry, material);
@@ -128,7 +129,7 @@ export default class Pong extends Component {
         return html(
             /* HTML */ ` <div>
                 <NavBar />
-                <div id="pong" width="1920" height="780" style="border:1px solid #000000;"></div>
+                <div id="pong" style="border:1px solid #000000;"></div>
             </div>`
         );
     }

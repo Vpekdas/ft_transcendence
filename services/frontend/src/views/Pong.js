@@ -4,9 +4,6 @@ import { action } from "../game";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-// https://www.youtube.com/watch?v=Ou3Ykcp_-D8
-// timestamp: 9:27
-
 export default class Pong extends Component {
     constructor() {
         super();
@@ -17,7 +14,7 @@ export default class Pong extends Component {
         let id = "";
 
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(125, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -58,7 +55,6 @@ export default class Pong extends Component {
             const ball = addSphere(0, 3, 0.5, 32, 16, "#ffde21");
 
             function animate() {
-                requestAnimationFrame(animate);
                 controls.update();
                 renderer.render(scene, camera);
             }
@@ -129,7 +125,7 @@ export default class Pong extends Component {
         return html(
             /* HTML */ ` <div>
                 <NavBar />
-                <div id="pong" style="border:1px solid #000000;"></div>
+                <div id="pong"></div>
             </div>`
         );
     }

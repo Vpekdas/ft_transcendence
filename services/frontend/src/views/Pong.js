@@ -52,7 +52,7 @@ export default class Pong extends Component {
             const botWall = addCube(0, 5, 10, 1, "#008000");
 
             const playerOne = addCube(-4, 0, 1, 3, "#cd1c18");
-            const playerTne = addCube(4, 0, 1, 3, "#7f00ff");
+            const playerTwo = addCube(4, 0, 1, 3, "#7f00ff");
 
             const ball = addSphere(0, 3, 0.5, 32, 16, "#ffde21");
 
@@ -76,22 +76,12 @@ export default class Pong extends Component {
 
                     const ballPos = data["ball"]["pos"];
 
-                    // const width = 20;
-                    // const height = 250;
+                    ball.position.x = ballPos.x;
+                    ball.position.y = ballPos.y;
+                    ball.position.z = ballPos.z;
 
-                    // ctx.fillStyle = "white";
-                    // ctx.fillRect(0, 0, 1920, 780);
-
-                    // ctx.beginPath();
-                    // ctx.fillStyle = "yellow";
-                    // ctx.arc(ballPos.x, ballPos.y, 30, 0, 2 * Math.PI);
-                    // ctx.stroke();
-
-                    // ctx.fillStyle = "red";
-                    // ctx.fillRect(0, player1Y - height / 2, width, height);
-
-                    // ctx.fillStyle = "green";
-                    // ctx.fillRect(1900, player2Y - height / 2, width, height);
+                    playerOne.position.y = player1Y;
+                    playerTwo.position.y = player2Y;
                 } else if (data.type == "matchFound") {
                     id = data.id;
                 }

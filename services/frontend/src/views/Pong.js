@@ -63,6 +63,23 @@ export default class Pong extends Component {
 
             const ball = addSphere(scene, 0, 3, 0.5, 32, 16, "#ffde21");
 
+            function addStar() {
+                const geometry = new THREE.SphereGeometry(0.25, 24, 24);
+                const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                const star = new THREE.Mesh(geometry, material);
+
+                const [x, y, z] = Array(3)
+                    .fill()
+                    .map(() => THREE.MathUtils.randFloatSpread(100));
+                star.position.set(x, y, z);
+                scene.add(star);
+            }
+
+            Array(200).fill().forEach(addStar);
+
+            const spaceTexture = new THREE.TextureLoader().load("/img/space.jpg");
+            scene.background = spaceTexture;
+
             // requestAnimationFrame is supposed to provide a better efficient loop for rendering.
             function animate() {
                 controls.update();

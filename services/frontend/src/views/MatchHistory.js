@@ -14,7 +14,7 @@ export default class MatchHistory extends Component {
             ` <div>
                 <NavBar />
                 <div class="container-fluid dashboard-container">
-                    <ul class="nav flex-column nav-underline dashboard-tab">
+                    <ul class="nav flex-column dashboard-tab">
                         <li class="nav-item">
                             <a class="nav-link custom-link" data-link href="/profile/match-history">Match History</a>
                         </li>

@@ -8,7 +8,7 @@ export default class NavBar extends Component {
     async render() {
         return html(
             /* HTML */ ` <div>
-                <ul class="nav nav-underline navbar">
+                <ul class="nav navbar">
                     <div class="background-elements">
                         <div class="glitch-wrapper">
                             <div class="glitch text-layer text-layer-1">FT-TRANSCENDENCE</div>

@@ -4,6 +4,27 @@ import { action } from "../game";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
+function addCube(scene, x, y, width, height, color) {
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshBasicMaterial({ color: color });
+    const cube = new THREE.Mesh(geometry, material);
+
+    cube.position.set(x, y, 0);
+    cube.scale.set(width, height, 1);
+    scene.add(cube);
+    return cube;
+}
+
+function addSphere(scene, x, y, radius, widthSegments, heightSegments, color) {
+    const geometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
+    const material = new THREE.MeshBasicMaterial({ color: color });
+    const sphere = new THREE.Mesh(geometry, material);
+
+    sphere.position.set(x, y, 0);
+    scene.add(sphere);
+    return sphere;
+}
+
 export default class Pong extends Component {
     constructor() {
         super();
@@ -13,50 +34,40 @@ export default class Pong extends Component {
         const [port, setPort] = this.useGlobalStore("wsPort", 0);
         let id = "";
 
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(125, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-
-        function addCube(x, y, width, height, color) {
-            const geometry = new THREE.BoxGeometry(1, 1, 1);
-            const material = new THREE.MeshBasicMaterial({ color: color });
-            const cube = new THREE.Mesh(geometry, material);
-
-            cube.position.set(x, y, 0);
-            cube.scale.set(width, height, 1);
-            scene.add(cube);
-            return cube;
-        }
-
-        function addSphere(x, y, radius, widthSegments, heightSegments, color) {
-            const geometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
-            const material = new THREE.MeshBasicMaterial({ color: color });
-            const sphere = new THREE.Mesh(geometry, material);
-
-            sphere.position.set(x, y, 0);
-            scene.add(sphere);
-            return sphere;
-        }
-
         this.query("#pong").do(async (c) => {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(125, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer();
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            window.addEventListener("resize", onWindowResize, false);
+
+            function onWindowResize() {
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+            }
+
             c.appendChild(renderer.domElement);
             const controls = new OrbitControls(camera, c);
 
             camera.position.z = 5;
             renderer.setAnimationLoop(animate);
 
-            const topWall = addCube(0, -5, 10, 1, "#008000");
-            const botWall = addCube(0, 5, 10, 1, "#008000");
+            const topWall = addCube(scene, 0, -5, 10, 1, "#008000");
+            const botWall = addCube(scene, 0, 5, 10, 1, "#008000");
 
-            const playerOne = addCube(-4, 0, 1, 3, "#cd1c18");
-            const playerTwo = addCube(4, 0, 1, 3, "#7f00ff");
+            const playerOne = addCube(scene, -4, 0, 1, 3, "#cd1c18");
+            const playerTwo = addCube(scene, 4, 0, 1, 3, "#7f00ff");
 
-            const ball = addSphere(0, 3, 0.5, 32, 16, "#ffde21");
+            const ball = addSphere(scene, 0, 3, 0.5, 32, 16, "#ffde21");
 
+            // requestAnimationFrame is supposed to provide a better efficient loop for rendering.
             function animate() {
                 controls.update();
                 renderer.render(scene, camera);
+                requestAnimationFrame(animate);
             }
 
             var ws = new WebSocket(`ws://localhost:1972`);

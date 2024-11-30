@@ -623,7 +623,7 @@ body::before {
     z-index: -1;
 }
 
-.nav.nav-underline.navbar {
+.nav.navbar {
     display: flex;
     position: relative;
     align-items: center;
@@ -717,6 +717,10 @@ body::before {
     outline: none;
 }
 
+/* PONG GAME */
+
 #pong {
-    border: 1px solid #000000;
+    border: 1px solid red;
+    height: 100%;
+    width: 100%;
 }

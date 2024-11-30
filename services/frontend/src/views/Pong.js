@@ -36,16 +36,16 @@ export default class Pong extends Component {
 
         this.query("#pong").do(async (c) => {
             const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(125, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const camera = new THREE.PerspectiveCamera(125, c.clientWidth / c.clientHeight, 0.1, 1000);
             const renderer = new THREE.WebGLRenderer();
 
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setSize(c.clientWidth, c.clientHeight);
 
             window.addEventListener("resize", onWindowResize, false);
 
             function onWindowResize() {
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                camera.aspect = window.innerWidth / window.innerHeight;
+                renderer.setSize(c.clientWidth, c.clientHeight);
+                camera.aspect = c.clientWidth / c.clientHeight;
                 camera.updateProjectionMatrix();
             }
 
@@ -67,7 +67,6 @@ export default class Pong extends Component {
             function animate() {
                 controls.update();
                 renderer.render(scene, camera);
-                requestAnimationFrame(animate);
             }
 
             var ws = new WebSocket(`ws://localhost:1972`);

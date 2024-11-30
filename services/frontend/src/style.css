@@ -491,12 +491,6 @@
     width: 50%;
 }
 
-/* CANVAS */
-
-#myCanvas {
-    width: 100%;
-}
-
 /* CHANGE FORM */
 
 .container-fluid.change-password-form {
@@ -720,6 +714,12 @@ body::before {
 /* PONG GAME */
 
 #pong {
+    height: 90vh;
+    width: 100vw;
+    padding-top: 15px;
+}
+
+canvas {
     border: 1px solid red;
     height: 100%;
     width: 100%;

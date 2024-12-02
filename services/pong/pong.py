@@ -1,14 +1,14 @@
 import sys
 import os
 import json
-from gameframework import log, Game, GameServer, Vec3, Box, Sphere, Body, Scene, Client
+import math
+from gameframework import log, Game, GameServer, Vec3, Box, Sphere, Body, Scene, Client, BodyType
 
 class Player(Body):
     speed = 0.1
 
     def __init__(self, client: Client):
-        self.client = client
-        self.shape = Box(Vec3(-0.5, -5, 0), Vec3(0.5, 5, 0))
+        super().__init__(shape=Box(Vec3(-0.5, -5, 0), Vec3(0.5, 5, 0)), client=client)
 
     def process(self):
         if self.client.is_pressed("up"):
@@ -29,15 +29,12 @@ class Ball(Body):
     speed = 0.1
 
     def __init__(self):
-        self.shape = Sphere(0.5)
+        super().__init__(shape = Sphere(0.5), type=BodyType.DYNAMIC)
         self.last_collision = None
+        self.velocity = Vec3(Ball.speed, 0, 0)
 
     def process(self):
-        if self.last_collision is not None:
-            self.velocity.x = -self.velocity.x
-            # log(self.velocity)
-
-        self.last_collision = self.try_move()
+        self.try_move()
 
     def to_dict(self):
         return { "pos": self.pos.to_dict() }
@@ -56,7 +53,6 @@ class Pong(Game):
 
         self.ball = Ball()
         self.ball.pos = Vec3(0, 0, 0)
-        self.ball.velocity = Vec3(0.05, 0, 0)
 
         self.scene.add_body(self.player1)
         self.scene.add_body(self.player2)

@@ -8,6 +8,7 @@ import websockets
 import json
 import random
 import string
+import enum
 
 from math import sqrt
 
@@ -35,12 +36,27 @@ class Vec3:
         if isinstance(other, Vec3):
             return Vec3(self.x + other.x, self.y + other.y, self.z + other.z)
 
+    def __sub__(self, other):
+        if isinstance(other, Vec3):
+            return Vec3(self.x - other.x, self.y - other.y, self.z - other.z)
+
+    def __mul__(self, other):
+        if isinstance(other, float) or isinstance(other, int):
+            return Vec3(self.x * other, self.y * other, self.z * other)
+
     def __neg__(self):
         return Vec3(-self.x, -self.y, -self.z)
 
     def is_zero_approx(self):
         e = 10e-5;
         return abs(self.x) <= e and abs(self.y) <= e and abs(self.z) <= e
+
+    def length(self) -> float:
+        return sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
+
+    def normalized(self):
+        l = self.length()
+        return Vec3(self.x / l, self.y / l, self.z / l)
 
     def to_dict(self):
         return { "x": self.x, "y": self.y, "z": self.z }
@@ -63,31 +79,6 @@ class Sphere:
     def translate(self, pos: Vec3):
         return Sphere(self.radius, pos)
 
-    def test_collision(self, other) -> CollisionResult:
-        if isinstance(other, Box):
-            test_x = self.center.x
-            test_y = self.center.y
-            test_z = self.center.z
-
-            if self.center.x < other.min.x: test_x = other.min.x
-            elif self.center.x > other.max.x: test_x = other.max.x
-
-            if self.center.y < other.min.y: test_y = other.min.y
-            elif self.center.y > other.max.y: test_y = other.max.y
-
-            if self.center.z < other.min.z: test_z = other.min.z
-            elif self.center.z > other.max.z: test_z = other.max.z
-
-            dist_x = self.center.x - test_x
-            dist_y = self.center.y - test_y
-            dist_z = self.center.z - test_z
-
-            dist = sqrt((dist_x * dist_x) + (dist_y * dist_y) + (dist_z * dist_z))
-
-            if dist <= self.radius:
-                return CollisionResult(collider=other)
-        return None
-
 class Box:
     def __init__(self, min, max):
         self.min = min
@@ -96,37 +87,33 @@ class Box:
     def translate(self, pos: Vec3):
         return Box(self.min + pos, self.max + pos)
 
-    def test_collision(self, other) -> CollisionResult:
-        if isinstance(other, Box):
-            if self.min.x <= other.max.x and self.max.x >= other.min.x and self.min.y <= other.max.y and self.max.y >= other.min.y and self.min.z <= other.max.z and self.max.z >= other.min.z:
-                return CollisionResult(collider=other)
-        elif isinstance(other, Sphere):
-            test_x = other.center.x
-            test_y = other.center.y
-            test_z = other.center.z
+def check_collision(a, b) -> bool:
+    if isinstance(a, Box) and isinstance(b, Box):
+        if a.min.x <= b.max.x and a.max.x >= b.min.x and a.min.y <= b.max.y and a.max.y >= b.min.y and a.min.z <= b.max.z and a.max.z >= b.min.z:
+            return CollisionResult(collider=other)
+    elif isinstance(a, Sphere) and isinstance(b, Box):
+        test_x = a.center.x
+        test_y = a.center.y
+        test_z = a.center.z
 
-            if other.center.x < self.min.x: test_x = self.min.x
-            elif other.center.x > self.max.x: test_x = self.max.x
+        if a.center.x < b.min.x: test_x = b.min.x
+        elif a.center.x > b.max.x: test_x = b.max.x
 
-            if other.center.y < self.min.y: test_y = self.min.y
-            elif other.center.y > self.max.y: test_y = self.max.y
+        if a.center.y < b.min.y: test_y = b.min.y
+        elif a.center.y > b.max.y: test_y = b.max.y
 
-            if other.center.z < self.min.z: test_z = self.min.z
-            elif other.center.z > self.max.z: test_z = self.max.z
+        if a.center.z < b.min.z: test_z = b.min.z
+        elif a.center.z > b.max.z: test_z = b.max.z
 
-            dist_x = other.center.x - test_x
-            dist_y = other.center.y - test_y
-            dist_z = other.center.z - test_z
+        dist_x = a.center.x - test_x
+        dist_y = a.center.y - test_y
+        dist_z = a.center.z - test_z
 
-            dist = sqrt((dist_x * dist_x) + (dist_y * dist_y) + (dist_z * dist_z))
+        dist = sqrt((dist_x * dist_x) + (dist_y * dist_y) + (dist_z * dist_z))
 
-            if dist <= other.radius:
-                return CollisionResult(collider=other)
-        return None
+        return dist <= a.radius
 
 class Scene:
-    # bodies: list = []
-
     def __init__(self):
         self.bodies = []
 
@@ -151,9 +138,6 @@ class Scene:
 Represent a remote client in a game.
 """
 class Client:
-    # id: str
-    # inputs: dict[str, bool] = dict()
-
     def __init__(self, id: str):
         self.id = id
         self.inputs = dict()
@@ -170,23 +154,29 @@ class Client:
         elif action_type == "release":
             self.inputs[action_name] = False
 
+class BodyType(enum.Enum):
+    STATIC = 0
+    DYNAMIC = 1
+
 class Body:
-    # scene: Scene
-    # pos: Vec3 = Vec3()
-    # velocity: Vec3 = Vec3()
-    # shape = None
-
-    # client: Client = None
-
-    def __init__(self, *, scene=None, shape=None, client=None):
+    def __init__(self, *, scene: Scene=None, shape=None, type=BodyType.STATIC, client=None):
         self.scene = scene
         self.pos = Vec3()
         self.velocity = Vec3()
         self.shape = shape
+        self.type = type
         self.client = client
+
+        # Physics properties
+
+        # The "bounce" property of the body. 0 means nothing will bounce, 1.0 means total conservation of energy
+        self.bounce = 0.0
 
     def try_move(self):
         res = None
+
+        current_speed = self.velocity.length()
+
         while True:
             res = self.scene.test_collision(self)
 
@@ -198,11 +188,11 @@ class Body:
                 self.velocity.y *= 1.0 - 0.1
                 self.velocity.z *= 1.0 - 0.1
                 if self.velocity.is_zero_approx():
-                    break
+                    if self.type == BodyType.DYNAMIC:
+                        self.velocity = res.normal * current_speed
+                    else:
+                        break
         return res
-
-    def test_collision_only(self):
-        return self.scene.test_collision(self)
 
     def test_collision(self, rb) -> CollisionResult:
         if rb.shape is None or self.shape is None: return None
@@ -210,17 +200,19 @@ class Body:
         shape_a = self.shape.translate(self.pos)
         shape_b = rb.shape.translate(rb.pos)
 
-        return shape_a.test_collision(shape_b)
+        direction = (rb.pos - self.pos).normalized()
+
+        if isinstance(shape_b, Sphere):
+            if check_collision(shape_b, shape_a):
+                return CollisionResult(collider=rb, normal=direction)
+        else:
+            if check_collision(shape_a, shape_b):
+                return CollisionResult(collider=rb)
 
     def process(self):
         pass
 
 class Game:
-    # id: str
-    # ws: Server
-    # conns: list[ServerConnection] = []
-    # clients: dict[str, Client] = {}
-
     def __init__(self):
         self.id = ""
         self.ws = None
@@ -262,10 +254,6 @@ class Game:
         pass
 
 class GameServer:
-    # games: dict[str, Game] = {}
-    # ws: Server
-    # loop = None
-
     def __init__(self):
         self.games = {}
         self.ws = None

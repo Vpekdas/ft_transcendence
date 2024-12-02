@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -137,3 +138,5 @@ CORS_ALLOW_CREDENTIALS = True
 SESSION_COOKIE_SAMESITE = None
 
 CSRF_TRUSTED_ORIGINS = [ "http://localhost:8080", "http://127.0.0.1:8080" ]
+
+ASGI_APPLICATION = "app.asgi.application"

@@ -2,7 +2,7 @@ import sys
 import os
 import json
 import math
-from gameframework import log, Game, GameServer, Vec3, Box, Sphere, Body, Scene, Client, BodyType
+from .gameframework import log, Game, ServerManager, Vec3, Box, Sphere, Body, Scene, Client, BodyType
 
 class Player(Body):
     speed = 0.1
@@ -58,22 +58,15 @@ class Pong(Game):
         self.scene.add_body(self.player2)
         self.scene.add_body(self.ball)
 
-    async def on_update(self):
+    def on_update(self):
         self.scene.update()
-        await self.broadcast(json.dumps({ "type": "update", "id": self.id, "player1": self.player1.to_dict(), "player2": self.player2.to_dict(), "ball": self.ball.to_dict() }))
+        self.broadcast({ "type": "update", "id": self.id, "player1": self.player1.to_dict(), "player2": self.player2.to_dict(), "ball": self.ball.to_dict() })
 
-    async def on_unhandled_message(self, msg):
+    def on_unhandled_message(self, msg):
         pass
 
-class PongServer(GameServer):
-    async def do_matchmaking(self, conn, mode: str):
+class PongServer(ServerManager):
+    def do_matchmaking(self, conn, mode: str):
         game = Pong()
-        await self.start_game(conn, game)
+        self.start_game(conn, game)
         return game
-
-def main():
-    serve = PongServer()
-    serve.serve_forever()
-
-if __name__ == '__main__':
-    main()

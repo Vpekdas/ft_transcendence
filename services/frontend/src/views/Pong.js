@@ -86,7 +86,7 @@ export default class Pong extends Component {
                 renderer.render(scene, camera);
             }
 
-            var ws = new WebSocket(`ws://localhost:1972`);
+            var ws = new WebSocket(`ws://localhost:8000/ws`);
             ws.onopen = (event) => {
                 ws.send(JSON.stringify({ type: "matchmake", gamemode: "1v1local" }));
             };

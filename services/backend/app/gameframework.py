@@ -2,18 +2,15 @@
 Common logic shared by all games.
 """
 
-import asyncio
 import sys
-import websockets
 import json
 import random
 import string
 import enum
+import time
 
 from math import sqrt
 
-from websockets.asyncio.server import serve, broadcast, Server, ServerConnection
-from websockets.protocol import State
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from threading import Thread
 
@@ -214,31 +211,30 @@ class Body:
 
 class Game:
     def __init__(self):
+        self.manager = None
         self.id = ""
-        self.ws = None
-        self.conns = []
+        self.consumers = []
         self.clients = {}
         self.scene = Scene()
 
-    async def start(self):
-        thread = Thread(target=lambda: asyncio.run(self.run()))
+    def start(self):
+        thread = Thread(target=self.run)
         thread.start()
 
-    async def run(self):
-        while len(self.active_connections()) > 0:
-            await self.on_update()
-            await asyncio.sleep(0.010)
+    def run(self):
+        while len(self.consumers) > 0:
+            self.on_update()
+            time.sleep(0.010)
 
         log(f"Game with id {self.id} exited")
+        self.manager.game.remove(id)
 
-    async def broadcast(self, data):
-        try:
-            broadcast(self.conns, data, raise_exceptions=True)
-        except:
-            pass
+    def broadcast(self, data):
+        for consumer in self.consumers:
+            consumer.send(json.dumps(data))
 
-    def active_connections(self) -> list[ServerConnection]:
-        return list(filter(lambda conn: conn.state == State.OPEN, self.conns))
+    # def active_connections(self) -> list[ServerConnection]:
+    #     return list(filter(lambda conn: conn.state == State.OPEN, self.conns))
 
     def get_client(self, id) -> Client:
         return self.clients[id] if id in self.clients else None
@@ -247,73 +243,46 @@ class Game:
     # Callbacks
     #
 
-    async def on_unhandled_message(self, msg):
+    def on_unhandled_message(self, msg):
         pass
 
-    async def on_update(self):
+    def on_update(self, conn):
         pass
 
-class GameServer:
+class ServerManager:
     def __init__(self):
         self.games = {}
-        self.ws = None
-        self.loop = None
 
-    def serve_forever(self):
-        asyncio.run(self.run())
-
-    async def message_handler(self, ws: ServerConnection):
-        try:
-            async for message in ws:
-                try:
-                    data = json.loads(message)
-
-
-                    if "type" not in data:
-                        continue
-
-                    if data["type"] == "matchmake" and "gamemode" in data:
-                        game = await self.do_matchmaking(ws, data["gamemode"])
-
-                        if game is not None:
-                            await ws.send(json.dumps({ "type": "matchFound", "id": game.id }))
-                        else:
-                            log("Something went wrong...")
-                    elif "id" in data and data["id"] in self.games:
-                        game = self.games[data["id"]]
-
-                        if data["type"] == "input":
-                            client = game.get_client(data["player"])
-                            if client is not None: client.on_input(data)
-                        else:
-                            await game.on_unhandled_message(data)
-                except json.JSONDecodeError:
-                    pass
-        except:
-            pass
-
-    async def run(self):
-        self.ws = await serve(self.message_handler, "0.0.0.0", 1972)
-        log(f"Listening on 0.0.0.0:{1972}")
-        await self.ws.serve_forever()
+    def get_game(self, consumer) -> Game:
+        for id in self.games:
+            game = self.games[id]
+            if consumer in game.consumers:
+                return game
+        return None
+        # return next(filter(lambda k, v: consumer in v.consumers, self.games))
 
     def make_id(self, k=8) -> str:
         return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
 
-    async def start_game(self, conn: ServerConnection, game: Game) -> str:
+    def start_game(self, conn, game: Game) -> str:
         id = self.make_id()
         self.games[id] = game
 
         game.id = id
-        game.ws = self.ws
-        game.conns.append(conn)
+        game.consumers.append(conn)
 
         log(f"Game started with id", game.id)
-        await game.start()
+        game.start()
+
+    def disconnect(self, consumer):
+        game = self.get_game(consumer)
+
+        if game is not None:
+            game.consumers.remove(consumer)
 
     #
     # Callbacks
     #
 
-    async def do_matchmaking(self) -> Game:
+    def do_matchmaking(self) -> Game:
         return None

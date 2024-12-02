@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path
 
 from app import views
+from .ws import ClientConsumer
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -38,3 +39,8 @@ urlpatterns = [
     path('api/enterMatchmaking', views.enterMatchmaking),
     path('api/quitMatchmaking', views.quitMatchmaking)
 ]
+
+websocket_urlpatterns = [
+    path('ws', ClientConsumer.as_asgi())
+]
+

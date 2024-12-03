@@ -19,6 +19,13 @@
     font-style: normal;
 }
 
+@font-face {
+    font-family: "Takao Mincho";
+    src: url("fonts/Takao-Mincho-Font.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
 #app {
     width: 100%;
     height: 100%;
@@ -28,27 +35,74 @@
 /* LOGIN FORM */
 
 .container-fluid.login-container {
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    top: 50%;
-}
-
-.login-form {
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-}
-
-.col-sm-2.col-form-label {
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    color: red;
+    height: 100vh;
+    width: 100vw;
+    background-image: url("/img/Amadeus-Secondary.png");
+    background-size: cover;
+}
+
+.login-logo {
+    display: flex;
+    height: auto;
+    width: auto;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* width: 100%; */
+    height: auto;
+    max-width: 500px;
+    font-family: "Takao Mincho", serif;
+}
+
+.col-sm-8.login {
+    display: flex;
+    position: relative;
+    background-color: transparent;
+    color: #d89123;
+    border-radius: 0;
+    border-color: #7d7d7e;
+    width: 70%;
+    height: auto;
+}
+
+.row.mb-3.login input {
+    width: 100%;
+    background-color: black;
+    color: #d89123;
+    border: 1px solid #7d7d7e;
+    border-radius: 0;
+    padding: 10px;
+}
+
+.row.mb-3.login {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.row.mb-3.login label {
+    flex: 0 0 100px;
+    color: #d89123;
+    text-shadow:
+        0 0 5px #d89123,
+        0 0 10px #d89123;
+    transition: text-shadow 0.3s ease;
+}
+
+.row.mb-3.login button {
+    display: flex;
+    height: auto;
+    width: auto;
+    background-color: transparent;
+    border: none;
 }
 
 /* DASHBOARD */

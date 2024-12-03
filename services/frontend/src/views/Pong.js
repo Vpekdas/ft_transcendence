@@ -91,6 +91,11 @@ export default class Pong extends Component {
                 ws.send(JSON.stringify({ type: "matchmake", gamemode: "1v1local" }));
             };
 
+            const sphere = new THREE.SphereGeometry();
+            const object = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial(0xff0000));
+            const box = new THREE.BoxHelper(object, 0xffff00);
+            scene.add(box);
+
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
 

@@ -186,6 +186,7 @@ class Body:
         res = None
 
         current_speed = self.velocity.length()
+        current_dir = self.velocity.normalized()
 
         while True:
             res = self.scene.test_collision(self)
@@ -197,7 +198,17 @@ class Body:
                 self.velocity *= 1.0 - 0.1
                 if self.velocity.is_zero_approx():
                     if self.type == BodyType.DYNAMIC and self.bounce > 0.0:
-                        self.velocity = res.normal * 0.1 * self.bounce
+                        #
+                        # Ball dir   bounce dir
+                        #      \   ^   /
+                        #       \  |  /
+                        #        \ | /
+                        #    surface normal
+                        #
+
+                        log(current_dir, res.normal)
+
+                        self.velocity = (current_dir * -1 + res.normal).normalized() * 0.1 * self.bounce
                         break
                     else:
                         break
@@ -206,17 +217,34 @@ class Body:
     def test_collision(self, rb) -> CollisionResult:
         if rb.shape is None or self.shape is None: return None
 
-        shape_a = self.shape.translate(self.pos + self.velocity)
-        shape_b = rb.shape.translate(rb.pos + rb.velocity)
+        body_a = self
+        body_b = rb
+        shape_a = body_a.shape.translate(self.pos + self.velocity)
+        shape_b = body_b.shape.translate(rb.pos + rb.velocity)
 
-        direction = (rb.pos - self.pos).normalized()
+        direction = Vec3()
 
-        if isinstance(shape_b, Sphere):
-            if check_collision(shape_b, shape_a):
-                return CollisionResult(collider=rb, normal=direction)
+        if isinstance(shape_b, Sphere) and isinstance(shape_a, Box):
+            shape_a, shape_b = shape_b, shape_a
+            body_a, body_b = body_b, body_a
+
+        if isinstance(shape_a, Sphere) and isinstance(shape_b, Box):
+
+            if body_a.pos.x < body_b.pos.x and body_a.pos.y >= shape_b.min.y and body_a.pos.y <= shape_b.max.y:
+                direction = Vec3(-1, 0, 0)
+            elif body_a.pos.x > body_b.pos.x and body_a.pos.y >= shape_b.min.y and body_a.pos.y <= shape_b.max.y:
+                direction = Vec3(1, 0, 0)
+            elif body_a.pos.y < body_b.pos.y and body_a.pos.x >= shape_b.min.x and body_a.pos.x <= shape_b.max.x:
+                direction = Vec3(0, 1, 0)
+            elif body_a.pos.y > body_b.pos.y and body_a.pos.x >= shape_b.min.x and body_a.pos.x <= shape_b.max.x:
+                direction = Vec3(0, -1, 0)
+
         else:
-            if check_collision(shape_a, shape_b):
-                return CollisionResult(collider=rb)
+            # This should works for sphere vs sphere
+            direction = (rb.pos - self.pos).normalized()
+
+        if check_collision(shape_a, shape_b):
+            return CollisionResult(collider=rb, normal=direction)
 
     def process(self):
         pass

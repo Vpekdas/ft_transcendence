@@ -25,6 +25,12 @@ function addSphere(scene, x, y, radius, widthSegments, heightSegments, color) {
     return sphere;
 }
 
+function debuggingBox(scene, object3D) {
+    const box = new THREE.BoxHelper(object3D, 0xffff00);
+    scene.add(box);
+    return box;
+}
+
 export default class Pong extends Component {
     constructor() {
         super();
@@ -55,13 +61,22 @@ export default class Pong extends Component {
             camera.position.z = 5;
             renderer.setAnimationLoop(animate);
 
+            const boxHelpers = [];
+
             const topWall = addCube(scene, 0, -5, 10, 1, "#008000");
+            boxHelpers.push(debuggingBox(scene, topWall));
+
             const botWall = addCube(scene, 0, 5, 10, 1, "#008000");
+            boxHelpers.push(debuggingBox(scene, botWall));
 
             const playerOne = addCube(scene, -4, 0, 1, 3, "#cd1c18");
+            boxHelpers.push(debuggingBox(scene, playerOne));
+
             const playerTwo = addCube(scene, 4, 0, 1, 3, "#7f00ff");
+            boxHelpers.push(debuggingBox(scene, playerTwo));
 
             const ball = addSphere(scene, 0, 3, 0.5, 32, 16, "#ffde21");
+            boxHelpers.push(debuggingBox(scene, ball));
 
             function addStar() {
                 const geometry = new THREE.SphereGeometry(0.25, 24, 24);
@@ -82,6 +97,9 @@ export default class Pong extends Component {
 
             // requestAnimationFrame is supposed to provide a better efficient loop for rendering.
             function animate() {
+                for (let i = 0; i < boxHelpers.length; i++) {
+                    boxHelpers[i].update();
+                }
                 controls.update();
                 renderer.render(scene, camera);
             }
@@ -91,27 +109,10 @@ export default class Pong extends Component {
                 ws.send(JSON.stringify({ type: "matchmake", gamemode: "1v1local" }));
             };
 
-            const sphere = new THREE.SphereGeometry();
-            const object = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial(0xff0000));
-            const box = new THREE.BoxHelper(object, 0xffff00);
-            scene.add(box);
-
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
 
                 if (data.type == "update" && data.id == id) {
-                    // const player1Y = data["player1"]["pos"]["y"];
-                    // const player2Y = data["player2"]["pos"]["y"];
-                    //
-                    // const ballPos = data["ball"]["pos"];
-                    //
-                    // ball.position.x = ballPos.x;
-                    // ball.position.y = ballPos.y;
-                    // ball.position.z = ballPos.z;
-                    //
-                    // playerOne.position.y = player1Y;
-                    // playerTwo.position.y = player2Y;
-
                     for (let body of data["bodies"]) {
                         if (body["name"] == "player1") {
                             playerOne.position.y = body["pos"]["y"];

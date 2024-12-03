@@ -7,8 +7,8 @@ from .gameframework import log, Game, ServerManager, Vec3, Box, Sphere, Body, Sc
 class Player(Body):
     speed = 0.1
 
-    def __init__(self, client: Client):
-        super().__init__(shape=Box(Vec3(-0.5, -5, 0), Vec3(0.5, 5, 0)), client=client)
+    def __init__(self, name: str, client: Client):
+        super().__init__(name=name,shape=Box(Vec3(-0.5, -2.5, 0), Vec3(0.5, 2.5, 0)), client=client)
 
     def process(self):
         if self.client.is_pressed("up"):
@@ -22,22 +22,17 @@ class Player(Body):
     def move_down(self):
         self.pos.y -= self.speed
 
-    def to_dict(self):
-        return { "pos": self.pos.to_dict() }
-
 class Ball(Body):
     speed = 0.1
 
     def __init__(self):
-        super().__init__(shape = Sphere(0.5), type=BodyType.DYNAMIC)
+        super().__init__(name="Ball", shape=Sphere(0.5), type=BodyType.DYNAMIC)
         self.last_collision = None
         self.velocity = Vec3(Ball.speed, 0, 0)
+        self.bounce = 1.0
 
     def process(self):
         self.try_move()
-
-    def to_dict(self):
-        return { "pos": self.pos.to_dict() }
 
 class Pong(Game):
     def __init__(self):
@@ -46,9 +41,9 @@ class Pong(Game):
         self.clients["player1"] = Client("player1")
         self.clients["player2"] = Client("player2")
 
-        self.player1 = Player(self.clients["player1"])
+        self.player1 = Player("player1", self.clients["player1"])
         self.player1.pos = Vec3(-4, 0, 0)
-        self.player2 = Player(self.clients["player2"])
+        self.player2 = Player("player2", self.clients["player2"])
         self.player2.pos = Vec3(4, 0, 0)
 
         self.ball = Ball()
@@ -58,9 +53,14 @@ class Pong(Game):
         self.scene.add_body(self.player2)
         self.scene.add_body(self.ball)
 
-    def on_update(self):
+        border_box = Box(Vec3(-10, -0.2, 0), Vec3(10, 0.2, 0))
+
+        self.scene.add_body(Body(name="Border", shape=border_box, pos=Vec3(0, -5, 0)))
+        self.scene.add_body(Body(name="Border", shape=border_box, pos=Vec3(0, 5, 0)))
+
+    async def on_update(self):
         self.scene.update()
-        self.broadcast({ "type": "update", "id": self.id, "player1": self.player1.to_dict(), "player2": self.player2.to_dict(), "ball": self.ball.to_dict() })
+        await self.broadcast({ "type": "update", "id": self.id, "bodies": self.scene.to_dict() })
 
     def on_unhandled_message(self, msg):
         pass

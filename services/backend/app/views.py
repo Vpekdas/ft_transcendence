@@ -3,7 +3,6 @@ import json
 
 import django
 import base64
-import requests
 
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.http.request import HttpRequest
@@ -13,7 +12,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 
-from app.models import Player, MatchmakingPlayer, duck
+from app.models import Player, duck
 
 """
 Create a new user.
@@ -184,51 +183,5 @@ def updateProfilePicture(request: HttpRequest):
     player.icon = { "type": type, "data": image }
 
     player.save()
-
-    return JsonResponse({})
-
-"""
-Enter the matchmaking
-"""
-@require_POST
-def enterMatchmaking(request: HttpRequest):
-    if not request.user.is_authenticated:
-        return JsonResponse({ "error": "User is not authenticated" })
-
-    data = json.loads(request.body)
-
-    # game can be "pong"
-    # mode can be "1v1", "1v1v1v1", "tournament" of "pong"
-
-    game = data["game"]
-    mode = data["mode"]
-
-    if game == "pong":
-        if mode == "1v1local":
-            player = Player.objects.filter(user=request.user).first()
-            data = requests.post("http://pong:1973/createGame", data="{}").json()
-
-            return JsonResponse({"id": data["id"]})
-        # if mode == "1v1" or mode == "1v1local" or mode == "1v1v1v1" or mode == "tournament":
-        #     player = Player.objects.filter(user=request.user).first()
-        #     entry = MatchmakingPlayer.objects.create(player=player, game=game, mode=mode)
-        else:
-            return JsonResponse({"error": "invalid gamemode"})
-    else:
-        return JsonResponse({"error": "invalid game"})
-
-"""
-Quit matchmaking
-"""
-@require_POST
-def quitMatchmaking(request: HttpRequest):
-    if not request.user.is_authenticated:
-        return JsonResponse({})
-
-    # TODO: Maybe check if the player is not already into a game ?
-
-    player = Player.objects.filter(user=request.user).first()
-    entry = MatchmakingPlayer.objects.filter(player=player).first()
-    entry.delte()
 
     return JsonResponse({})

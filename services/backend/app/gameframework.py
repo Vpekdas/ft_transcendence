@@ -8,6 +8,8 @@ import random
 import string
 import enum
 import time
+import threading
+import asyncio
 
 from math import sqrt
 
@@ -38,7 +40,7 @@ class Vec3:
             return Vec3(self.x - other.x, self.y - other.y, self.z - other.z)
 
     def __mul__(self, other):
-        if isinstance(other, float) or isinstance(other, int):
+        if isinstance(other, (int, float)):
             return Vec3(self.x * other, self.y * other, self.z * other)
 
     def __neg__(self):
@@ -63,11 +65,6 @@ class CollisionResult:
         self.normal = normal
         self.collider = collider
 
-class Boundary:
-    def __init__(self, min, max):
-        self.min = min
-        self.max = max
-
 class Sphere:
     def __init__(self, radius=1.0, center=Vec3()):
         self.radius = radius
@@ -75,6 +72,9 @@ class Sphere:
 
     def translate(self, pos: Vec3):
         return Sphere(self.radius, pos)
+
+    def to_dict(self):
+        return { "type": "Sphere", "radius": self.radius }
 
 class Box:
     def __init__(self, min, max):
@@ -84,10 +84,12 @@ class Box:
     def translate(self, pos: Vec3):
         return Box(self.min + pos, self.max + pos)
 
+    def to_dict(self):
+        return { "type": "Box", "min": self.min.to_dict(), "max": self.max.to_dict() }
+
 def check_collision(a, b) -> bool:
     if isinstance(a, Box) and isinstance(b, Box):
-        if a.min.x <= b.max.x and a.max.x >= b.min.x and a.min.y <= b.max.y and a.max.y >= b.min.y and a.min.z <= b.max.z and a.max.z >= b.min.z:
-            return CollisionResult(collider=other)
+        return a.min.x <= b.max.x and a.max.x >= b.min.x and a.min.y <= b.max.y and a.max.y >= b.min.y and a.min.z <= b.max.z and a.max.z >= b.min.z
     elif isinstance(a, Sphere) and isinstance(b, Box):
         test_x = a.center.x
         test_y = a.center.y
@@ -109,6 +111,8 @@ def check_collision(a, b) -> bool:
         dist = sqrt((dist_x * dist_x) + (dist_y * dist_y) + (dist_z * dist_z))
 
         return dist <= a.radius
+    # elif isinstance(a, Sphere) and isinstance(b, Boundary):
+    #     return false
 
 class Scene:
     def __init__(self):
@@ -130,6 +134,14 @@ class Scene:
             if r is not None:
                 return r
         return None
+    
+    def to_dict(self):
+        array = []
+
+        for body in self.bodies:
+            array.append(body.to_dict())
+        
+        return array
 
 """
 Represent a remote client in a game.
@@ -156,9 +168,10 @@ class BodyType(enum.Enum):
     DYNAMIC = 1
 
 class Body:
-    def __init__(self, *, scene: Scene=None, shape=None, type=BodyType.STATIC, client=None):
+    def __init__(self, *, name="Body", scene: Scene=None, shape=None, type=BodyType.STATIC, client=None, pos=Vec3()):
+        self.name = name
         self.scene = scene
-        self.pos = Vec3()
+        self.pos = pos
         self.velocity = Vec3()
         self.shape = shape
         self.type = type
@@ -181,12 +194,11 @@ class Body:
                 self.pos += self.velocity
                 break
             else:
-                self.velocity.x *= 1.0 - 0.1
-                self.velocity.y *= 1.0 - 0.1
-                self.velocity.z *= 1.0 - 0.1
+                self.velocity *= 1.0 - 0.1
                 if self.velocity.is_zero_approx():
-                    if self.type == BodyType.DYNAMIC:
-                        self.velocity = res.normal * current_speed
+                    if self.type == BodyType.DYNAMIC and self.bounce > 0.0:
+                        self.velocity = res.normal * 0.1 * self.bounce
+                        break
                     else:
                         break
         return res
@@ -194,8 +206,8 @@ class Body:
     def test_collision(self, rb) -> CollisionResult:
         if rb.shape is None or self.shape is None: return None
 
-        shape_a = self.shape.translate(self.pos)
-        shape_b = rb.shape.translate(rb.pos)
+        shape_a = self.shape.translate(self.pos + self.velocity)
+        shape_b = rb.shape.translate(rb.pos + rb.velocity)
 
         direction = (rb.pos - self.pos).normalized()
 
@@ -209,6 +221,9 @@ class Body:
     def process(self):
         pass
 
+    def to_dict(self):
+        return { "pos": self.pos.to_dict(), "name": self.name, "shape": {} if self.shape is None else self.shape.to_dict() }
+
 class Game:
     def __init__(self):
         self.manager = None
@@ -218,20 +233,19 @@ class Game:
         self.scene = Scene()
 
     def start(self):
-        thread = Thread(target=self.run)
-        thread.start()
+        task = asyncio.create_task(self.run())
 
-    def run(self):
+    async def run(self):
         while len(self.consumers) > 0:
-            self.on_update()
-            time.sleep(0.010)
+            await self.on_update()
+            await asyncio.sleep(0.010)
 
         log(f"Game with id {self.id} exited")
-        self.manager.game.remove(id)
+        self.manager.games.pop(self.id)
 
-    def broadcast(self, data):
+    async def broadcast(self, data):
         for consumer in self.consumers:
-            consumer.send(json.dumps(data))
+            await consumer.send(json.dumps(data))
 
     # def active_connections(self) -> list[ServerConnection]:
     #     return list(filter(lambda conn: conn.state == State.OPEN, self.conns))
@@ -246,7 +260,7 @@ class Game:
     def on_unhandled_message(self, msg):
         pass
 
-    def on_update(self, conn):
+    async def on_update(self, conn):
         pass
 
 class ServerManager:
@@ -269,6 +283,7 @@ class ServerManager:
         self.games[id] = game
 
         game.id = id
+        game.manager = self
         game.consumers.append(conn)
 
         log(f"Game started with id", game.id)

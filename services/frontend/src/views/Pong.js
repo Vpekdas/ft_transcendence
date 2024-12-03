@@ -95,17 +95,29 @@ export default class Pong extends Component {
                 const data = JSON.parse(event.data);
 
                 if (data.type == "update" && data.id == id) {
-                    const player1Y = data["player1"]["pos"]["y"];
-                    const player2Y = data["player2"]["pos"]["y"];
+                    // const player1Y = data["player1"]["pos"]["y"];
+                    // const player2Y = data["player2"]["pos"]["y"];
+                    //
+                    // const ballPos = data["ball"]["pos"];
+                    //
+                    // ball.position.x = ballPos.x;
+                    // ball.position.y = ballPos.y;
+                    // ball.position.z = ballPos.z;
+                    //
+                    // playerOne.position.y = player1Y;
+                    // playerTwo.position.y = player2Y;
 
-                    const ballPos = data["ball"]["pos"];
-
-                    ball.position.x = ballPos.x;
-                    ball.position.y = ballPos.y;
-                    ball.position.z = ballPos.z;
-
-                    playerOne.position.y = player1Y;
-                    playerTwo.position.y = player2Y;
+                    for (let body of data["bodies"]) {
+                        if (body["name"] == "player1") {
+                            playerOne.position.y = body["pos"]["y"];
+                        } else if (body["name"] == "player2") {
+                            playerTwo.position.y = body["pos"]["y"];
+                        } else if (body["name"] == "Ball") {
+                            ball.position.x = body["pos"]["x"];
+                            ball.position.y = body["pos"]["y"];
+                            ball.position.z = body["pos"]["z"];
+                        }
+                    }
                 } else if (data.type == "matchFound") {
                     id = data.id;
                 }

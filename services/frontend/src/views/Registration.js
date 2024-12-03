@@ -36,12 +36,12 @@ export default class Registration extends Component {
         return html(
             /* HTML */
             ` <div>
-                <NavBar />
-                <div class="container-fluid">
+                <div class="container-fluid login-container">
                     <form class="login-form" action="javascript:void(0)">
-                        <div class="row mb-3">
+                        <img src="/img/Amadeus-Logo.webp" class="login-logo" />
+                        <div class="row mb-3 login">
                             <label for="username" class="col-sm-2 col-form-label">Username</label>
-                            <div class="col-sm-10">
+                            <div class="col-sm-8 login">
                                 <input
                                     name="username"
                                     autocomplete="off"
@@ -51,9 +51,9 @@ export default class Registration extends Component {
                                 />
                             </div>
                         </div>
-                        <div class="row mb-3">
-                            <label for="username" class="col-sm-2 col-form-label">Nickname</label>
-                            <div class="col-sm-10">
+                        <div class="row mb-3 login">
+                            <label for="nickname" class="col-sm-2 col-form-label">Nickname</label>
+                            <div class="col-sm-8 login">
                                 <input
                                     name="nickname"
                                     autocomplete="off"
@@ -63,9 +63,9 @@ export default class Registration extends Component {
                                 />
                             </div>
                         </div>
-                        <div class="row mb-3">
+                        <div class="row mb-3 login">
                             <label for="password" class="col-sm-2 col-form-label">Password</label>
-                            <div class="col-sm-10">
+                            <div class="col-sm-8 login">
                                 <input
                                     name="password"
                                     autocomplete="off"
@@ -74,8 +74,12 @@ export default class Registration extends Component {
                                     id="password"
                                 />
                             </div>
+                            <div class="col-sm-1 login">
+                                <button type="submit" class="btn btn-primary">
+                                    <img src="/img/login-button.png" />
+                                </button>
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-primary">Register</button>
                         <a class="login-redirect" href="javascript:void(0)">Already have an account ?</a>
                     </form>
                 </div>

@@ -55,7 +55,6 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* width: 100%; */
     height: auto;
     max-width: 500px;
     font-family: "Takao Mincho", serif;

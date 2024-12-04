@@ -11,14 +11,14 @@ export async function fetchApi(url, init) {
     return await fetch(api(url), init);
 }
 
-export async function post(url, init = { body: "{}", credentials: "include" }, port = 8000) {
+export async function post(url, init = { body: "{}" }, port = 8000) {
     init.method = "POST";
+    init.credentials = "include";
     return await fetch(api(url, port), init);
 }
 
 export async function isLoggedIn() {
-    const response = await post("/api/isLoggedIn", {
-        method: "POST",
-    }).then((res) => res.json());
+    const response = await post("/api/isLoggedIn", {}).then((res) => res.json());
+    console.log(response);
     return response["error"] === undefined;
 }

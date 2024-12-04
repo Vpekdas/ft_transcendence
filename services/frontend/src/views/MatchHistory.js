@@ -1,6 +1,5 @@
 import { Component, globalComponents, html } from "../micro";
 import NavBar from "../components/NavBar";
-import ProfileDashboard from "./ProfileDashboard";
 
 export default class MatchHistory extends Component {
     constructor() {
@@ -16,17 +15,28 @@ export default class MatchHistory extends Component {
                 <div class="container-fluid dashboard-container">
                     <ul class="nav flex-column dashboard-tab">
                         <li class="nav-item">
-                            <a class="nav-link custom-link" data-link href="/profile/match-history">Match History</a>
+                            <a class="nav-link custom-link" data-link href="/profile/match-history">
+                                <i class="bi bi-clock-history"></i>
+                                <span>Match History</span>
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link custom-link" data-link href="/profile/statistics">Statistics</a>
+                            <a class="nav-link custom-link" data-link href="/profile/statistics">
+                                <i class="bi bi-file-bar-graph"></i>
+                                <span>Statistics</span>
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link custom-link" data-link href="/profile/skins">Skins</a>
+                            <a class="nav-link custom-link" data-link href="/profile/skins">
+                                <i class="bi bi-stars"></i>
+                                <span>Skins</span>
+                            </a>
                         </li>
-
                         <li class="nav-item">
-                            <a class="nav-link custom-link" data-link href="/profile/settings">Settings</a>
+                            <a class="nav-link custom-link " data-link href="/profile/settings">
+                                <i class="bi bi-gear"></i>
+                                <span>Settings</span>
+                            </a>
                         </li>
                     </ul>
                     <ul class="list-group match-history">

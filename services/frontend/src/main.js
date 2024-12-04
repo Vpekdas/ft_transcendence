@@ -1,5 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import "bootstrap-icons/font/bootstrap-icons.css";
 import { navigateTo, router } from "./router";
 
 // If the clicked element contains a data-link attribute, prevent the default page reload,
@@ -12,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
         while (target && !target.matches("[data-link]")) {
             target = target.parentElement;
         }
+
         if (target && target.matches("[data-link]")) {
             event.preventDefault();
             navigateTo(target.href);

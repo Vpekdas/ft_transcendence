@@ -23,7 +23,7 @@ class ClientConsumer(AsyncWebsocketConsumer):
                     await self.send(json.dumps({ "type": "matchFound", "id": game.id }))
                 else:
                     log("Something went wrong...")
-            elif "id" in data:
+            else:
                 game = server_manager.get_game(self)
 
                 if data["type"] == "input":

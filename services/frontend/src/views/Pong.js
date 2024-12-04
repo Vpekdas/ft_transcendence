@@ -31,18 +31,24 @@ function debuggingBox(scene, object3D) {
     return box;
 }
 
+function debuggingBox2(scene, position, width, height) {
+    const box = new THREE.BoxHelper(new THREE.Mesh(new THREE.BoxGeometry(width, height, 1)), 0xffff00);
+    box.object.position.x = position["x"];
+    box.object.position.y = position["y"];
+    box.object.position.z = position["z"];
+    scene.add(box);
+    return box;
+}
+
 export default class Pong extends Component {
     constructor() {
         super();
     }
 
     async render() {
-        const [port, setPort] = this.useGlobalStore("wsPort", 0);
-        let id = "";
-
         this.query("#pong").do(async (c) => {
             const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(125, c.clientWidth / c.clientHeight, 0.1, 1000);
+            const camera = new THREE.PerspectiveCamera(70, c.clientWidth / c.clientHeight, 0.1, 1000);
             const renderer = new THREE.WebGLRenderer();
 
             renderer.setSize(c.clientWidth, c.clientHeight);
@@ -55,28 +61,66 @@ export default class Pong extends Component {
                 camera.updateProjectionMatrix();
             }
 
+            /** @type Map<string, any> */
+            let bodies = new Map();
+            let boxes = new Map();
+
+            const DEBUG = true;
+
+            function createBody(type, id, shape, position) {
+                let body;
+
+                if (type == "Ball") {
+                    body = addSphere(scene, position["x"], position["y"], 0.5, 32, 16, "#ffde21");
+                } else if (type == "Player") {
+                    body = addCube(scene, position["x"], position["y"], 1, 3, "#cd1c18");
+                } /* else if (type == "Wall") {
+                    body = addCube(scene, position["x"], position["y"], 10, 1, "#008000");
+                }*/
+
+                if (DEBUG) {
+                    let box;
+                    if (shape["type"] == "Box") {
+                        box = debuggingBox2(
+                            scene,
+                            position,
+                            shape["max"]["x"] - shape["min"]["x"],
+                            shape["max"]["y"] - shape["min"]["y"]
+                        );
+                        boxes.set(id, box);
+                    }
+                }
+
+                return body;
+            }
+
+            function onUpdateReceived(data) {
+                for (let body of data["bodies"]) {
+                    if (bodies.has(body["id"])) {
+                        let lbody = bodies.get(body["id"]);
+                        lbody.position.x = body["pos"]["x"];
+                        lbody.position.y = body["pos"]["y"];
+                        lbody.position.z = body["pos"]["z"];
+
+                        if (DEBUG && boxes.has(body["id"])) {
+                            let box = boxes.get(body["id"]);
+                            box.object.position.x = body["pos"]["x"];
+                            box.object.position.y = body["pos"]["y"];
+                            box.object.position.z = body["pos"]["z"];
+                        }
+                    } else {
+                        const lbody = createBody(body["type"], body["id"], body["shape"], body["pos"]);
+                        bodies.set(body["id"], lbody);
+                    }
+                }
+            }
+
             c.appendChild(renderer.domElement);
             const controls = new OrbitControls(camera, c);
 
-            camera.position.z = 5;
+            camera.position.z = 10;
+            camera.position.y = -2;
             renderer.setAnimationLoop(animate);
-
-            const boxHelpers = [];
-
-            const topWall = addCube(scene, 0, -5, 10, 1, "#008000");
-            boxHelpers.push(debuggingBox(scene, topWall));
-
-            const botWall = addCube(scene, 0, 5, 10, 1, "#008000");
-            boxHelpers.push(debuggingBox(scene, botWall));
-
-            const playerOne = addCube(scene, -4, 0, 1, 3, "#cd1c18");
-            boxHelpers.push(debuggingBox(scene, playerOne));
-
-            const playerTwo = addCube(scene, 4, 0, 1, 3, "#7f00ff");
-            boxHelpers.push(debuggingBox(scene, playerTwo));
-
-            const ball = addSphere(scene, 0, 3, 0.5, 32, 16, "#ffde21");
-            boxHelpers.push(debuggingBox(scene, ball));
 
             function addStar() {
                 const geometry = new THREE.SphereGeometry(0.25, 24, 24);
@@ -97,8 +141,8 @@ export default class Pong extends Component {
 
             // requestAnimationFrame is supposed to provide a better efficient loop for rendering.
             function animate() {
-                for (let i = 0; i < boxHelpers.length; i++) {
-                    boxHelpers[i].update();
+                for (let [key, value] of boxes) {
+                    value.update();
                 }
                 controls.update();
                 renderer.render(scene, camera);
@@ -112,20 +156,9 @@ export default class Pong extends Component {
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
 
-                if (data.type == "update" && data.id == id) {
-                    for (let body of data["bodies"]) {
-                        if (body["name"] == "player1") {
-                            playerOne.position.y = body["pos"]["y"];
-                        } else if (body["name"] == "player2") {
-                            playerTwo.position.y = body["pos"]["y"];
-                        } else if (body["name"] == "Ball") {
-                            ball.position.x = body["pos"]["x"];
-                            ball.position.y = body["pos"]["y"];
-                            ball.position.z = body["pos"]["z"];
-                        }
-                    }
+                if (data.type == "update") {
+                    onUpdateReceived(data);
                 } else if (data.type == "matchFound") {
-                    id = data.id;
                 }
             };
 
@@ -135,16 +168,16 @@ export default class Pong extends Component {
                 if (event.key == lastKey) return;
 
                 if (event.key === "w") {
-                    ws.send(JSON.stringify(action(id, "player1", "up", "press")));
+                    ws.send(JSON.stringify(action("player1", "up", "press")));
                 }
                 if (event.key === "s") {
-                    ws.send(JSON.stringify(action(id, "player1", "down", "press")));
+                    ws.send(JSON.stringify(action("player1", "down", "press")));
                 }
                 if (event.key === "ArrowUp") {
-                    ws.send(JSON.stringify(action(id, "player2", "up", "press")));
+                    ws.send(JSON.stringify(action("player2", "up", "press")));
                 }
                 if (event.key === "ArrowDown") {
-                    ws.send(JSON.stringify(action(id, "player2", "down", "press")));
+                    ws.send(JSON.stringify(action("player2", "down", "press")));
                 }
 
                 lastKey = event.key;
@@ -152,16 +185,16 @@ export default class Pong extends Component {
 
             window.addEventListener("keyup", (event) => {
                 if (event.key === "w") {
-                    ws.send(JSON.stringify(action(id, "player1", "up", "release")));
+                    ws.send(JSON.stringify(action("player1", "up", "release")));
                 }
                 if (event.key === "s") {
-                    ws.send(JSON.stringify(action(id, "player1", "down", "release")));
+                    ws.send(JSON.stringify(action("player1", "down", "release")));
                 }
                 if (event.key === "ArrowUp") {
-                    ws.send(JSON.stringify(action(id, "player2", "up", "release")));
+                    ws.send(JSON.stringify(action("player2", "up", "release")));
                 }
                 if (event.key === "ArrowDown") {
-                    ws.send(JSON.stringify(action(id, "player2", "down", "release")));
+                    ws.send(JSON.stringify(action("player2", "down", "release")));
                 }
                 lastKey = undefined;
             });

@@ -111,8 +111,8 @@ def check_collision(a, b) -> bool:
         dist = sqrt((dist_x * dist_x) + (dist_y * dist_y) + (dist_z * dist_z))
 
         return dist <= a.radius
-    # elif isinstance(a, Sphere) and isinstance(b, Boundary):
-    #     return false
+    elif isinstance(a, Sphere) and isinstance(b, Sphere):
+        return (b.center - a.center).length() <= a.radius + b.radius
 
 class Scene:
     def __init__(self):
@@ -134,13 +134,13 @@ class Scene:
             if r is not None:
                 return r
         return None
-    
+
     def to_dict(self):
         array = []
 
         for body in self.bodies:
             array.append(body.to_dict())
-        
+
         return array
 
 """
@@ -167,15 +167,19 @@ class BodyType(enum.Enum):
     STATIC = 0
     DYNAMIC = 1
 
+def make_id(k=8) -> str:
+    return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
+
 class Body:
-    def __init__(self, *, name="Body", scene: Scene=None, shape=None, type=BodyType.STATIC, client=None, pos=Vec3()):
-        self.name = name
+    def __init__(self, *, type="Body", scene: Scene=None, shape=None, body_type=BodyType.STATIC, client=None, pos=Vec3()):
+        self.type = type
         self.scene = scene
         self.pos = pos
         self.velocity = Vec3()
         self.shape = shape
-        self.type = type
+        self.body_type = body_type
         self.client = client
+        self.id = make_id()
 
         # Physics properties
 
@@ -186,7 +190,7 @@ class Body:
         res = None
 
         current_speed = self.velocity.length()
-        current_dir = self.velocity.normalized()
+        current_dir = Vec3() if self.velocity.is_zero_approx() else self.velocity.normalized()
 
         while True:
             res = self.scene.test_collision(self)
@@ -197,7 +201,7 @@ class Body:
             else:
                 self.velocity *= 1.0 - 0.1
                 if self.velocity.is_zero_approx():
-                    if self.type == BodyType.DYNAMIC and self.bounce > 0.0:
+                    if self.body_type == BodyType.DYNAMIC and self.bounce > 0.0:
                         #
                         # Ball dir   bounce dir
                         #      \   ^   /
@@ -206,7 +210,7 @@ class Body:
                         #    surface normal
                         #
 
-                        log(current_dir, res.normal)
+                        # log(current_dir, res.normal)
 
                         self.velocity = (current_dir * -1 + res.normal).normalized() * 0.1 * self.bounce
                         break
@@ -235,9 +239,9 @@ class Body:
             elif body_a.pos.x > body_b.pos.x and body_a.pos.y >= shape_b.min.y and body_a.pos.y <= shape_b.max.y:
                 direction = Vec3(1, 0, 0)
             elif body_a.pos.y < body_b.pos.y and body_a.pos.x >= shape_b.min.x and body_a.pos.x <= shape_b.max.x:
-                direction = Vec3(0, 1, 0)
-            elif body_a.pos.y > body_b.pos.y and body_a.pos.x >= shape_b.min.x and body_a.pos.x <= shape_b.max.x:
                 direction = Vec3(0, -1, 0)
+            elif body_a.pos.y > body_b.pos.y and body_a.pos.x >= shape_b.min.x and body_a.pos.x <= shape_b.max.x:
+                direction = Vec3(0, 1, 0)
 
         else:
             # This should works for sphere vs sphere
@@ -250,7 +254,7 @@ class Body:
         pass
 
     def to_dict(self):
-        return { "pos": self.pos.to_dict(), "name": self.name, "shape": {} if self.shape is None else self.shape.to_dict() }
+        return { "pos": self.pos.to_dict(), "type": self.type, "id": self.id, "shape": {} if self.shape is None else self.shape.to_dict() }
 
 class Game:
     def __init__(self):

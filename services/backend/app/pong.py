@@ -30,9 +30,9 @@ class Ball(Body):
     speed = 0.1
 
     def __init__(self):
-        super().__init__(type="Ball", shape=Sphere(0.5), body_type=BodyType.DYNAMIC)
+        super().__init__(type="Ball", shape=Sphere(0.5, Vec3()), body_type=BodyType.DYNAMIC)
         self.last_collision = None
-        self.velocity = Vec3(Ball.speed, 0, 0)
+        self.velocity = Vec3(1, -1, 0).normalized() * Ball.speed
         self.bounce = 1.0
 
     def process(self):

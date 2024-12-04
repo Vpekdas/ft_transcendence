@@ -57,6 +57,9 @@ class Vec3:
         l = self.length()
         return Vec3(self.x / l, self.y / l, self.z / l)
 
+    def dot(self, other):
+        return self.x * other.x + self.y * other.y
+
     def to_dict(self):
         return { "x": self.x, "y": self.y, "z": self.z }
 
@@ -111,6 +114,27 @@ def check_collision(a, b) -> bool:
         dist = sqrt((dist_x * dist_x) + (dist_y * dist_y) + (dist_z * dist_z))
 
         return dist <= a.radius
+    elif isinstance(a, Box) and isinstance(b, Sphere):
+        test_x = b.center.x
+        test_y = b.center.y
+        test_z = b.center.z
+
+        if b.center.x < a.min.x: test_x = a.min.x
+        elif b.center.x > a.max.x: test_x = a.max.x
+
+        if b.center.y < a.min.y: test_y = a.min.y
+        elif b.center.y > a.max.y: test_y = a.max.y
+
+        if b.center.z < a.min.z: test_z = a.min.z
+        elif b.center.z > a.max.z: test_z = a.max.z
+
+        dist_x = b.center.x - test_x
+        dist_y = b.center.y - test_y
+        dist_z = b.center.z - test_z
+
+        dist = sqrt((dist_x * dist_x) + (dist_y * dist_y) + (dist_z * dist_z))
+
+        return dist <= b.radius
     elif isinstance(a, Sphere) and isinstance(b, Sphere):
         return (b.center - a.center).length() <= a.radius + b.radius
 
@@ -186,6 +210,13 @@ class Body:
         # The "bounce" property of the body. 0 means nothing will bounce, 1.0 means total conservation of energy
         self.bounce = 0.0
 
+    def _bounce_vec(self, n, v, bounce) -> Vec3:
+        u = n * (v.dot(n) / (n.dot(n)))
+        w = v - u
+        v2 = w - u
+
+        return v2 * 0.1 * bounce
+
     def try_move(self):
         res = None
 
@@ -201,18 +232,11 @@ class Body:
             else:
                 self.velocity *= 1.0 - 0.1
                 if self.velocity.is_zero_approx():
-                    if self.body_type == BodyType.DYNAMIC and self.bounce > 0.0:
-                        #
-                        # Ball dir   bounce dir
-                        #      \   ^   /
-                        #       \  |  /
-                        #        \ | /
-                        #    surface normal
-                        #
-
-                        # log(current_dir, res.normal)
-
-                        self.velocity = (current_dir * -1 + res.normal).normalized() * 0.1 * self.bounce
+                    if self.body_type == BodyType.DYNAMIC and self.bounce > 0.0: # and not res.normal.is_zero_approx():
+                        self.velocity = self._bounce_vec(res.normal, current_dir, self.bounce)
+                        break
+                    elif res.collider.body_type == BodyType.DYNAMIC and res.collider.bounce > 0.0:
+                        res.collider.velocity = self._bounce_vec(-res.normal, current_dir, res.collider.bounce)
                         break
                     else:
                         break
@@ -228,12 +252,7 @@ class Body:
 
         direction = Vec3()
 
-        if isinstance(shape_b, Sphere) and isinstance(shape_a, Box):
-            shape_a, shape_b = shape_b, shape_a
-            body_a, body_b = body_b, body_a
-
         if isinstance(shape_a, Sphere) and isinstance(shape_b, Box):
-
             if body_a.pos.x < body_b.pos.x and body_a.pos.y >= shape_b.min.y and body_a.pos.y <= shape_b.max.y:
                 direction = Vec3(-1, 0, 0)
             elif body_a.pos.x > body_b.pos.x and body_a.pos.y >= shape_b.min.y and body_a.pos.y <= shape_b.max.y:
@@ -242,9 +261,17 @@ class Body:
                 direction = Vec3(0, -1, 0)
             elif body_a.pos.y > body_b.pos.y and body_a.pos.x >= shape_b.min.x and body_a.pos.x <= shape_b.max.x:
                 direction = Vec3(0, 1, 0)
-
+        elif isinstance(shape_a, Box) and isinstance(shape_b, Sphere):
+            if body_b.pos.x < body_a.pos.x and body_b.pos.y >= shape_a.min.y and body_a.pos.y <= shape_a.max.y:
+                direction = Vec3(-1, 0, 0)
+            elif body_b.pos.x > body_a.pos.x and body_b.pos.y >= shape_a.min.y and body_a.pos.y <= shape_a.max.y:
+                direction = Vec3(1, 0, 0)
+            elif body_b.pos.y < body_a.pos.y and body_b.pos.x >= shape_a.min.x and body_a.pos.x <= shape_a.max.x:
+                direction = Vec3(0, -1, 0)
+            elif body_b.pos.y > body_a.pos.y and body_b.pos.x >= shape_a.min.x and body_a.pos.x <= shape_a.max.x:
+                direction = Vec3(0, 1, 0)
         else:
-            # This should works for sphere vs sphere
+            # This should work for sphere vs sphere
             direction = (rb.pos - self.pos).normalized()
 
         if check_collision(shape_a, shape_b):

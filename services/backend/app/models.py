@@ -11,7 +11,7 @@ duck = '<svg height="64" preserveAspectRatio="none" viewBox="0 0 64 64" width="6
 class Player(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     nickname = models.CharField(max_length=20)
-    gid = models.CharField(max_length=16, default="0000000000000000")
+    gid = models.CharField(max_length=16)
 
     icon = models.JSONField(null=True)
 

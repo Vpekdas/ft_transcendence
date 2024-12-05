@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import { FontLoader } from "three/addons/loaders/FontLoader.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 function addCube(scene, x, y, width, height, color) {
     const geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -22,6 +23,7 @@ function addSphere(scene, x, y, radius, widthSegments, heightSegments, color) {
     const sphere = new THREE.Mesh(geometry, material);
 
     sphere.position.set(x, y, 0);
+    sphere.scale.set(1.0, 1.0, 1.0);
     return sphere;
 }
 
@@ -65,6 +67,8 @@ export default class Pong extends Component {
             let bodies = new Map();
             let boxes = new Map();
 
+            const playerWidth = 1.0;
+            const playerHeight = 5.0;
             const DEBUG = true;
 
             function createBody(type, id, shape, position) {
@@ -73,7 +77,7 @@ export default class Pong extends Component {
                 if (type == "Ball") {
                     body = addSphere(scene, position["x"], position["y"], 0.5, 32, 16, "#ffde21");
                 } else if (type == "Player") {
-                    body = addCube(scene, position["x"], position["y"], 1, 3, "#cd1c18");
+                    body = addCube(scene, position["x"], position["y"], playerWidth, playerHeight, "#cd1c18");
                 } /* else if (type == "Wall") {
                     body = addCube(scene, position["x"], position["y"], 10, 1, "#008000");
                 }*/ else {
@@ -141,7 +145,7 @@ export default class Pong extends Component {
             c.appendChild(renderer.domElement);
             const controls = new OrbitControls(camera, c);
 
-            camera.position.z = 10;
+            camera.position.z = 18;
             camera.position.y = -2;
             renderer.setAnimationLoop(animate);
 
@@ -161,6 +165,20 @@ export default class Pong extends Component {
 
             const spaceTexture = new THREE.TextureLoader().load("/img/space.jpg");
             scene.background = spaceTexture;
+
+            // Place both terrains
+            const modelLoader = new GLTFLoader();
+            const terrain = await modelLoader.loadAsync("/models/TerrainPlaceholder.glb");
+
+            const terrainSceneRight = terrain.scene;
+            terrainSceneRight.rotation.set(Math.PI / 2, 0, 0);
+            terrainSceneRight.position.set(13, 0, -1);
+            scene.add(terrainSceneRight);
+
+            const terrainSceneLeft = terrain.scene.clone();
+            terrainSceneLeft.rotation.set(Math.PI / 2, 0, Math.PI);
+            terrainSceneLeft.position.set(-13, 0, -1);
+            scene.add(terrainSceneLeft);
 
             // requestAnimationFrame is supposed to provide a better efficient loop for rendering.
             function animate() {

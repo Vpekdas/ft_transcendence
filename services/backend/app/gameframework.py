@@ -216,7 +216,7 @@ class Body:
         w = v - u
         v2 = w - u
 
-        return v2 * 0.1 * bounce
+        return v2 * bounce
 
     def try_move(self):
         res = None
@@ -233,14 +233,8 @@ class Body:
             else:
                 self.velocity *= 1.0 - 0.1
                 if self.velocity.is_zero_approx():
-                    if self.body_type == BodyType.DYNAMIC and self.bounce > 0.0: # and not res.normal.is_zero_approx():
-                        self.velocity = self._bounce_vec(res.normal, current_dir, self.bounce)
-                        break
-                    elif res.collider.body_type == BodyType.DYNAMIC and res.collider.bounce > 0.0:
-                        res.collider.velocity = self._bounce_vec(-res.normal, current_dir, res.collider.bounce)
-                        break
-                    else:
-                        break
+                    self.on_collision(current_dir, res)
+                    break
         return res
 
     def test_collision(self, rb) -> CollisionResult:
@@ -298,6 +292,9 @@ class Body:
         return { "pos": self.pos.to_dict(), "type": self.type, "id": self.id, "shape": {} if self.shape is None else self.shape.to_dict() }
 
     def process(self):
+        pass
+
+    def on_collision(self, dir: Vec3, collision: CollisionResult):
         pass
 
 class Area(Body):

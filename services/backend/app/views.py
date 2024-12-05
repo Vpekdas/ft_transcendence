@@ -14,6 +14,9 @@ from django.contrib.auth.models import User
 
 from app.models import Player, duck
 
+def make_id(k=16) -> str:
+    return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
+
 """
 Create a new user.
 """
@@ -32,7 +35,7 @@ def signin(request: HttpRequest):
         return JsonResponse({"error": "Username is already taken"})
 
     user = User.objects.create(username=username)
-    player = Player.objects.create(user=user, nickname=nickname)
+    player = Player.objects.create(user=user, nickname=nickname, gid=make_id())
 
     user.set_password(password)
     user.save()

@@ -53,6 +53,8 @@ class Pong(Game):
     def __init__(self):
         super().__init__()
 
+        self.service = 0
+
         self.clients["player1"] = Client("player1")
         self.clients["player2"] = Client("player2")
 
@@ -83,7 +85,14 @@ class Pong(Game):
         self.player1.pos.y = 0
         self.player2.pos.y = 0
         self.ball.pos = Vec3(0, 0, 0)
-        self.ball.velocity = Vec3(1, -1, 0).normalized() * Ball.speed
+        
+        if self.service == 1:
+            self.ball.velocity = Vec3(1, -1, 0).normalized() * Ball.speed
+        else:
+            self.ball.velocity = Vec3(-1, -1, 0).normalized() * Ball.speed
+        
+        if self.service == 1: self.service = 0
+        else: self.service = 1
 
     async def on_update(self):
         self.scene.update()

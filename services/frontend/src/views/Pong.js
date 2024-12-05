@@ -3,6 +3,8 @@ import { Component, globalComponents, html } from "../micro";
 import { action } from "../game";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
+import { FontLoader } from "three/addons/loaders/FontLoader.js";
 
 function addCube(scene, x, y, width, height, color) {
     const geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -51,6 +53,13 @@ export default class Pong extends Component {
                 camera.aspect = c.clientWidth / c.clientHeight;
                 camera.updateProjectionMatrix();
             }
+
+            const loader = new FontLoader();
+
+            const font = await loader.loadAsync("fonts/TakaoMincho_Regular.json");
+            const textMesh = new THREE.Mesh(undefined);
+            textMesh.scale.set(0.01, 0.01, 0.01);
+            scene.add(textMesh);
 
             /** @type Map<string, any> */
             let bodies = new Map();
@@ -110,6 +119,23 @@ export default class Pong extends Component {
                         }
                     }
                 }
+
+                let score1 = data["scores"][0];
+                let score2 = data["scores"][1];
+
+                const geometry = new TextGeometry(score1 + " - " + score2, {
+                    font: font,
+                    size: 80,
+                    depth: 0,
+                    curveSegments: 12,
+                    bevelEnabled: true,
+                    bevelThickness: 10,
+                    bevelSize: 8,
+                    bevelOffset: 0,
+                    bevelSegments: 5,
+                });
+
+                textMesh.geometry = geometry;
             }
 
             c.appendChild(renderer.domElement);

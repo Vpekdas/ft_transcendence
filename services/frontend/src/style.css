@@ -120,12 +120,25 @@
     }
 }
 
+.container-fluid.dashboard-navbar {
+    display: flex;
+    position: relative;
+    justify-content: left;
+    flex-direction: row;
+    overflow: hidden;
+    height: 90vh;
+    width: 90%;
+    background: #222;
+    color: #ffffff;
+    font-family: "Roboto Mono", monospace;
+    font-size: 20px;
+}
+
 .container-fluid.dashboard-container {
     display: flex;
     position: relative;
     justify-content: left;
     border-radius: 10px;
-    border: 2px solid #d2320a;
     flex-direction: row;
     overflow: hidden;
     height: 90vh;
@@ -157,7 +170,6 @@
     flex-direction: column;
     height: 100%;
     width: 100%;
-    border: 2px solid #d2320a;
     overflow-y: auto;
 }
 

@@ -3,7 +3,6 @@ import NotFound from "./views/NotFound";
 import Counter from "./views/Counter";
 import Registration from "./views/Registration";
 import { Component, html } from "./micro";
-import ProfileDashboard from "./views/ProfileDashboard";
 import MatchHistory from "./views/MatchHistory";
 import Statistics from "./views/Statistics";
 import Login from "./views/Login";
@@ -57,7 +56,6 @@ export const router = async () => {
     const routes = [
         { path: "/404", view: NotFound },
         { path: "/", view: Home },
-        { path: "/profile", view: ProfileDashboard },
         { path: "/register", view: Registration },
         { path: "/login", view: Login },
         { path: "/logout", view: Logout },

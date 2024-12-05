@@ -9,15 +9,15 @@ export default class NavBar extends Component {
         console.log(window.location);
         let activeHome, activeProfile, activeCounter;
 
-        if (window.location.href === "http://localhost:8080/") {
+        if (window.location.pathname === "/") {
             activeHome = "active";
             activeProfile = "";
             activeCounter = "";
-        } else if (window.location.href === "http://localhost:8080/profile") {
+        } else if (window.location.pathname === "/profile") {
             activeHome = "";
             activeProfile = "active";
             activeCounter = "";
-        } else if (window.location.href === "http://localhost:8080/counter") {
+        } else if (window.location.pathname === "/counter") {
             activeHome = "";
             activeProfile = "";
             activeCounter = "active";

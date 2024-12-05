@@ -67,7 +67,6 @@ Logout from an account.
 @require_POST
 def logoutRoute(request: HttpRequest):
     logout(request)
-
     return JsonResponse({})
 
 """
@@ -85,15 +84,15 @@ Update the password
 """
 @require_POST
 def updatePassword(request: HttpRequest):
-    data = json.loads(request.body)
-
-    oldPassword = data["oldPassword"]
-    newPassword = data["newPassword"]
-
-    if oldPassword is None or newPassword is None:
-        return HttpResponseBadRequest()
-
     if request.user.is_authenticated:
+        data = json.loads(request.body)
+
+        oldPassword = data["oldPassword"]
+        newPassword = data["newPassword"]
+
+        if oldPassword is None or newPassword is None:
+            return HttpResponseBadRequest()
+
         user = authenticate(username=request.user.username, password=oldPassword)
 
         # if user is None:
@@ -111,12 +110,12 @@ Update a nickname
 """
 @require_POST
 def updateNickname(request: HttpRequest):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "User is not authenticated"})
+
     data = json.loads(request.body)
 
     newNickname = data["nickname"]
-
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": "User is not authenticated"})
 
     player = Player.objects.filter(user=request.user).first()
     if not player:
@@ -131,10 +130,10 @@ def updateNickname(request: HttpRequest):
 """
 @require_POST
 def getPlayerProfile(request: HttpRequest):
-    data = json.loads(request.body)
-
     if not request.user.is_authenticated:
         return JsonResponse({"error": "User is not authenticated"})
+
+    data = json.loads(request.body)
 
     player = Player.objects.filter(user=request.user).first()
 
@@ -166,13 +165,13 @@ Update profile picture
 """
 @require_POST
 def updateProfilePicture(request: HttpRequest):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "User is not authenticated"})
+
     data = json.loads(request.body)
 
     type = data["type"]
     image = data["image"]
-
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": "User is not authenticated"})
 
     valid_types = [ "image/svg+xml", "image/png", "image/jpeg", "image/gif" ]
 
@@ -183,5 +182,17 @@ def updateProfilePicture(request: HttpRequest):
     player.icon = { "type": type, "data": image }
 
     player.save()
+
+    return JsonResponse({})
+
+@require_POST
+def deleteProfile(request: HttpRequest):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "User is not authenticated"})
+
+    # data = json.loads(request.body)
+
+    user = request.user
+    user.delete()
 
     return JsonResponse({})

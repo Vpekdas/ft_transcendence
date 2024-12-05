@@ -152,7 +152,7 @@ class Scene:
 
     def test_collision(self, ibody) -> CollisionResult:
         for body in self.bodies:
-            if body == ibody:
+            if body == ibody or isinstance(body, Area):
                 continue
             r = body.test_collision(ibody)
             if r is not None:
@@ -190,6 +190,7 @@ class Client:
 class BodyType(enum.Enum):
     STATIC = 0
     DYNAMIC = 1
+    AREA = 2
 
 def make_id(k=8) -> str:
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
@@ -261,15 +262,31 @@ class Body:
                 direction = Vec3(0, -1, 0)
             elif body_a.pos.y > body_b.pos.y and body_a.pos.x >= shape_b.min.x and body_a.pos.x <= shape_b.max.x:
                 direction = Vec3(0, 1, 0)
-        elif isinstance(shape_a, Box) and isinstance(shape_b, Sphere):
-            if body_b.pos.x < body_a.pos.x and body_b.pos.y >= shape_a.min.y and body_a.pos.y <= shape_a.max.y:
+            elif body_a.pos.x <= body_b.pos.x and body_a.pos.y >= body_b.pos.y: # Top left corner
+                direction = Vec3(-1, 1, 0).normalized()
+            elif body_a.pos.x > body_b.pos.x and body_a.pos.y >= body_b.pos.y: # Top right corner
+                direction = Vec3(1, 1, 0).normalized()
+            elif body_a.pos.x <= body_b.pos.x and body_a.pos.y < body_b.pos.y: # Bottom left corner
+                direction = Vec3(-1, -1, 0).normalized()
+            elif body_a.pos.x > body_b.pos.x and body_a.pos.y < body_b.pos.y: # Bottom right corner
+                direction = Vec3(1, -1, 0).normalized()
+        if isinstance(shape_a, Box) and isinstance(shape_b, Sphere):
+            if body_b.pos.x < body_a.pos.x and body_b.pos.y >= shape_a.min.y and body_b.pos.y <= shape_a.max.y:
                 direction = Vec3(-1, 0, 0)
-            elif body_b.pos.x > body_a.pos.x and body_b.pos.y >= shape_a.min.y and body_a.pos.y <= shape_a.max.y:
+            elif body_b.pos.x > body_a.pos.x and body_b.pos.y >= shape_a.min.y and body_b.pos.y <= shape_a.max.y:
                 direction = Vec3(1, 0, 0)
-            elif body_b.pos.y < body_a.pos.y and body_b.pos.x >= shape_a.min.x and body_a.pos.x <= shape_a.max.x:
+            elif body_b.pos.y < body_a.pos.y and body_b.pos.x >= shape_a.min.x and body_b.pos.x <= shape_a.max.x:
                 direction = Vec3(0, -1, 0)
-            elif body_b.pos.y > body_a.pos.y and body_b.pos.x >= shape_a.min.x and body_a.pos.x <= shape_a.max.x:
+            elif body_b.pos.y > body_a.pos.y and body_b.pos.x >= shape_a.min.x and body_b.pos.x <= shape_a.max.x:
                 direction = Vec3(0, 1, 0)
+            elif body_b.pos.x <= body_a.pos.x and body_b.pos.y >= body_a.pos.y: # Top left corner
+                direction = Vec3(-1, 1, 0).normalized()
+            elif body_b.pos.x > body_a.pos.x and body_b.pos.y >= body_a.pos.y: # Top right corner
+                direction = Vec3(1, 1, 0).normalized()
+            elif body_b.pos.x <= body_a.pos.x and body_b.pos.y < body_a.pos.y: # Bottom left corner
+                direction = Vec3(-1, -1, 0).normalized()
+            elif body_b.pos.x > body_a.pos.x and body_b.pos.y < body_a.pos.y: # Bottom right corner
+                direction = Vec3(1, -1, 0).normalized()
         else:
             # This should work for sphere vs sphere
             direction = (rb.pos - self.pos).normalized()
@@ -277,11 +294,24 @@ class Body:
         if check_collision(shape_a, shape_b):
             return CollisionResult(collider=rb, normal=direction)
 
+    def to_dict(self):
+        return { "pos": self.pos.to_dict(), "type": self.type, "id": self.id, "shape": {} if self.shape is None else self.shape.to_dict() }
+
     def process(self):
         pass
 
-    def to_dict(self):
-        return { "pos": self.pos.to_dict(), "type": self.type, "id": self.id, "shape": {} if self.shape is None else self.shape.to_dict() }
+class Area(Body):
+    def __init__(self, *, pos=Vec3(), shape=None):
+        super().__init__(type="Area", body_type=BodyType.AREA, pos=pos, shape=shape)
+
+    def process(self):
+        res = self.scene.test_collision(self)
+
+        if res:
+            self.body_entered(res.collider)
+
+    def body_entered(self, body):
+        pass
 
 class Game:
     def __init__(self):

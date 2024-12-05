@@ -11,7 +11,6 @@ function addCube(scene, x, y, width, height, color) {
 
     cube.position.set(x, y, 0);
     cube.scale.set(width, height, 1);
-    scene.add(cube);
     return cube;
 }
 
@@ -21,14 +20,7 @@ function addSphere(scene, x, y, radius, widthSegments, heightSegments, color) {
     const sphere = new THREE.Mesh(geometry, material);
 
     sphere.position.set(x, y, 0);
-    scene.add(sphere);
     return sphere;
-}
-
-function debuggingBox(scene, object3D) {
-    const box = new THREE.BoxHelper(object3D, 0xffff00);
-    scene.add(box);
-    return box;
 }
 
 function debuggingBox2(scene, position, width, height) {
@@ -36,7 +28,6 @@ function debuggingBox2(scene, position, width, height) {
     box.object.position.x = position["x"];
     box.object.position.y = position["y"];
     box.object.position.z = position["z"];
-    scene.add(box);
     return box;
 }
 
@@ -68,7 +59,7 @@ export default class Pong extends Component {
             const DEBUG = true;
 
             function createBody(type, id, shape, position) {
-                let body;
+                let body = undefined;
 
                 if (type == "Ball") {
                     body = addSphere(scene, position["x"], position["y"], 0.5, 32, 16, "#ffde21");
@@ -76,7 +67,9 @@ export default class Pong extends Component {
                     body = addCube(scene, position["x"], position["y"], 1, 3, "#cd1c18");
                 } /* else if (type == "Wall") {
                     body = addCube(scene, position["x"], position["y"], 10, 1, "#008000");
-                }*/
+                }*/ else {
+                    body = addCube(scene, 0, 0, 0, 0, "#000000");
+                }
 
                 if (DEBUG) {
                     let box;
@@ -88,6 +81,7 @@ export default class Pong extends Component {
                             shape["max"]["y"] - shape["min"]["y"]
                         );
                         boxes.set(id, box);
+                        scene.add(box);
                     }
                 }
 
@@ -110,7 +104,10 @@ export default class Pong extends Component {
                         }
                     } else {
                         const lbody = createBody(body["type"], body["id"], body["shape"], body["pos"]);
-                        bodies.set(body["id"], lbody);
+                        if (lbody != undefined) {
+                            bodies.set(body["id"], lbody);
+                            scene.add(lbody);
+                        }
                     }
                 }
             }

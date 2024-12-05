@@ -2,7 +2,7 @@ import sys
 import os
 import json
 import math
-from .gameframework import log, Game, ServerManager, Vec3, Box, Sphere, Body, Scene, Client, BodyType
+from .gameframework import log, Game, ServerManager, Vec3, Box, Sphere, Body, Scene, Client, BodyType, Area
 
 class Player(Body):
     speed = 0.1
@@ -10,6 +10,7 @@ class Player(Body):
     def __init__(self, name: str, client: Client):
         super().__init__(type="Player", shape=Box(Vec3(-0.5, -1.5, 0), Vec3(0.5, 1.5, 0)), client=client)
         self.id = name
+        self.score = 0
 
     def process(self):
         if self.client.is_pressed("up"):
@@ -38,6 +39,16 @@ class Ball(Body):
     def process(self):
         self.try_move()
 
+class ScoreArea(Area):
+    def __init__(self, *, player=None, pos=Vec3(), game=None):
+        super().__init__(pos=pos, shape=Box(min=Vec3(-1, -5.2, 0.5), max=Vec3(1, 5.2, 0.5)))
+        self.player = player
+        self.game = game
+
+    def body_entered(self, body):
+        self.player.score += 1
+        self.game.reset()
+
 class Pong(Game):
     def __init__(self):
         super().__init__()
@@ -53,6 +64,12 @@ class Pong(Game):
         self.ball = Ball()
         self.ball.pos = Vec3(0, 0, 0)
 
+        self.score1 = ScoreArea(player=self.player2, pos=Vec3(-11, 0, 0), game=self)
+        self.score2 = ScoreArea(player=self.player1, pos=Vec3(11, 0, 0), game=self)
+
+        self.scene.add_body(self.score1)
+        self.scene.add_body(self.score2)
+
         self.scene.add_body(self.player1)
         self.scene.add_body(self.player2)
         self.scene.add_body(self.ball)
@@ -62,9 +79,15 @@ class Pong(Game):
         self.scene.add_body(Body(type="Wall", shape=border_box, pos=Vec3(0, -5, 0)))
         self.scene.add_body(Body(type="Wall", shape=border_box, pos=Vec3(0, 5, 0)))
 
+    def reset(self):
+        self.player1.pos.y = 0
+        self.player2.pos.y = 0
+        self.ball.pos = Vec3(0, 0, 0)
+        self.ball.velocity = Vec3(1, -1, 0).normalized() * Ball.speed
+
     async def on_update(self):
         self.scene.update()
-        await self.broadcast({ "type": "update", "bodies": self.scene.to_dict() })
+        await self.broadcast({ "type": "update", "bodies": self.scene.to_dict(), "scores": [ self.player1.score, self.player2.score ] })
 
     def on_unhandled_message(self, msg):
         pass

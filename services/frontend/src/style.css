@@ -726,7 +726,42 @@ body::before {
 }
 
 .nav-link.active.custom-link {
-    background-color: white;
+    color: white;
+    position: relative;
+    animation: glitch 1s infinite;
+}
+
+@keyframes glitch {
+    0% {
+        text-shadow:
+            2px 2px #ff00c1,
+            -2px -2px #00fff9;
+    }
+    20% {
+        text-shadow:
+            -2px -2px #ff00c1,
+            2px 2px #00fff9;
+    }
+    40% {
+        text-shadow:
+            2px -2px #ff00c1,
+            -2px 2px #00fff9;
+    }
+    60% {
+        text-shadow:
+            -2px 2px #ff00c1,
+            2px -2px #00fff9;
+    }
+    80% {
+        text-shadow:
+            2px 2px #ff00c1,
+            -2px -2px #00fff9;
+    }
+    100% {
+        text-shadow:
+            -2px -2px #ff00c1,
+            2px 2px #00fff9;
+    }
 }
 
 .nav-link.custom-link {

@@ -1,12 +1,26 @@
 import { Component, globalComponents, html } from "../micro";
 
+const activeRoutes = [
+    { path: "/", active: false },
+    { path: "/profile", active: false },
+    { path: "/counter", active: false },
+    { path: "/profile/match-history", active: false },
+    { path: "/profile/statistics", active: false },
+    { path: "/profile/settings", active: false },
+];
 export default class NavBar extends Component {
     constructor() {
         super();
     }
 
     async render() {
-        console.log(window.location);
+
+        for (let i = 0; i < activeRoutes.length; i++) {
+            if (window.location.pathname === activeRoutes[i].path) {
+                
+            }
+        }
+
         let activeHome, activeProfile, activeCounter;
 
         if (window.location.pathname === "/") {

@@ -49,10 +49,15 @@ class ScoreArea(Area):
         self.player.score += 1
         self.game.reset()
 
+class Settings:
+    def __init__(self, *, max_score=9):
+        self.max_score = max_score
+
 class Pong(Game):
     def __init__(self):
         super().__init__()
 
+        self.settings = Settings()
         self.service = 0
 
         self.clients["player1"] = Client("player1")
@@ -85,14 +90,17 @@ class Pong(Game):
         self.player1.pos.y = 0
         self.player2.pos.y = 0
         self.ball.pos = Vec3(0, 0, 0)
-        
+
         if self.service == 1:
             self.ball.velocity = Vec3(1, -1, 0).normalized() * Ball.speed
         else:
             self.ball.velocity = Vec3(-1, -1, 0).normalized() * Ball.speed
-        
+
         if self.service == 1: self.service = 0
         else: self.service = 1
+
+        if self.score1 == self.settings.max_score:
+            pass
 
     async def on_update(self):
         self.scene.update()

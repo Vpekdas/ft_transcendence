@@ -1,5 +1,7 @@
 import sys
 import json
+import random
+import string
 
 import django
 import base64

@@ -30,7 +30,7 @@ export default class Login extends Component {
             console.log("login response: ", response);
 
             if (response["error"] == undefined) {
-                navigateTo("profile");
+                navigateTo("profile/match-history");
             }
         });
 
@@ -39,8 +39,8 @@ export default class Login extends Component {
         return html(
             /* HTML */
             ` <div>
-                <div class="container-fluid login-container">
-                    <form class="login-form" action="javascript:void(0)">
+                <div class="container-fluid login-container" novalidate>
+                    <form class="login-form was-validated" action="javascript:void(0)">
                         <img src="/img/Amadeus-Logo.webp" class="login-logo" />
                         <div class="row mb-3 login">
                             <label for="username" class="col-sm-2 col-form-label">Username</label>
@@ -51,6 +51,7 @@ export default class Login extends Component {
                                     type="text"
                                     class="form-control"
                                     id="username"
+                                    required
                                 />
                             </div>
                         </div>
@@ -63,6 +64,7 @@ export default class Login extends Component {
                                     type="password"
                                     class="form-control"
                                     id="password"
+                                    required
                                 />
                             </div>
                             <div class="col-sm-1 login">
@@ -77,16 +79,5 @@ export default class Login extends Component {
             </div>`
         );
     }
-
-    // /api/signin
-    //
-    // username, nickname, password
-
-    // /api/login
-    //
-    // username, password
-
-    // /api/profile/info
-    // /api/profile/stats
 }
 globalComponents.set("Login", Login);

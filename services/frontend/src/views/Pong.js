@@ -145,7 +145,7 @@ export default class Pong extends Component {
             c.appendChild(renderer.domElement);
             const controls = new OrbitControls(camera, c);
 
-            camera.position.z = 18;
+            camera.position.z = 20;
             camera.position.y = -2;
             renderer.setAnimationLoop(animate);
 

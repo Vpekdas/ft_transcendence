@@ -5,7 +5,7 @@ import math
 from .gameframework import log, Game, ServerManager, Vec3, Box, Sphere, Body, Scene, Client, BodyType, Area, CollisionResult
 
 class Player(Body):
-    speed = 0.1
+    speed = 0.2
 
     def __init__(self, name: str, client: Client):
         super().__init__(type="Player", shape=Box(Vec3(-0.5, -2.5, 0), Vec3(0.5, 2.5, 0)), client=client)
@@ -47,7 +47,7 @@ class Ball(Body):
 
 class ScoreArea(Area):
     def __init__(self, *, player=None, pos=Vec3(), game=None):
-        super().__init__(pos=pos, shape=Box(min=Vec3(-1, -10.2, 0.5), max=Vec3(1, 10.2, 0.5)))
+        super().__init__(pos=pos, shape=Box(min=Vec3(-1, -12.2, 0.5), max=Vec3(1, 12.2, 0.5)))
         self.player = player
         self.game = game
 
@@ -90,8 +90,8 @@ class Pong(Game):
 
         border_box = Box(Vec3(-18, -0.2, 0), Vec3(18, 0.2, 0))
 
-        self.scene.add_body(Body(type="Wall", shape=border_box, pos=Vec3(0, -9, 0)))
-        self.scene.add_body(Body(type="Wall", shape=border_box, pos=Vec3(0, 9, 0)))
+        self.scene.add_body(Body(type="Wall", shape=border_box, pos=Vec3(0, -12, 0)))
+        self.scene.add_body(Body(type="Wall", shape=border_box, pos=Vec3(0, 12, 0)))
 
     def reset(self):
         self.player1.pos.y = 0

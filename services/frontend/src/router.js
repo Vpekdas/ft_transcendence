@@ -9,6 +9,7 @@ import Login from "./views/Login";
 import Logout from "./views/Logout";
 import Settings from "./views/Settings";
 import Pong from "./views/Pong";
+import Clicker from "./views/Clicker";
 
 /**
  * @param {*} routes
@@ -64,6 +65,7 @@ export const router = async () => {
         { path: "/profile/statistics", view: Statistics },
         { path: "/profile/settings", view: Settings },
         { path: "/play", view: Pong },
+        { path: "/duck", view: Clicker },
         // /api/enterMatchmaking { "game": "pong", "mode": "1v1local" }
     ];
 

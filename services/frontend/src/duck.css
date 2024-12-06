@@ -1,0 +1,14 @@
+.duck-container {
+    background-color: #222;
+}
+
+.duck-list {
+    text-align: center;
+    color: #eee;
+    list-style: none;
+}
+
+.duck-count {
+    font-weight: bold;
+    font-size: 3em;
+}

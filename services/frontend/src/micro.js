@@ -107,6 +107,11 @@ export class Component {
         ];
     }
 
+    getPersistentStoreValue(name) {
+        var key = this.getFullPath() + "__" + name;
+        return JSON.parse(localStorage.getItem(key));
+    }
+
     async update() {
         if (this.updateHandler != undefined) await this.updateHandler();
         if (this.parent != undefined) await this.parent.update();
@@ -247,12 +252,25 @@ class HTMLComponent extends HTMLElement {
         }
     }
 
+    forEachReactiveValue(f, n = this) {
+        for (let element of n.children) {
+            if (element instanceof HTMLReactiveValue) {
+                f(element);
+            } else {
+                this.forEachReactiveValue(f, element);
+            }
+        }
+    }
+
     async updateHTML() {
         if (this.component != undefined) {
-            const newChild = await this.component.render();
-            if (this.children.length > 0) this.removeChild(this.children[0]);
-            this.appendChild(newChild);
-            await this.do();
+            if (this.children.length == 0) {
+                const newChild = await this.component.render();
+                if (this.children.length > 0) this.removeChild(this.children[0]);
+                this.appendChild(newChild);
+                await this.do();
+            }
+            this.forEachReactiveValue((el) => el.updateInnerText(this.component));
         }
 
         this.events();
@@ -279,6 +297,27 @@ class HTMLComponent extends HTMLElement {
     }
 }
 
+class HTMLReactiveValue extends HTMLElement {
+    constructor() {
+        super();
+        /** @type Component */
+        this.globalStoreName = "";
+    }
+
+    async connectedCallback() {}
+
+    updateInnerText(component) {
+        const [value, _] = component.usePersistentStore(this.globalStoreName, {});
+        this.textContent = `${value}`;
+    }
+
+    disconnectedCallback() {}
+
+    async adoptedCallback() {}
+
+    async attributeChangedCallback(name, oldValue, newValue) {}
+}
+
 /**
  * @param {string} str
  * @returns {HTMLElement | ParsingError}
@@ -287,6 +326,7 @@ export function html(str) {
     // There is probably a better place to put this. This maybe should go away when parsing is done.
     if (customElements.get("micro-component") == undefined) {
         customElements.define("micro-component", HTMLComponent);
+        customElements.define("micro-reactive-value", HTMLReactiveValue);
     }
 
     class Token {
@@ -499,7 +539,9 @@ export function html(str) {
             const c = globalComponents.get(name);
 
             el.component = new c();
-            el.component.updateHandler = async () => await el.updateHTML();
+            el.component.updateHandler = async () => {
+                el.forEachReactiveValue((el2) => el2.updateInnerText(el.component));
+            };
 
             for (let [key, value] of attributes) {
                 el.setAttribute(key, value);
@@ -602,7 +644,20 @@ export function html(str) {
                     return msg.replace("&lt;", "<").replace("&gt;", ">");
                 };
 
-                el.textContent = unescapeHTML(tokens[index].s);
+                /** @type string */
+                var text = unescapeHTML(tokens[index].s);
+
+                // TODO: Only works with global stores
+
+                if (text.startsWith("{") && text.endsWith("}")) {
+                    var reactiveValue = document.createElement("micro-reactive-value");
+                    // reactiveValue.component = microParent.component;
+                    reactiveValue.globalStoreName = text.substring(1, text.length - 1);
+                    el.appendChild(reactiveValue);
+                } else {
+                    el.textContent = unescapeHTML(tokens[index].s);
+                }
+
                 index++;
             } else {
                 while (index < newEnd) {

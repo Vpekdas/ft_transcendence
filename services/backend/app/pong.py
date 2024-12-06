@@ -120,4 +120,7 @@ class PongServer(ServerManager):
     def do_matchmaking(self, conn, mode: str):
         game = Pong()
         self.start_game(conn, game)
-        return game
+        return game.id
+
+    def on_join(self, conn) -> bool:
+        return False

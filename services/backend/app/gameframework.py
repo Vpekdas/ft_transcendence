@@ -387,3 +387,6 @@ class ServerManager:
 
     def do_matchmaking(self) -> Game:
         return None
+
+    def on_join(self, conn) -> bool:
+        return False

@@ -17,12 +17,15 @@ class ClientConsumer(AsyncWebsocketConsumer):
             data = json.loads(text_data)
 
             if "type" in data and data["type"] == "matchmake" and "gamemode" in data:
-                game = server_manager.do_matchmaking(self, data["gamemode"])
+                server_manager.do_matchmaking(self, data["gamemode"])
+                await self.send(json.dumps({ "type": "waiting" }))
+            elif "type" in data and data["type"] == "join":
+                id = data["id"]
 
-                if game is not None:
-                    await self.send(json.dumps({ "type": "matchFound", "id": game.id }))
+                if server_manager.on_join(id):
+                    await self.send(json.dumps({ "type": "matchFound", "id": id }))
                 else:
-                    log("Something went wrong...")
+                    await self.send(json.dumps({ "type": "denied" }))
             else:
                 game = server_manager.get_game(self)
 

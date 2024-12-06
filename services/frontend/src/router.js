@@ -65,8 +65,8 @@ export const router = async () => {
         { path: "/profile/statistics", view: Statistics },
         { path: "/profile/settings", view: Settings },
         { path: "/play", view: Pong },
+        { path: "/play/[id]", view: Pong },
         { path: "/duck", view: Clicker },
-        // /api/enterMatchmaking { "game": "pong", "mode": "1v1local" }
     ];
 
     let match = matchRoute(routes, location.pathname);

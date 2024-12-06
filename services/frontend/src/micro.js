@@ -264,12 +264,12 @@ class HTMLComponent extends HTMLElement {
 
     async updateHTML() {
         if (this.component != undefined) {
-            if (this.children.length == 0) {
-                const newChild = await this.component.render();
-                if (this.children.length > 0) this.removeChild(this.children[0]);
-                this.appendChild(newChild);
-                await this.do();
-            }
+            // if (this.children.length == 0) {
+            const newChild = await this.component.render();
+            if (this.children.length > 0) this.removeChild(this.children[0]);
+            this.appendChild(newChild);
+            await this.do();
+            // }
             this.forEachReactiveValue((el) => el.updateInnerText(this.component));
         }
 

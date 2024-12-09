@@ -1,10 +1,24 @@
 import { fetchApi } from "../api";
 import { navigateTo } from "../router";
 import { Component, globalComponents, html } from "../micro";
+import { sanitizeInput } from "../validateInput";
 
 export default class Login extends Component {
     constructor() {
         super();
+    }
+
+    showToast(message, iconClass) {
+        const toastContainer = document.getElementById("toast-container");
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.innerHTML = `<i class="${iconClass} toast-icon"></i> ${message}`;
+        toast.style.display = "flex";
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 5000);
     }
 
     async render() {
@@ -15,6 +29,17 @@ export default class Login extends Component {
             const username = data.get("username");
             const password = data.get("password");
 
+            const sanitizedUsername = sanitizeInput(username);
+            const sanitizedPassword = sanitizeInput(password);
+
+            if (sanitizedUsername.length !== username.length || sanitizedPassword.length !== password.length) {
+                this.showToast(
+                    "Invalid input detected. Please fill out all fields correctly.",
+                    "bi bi-exclamation-triangle-fill"
+                );
+                return;
+            }
+
             const response = await fetchApi("/api/login", {
                 method: "POST",
                 body: JSON.stringify({
@@ -24,12 +49,11 @@ export default class Login extends Component {
             })
                 .then((res) => res.json())
                 .catch((err) => {
-                    error: "Bad input";
+                    this.showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
                 });
-
-            console.log("login response: ", response);
-
-            if (response["error"] == undefined) {
+            if (response.error) {
+                this.showToast(response.error, "bi bi-exclamation-triangle-fill");
+            } else {
                 navigateTo("profile/match-history");
             }
         });
@@ -39,7 +63,8 @@ export default class Login extends Component {
         return html(
             /* HTML */
             ` <div>
-                <div class="container-fluid login-container" novalidate>
+                <div class="container-fluid login-container">
+                    <div id="toast-container"></div>
                     <form class="login-form was-validated" action="javascript:void(0)">
                         <img src="/img/Amadeus-Logo.webp" class="login-logo" />
                         <div class="row mb-3 login">

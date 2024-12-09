@@ -1,7 +1,6 @@
 import { Component, globalComponents, html } from "../micro";
 import { tr } from "../i18n";
 import { fetchApi, post } from "../api";
-import { isValidInput } from "../validateInput";
 
 export default class ChangeNicknameForm extends Component {
     constructor() {
@@ -15,9 +14,6 @@ export default class ChangeNicknameForm extends Component {
 
         this.query(".btn.btn-primary.change-nickname-button").on("click", async (event) => {
             const oldNickname = document.getElementById("new-nickname").value;
-
-            if (!isValidInput(oldNickname)) {
-            }
 
             const response = await fetchApi("/api/updateNickname", {
                 method: "POST",

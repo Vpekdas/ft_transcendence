@@ -1,9 +1,23 @@
 import { navigateTo } from "../router";
 import { Component, globalComponents, html } from "../micro";
+import { sanitizeInput } from "../validateInput";
 
 export default class Registration extends Component {
     constructor() {
         super();
+    }
+
+    showToast(message, iconClass) {
+        const toastContainer = document.getElementById("toast-container");
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.innerHTML = `<i class="${iconClass} toast-icon"></i> ${message}`;
+        toast.style.display = "flex";
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 5000);
     }
 
     async render() {
@@ -15,6 +29,22 @@ export default class Registration extends Component {
             const nickname = data.get("nickname");
             const password = data.get("password");
 
+            const sanitizedUsername = sanitizeInput(username);
+            const sanitizedNickname = sanitizeInput(nickname);
+            const sanitizedPassword = sanitizeInput(password);
+
+            if (
+                sanitizedUsername.length !== username.length ||
+                sanitizedNickname.length !== nickname.length ||
+                sanitizedPassword.length !== password.length
+            ) {
+                this.showToast(
+                    "Invalid input detected. Please fill out all fields correctly.",
+                    "bi bi-exclamation-triangle-fill"
+                );
+                return;
+            }
+
             const response = await fetch(this.api("/api/signin"), {
                 method: "POST",
                 body: JSON.stringify({
@@ -25,10 +55,13 @@ export default class Registration extends Component {
             })
                 .then((res) => res.json())
                 .catch((err) => {
-                    error: "Bad input";
+                    this.showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
                 });
-
-            console.log("registration response: ", response);
+            if (response.error) {
+                this.showToast(response.error, "bi bi-exclamation-triangle-fill");
+            } else {
+                navigateTo("profile/match-history");
+            }
         });
 
         this.query(".login-redirect").on("click", () => navigateTo("login"));
@@ -37,7 +70,8 @@ export default class Registration extends Component {
             /* HTML */
             ` <div>
                 <div class="container-fluid login-container">
-                    <form class="login-form" action="javascript:void(0)">
+                    <div id="toast-container"></div>
+                    <form class="login-form was-validated" action="javascript:void(0)">
                         <img src="/img/Amadeus-Logo.webp" class="login-logo" />
                         <div class="row mb-3 login">
                             <label for="username" class="col-sm-2 col-form-label">Username</label>
@@ -48,7 +82,9 @@ export default class Registration extends Component {
                                     type="text"
                                     class="form-control"
                                     id="username"
+                                    required
                                 />
+                                <div class="invalid-feedback">Please enter a username.</div>
                             </div>
                         </div>
                         <div class="row mb-3 login">
@@ -60,7 +96,9 @@ export default class Registration extends Component {
                                     type="text"
                                     class="form-control"
                                     id="nickname"
+                                    required
                                 />
+                                <div class="invalid-feedback">Please enter a nickname.</div>
                             </div>
                         </div>
                         <div class="row mb-3 login">
@@ -72,7 +110,9 @@ export default class Registration extends Component {
                                     type="password"
                                     class="form-control"
                                     id="password"
+                                    required
                                 />
+                                <div class="invalid-feedback">Please enter a paswword.</div>
                             </div>
                             <div class="col-sm-1 login">
                                 <button type="submit" class="btn btn-primary">

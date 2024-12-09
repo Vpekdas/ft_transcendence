@@ -1,5 +1,5 @@
-const forbiddenChar = /^[a-zA-Z0-9]+/;
+import DOMPurify from "dompurify";
 
-export function isValidInput(input) {
-    return forbiddenChar.test(input);
+export function sanitizeInput(input) {
+    return DOMPurify.sanitize(input);
 }

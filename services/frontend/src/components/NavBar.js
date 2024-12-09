@@ -1,10 +1,5 @@
 import { Component, globalComponents, html } from "../micro";
-
-const activeRoutes = new Map();
-
-activeRoutes.set("/", "");
-activeRoutes.set("/profile", "");
-activeRoutes.set("/counter", "");
+import { isLoggedIn } from "../api";
 
 export default class NavBar extends Component {
     constructor() {
@@ -12,20 +7,19 @@ export default class NavBar extends Component {
     }
 
     async render() {
-        const currentRoute = window.location.pathname;
-
-        if (activeRoutes.has(currentRoute)) {
-            activeRoutes.set(currentRoute, "active");
-            for (let [key] of activeRoutes) {
-                if (key != currentRoute) {
-                    activeRoutes.set(key, "");
-                }
-            }
-        }
-
         function activeTabClass(t) {
             if (window.location.pathname.startsWith(t)) return "active";
             return "";
+        }
+
+        let logoutNavItem;
+
+        if (await isLoggedIn()) {
+            logoutNavItem = `<li class="nav-item">
+                        <a class="nav-link custom-link ${activeTabClass("/logout")}" data-link href="/logout"
+                            >Logout</a
+                        >
+                    </li>`;
         }
 
         return html(
@@ -58,12 +52,10 @@ export default class NavBar extends Component {
                             >Counter</a
                         >
                     </li>
+                    ${logoutNavItem}
                 </ul>
             </div>`
         );
     }
 }
 globalComponents.set("NavBar", NavBar);
-
-// TODO Add a dynamic function to update the "active" class on nav links based on the current URL.
-// TODO This ensures that the user can visually see which page they are currently on.

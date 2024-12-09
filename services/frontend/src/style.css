@@ -141,12 +141,12 @@
 .container-fluid.dashboard-container {
     display: flex;
     position: relative;
+    height: 90vh;
+    width: 90%;
     justify-content: left;
     border-radius: 10px;
     flex-direction: row;
     overflow: hidden;
-    height: 90vh;
-    width: 90%;
     background: #222;
     color: #ffffff;
     font-family: "Roboto Mono", monospace;
@@ -194,7 +194,6 @@
     flex-direction: row;
     height: 100%;
     width: 100%;
-    border: 2px solid #d2320a;
 }
 
 /* 404 PAGE */
@@ -545,9 +544,7 @@
     flex-direction: column;
     height: 100%;
     width: 100%;
-    border: 2px solid #d2320a;
-    overflow-y: auto;
-    align-items: center;
+    gap: 20px;
 }
 
 .card {
@@ -569,6 +566,12 @@
 }
 
 .container-fluid.change-nickname-form {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+.container-fluid.change-profile-picture {
     display: flex;
     height: 100%;
     width: 100%;

@@ -28,6 +28,8 @@ export default class ChangeNicknameForm extends Component {
 
             console.log("changeNickname response: ", response);
         });
+
+        console.log(info.nickname);
         return html(
             /* HTML */ `<div class="container-fluid change-nickname-form">
                 <input

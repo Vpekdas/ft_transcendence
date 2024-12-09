@@ -52,7 +52,7 @@ export default class Registration extends Component {
             if (response.error) {
                 this.showToast(response.error, "bi bi-exclamation-triangle-fill");
             } else {
-                navigateTo("profile/match-history");
+                navigateTo("/");
             }
         });
 

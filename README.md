@@ -1,41 +1,43 @@
 ## Modules
 
-- Web: Django (major) by [@FirePh0enix]
-- Web: Bootstrap (minor) by [@Vpekdas]
-- Web: PostgresSQL (minor) by [@FirePh0enix]
-- Web: Blockchain (major) by [@FirePh0enix]
+- [ ] Web: Django (major) by [@FirePh0enix]
+- [ ] Web: Bootstrap (minor) by [@Vpekdas]
+- [x] Web: PostgreSQL (minor) by [@FirePh0enix]
 
-- User: Standard user (major) by [@FirePh0enix]
-- User: Remote Authentication (42) (major)
+- [ ] User: Standard user (major) by [@FirePh0enix]
+- [ ] User: Remote Authentication (42) (major) by [@FirePh0enix]
 
-- Gameplay: Remote players (major)
-- Gameplay: Multiple player (major)
-- Gameplay: Another game (major) ?
-- Gameplay: Game customization (minor)
-    - [ ] Rewind time
-    - [ ] Ball turn into bomb and blow the bar in two
-    - [ ] Spawn obstacles
-    - [ ] Illusions with glitches
-    - [ ] Supersonic ball
-- Gameplay: Live Chat (major) by [@Vpekdas]
+- [ ] Gameplay: Remote players (major)
+- [ ] Gameplay: Multiple player (major)
+- [ ] Gameplay: Another game (major) ?
+- [ ] Gameplay: Game customization (minor)
+    - Power-Up (Pong)
+        - [ ] Rewind time
+        - [ ] Ball turn into bomb and blow the bar in two
+        - [ ] Spawn obstacles
+        - [ ] Illusions with glitches
+        - [ ] Supersonic ball
+- [ ] Gameplay: Live Chat (major) by [@Vpekdas]
 
-- AI: AI Opponent (major)
-- AI: User stats (minor)
+- [ ] AI: AI Opponent (major)
+- [ ] AI: User stats (minor)
 
-- Cybersec: GPDR (minor) ?
-- Cybersec: 2FA (major) by [@Vpekdas]
+- [ ] Cybersec: GPDR (minor) ?
+- [ ] Cybersec: 2FA (major) by [@Vpekdas]
 
-- Devops: Microservices (major) by [@Vpekdas] and [@FirePh0enix]
+- [ ] Devops: Microservices (major) by [@Vpekdas] and [@FirePh0enix]
 
-- Graphics: ThreeJS (major)
+- [ ] Graphics: ThreeJS (major)
 
-- Accessibility: Expanding Browser Compatibility (minor)
-- Accessibility: Multiple language (minor) by [@Vpekdas]
+- [ ] Accessibility: Expanding Browser Compatibility (minor)
+- [ ] Accessibility: Multiple language (minor) by [@Vpekdas]
 
-- Server-Side Pong: API (major) by [@FirePh0enix]
-- Server-Side Pong: CLI (major) by [@FirePh0enix]
+- [ ] Server-Side Pong: API (major) by [@FirePh0enix]
+- [ ] Server-Side Pong: CLI (major) by [@FirePh0enix]
 
 ## Missing modules
+
+- Web: Blockchain (major)
 
 - Cybersec: Implement WAF/ModSecurity with Hardened Configuration and HashiCorp Vault for Secrets Management (major)
 

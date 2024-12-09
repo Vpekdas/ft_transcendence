@@ -76,7 +76,6 @@ export default class Registration extends Component {
                                     id="username"
                                     required
                                 />
-                                <div class="invalid-feedback">Please enter a username.</div>
                             </div>
                         </div>
                         <div class="row mb-3 login">
@@ -90,7 +89,6 @@ export default class Registration extends Component {
                                     id="nickname"
                                     required
                                 />
-                                <div class="invalid-feedback">Please enter a nickname.</div>
                             </div>
                         </div>
                         <div class="row mb-3 login">
@@ -104,7 +102,6 @@ export default class Registration extends Component {
                                     id="password"
                                     required
                                 />
-                                <div class="invalid-feedback">Please enter a paswword.</div>
                             </div>
                             <div class="col-sm-1 login">
                                 <button type="submit" class="btn btn-primary">

@@ -171,8 +171,9 @@ class Scene:
 Represent a remote client in a game.
 """
 class Client:
-    def __init__(self, id: str):
+    def __init__(self, id: str, subid: str=None):
         self.id = id
+        self.subid = subid
         self.inputs = dict()
 
     def is_pressed(self, name):
@@ -310,19 +311,24 @@ class Area(Body):
     def body_entered(self, body):
         pass
 
+class State(enum.Enum):
+    IN_LOBBY = 0,
+    STARTED = 1,
+
 class Game:
     def __init__(self):
         self.manager = None
         self.id = ""
         self.consumers = []
-        self.clients = {}
+        self.clients = []
         self.scene = Scene()
+        self.state = State.IN_LOBBY
 
     def start(self):
         task = asyncio.create_task(self.run())
 
     async def run(self):
-        while len(self.consumers) > 0:
+        while self.state == State.IN_LOBBY or len(self.consumers) > 0:
             await self.on_update()
             await asyncio.sleep(0.010)
 
@@ -333,15 +339,15 @@ class Game:
         for consumer in self.consumers:
             await consumer.send(json.dumps(data))
 
-    # def active_connections(self) -> list[ServerConnection]:
-    #     return list(filter(lambda conn: conn.state == State.OPEN, self.conns))
-
-    def get_client(self, id) -> Client:
-        return self.clients[id] if id in self.clients else None
+    def get_client(self, id, subid=None) -> Client:
+        return next(filter(lambda c: c.id == id and c.subid == subid, self.clients))
 
     #
     # Callbacks
     #
+
+    def on_join(self, msg) -> bool:
+        pass
 
     def on_unhandled_message(self, msg):
         pass
@@ -364,13 +370,12 @@ class ServerManager:
     def make_id(self, k=8) -> str:
         return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
 
-    def start_game(self, conn, game: Game) -> str:
+    def start_game(self, game: Game) -> str:
         id = self.make_id()
         self.games[id] = game
 
         game.id = id
         game.manager = self
-        game.consumers.append(conn)
 
         log(f"Game started with id", game.id)
         game.start()
@@ -385,7 +390,7 @@ class ServerManager:
     # Callbacks
     #
 
-    def do_matchmaking(self) -> Game:
+    async def do_matchmaking(self) -> Game:
         return None
 
     def on_join(self, conn) -> bool:

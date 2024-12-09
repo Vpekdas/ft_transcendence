@@ -4,6 +4,7 @@ import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import { FontLoader } from "three/addons/loaders/FontLoader.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { action } from "./game";
+import { post } from "./api";
 
 function addCube(scene, x, y, width, height, color) {
     const geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -39,7 +40,13 @@ export class PongGame {
     constructor() {}
 
     async setup(cc, c) {
-        const id = cc.attrib("id");
+        this.id = cc.attrib("id");
+
+        if (this.id == undefined && localStorage.getItem("pongGamemode") == null) {
+            return;
+        }
+
+        this.playerInfo = await post("/api/getPlayerProfile").then((res) => res.json());
 
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(70, c.clientWidth / c.clientHeight, 0.1, 1000);
@@ -47,17 +54,19 @@ export class PongGame {
 
         this.renderer.setSize(c.clientWidth, c.clientHeight);
 
-        window.addEventListener("resize", onWindowResize, false);
-
-        function onWindowResize() {
-            renderer.setSize(c.clientWidth, c.clientHeight);
-            camera.aspect = c.clientWidth / c.clientHeight;
-            camera.updateProjectionMatrix();
-        }
+        window.addEventListener(
+            "resize",
+            () => {
+                this.renderer.setSize(c.clientWidth, c.clientHeight);
+                this.camera.aspect = c.clientWidth / c.clientHeight;
+                this.camera.updateProjectionMatrix();
+            },
+            false
+        );
 
         const loader = new FontLoader();
 
-        this.font = await loader.loadAsync("fonts/TakaoMincho_Regular.json");
+        this.font = await loader.loadAsync("/fonts/TakaoMincho_Regular.json");
         this.textMesh = new THREE.Mesh(undefined);
         this.textMesh.scale.set(0.01, 0.01, 0.01);
         this.scene.add(this.textMesh);
@@ -101,11 +110,17 @@ export class PongGame {
 
         this.ws = new WebSocket(`ws://localhost:8000/ws`);
         this.ws.onopen = (event) => {
-            if (id == undefined) {
-                this.ws.send(JSON.stringify({ type: "matchmake", gamemode: "1v1" }));
-            } else {
-                this.ws.send(JSON.stringify({ type: "join", gamemode: "1v1" }));
-            }
+            if (this.id == undefined) {
+                this.ws.send(
+                    JSON.stringify({
+                        type: "matchmake",
+                        gamemode: localStorage.getItem("pongGamemode"),
+                        playerId: this.playerInfo.id,
+                    })
+                );
+            } /* else {
+                this.ws.send(JSON.stringify({ type: "join" }));
+            }*/
         };
         this.ws.onmessage = async (event) => {
             const data = JSON.parse(event.data);
@@ -134,16 +149,16 @@ export class PongGame {
             if (event.key == lastKey) return;
 
             if (event.key === "w") {
-                this.ws.send(JSON.stringify(action("player1", "up", "press")));
+                this.ws.send(JSON.stringify(action(this.playerInfo.id, "player1", "up", "press")));
             }
             if (event.key === "s") {
-                this.ws.send(JSON.stringify(action("player1", "down", "press")));
+                this.ws.send(JSON.stringify(action(this.playerInfo.id, "player1", "down", "press")));
             }
             if (event.key === "ArrowUp") {
-                this.ws.send(JSON.stringify(action("player2", "up", "press")));
+                this.ws.send(JSON.stringify(action(this.playerInfo.id, "player2", "up", "press")));
             }
             if (event.key === "ArrowDown") {
-                this.ws.send(JSON.stringify(action("player2", "down", "press")));
+                this.ws.send(JSON.stringify(action(this.playerInfo.id, "player2", "down", "press")));
             }
 
             lastKey = event.key;
@@ -151,16 +166,16 @@ export class PongGame {
 
         window.addEventListener("keyup", (event) => {
             if (event.key === "w") {
-                this.ws.send(JSON.stringify(action("player1", "up", "release")));
+                this.ws.send(JSON.stringify(action(this.playerInfo.id, "player1", "up", "release")));
             }
             if (event.key === "s") {
-                this.ws.send(JSON.stringify(action("player1", "down", "release")));
+                this.ws.send(JSON.stringify(action(this.playerInfo.id, "player1", "down", "release")));
             }
             if (event.key === "ArrowUp") {
-                this.ws.send(JSON.stringify(action("player2", "up", "release")));
+                this.ws.send(JSON.stringify(action(this.playerInfo.id, "player2", "up", "release")));
             }
             if (event.key === "ArrowDown") {
-                this.ws.send(JSON.stringify(action("player2", "down", "release")));
+                this.ws.send(JSON.stringify(action(this.playerInfo.id, "player2", "down", "release")));
             }
             lastKey = undefined;
         });
@@ -236,11 +251,15 @@ export class PongGame {
     }
 
     async onMessage(data) {
-        if (data.type == "update") {
+        if (data.type == "update" && this.id != null) {
             this.onUpdateReceived(data);
         } else if (data.type == "matchFound") {
+            this.id = data.id;
+
+            console.log(`Match with id \`${this.id}\` was found !`);
+
+            // location.pathname = "/play/" + this.id;
             await this.setupGameTerrain();
-            location.location.pathname = "/play/" + data.id;
         } else if (data.type == "waiting") {
             console.log("Waiting for");
         }

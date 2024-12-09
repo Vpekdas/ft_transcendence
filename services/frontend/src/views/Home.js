@@ -23,9 +23,20 @@ export default class Home extends Component {
     async render() {
         this.setTitle("Home");
 
-        this.query(".btn.btn-success").on("click", async (event) => {
-                navigateTo("/play");
+        // this.query(".btn.btn-success").on("click", async (event) => {
+        //         navigateTo("/play");
+        // });
+
+        this.query("#play-pong-1v1local").on("click", () => {
+            localStorage.setItem("pongGamemode", "1v1local");
+            navigateTo("/play");
         });
+
+        this.query("#play-pong-1v1").on("click", () => {
+            localStorage.setItem("pongGamemode", "1v1");
+            navigateTo("/play");
+        });
+
         return html(
             /* HTML */
             `<div>
@@ -37,7 +48,7 @@ export default class Home extends Component {
                         <img src="/favicon.svg" class="card-img-top pong-game" alt="..." />
                         <div class="card-body pong-game">
                             <p class="card-text pong-game">Play 1v1 local.</p>
-                            <button type="button" class="btn btn-success play">Play</button>
+                            <button type="button" class="btn btn-success play" id="play-pong-1v1local">Play</button>
                         </div>
                     </div>
                     <div class="card pong-game">
@@ -45,7 +56,7 @@ export default class Home extends Component {
                         <img src="/favicon.svg" class="card-img-top pong-game" alt="..." />
                         <div class="card-body pong-game">
                             <p class="card-text pong-game">Play 1v1 remote.</p>
-                            <button type="button" class="btn btn-success play">Play</button>
+                            <button type="button" class="btn btn-success play" id="play-pong-1v1">Play</button>
                         </div>
                     </div>
                 </div>

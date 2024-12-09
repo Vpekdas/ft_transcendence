@@ -147,6 +147,7 @@ def getPlayerProfile(request: HttpRequest):
         "money": player.money,
         "skins": player.skins,
         "pongElo": player.pongElo,
+        "id": player.gid,
     })
 
 """

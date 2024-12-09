@@ -2,13 +2,13 @@ import sys
 import os
 import json
 import math
-from .gameframework import log, Game, ServerManager, Vec3, Box, Sphere, Body, Scene, Client, BodyType, Area, CollisionResult
+from .gameframework import log, Game, ServerManager, Vec3, Box, Sphere, Body, Scene, Client, BodyType, Area, CollisionResult, State
 
 class Player(Body):
     speed = 0.2
 
-    def __init__(self, name: str, client: Client):
-        super().__init__(type="Player", shape=Box(Vec3(-0.5, -2.5, 0), Vec3(0.5, 2.5, 0)), client=client)
+    def __init__(self, name: str):
+        super().__init__(type="Player", shape=Box(Vec3(-0.5, -2.5, 0), Vec3(0.5, 2.5, 0)), client=None)
         self.id = name
         self.score = 0
 
@@ -56,24 +56,32 @@ class ScoreArea(Area):
         self.game.reset()
 
 class Settings:
-    def __init__(self, *, max_score=9):
+    def __init__(self, *, max_score=9, players_expected: list[str]=None):
         self.max_score = max_score
+        self.players_expected = players_expected
 
 class Pong(Game):
-    def __init__(self):
+    def __init__(self, *, gamemode: str = None):
         super().__init__()
 
         self.settings = Settings()
         self.service = 0
         self.players_count = 2
+        self.gamemode = gamemode
+        self.master = None
 
-        self.clients["player1"] = Client("player1")
-        self.clients["player2"] = Client("player2")
-
-        self.player1 = Player("player1", self.clients["player1"])
+        self.player1 = Player("player1")
         self.player1.pos = Vec3(-17, 0, 0)
-        self.player2 = Player("player2", self.clients["player2"])
+        self.player2 = Player("player2")
         self.player2.pos = Vec3(17, 0, 0)
+        # elif gamemode == "1v1":
+        #     self.clients["player1"] = Client("player1")
+        #     self.clients["player2"] = Client("player2")
+
+        #     self.player1 = Player("player1", self.clients["player1"])
+        #     self.player1.pos = Vec3(-17, 0, 0)
+        #     self.player2 = Player("player2", self.clients["player2"])
+        #     self.player2.pos = Vec3(17, 0, 0)
 
         self.ball = Ball()
         self.ball.pos = Vec3(0, 0, 0)
@@ -110,17 +118,76 @@ class Pong(Game):
             pass
 
     async def on_update(self):
-        self.scene.update()
-        await self.broadcast({ "type": "update", "bodies": self.scene.to_dict(), "scores": [ self.player1.score, self.player2.score ] })
+        if self.state == State.STARTED:
+            self.scene.update()
+            await self.broadcast({ "type": "update", "bodies": self.scene.to_dict(), "scores": [ self.player1.score, self.player2.score ] })
+
+    def on_join(self, gamemode: str, player_id: str):
+        if gamemode == "1v1local":
+            self.state = State.STARTED
+            self.clients.append(Client(id=player_id, subid="player1"))
+            self.clients.append(Client(id=player_id, subid="player2"))
+
+            self.player1.client = self.clients[0]
+            self.player2.client = self.clients[1]
+        elif gamemode == "1v1":
+            client = Client(id=player_id)
+            self.clients.append(client)
+
+            if self.player1.client is None:
+                self.player1.client = client
+            elif self.player2.client is None:
+                self.player2.client = client
+
+            if len(self.clients) == 2:
+                self.state = State.STARTED
+
+
+            # if self.settings.players_expected == None or ("player_id" in msg and msg["player_id"] in self.settings.players_expected):
+            #     pass
 
     def on_unhandled_message(self, msg):
         pass
 
-class PongServer(ServerManager):
-    def do_matchmaking(self, conn, mode: str):
-        game = Pong()
-        self.start_game(conn, game)
-        return game.id
+class MatchmakePlayer:
+    def __init__(self, *, conn, player_id: str, gamemode: str):
+        self.conn = conn
+        self.player_id = player_id
+        self.gamemode = gamemode
 
-    def on_join(self, conn) -> bool:
-        return False
+class PongServer(ServerManager):
+    def __init__(self):
+        super().__init__()
+
+        self.players = []
+
+    async def do_matchmaking(self, conn, msg):
+        if msg["gamemode"] == "1v1local":
+            game = Pong(gamemode=msg["gamemode"])
+
+            self.start_game(game)
+
+            # Instantly send a match found to the player since he is playing against himself
+            await conn.send(json.dumps({ "type": "matchFound", "id": game.id }))
+            game.on_join(msg["gamemode"], msg["playerId"])
+            game.consumers.append(conn)
+        elif msg["gamemode"] == "1v1":
+            try:
+                opponent = next(filter(lambda p: p.gamemode == msg["gamemode"], self.players))
+
+                game = Pong(gamemode=msg["gamemode"])
+                self.start_game(game)
+
+                game.on_join(msg["gamemode"], opponent.player_id)
+                game.on_join(msg["gamemode"], msg["playerId"])
+
+                # TODO: We should relying on the connection staying open during the game
+                game.consumers.append(opponent.conn)
+                game.consumers.append(conn)
+
+                await conn.send(json.dumps({ "type": "matchFound", "id": game.id }))
+                await opponent.conn.send(json.dumps({ "type": "matchFound", "id": game.id }))
+
+                self.players.remove(opponent)
+            except StopIteration:
+                self.players.append(MatchmakePlayer(conn=conn, player_id=msg["playerId"], gamemode=msg["gamemode"]))

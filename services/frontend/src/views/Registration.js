@@ -29,15 +29,7 @@ export default class Registration extends Component {
             const nickname = data.get("nickname");
             const password = data.get("password");
 
-            const sanitizedUsername = sanitizeInput(username);
-            const sanitizedNickname = sanitizeInput(nickname);
-            const sanitizedPassword = sanitizeInput(password);
-
-            if (
-                sanitizedUsername.length !== username.length ||
-                sanitizedNickname.length !== nickname.length ||
-                sanitizedPassword.length !== password.length
-            ) {
+            if (!sanitizeInput(username) || !sanitizeInput(nickname) || !sanitizeInput(password)) {
                 this.showToast(
                     "Invalid input detected. Please fill out all fields correctly.",
                     "bi bi-exclamation-triangle-fill"

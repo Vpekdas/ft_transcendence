@@ -29,10 +29,7 @@ export default class Login extends Component {
             const username = data.get("username");
             const password = data.get("password");
 
-            const sanitizedUsername = sanitizeInput(username);
-            const sanitizedPassword = sanitizeInput(password);
-
-            if (sanitizedUsername.length !== username.length || sanitizedPassword.length !== password.length) {
+            if (!sanitizeInput(username) || !sanitizeInput(password)) {
                 this.showToast(
                     "Invalid input detected. Please fill out all fields correctly.",
                     "bi bi-exclamation-triangle-fill"

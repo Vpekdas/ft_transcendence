@@ -24,24 +24,7 @@ export default class Home extends Component {
         this.setTitle("Home");
 
         this.query(".btn.btn-success").on("click", async (event) => {
-            const response = await fetchApi("/api/enterMatchmaking", {
-                method: "POST",
-                body: JSON.stringify({
-                    game: "pong",
-                    mode: "1v1local",
-                }),
-            })
-                .then((res) => res.json())
-                .catch((err) => {
-                    this.showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
-                });
-
-            if (response["error"] != undefined) {
-                console.log("game response: ", response);
-            } else {
-                const id = response["id"];
-                navigateTo("/game");
-            }
+                navigateTo("/play");
         });
         return html(
             /* HTML */

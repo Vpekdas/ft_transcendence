@@ -1,4 +1,5 @@
 import { Component, globalComponents, html } from "../micro";
+import { tr } from "../i18n";
 
 export default class ProfileNavBar extends Component {
     constructor() {
@@ -11,6 +12,11 @@ export default class ProfileNavBar extends Component {
             return "";
         }
 
+        const matchHistoryLanguage = tr("Match History");
+        const statisticsLanguage = tr("Statistics");
+        const skinsLanguage = tr("Skins");
+        const settingsLanguage = tr("Settings");
+
         return html(
             /* HTML */
             `<div class="container-fluid dashboard-navbar">
@@ -22,7 +28,7 @@ export default class ProfileNavBar extends Component {
                             href="/profile/match-history"
                         >
                             <i class="bi bi-clock-history"></i>
-                            <span>Match History</span>
+                            <span>${matchHistoryLanguage}</span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -32,7 +38,7 @@ export default class ProfileNavBar extends Component {
                             href="/profile/statistics"
                         >
                             <i class="bi bi-file-bar-graph"></i>
-                            <span>Statistics</span>
+                            <span>${statisticsLanguage}</span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -42,7 +48,7 @@ export default class ProfileNavBar extends Component {
                             href="/profile/skins"
                         >
                             <i class="bi bi-stars"></i>
-                            <span>Skins</span>
+                            <span>${skinsLanguage}</span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -52,7 +58,7 @@ export default class ProfileNavBar extends Component {
                             href="/profile/settings"
                         >
                             <i class="bi bi-gear"></i>
-                            <span>Settings</span>
+                            <span>${settingsLanguage}</span>
                         </a>
                     </li>
                 </ul>

@@ -1,5 +1,6 @@
 import { Component, globalComponents, html } from "../micro";
 import { isLoggedIn } from "../api";
+import { tr } from "../i18n";
 
 export default class NavBar extends Component {
     constructor() {
@@ -14,10 +15,13 @@ export default class NavBar extends Component {
 
         let logoutNavItem;
 
+        const logoutLanguage = tr("Logout");
+        const profileLanguage = tr("Profile");
+
         if (await isLoggedIn()) {
             logoutNavItem = `<li class="nav-item">
                         <a class="nav-link custom-link ${activeTabClass("/logout")}" data-link href="/logout"
-                            >Logout</a
+                            >${logoutLanguage}</a
                         >
                     </li>`;
         }
@@ -44,7 +48,7 @@ export default class NavBar extends Component {
                             href="/profile/match-history"
                         >
                             <i class="bi bi-person-badge"></i>
-                            <span>Profile</span>
+                            <span>${profileLanguage}</span>
                         </a>
                     </li>
                     <li class="nav-item">

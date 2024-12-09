@@ -1,4 +1,13 @@
 {
+    "Username": "Nom d'utilisateur",
+    "Password": "Mot de passe",
+    "Create an account": "Creer un compte",
+    "Profile": "Profil",
+    "Logout": "Se deconnecter",
+    "Match History": "Historique des parties",
+    "Statistics": "Statistiques",
+    "Skins": "Apparences",
+    "Settings": "Parametres",
     "Change": "Changer",
     "New password": "Nouveau mot de passe",
     "Old password": "Ancien mot de passe",

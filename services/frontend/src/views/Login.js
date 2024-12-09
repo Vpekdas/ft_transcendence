@@ -2,6 +2,7 @@ import { fetchApi } from "../api";
 import { navigateTo } from "../router";
 import { Component, globalComponents, html } from "../micro";
 import { sanitizeInput } from "../validateInput";
+import { tr } from "../i18n";
 
 export default class Login extends Component {
     constructor() {
@@ -57,6 +58,10 @@ export default class Login extends Component {
 
         this.query(".create-account-redirect").on("click", () => navigateTo("register"));
 
+        const usernameLanguage = tr("Username");
+        const passwordLanguage = tr("Password");
+        const createLanguage = tr("Create an account");
+
         return html(
             /* HTML */
             ` <div>
@@ -65,7 +70,7 @@ export default class Login extends Component {
                     <form class="login-form was-validated" action="javascript:void(0)">
                         <img src="/img/Amadeus-Logo.webp" class="login-logo" />
                         <div class="row mb-3 login">
-                            <label for="username" class="col-sm-2 col-form-label">Username</label>
+                            <label for="username" class="col-sm-2 col-form-label">${usernameLanguage}</label>
                             <div class="col-sm-8 login">
                                 <input
                                     name="username"
@@ -78,7 +83,7 @@ export default class Login extends Component {
                             </div>
                         </div>
                         <div class="row mb-3 login">
-                            <label for="password" class="col-sm-2 col-form-label">Password</label>
+                            <label for="password" class="col-sm-2 col-form-label">${passwordLanguage}</label>
                             <div class="col-sm-8 login">
                                 <input
                                     name="password"
@@ -95,7 +100,7 @@ export default class Login extends Component {
                                 </button>
                             </div>
                         </div>
-                        <a class="create-account-redirect" href="javascript:void(0)">Create an account</a>
+                        <a class="create-account-redirect" href="javascript:void(0)">${createLanguage}</a>
                     </form>
                 </div>
             </div>`

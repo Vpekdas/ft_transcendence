@@ -1,4 +1,4 @@
-import { fetchApi } from "../api";
+import { fetchApi, isLoggedIn } from "../api";
 import { Component, globalComponents, html } from "../micro";
 import { navigateTo } from "../router";
 
@@ -22,6 +22,10 @@ export default class Home extends Component {
 
     async render() {
         this.setTitle("Home");
+
+        if (!(await isLoggedIn())) {
+            navigateTo("/login");
+        }
 
         // this.query(".btn.btn-success").on("click", async (event) => {
         //         navigateTo("/play");

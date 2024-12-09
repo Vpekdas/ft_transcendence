@@ -1,10 +1,11 @@
 import { Component, globalComponents, html } from "../micro";
 import NavBar from "../components/NavBar";
 import DonutChart from "../components/DonutChart";
-import { fetchApi } from "../api";
+import { fetchApi, isLoggedIn } from "../api";
 import ChangePasswordForm from "../components/ChangePassword";
 import ChangeNicknameForm from "../components/ChangeNickname";
 import DeleteAccountButton from "../components/DeleteAccountButton";
+import { navigateTo } from "../router";
 
 export default class Settings extends Component {
     constructor() {
@@ -12,6 +13,10 @@ export default class Settings extends Component {
     }
 
     async render() {
+        if (!(await isLoggedIn())) {
+            navigateTo("/login");
+        }
+
         this.setTitle("Settings");
 
         this.query("#profilePictureUpload").on("click", async (event) => {

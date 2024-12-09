@@ -1,6 +1,8 @@
 import { Component, globalComponents, html } from "../micro";
 import NavBar from "../components/NavBar";
 import ProfileNavBar from "../components/ProfileNavBar";
+import { isLoggedIn } from "../api";
+import { navigateTo } from "../router";
 
 export default class MatchHistory extends Component {
     constructor() {
@@ -8,6 +10,9 @@ export default class MatchHistory extends Component {
     }
 
     async render() {
+        if (!(await isLoggedIn())) {
+            navigateTo("/login");
+        }
         this.setTitle("Match History");
         return html(
             /* HTML */

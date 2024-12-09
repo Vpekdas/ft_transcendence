@@ -3,13 +3,17 @@ import NavBar from "../components/NavBar";
 import DonutChart from "../components/DonutChart";
 import LineChart from "../components/LineChart";
 import ProfileNavBar from "../components/ProfileNavBar";
-
+import { isLoggedIn } from "../api";
+import { navigateTo } from "../router";
 export default class Statistics extends Component {
     constructor() {
         super();
     }
 
     async render() {
+        if (!(await isLoggedIn())) {
+            navigateTo("/login");
+        }
         this.setTitle("Statistics");
 
         return html(

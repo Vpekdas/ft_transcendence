@@ -1,6 +1,7 @@
 import { Component, globalComponents, html } from "../micro";
 import { isLoggedIn } from "../api";
-import { tr } from "../i18n";
+import { tr, setLanguage } from "../i18n";
+import { navigateTo } from "../router";
 
 export default class LanguagePicker extends Component {
     constructor() {
@@ -8,8 +9,14 @@ export default class LanguagePicker extends Component {
     }
 
     async render() {
-        this.query(".btn.btn-outline-info").on("click", async (buttons) => {
-            console.log(buttons);
+        this.query(".btn.btn-secondary.dropdown-toggle").on("click", async () => {
+            const buttons = document.querySelectorAll(".btn.btn-outline-info.language-picker");
+            buttons.forEach((button) => {
+                button.addEventListener("click", async () => {
+                    setLanguage(button.getAttribute("lang"));
+                    navigateTo(window.location.pathname);
+                });
+            });
         });
 
         return html(
@@ -24,19 +31,19 @@ export default class LanguagePicker extends Component {
                 </button>
                 <ul class="dropdown-menu language-picker">
                     <li>
-                        <button type="button language-picker" class="btn btn-outline-info">
+                        <button type="button" lang="fr" class="btn btn-outline-info language-picker">
                             <img src="/img/french.png" />
                             <span>French</span>
                         </button>
                     </li>
                     <li>
-                        <button type="button language-picker" class="btn btn-outline-info">
+                        <button type="button" lang="en" class="btn btn-outline-info language-picker">
                             <img src="/img/english.png" />
                             <span>English</span>
                         </button>
                     </li>
                     <li>
-                        <button type="button language-picker" class="btn btn-outline-info">
+                        <button type="button" lang="kr" class="btn btn-outline-info language-picker">
                             <img src="/img/korean.png" />
                             <span>Korean</span>
                         </button>

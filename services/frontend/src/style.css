@@ -978,6 +978,7 @@ canvas {
 /* GAME CONTAINER */
 
 .container-fluid.game-container {
+    position: relative;
     display: flex;
     height: 100%;
     width: 100%;
@@ -985,21 +986,66 @@ canvas {
     border-color: red;
     border-radius: 10px;
     align-items: center;
+    justify-items: center;
     gap: 20px;
 }
 
 .card.pong-game {
     display: flex;
+    position: relative;
     height: 10%;
     width: 10%;
     align-items: center;
-    justify-content: center;
+    justify-items: center;
 }
 
 .card-body.pong-game {
     display: flex;
-    flex-direction: column;
     height: 100%;
     width: 100%;
+    align-items: center;
     justify-content: center;
+    flex-direction: column;
+}
+
+.card-body.pong-game button {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+/* LANGUAGE PICKER */
+
+.dropdown.language-picker {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.dropdown-menu.language-picker li {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.dropdown-menu.language-picker button {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+}
+
+.dropdown-menu.language-picker img {
+    margin-right: 10px;
+}
+
+.language-picker-container {
+    margin-left: auto;
 }

@@ -40,8 +40,6 @@ class ClientConsumer(AsyncWebsocketConsumer):
                     log(data)
                     client = game.get_client(self.player.gid, data["playerSubId"] if "playerSubId" in data else None)
                     if client is not None: client.on_input(data)
-                elif data["type"] == "join":
-                    game.on_join(data)
                 else:
                     game.on_unhandled_message(data)
         except json.JSONDecodeError:

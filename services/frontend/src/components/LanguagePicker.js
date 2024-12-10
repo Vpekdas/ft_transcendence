@@ -8,7 +8,10 @@ export default class LanguagePicker extends Component {
     }
 
     async render() {
-        this.query("click");
+        this.query(".btn.btn-outline-info").on("click", async (buttons) => {
+            console.log(buttons);
+        });
+
         return html(
             /* HTML */ ` <div class="dropdown language-picker">
                 <button

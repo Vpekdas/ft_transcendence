@@ -8,7 +8,7 @@ export default class ChangeProfilePicture extends Component {
     }
 
     async render() {
-        this.query("#profilePictureUpload").on("click", async (event) => {
+        this.query("#profilePictureUpload").on("click", async () => {
             const target = document.getElementById("inputGroupFile04");
             const picture = target.files[0];
 

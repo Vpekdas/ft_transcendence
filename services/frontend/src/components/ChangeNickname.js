@@ -12,7 +12,7 @@ export default class ChangeNicknameForm extends Component {
 
         const info = await post("/api/getPlayerProfile").then((res) => res.json());
 
-        this.query(".btn.btn-primary.change-nickname-button").on("click", async (event) => {
+        this.query(".btn.btn-primary.change-nickname-button").on("click", async () => {
             const oldNickname = document.getElementById("new-nickname").value;
 
             const response = await fetchApi("/api/updateNickname", {

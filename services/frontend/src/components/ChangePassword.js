@@ -10,7 +10,7 @@ export default class ChangePasswordForm extends Component {
     async render() {
         const changeLanguage = tr("Change");
 
-        this.query(".btn.btn-primary.change-password-button").on("click", async (event) => {
+        this.query(".btn.btn-primary.change-password-button").on("click", async () => {
             const oldPassword = document.getElementById("old-password").value;
             const newPassword = document.getElementById("new-password").value;
 

@@ -1,3 +1,7 @@
-export function action(id, subId, actionName, actionType) {
-    return { type: "input", playerId: id, playerSubId: subId, action_name: actionName, action: actionType };
+export function action(subId, actionName, actionType) {
+    if (subId == null) {
+        return { type: "input", action_name: actionName, action: actionType };
+    } else {
+        return { type: "input", playerSubId: subId, action_name: actionName, action: actionType };
+    }
 }

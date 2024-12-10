@@ -319,7 +319,6 @@ class Game:
     def __init__(self):
         self.manager = None
         self.id = ""
-        self.consumers = []
         self.clients = []
         self.scene = Scene()
         self.state = State.IN_LOBBY
@@ -328,7 +327,7 @@ class Game:
         task = asyncio.create_task(self.run())
 
     async def run(self):
-        while self.state == State.IN_LOBBY or len(self.consumers) > 0:
+        while True:
             await self.on_update()
             await asyncio.sleep(0.010)
 
@@ -336,11 +335,16 @@ class Game:
         self.manager.games.pop(self.id)
 
     async def broadcast(self, data):
-        for consumer in self.consumers:
+        consumers = filter(lambda conn: self.get_client(conn.player.gid, None) is not None, self.manager.consumers)
+
+        for consumer in consumers:
             await consumer.send(json.dumps(data))
 
     def get_client(self, id, subid=None) -> Client:
-        return next(filter(lambda c: c.id == id and c.subid == subid, self.clients))
+        try:
+            return next(filter(lambda c: c.id == id and (c.subid == subid), self.clients))
+        except StopIteration:
+            return None
 
     #
     # Callbacks
@@ -358,14 +362,16 @@ class Game:
 class ServerManager:
     def __init__(self):
         self.games = {}
+        self.consumers = []
 
-    def get_game(self, consumer) -> Game:
+    def get_game(self, gid: str) -> Game:
         for id in self.games:
             game = self.games[id]
-            if consumer in game.consumers:
-                return game
+
+            for client in game.clients:
+                if client.id == gid:
+                    return game
         return None
-        # return next(filter(lambda k, v: consumer in v.consumers, self.games))
 
     def make_id(self, k=8) -> str:
         return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
@@ -381,10 +387,17 @@ class ServerManager:
         game.start()
 
     def disconnect(self, consumer):
-        game = self.get_game(consumer)
+        self.consumers.remove(consumer)
 
-        if game is not None:
-            game.consumers.remove(consumer)
+    def already_in_game(self, conn) -> bool:
+        return self.get_game(conn.player.gid) is not None
+
+    #
+    # Error messages
+    #
+
+    async def err_already_in_game(self, conn):
+        await conn.send({ "error": "Already in game" })
 
     #
     # Callbacks
@@ -393,5 +406,5 @@ class ServerManager:
     async def do_matchmaking(self) -> Game:
         return None
 
-    def on_join(self, conn) -> bool:
+    async def on_join(self, conn) -> bool:
         return False

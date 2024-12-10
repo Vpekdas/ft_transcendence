@@ -162,6 +162,11 @@ class PongServer(ServerManager):
         self.players = []
 
     async def do_matchmaking(self, conn, msg):
+        if self.already_in_game(conn):
+            log("Testing!")
+            self.err_already_in_game(conn)
+            return
+
         if msg["gamemode"] == "1v1local":
             game = Pong(gamemode=msg["gamemode"])
 
@@ -170,7 +175,6 @@ class PongServer(ServerManager):
             # Instantly send a match found to the player since he is playing against himself
             await conn.send(json.dumps({ "type": "matchFound", "id": game.id }))
             game.on_join(msg["gamemode"], msg["playerId"])
-            game.consumers.append(conn)
         elif msg["gamemode"] == "1v1":
             try:
                 opponent = next(filter(lambda p: p.gamemode == msg["gamemode"], self.players))
@@ -181,13 +185,17 @@ class PongServer(ServerManager):
                 game.on_join(msg["gamemode"], opponent.player_id)
                 game.on_join(msg["gamemode"], msg["playerId"])
 
-                # TODO: We should relying on the connection staying open during the game
-                game.consumers.append(opponent.conn)
-                game.consumers.append(conn)
-
-                await conn.send(json.dumps({ "type": "matchFound", "id": game.id }))
+                await conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": msg["gamemode"] }))
                 await opponent.conn.send(json.dumps({ "type": "matchFound", "id": game.id }))
 
                 self.players.remove(opponent)
             except StopIteration:
                 self.players.append(MatchmakePlayer(conn=conn, player_id=msg["playerId"], gamemode=msg["gamemode"]))
+
+    async def on_join(self, conn) -> bool:
+        game = self.get_game(conn.player.gid)
+
+        if game is not None:
+            await conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": game.gamemode }))
+        
+        return False

@@ -102,10 +102,10 @@ export const router = async () => {
 };
 
 // Update the browser's history with the new URL and render the corresponding view.
-export const navigateTo = (url) => {
+export const navigateTo = (url, updateHTML = true) => {
     // console.log(new Error().stack);
     history.pushState(null, null, url);
-    router();
+    if (updateHTML !== undefined && updateHTML) router();
 };
 
 export const escapeHTML = (msg) => {

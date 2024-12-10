@@ -2,6 +2,13 @@ function getOrigin() {
     return window.location.origin.substring(0, window.location.origin.lastIndexOf(":"));
 }
 
+export function getOriginNotProtocol() {
+    return window.location.origin
+        .substring(0, window.location.origin.lastIndexOf(":"))
+        .replace("http://", "")
+        .replace("https://", "");
+}
+
 function api(route, port = 8000) {
     return getOrigin() + ":" + port + route;
 }

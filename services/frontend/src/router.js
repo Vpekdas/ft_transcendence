@@ -10,6 +10,7 @@ import Logout from "./views/Logout";
 import Settings from "./views/Settings";
 import Pong from "./views/Pong";
 import Clicker from "./views/Clicker";
+import { isLoggedIn } from "./api";
 
 /**
  * @param {*} routes
@@ -77,6 +78,11 @@ export const router = async () => {
     const app = document.getElementById("app");
     const viewName = match.route.view.name;
 
+    if (location.pathname != "/login" && location.pathname != "/register" && !(await isLoggedIn())) {
+        navigateTo("/login");
+        return;
+    }
+
     try {
         const view = html(`<${viewName} />`);
 
@@ -94,11 +100,11 @@ export const router = async () => {
         if (app.children.length > 0) app.removeChild(app.children[0]);
         app.appendChild(errorView);
     }
+};
 
-    // Handle browser navigation events (back/forward buttons).
-    window.onpopstate = () => {
-        router();
-    };
+// Handle browser navigation events (back/forward buttons).
+window.onpopstate = () => {
+    router();
 };
 
 // Update the browser's history with the new URL and render the corresponding view.

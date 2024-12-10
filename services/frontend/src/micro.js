@@ -287,10 +287,16 @@ class HTMLComponent extends HTMLElement {
     events() {
         if (this.component != undefined) {
             for (let [selector, values] of this.component.accessors) {
+                const elements = this.querySelectorAll(selector);
+
+                if (elements.length == 0) {
+                    continue;
+                }
+
                 for (let [eventName, callback] of values.eventCallbacks) {
-                    const el = this.querySelector(selector);
-                    if (el == null) continue;
-                    el.addEventListener(eventName, callback);
+                    for (let el of elements) {
+                        el.addEventListener(eventName, callback);
+                    }
                 }
             }
         }

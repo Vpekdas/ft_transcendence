@@ -14,7 +14,8 @@ services:
             - Dockerfile
   backend:
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     container_name: backend
     build: services/backend
     ports:
@@ -33,15 +34,6 @@ services:
       - ./.data/postgres:/var/lib/postgresql/data/
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
-  # pong:
-  #   container_name: pong
-  #   build: services/pong
-  #   ports:
-  #     - 1972:1972
-  #   develop:
-  #     watch:
-  #       - action: sync
-  #         path: ./services/pong
-  #         target: /app
-  #         ignore:
-  #           - Dockerfile
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 0.2s

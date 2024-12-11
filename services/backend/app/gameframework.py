@@ -9,7 +9,6 @@ import string
 import enum
 import time
 import threading
-import asyncio
 
 from math import sqrt
 
@@ -314,6 +313,7 @@ class Area(Body):
 class State(enum.Enum):
     IN_LOBBY = 0,
     STARTED = 1,
+    ENDED = 2,
 
 class Game:
     def __init__(self):
@@ -324,21 +324,24 @@ class Game:
         self.state = State.IN_LOBBY
 
     def start(self):
-        task = asyncio.create_task(self.run())
+        # task = asyncio.create_task(self.run())
+        self.thread = Thread(target=self.run)
+        self.thread.start()
 
-    async def run(self):
-        while True:
-            await self.on_update()
-            await asyncio.sleep(0.010)
+    def run(self):
+        while self.state != State.ENDED:
+            self.on_update()
+            # await asyncio.sleep(0.010)
+            time.sleep(0.005)
 
         log(f"Game with id {self.id} exited")
         self.manager.games.pop(self.id)
 
-    async def broadcast(self, data):
+    def broadcast(self, data):
         consumers = filter(lambda conn: self.get_client(conn.player.gid, None) is not None, self.manager.consumers)
 
         for consumer in consumers:
-            await consumer.send(json.dumps(data))
+            consumer.send(json.dumps(data))
 
     def get_client(self, id, subid=None) -> Client:
         try:
@@ -356,7 +359,7 @@ class Game:
     def on_unhandled_message(self, msg):
         pass
 
-    async def on_update(self, conn):
+    def on_update(self, conn):
         pass
 
 class ServerManager:
@@ -396,15 +399,15 @@ class ServerManager:
     # Error messages
     #
 
-    async def err_already_in_game(self, conn):
-        await conn.send({ "error": "Already in game" })
+    def err_already_in_game(self, conn):
+        conn.send(json.dumps({ "error": "Already in game" }))
 
     #
     # Callbacks
     #
 
-    async def do_matchmaking(self) -> Game:
+    def do_matchmaking(self) -> Game:
         return None
 
-    async def on_join(self, conn) -> bool:
+    def on_join(self, conn) -> bool:
         return False

@@ -259,19 +259,21 @@ export class PongGame {
         let score1 = data["scores"][0];
         let score2 = data["scores"][1];
 
-        // const geometry = new TextGeometry(score1 + " - " + score2, {
-        //     font: this.font,
-        //     size: 80,
-        //     depth: 0,
-        //     curveSegments: 12,
-        //     bevelEnabled: true,
-        //     bevelThickness: 10,
-        //     bevelSize: 8,
-        //     bevelOffset: 0,
-        //     bevelSegments: 5,
-        // });
+        const geometry = new TextGeometry(score1 + " - " + score2, {
+            font: this.font,
+            size: 80,
+            depth: 0,
+            curveSegments: 12,
+            bevelEnabled: true,
+            bevelThickness: 10,
+            bevelSize: 8,
+            bevelOffset: 0,
+            bevelSegments: 5,
+        });
 
-        // this.textMesh.geometry = geometry;
+        var oldGeometry = this.textMesh.geometry;
+        this.textMesh.geometry = geometry;
+        oldGeometry.dispose();
     }
 
     async onMessage(data) {

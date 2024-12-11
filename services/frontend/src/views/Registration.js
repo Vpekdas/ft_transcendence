@@ -1,7 +1,7 @@
 import { navigateTo } from "../router";
 import { Component, globalComponents, html } from "../micro";
 import { sanitizeInput } from "../validateInput";
-
+import { tr } from "../i18n";
 export default class Registration extends Component {
     constructor() {
         super();
@@ -58,6 +58,11 @@ export default class Registration extends Component {
 
         this.query(".login-redirect").on("click", () => navigateTo("login"));
 
+        const usernameLanguage = tr("Username");
+        const nicknameLanguage = tr("Nickname");
+        const passwordLanguage = tr("Password");
+        const alreadyAccountLanguage = tr("Already have an account ?");
+
         return html(
             /* HTML */
             ` <div>
@@ -66,7 +71,7 @@ export default class Registration extends Component {
                     <form class="login-form was-validated" action="javascript:void(0)">
                         <img src="/img/Amadeus-Logo.webp" class="login-logo" />
                         <div class="row mb-3 login">
-                            <label for="username" class="col-sm-2 col-form-label">Username</label>
+                            <label for="username" class="col-sm-2 col-form-label">${usernameLanguage}</label>
                             <div class="col-sm-8 login">
                                 <input
                                     name="username"
@@ -79,7 +84,7 @@ export default class Registration extends Component {
                             </div>
                         </div>
                         <div class="row mb-3 login">
-                            <label for="nickname" class="col-sm-2 col-form-label">Nickname</label>
+                            <label for="nickname" class="col-sm-2 col-form-label">${nicknameLanguage}</label>
                             <div class="col-sm-8 login">
                                 <input
                                     name="nickname"
@@ -92,7 +97,7 @@ export default class Registration extends Component {
                             </div>
                         </div>
                         <div class="row mb-3 login">
-                            <label for="password" class="col-sm-2 col-form-label">Password</label>
+                            <label for="password" class="col-sm-2 col-form-label">${passwordLanguage}</label>
                             <div class="col-sm-8 login">
                                 <input
                                     name="password"
@@ -109,7 +114,7 @@ export default class Registration extends Component {
                                 </button>
                             </div>
                         </div>
-                        <a class="login-redirect" href="javascript:void(0)">Already have an account ?</a>
+                        <a class="login-redirect" href="javascript:void(0)">${alreadyAccountLanguage}</a>
                     </form>
                 </div>
             </div>`

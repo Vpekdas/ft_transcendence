@@ -24,8 +24,6 @@ export default class DeleteAccountButton extends Component {
                 });
 
             document.querySelector(".delete-modal-overlay").style.display = "none";
-
-            console.log("delete account response: ", response);
         });
 
         return html(

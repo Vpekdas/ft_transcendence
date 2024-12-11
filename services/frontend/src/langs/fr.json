@@ -1,6 +1,7 @@
 {
     "Username": "Nom d'utilisateur",
     "Password": "Mot de passe",
+    "Nickname": "Pseudo",
     "Create an account": "Creer un compte",
     "Profile": "Profil",
     "Logout": "Se deconnecter",
@@ -14,5 +15,6 @@
     "Delete your account": "Supprimer votre compte",
     "Profile Picture": "Photo de profil",
     "Upload": "Telecharger",
-    "Browse": "Naviguer"
+    "Browse": "Naviguer",
+    "Already have an account ?": "Vous avez deja un compte ?"
 }

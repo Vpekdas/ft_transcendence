@@ -24,7 +24,6 @@ export default class ChangeProfilePicture extends Component {
                     .catch((err) => {
                         error: "Bad input";
                     });
-                console.log("Update profile picture response:", response);
             };
             reader.readAsDataURL(picture);
         });

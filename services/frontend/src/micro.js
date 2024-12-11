@@ -157,6 +157,19 @@ export class Component {
     api(route) {
         return this.getOrigin() + ":8000" + route;
     }
+
+    showToast(message, iconClass) {
+        const toastContainer = document.getElementById("toast-container");
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.innerHTML = `<i class="${iconClass} toast-icon"></i> ${message}`;
+        toast.style.display = "flex";
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 5000);
+    }
 }
 
 class ParsingError extends Error {

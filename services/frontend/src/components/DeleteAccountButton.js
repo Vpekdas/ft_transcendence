@@ -26,20 +26,34 @@ export default class DeleteAccountButton extends Component {
             document.querySelector(".delete-modal-overlay").style.display = "none";
         });
 
+        this.query("#cancel-button").on("click", async () => {
+            document.querySelector(".delete-modal-overlay").style.display = "none";
+        });
+
         return html(
             /* HTML */ ` <div>
-                <button type="submit" class="btn btn-primary delete-account-button">${changeLanguage}</button>
-                <div class="delete-modal-overlay">
-                    <div class="delete-modal-container">
-                        <div class="delete-modal-header">
-                            <h2>Confirm Action</h2>
-                        </div>
-                        <div class="delete-modal-body">
-                            <p>Are you sure you want to delete your account?</p>
-                        </div>
-                        <div class="delete-modal-footer">
-                            <button id="confirm-button" class="modal-button">Confirm</button>
-                            <button id="cancel-button" class="modal-button">Cancel</button>
+                <div class="container-fluid change-password">
+                    <div class="card">
+                        <h5 class="card-title">Delete your account</h5>
+                        <div class="card-body change-password">
+                            <p class="card-text">You can delete your account here.</p>
+                            <button type="submit" class="btn btn-primary change-password-button delete-account-button">
+                                ${changeLanguage}
+                            </button>
+                            <div class="delete-modal-overlay">
+                                <div class="delete-modal-container">
+                                    <div class="delete-modal-header">
+                                        <h2>Confirm Action</h2>
+                                    </div>
+                                    <div class="delete-modal-body">
+                                        <p>Are you sure you want to delete your account?</p>
+                                    </div>
+                                    <div class="delete-modal-footer">
+                                        <button id="confirm-button" class="modal-button">Confirm</button>
+                                        <button id="cancel-button" class="modal-button">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

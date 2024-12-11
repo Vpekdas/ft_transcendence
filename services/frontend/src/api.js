@@ -26,6 +26,5 @@ export async function post(url, init = { body: "{}" }, port = 8000) {
 
 export async function isLoggedIn() {
     const response = await post("/api/isLoggedIn", {}).then((res) => res.json());
-    console.log(response);
     return response["error"] === undefined;
 }

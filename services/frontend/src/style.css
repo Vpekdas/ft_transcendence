@@ -146,7 +146,7 @@
     justify-content: left;
     border-radius: 10px;
     flex-direction: row;
-    overflow: hidden;
+    overflow: auto;
     background: #222;
     color: #ffffff;
     font-family: "Roboto Mono", monospace;
@@ -559,12 +559,6 @@
 
 /* CHANGE FORM */
 
-.container-fluid.change-password-form {
-    display: flex;
-    height: 100%;
-    width: 100%;
-}
-
 .container-fluid.change-nickname-form {
     display: flex;
     height: 100%;
@@ -577,12 +571,34 @@
     width: 100%;
 }
 
+/* Overflow hidden ensure that windows are not scrollable */
 body {
     background: linear-gradient(to bottom, #000000, #1a1a1a);
     color: #ffffff;
     height: 100%;
     width: 100%;
     overflow: hidden;
+}
+
+/* PASSWORD FORM */
+
+.container-fluid.change-password {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+.btn.btn-primary.change-password-button {
+    height: auto;
+    width: 50%;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.card-body.change-password {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* NAV BAR */

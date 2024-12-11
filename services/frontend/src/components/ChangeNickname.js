@@ -13,36 +13,43 @@ export default class ChangeNicknameForm extends Component {
         const info = await post("/api/getPlayerProfile").then((res) => res.json());
 
         this.query(".btn.btn-primary.change-nickname-button").on("click", async () => {
-            const oldNickname = document.getElementById("new-nickname").value;
+            const newNickname = document.getElementById("new-nickname").value;
 
             const response = await fetchApi("/api/updateNickname", {
                 method: "POST",
                 body: JSON.stringify({
-                    nickname: oldNickname,
+                    nickname: newNickname,
                 }),
             })
                 .then((res) => res.json())
                 .catch((err) => {
-                    error: "Bad input";
+                    this.showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
                 });
-
-            console.log("changeNickname response: ", response);
+                
+            if (response.error) {
+                this.showToast(response.error, "bi bi-exclamation-triangle-fill");
+            }
         });
 
-        console.log(info.nickname);
         return html(
             /* HTML */ `<div class="container-fluid change-nickname-form">
-                <input
-                    type="text"
-                    id="new-nickname"
-                    class="form-control"
-                    aria-describedby="passwordHelpBlock"
-                    value="${info["nickname"]}"
-                    autocomplete="off"
-                    required
-                />
-                <button type="submit" class="btn btn-primary change-nickname-button">${changeLanguage}</button>
-                <div>${info.nickname}</div>
+                <div id="toast-container"></div>
+                <div class="card">
+                    <h5 class="card-title">Nickname</h5>
+                    <div class="card-body change-password">
+                        <p class="card-text">You can update your nickname here.</p>
+                        <input
+                            type="text"
+                            id="new-nickname"
+                            class="form-control"
+                            aria-describedby="passwordHelpBlock"
+                            value="${info["nickname"]}"
+                            autocomplete="off"
+                            required
+                        />
+                        <button type="submit" class="btn btn-primary change-password-button">${changeLanguage}</button>
+                    </div>
+                </div>
             </div>`
         );
     }

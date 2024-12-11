@@ -9,19 +9,6 @@ export default class Login extends Component {
         super();
     }
 
-    showToast(message, iconClass) {
-        const toastContainer = document.getElementById("toast-container");
-        const toast = document.createElement("div");
-        toast.className = "toast";
-        toast.innerHTML = `<i class="${iconClass} toast-icon"></i> ${message}`;
-        toast.style.display = "flex";
-        toastContainer.appendChild(toast);
-
-        setTimeout(() => {
-            toast.remove();
-        }, 5000);
-    }
-
     async render() {
         this.query(".login-form").on("submit", async (event) => {
             const form = event.target;

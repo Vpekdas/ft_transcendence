@@ -1,4 +1,4 @@
- export function tr(str) {
+export function tr(str) {
     if (languageDb == undefined) {
         return str;
     }
@@ -6,7 +6,8 @@
     if (languageDb[str] != undefined) {
         return languageDb[str];
     }
-    console.warn(`No translation for \`${str}\` in language \`${getLanguage()}\``);
+    if (localStorage.getItem("lang") != "en")
+        console.warn(`No translation for \`${str}\` in language \`${getLanguage()}\``);
     return str;
 }
 

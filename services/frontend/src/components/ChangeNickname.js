@@ -25,19 +25,19 @@ export default class ChangeNicknameForm extends Component {
                 .catch((err) => {
                     this.showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
                 });
-                
+
             if (response.error) {
                 this.showToast(response.error, "bi bi-exclamation-triangle-fill");
             }
         });
 
         return html(
-            /* HTML */ `<div class="container-fluid change-nickname-form">
+            /* HTML */ `<div class="container-fluid settings">
                 <div id="toast-container"></div>
-                <div class="card">
-                    <h5 class="card-title">Nickname</h5>
-                    <div class="card-body change-password">
-                        <p class="card-text">You can update your nickname here.</p>
+                <div class="card settings">
+                    <h5 class="card-title settings">Nickname</h5>
+                    <div class="card-body settings">
+                        <p class="card-text settings">You can update your nickname here.</p>
                         <input
                             type="text"
                             id="new-nickname"
@@ -47,7 +47,7 @@ export default class ChangeNicknameForm extends Component {
                             autocomplete="off"
                             required
                         />
-                        <button type="submit" class="btn btn-primary change-password-button">${changeLanguage}</button>
+                        <button type="submit" class="btn btn-primary settings">${changeLanguage}</button>
                     </div>
                 </div>
             </div>`

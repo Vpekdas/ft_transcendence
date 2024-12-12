@@ -539,6 +539,12 @@
 
 /* SETTINGS */
 
+.container-fluid.settings {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
 .list-group.settings {
     display: flex;
     flex-direction: column;
@@ -547,28 +553,205 @@
     gap: 20px;
 }
 
-.card {
+.card.settings {
     display: flex;
-    width: 40%;
+    flex-direction: column;
     align-items: center;
+    background: linear-gradient(135deg, rgba(34, 34, 34, 0.9), rgba(0, 0, 0, 0.9)), url("/img/settings.jpg");
+    border: 1px solid #d89123;
+    border-radius: 10px;
+    box-shadow:
+        0 0 10px rgba(216, 145, 35, 0.5),
+        0 0 20px rgba(216, 145, 35, 0.3);
+    padding: 20px;
+    margin: 20px;
+    width: 100%;
+    max-width: 400px;
+    font-family: "Roboto Mono", monospace;
+    color: #d89123;
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.card.settings:hover {
+    transform: scale(1.05);
+    box-shadow:
+        0 0 20px rgba(216, 145, 35, 1),
+        0 0 40px rgba(216, 145, 35, 0.8);
+}
+
+.card-title.settings {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    text-shadow:
+        0 0 5px #d89123,
+        0 0 10px #d89123;
 }
 
 .card-img-top.profile {
-    width: 50%;
+    border: 2px solid #d89123;
+    border-radius: 50%;
+    box-shadow:
+        0 0 10px rgba(216, 145, 35, 0.5),
+        0 0 20px rgba(216, 145, 35, 0.3);
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    margin-bottom: 20px;
 }
 
-/* CHANGE FORM */
-
-.container-fluid.change-nickname-form {
+.card-body.settings {
     display: flex;
-    height: 100%;
     width: 100%;
+    height: 100%;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.container-fluid.change-profile-picture {
-    display: flex;
-    height: 100%;
+.card-text.settings {
+    font-size: 1em;
+    margin-bottom: 20px;
+}
+
+.input.settings {
     width: 100%;
+    background-color: black;
+    color: #d89123;
+    border: 1px solid #7d7d7e;
+    border-radius: 0;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.card-title.settings::before,
+.card-title.settings::after,
+.card-text.settings::before,
+.card-text.settings::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    clip: rect(0, 900px, 0, 0);
+    animation: holographic 2s infinite;
+}
+
+.card-title.settings::before {
+    left: 2px;
+    text-shadow: -2px 0 red;
+    animation: holographic 2s infinite linear alternate-reverse;
+}
+
+.card-title.settings::after {
+    left: -2px;
+    text-shadow: -2px 0 blue;
+    animation: holographic 2s infinite linear alternate;
+}
+
+.card-text.settings::before {
+    left: 2px;
+    text-shadow: -2px 0 red;
+    animation: holographic 2s infinite linear alternate-reverse;
+}
+
+.card-text.settings::after {
+    left: -2px;
+    text-shadow: -2px 0 blue;
+    animation: holographic 2s infinite linear alternate;
+}
+
+@keyframes holographic {
+    0% {
+        clip: rect(42px, 9999px, 44px, 0);
+    }
+    5% {
+        clip: rect(12px, 9999px, 14px, 0);
+    }
+    10% {
+        clip: rect(82px, 9999px, 84px, 0);
+    }
+    15% {
+        clip: rect(32px, 9999px, 34px, 0);
+    }
+    20% {
+        clip: rect(62px, 9999px, 64px, 0);
+    }
+    25% {
+        clip: rect(22px, 9999px, 24px, 0);
+    }
+    30% {
+        clip: rect(72px, 9999px, 74px, 0);
+    }
+    35% {
+        clip: rect(52px, 9999px, 54px, 0);
+    }
+    40% {
+        clip: rect(92px, 9999px, 94px, 0);
+    }
+    45% {
+        clip: rect(42px, 9999px, 44px, 0);
+    }
+    50% {
+        clip: rect(12px, 9999px, 14px, 0);
+    }
+    55% {
+        clip: rect(82px, 9999px, 84px, 0);
+    }
+    60% {
+        clip: rect(32px, 9999px, 34px, 0);
+    }
+    65% {
+        clip: rect(62px, 9999px, 64px, 0);
+    }
+    70% {
+        clip: rect(22px, 9999px, 24px, 0);
+    }
+    75% {
+        clip: rect(72px, 9999px, 74px, 0);
+    }
+    80% {
+        clip: rect(52px, 9999px, 54px, 0);
+    }
+    85% {
+        clip: rect(92px, 9999px, 94px, 0);
+    }
+    90% {
+        clip: rect(42px, 9999px, 44px, 0);
+    }
+    95% {
+        clip: rect(12px, 9999px, 14px, 0);
+    }
+    100% {
+        clip: rect(82px, 9999px, 84px, 0);
+    }
+}
+
+.btn-primary.settings {
+    background-color: transparent;
+    border: 1px solid #d89123;
+    color: #d89123;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.btn-primary.settings:hover {
+    background-color: #d89123;
+    color: #000;
+    box-shadow:
+        0 0 10px #d89123,
+        0 0 20px #d89123;
+    border-color: #d89123;
 }
 
 /* Overflow hidden ensure that windows are not scrollable */
@@ -578,27 +761,6 @@ body {
     height: 100%;
     width: 100%;
     overflow: hidden;
-}
-
-/* PASSWORD FORM */
-
-.container-fluid.change-password {
-    display: flex;
-    height: 100%;
-    width: 100%;
-}
-
-.btn.btn-primary.change-password-button {
-    height: auto;
-    width: 50%;
-    margin-top: 20px;
-    justify-content: center;
-}
-
-.card-body.change-password {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
 
 /* NAV BAR */
@@ -859,17 +1021,7 @@ canvas {
     width: 100%;
 }
 
-/* DELETE ACCOUNT BUTTON */
-
-.delete-modal-container {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    max-width: 400px;
-    width: 100%;
-    text-align: center;
-}
+/* DELETE ACCOUNT */
 
 .delete-modal-overlay {
     position: fixed;
@@ -877,28 +1029,37 @@ canvas {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: none;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    display: none;
+}
+
+.delete-modal-container {
+    background: linear-gradient(135deg, rgba(34, 34, 34, 0.9), rgba(0, 0, 0, 0.9)); /* Dark gradient background */
+    border: 1px solid #d89123;
+    border-radius: 10px;
+    box-shadow:
+        0 0 10px rgba(216, 145, 35, 0.5),
+        0 0 20px rgba(216, 145, 35, 0.3);
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+    font-family: "Roboto Mono", monospace;
+    color: #d89123;
 }
 
 .delete-modal-header h2 {
     margin: 0;
-    font-size: 24px;
-    color: #333;
+    text-shadow:
+        0 0 5px #d89123,
+        0 0 10px #d89123;
 }
 
 .delete-modal-body p {
-    font-size: 16px;
-    color: #666;
     margin: 20px 0;
-}
-
-.delete-modal-footer {
-    display: flex;
-    justify-content: space-around;
 }
 
 .modal-button {
@@ -911,21 +1072,49 @@ canvas {
 }
 
 #confirm-button {
-    background-color: #d9534f;
-    color: #fff;
+    background-color: transparent;
+    border: 1px solid #d89123;
+    color: #d89123;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: "Roboto Mono", monospace;
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease,
+        box-shadow 0.3s ease;
 }
 
 #confirm-button:hover {
-    background-color: #c9302c;
+    background-color: #d89123;
+    color: #000;
+    box-shadow:
+        0 0 10px #d89123,
+        0 0 20px #d89123;
+    border-color: #d89123;
 }
 
 #cancel-button {
-    background-color: #5bc0de;
-    color: #fff;
+    background-color: transparent;
+    border: 1px solid #5bc0de;
+    color: #5bc0de;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: "Roboto Mono", monospace;
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease,
+        box-shadow 0.3s ease;
 }
 
 #cancel-button:hover {
-    background-color: #31b0d5;
+    background-color: #5bc0de;
+    color: #000;
+    box-shadow:
+        0 0 10px #5bc0de,
+        0 0 20px #5bc0de;
+    border-color: #5bc0de;
 }
 
 /* TOAST */
@@ -1009,8 +1198,8 @@ canvas {
 .card.pong-game {
     display: flex;
     position: relative;
-    height: 10%;
-    width: 10%;
+    height: 20%;
+    width: 20%;
     align-items: center;
     justify-items: center;
 }

@@ -4,7 +4,7 @@ import DonutChart from "../components/DonutChart";
 import { fetchApi, isLoggedIn } from "../api";
 import ChangePasswordForm from "../components/ChangePassword";
 import ChangeNicknameForm from "../components/ChangeNickname";
-import DeleteAccountButton from "../components/DeleteAccountButton";
+import DeleteAccount from "../components/DeleteAccount";
 import ChangeProfilePicture from "../components/ChangeProfilePicture";
 import { navigateTo } from "../router";
 import { tr } from "../i18n";
@@ -34,7 +34,7 @@ export default class Settings extends Component {
                         <ChangeProfilePicture />
                         <ChangePasswordForm />
                         <ChangeNicknameForm />
-                        <DeleteAccountButton />
+                        <DeleteAccount />
                     </ul>
                 </div>
             </div>`

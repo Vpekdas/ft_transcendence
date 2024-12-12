@@ -10,7 +10,7 @@ export default class ChangePasswordForm extends Component {
     async render() {
         const changeLanguage = tr("Change");
 
-        this.query(".btn.btn-primary.change-password-button").on("click", async () => {
+        this.query(".btn.btn-primary.settings").on("click", async () => {
             const oldPassword = document.getElementById("old-password").value;
             const newPassword = document.getElementById("new-password").value;
             const newPasswordConfirm = document.getElementById("new-password-confirm").value;
@@ -37,12 +37,12 @@ export default class ChangePasswordForm extends Component {
             }
         });
         return html(
-            /* HTML */ `<div class="container-fluid change-password">
+            /* HTML */ `<div class="container-fluid settings">
                 <div id="toast-container"></div>
-                <div class="card password">
-                    <h5 class="card-title">Password</h5>
-                    <div class="card-body change-password">
-                        <p class="card-text">You can update your password here.</p>
+                <div class="card settings">
+                    <h5 class="card-title settings">Password</h5>
+                    <div class="card-body settings">
+                        <p class="card-text settings">You can update your password here.</p>
                         <input
                             type="password"
                             id="old-password"
@@ -67,7 +67,7 @@ export default class ChangePasswordForm extends Component {
                             placeholder="${tr("Confirm new password")}"
                             autocomplete="off"
                         />
-                        <button type="submit" class="btn btn-primary change-password-button">${changeLanguage}</button>
+                        <button type="submit" class="btn btn-primary settings">${changeLanguage}</button>
                     </div>
                 </div>
             </div>`

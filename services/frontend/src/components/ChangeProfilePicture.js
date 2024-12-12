@@ -47,10 +47,10 @@ export default class ChangeProfilePicture extends Component {
                     <h5 class="card-title settings">${profilePictureLanguage}</h5>
                     <img src="${this.api(`/api/getProfilePicture?nickname=test`)}" class="card-img-top profile" />
                     <div class="card-body settings">
-                        <div class="input-group">
+                        <div class="input-group settings">
                             <input
                                 type="file"
-                                class="form-control"
+                                class="form-control settings"
                                 id="inputGroupFile04"
                                 aria-describedby="profilePictureUpload"
                                 aria-label="Upload"

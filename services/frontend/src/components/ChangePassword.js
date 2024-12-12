@@ -46,7 +46,7 @@ export default class ChangePasswordForm extends Component {
                         <input
                             type="password"
                             id="old-password"
-                            class="form-control"
+                            class="form-control settings"
                             aria-describedby="passwordHelpBlock"
                             placeholder="${tr("Old password")}"
                             autocomplete="off"
@@ -54,7 +54,7 @@ export default class ChangePasswordForm extends Component {
                         <input
                             type="password"
                             id="new-password"
-                            class="form-control"
+                            class="form-control settings"
                             aria-describedby="passwordHelpBlock"
                             placeholder="${tr("New password")}"
                             autocomplete="off"
@@ -62,7 +62,7 @@ export default class ChangePasswordForm extends Component {
                         <input
                             type="password"
                             id="new-password-confirm"
-                            class="form-control"
+                            class="form-control settings"
                             aria-describedby="passwordHelpBlock"
                             placeholder="${tr("Confirm new password")}"
                             autocomplete="off"

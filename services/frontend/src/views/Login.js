@@ -63,7 +63,7 @@ export default class Login extends Component {
                                     name="username"
                                     autocomplete="off"
                                     type="text"
-                                    class="form-control"
+                                    class="form-control settings"
                                     id="username"
                                     required
                                 />
@@ -76,7 +76,7 @@ export default class Login extends Component {
                                     name="password"
                                     autocomplete="off"
                                     type="password"
-                                    class="form-control"
+                                    class="form-control settings"
                                     id="password"
                                     required
                                 />

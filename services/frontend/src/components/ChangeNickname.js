@@ -41,7 +41,7 @@ export default class ChangeNicknameForm extends Component {
                         <input
                             type="text"
                             id="new-nickname"
-                            class="form-control"
+                            class="form-control settings"
                             aria-describedby="passwordHelpBlock"
                             value="${info["nickname"]}"
                             autocomplete="off"

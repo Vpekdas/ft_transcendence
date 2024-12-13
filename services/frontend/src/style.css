@@ -768,12 +768,13 @@
 }
 
 /* Overflow hidden ensure that windows are not scrollable */
+/* ! Weird scroll effect even if there is nothing to scroll ? */
 body {
     background: linear-gradient(to bottom, #000000, #1a1a1a);
     color: #ffffff;
     height: 100%;
     width: 100%;
-    overflow: hidden;
+    overflow: auto;
 }
 
 /* NAV BAR */
@@ -1214,7 +1215,7 @@ canvas {
     border-color: red;
     border-radius: 10px;
     align-items: center;
-    justify-items: center;
+    justify-content: space-evenly;
     gap: 20px;
 }
 
@@ -1288,4 +1289,355 @@ canvas {
     margin-right: 100px;
     display: flex;
     align-items: center;
+}
+
+#outer-wilds {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    background-color: black;
+    z-index: 10;
+}
+
+ow-system {
+    --cycle: 1320s; /* 22-minute cycle if you want this to be game-accurate */
+    --unit: calc(var(--scale, 1) * 95vmin);
+    --sun-glow: #ba702f;
+    --orbit-border-width: 1px;
+
+    position: relative;
+    isolation: isolate;
+
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    justify-content: center;
+    align-items: center;
+    block-size: calc(1 * var(--unit));
+    inline-size: calc(1 * var(--unit));
+    aspect-ratio: 1;
+    margin: auto;
+
+    background: radial-gradient(circle at center, var(--sun-glow), transparent 35%) no-repeat center / var(--unit)
+        var(--unit);
+
+    transition: --scale 5ms linear;
+    animation: --sun-glow var(--cycle) linear infinite;
+}
+
+ow-system[timelapse="true"] {
+    --cycle: 120s; /* Two minutes to make it less boring? */
+}
+
+ow-orbit {
+    position: relative;
+    /* z-index: -1; */
+    pointer-events: none;
+
+    grid-area: 1 / 1 / -1 / -1;
+    place-self: center;
+    display: flex;
+    block-size: calc(var(--orbit-radius) * 2 * var(--unit) * var(--orbit-ratio, 1));
+    inline-size: calc(var(--orbit-radius) * 2 * var(--unit));
+
+    border: var(--orbit-border-width) solid #8888;
+    border-color: color-mix(in oklch, transparent, color-mix(in oklch, var(--fg), var(--w-color)));
+    border-radius: 50%;
+}
+
+ow-name {
+    color: white;
+}
+
+ow-wanderer {
+    display: block;
+    height: calc(var(--body-radius) * 2 * var(--unit));
+    width: calc(var(--body-radius) * 2 * var(--unit));
+    background-size: cover;
+    background-position: center;
+    border-radius: 50%;
+    background: var(--w-image) no-repeat center center;
+    position: relative;
+}
+
+#sun {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    width: 200px;
+    border-radius: 50%;
+    background-color: #f6ab48;
+    box-shadow: 0 0 20px rgba(255, 165, 0, 0.5);
+}
+
+#sun ow-wanderer {
+    height: 100%;
+    width: 100%;
+    border-radius: 50%;
+    background: var(--w-image) no-repeat center center;
+    background-size: cover;
+}
+
+#sun-station {
+    --orbit-radius: 0.055;
+    --body-radius: 0.01;
+    --orbital-speed: 0.025;
+    --w-color: gold;
+    --w-angle: 90deg;
+
+    animation: --eaten calc(54.5 / 120 * var(--cycle)) linear 1 forwards;
+}
+
+#sun-station ow-wanderer {
+    height: calc(var(--body-radius) * 2 * var(--unit));
+    width: calc(var(--body-radius) * 2 * var(--unit));
+    border-radius: 50%; /* Make it circular */
+    background: url("https://i.imgur.com/KcqPZnw.png") no-repeat center center;
+    background-size: cover;
+    z-index: 2;
+}
+
+#interloper {
+    --orbit-radius: 0.278;
+    --body-radius: 0.015;
+    --orbit-ratio: 0.575;
+    --orbital-speed: 0.4125;
+    --tilt-axis: -8.9deg;
+    --w-color: cyan;
+    --orbit-dir: -1;
+    --w-offset: 55%;
+    transform-origin: 93.5% 47.6%;
+    transform: translate(-41%, 0) rotate(var(--tilt-axis));
+    animation: --eaten calc(119 / 120 * var(--cycle)) linear 1 forwards;
+}
+
+#interloper ow-wanderer {
+    background: url("https://i.imgur.com/3EF5IMK.png") no-repeat center center;
+    background-size: cover;
+    z-index: 2;
+}
+
+#hourglass-twins {
+    --orbit-radius: 0.105;
+    --body-radius: 0.0000001;
+    --orbital-speed: 0.091667;
+    --w-color: orangered;
+    --w-offset: 60%;
+}
+
+#hourglass-twins > ow-wanderer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    --revolution-dir: reverse;
+}
+
+#hourglass-twins > ow-wanderer:defined[image] {
+    --gap: calc(0.0075 * var(--unit));
+}
+
+#hourglass-twins > ow-wanderer:defined[image]::before {
+    content: "";
+    position: absolute;
+    inset: 50%;
+    flex-shrink: 0;
+    block-size: var(--gap);
+    inline-size: var(--gap);
+    margin: auto;
+    background: inherit;
+    scale: 2;
+}
+
+#twins {
+    --orbit-radius: 0.0075;
+    --body-radius: 0.0000001;
+    --orbital-speed: 0;
+    --w-offset: 0%;
+}
+
+#ash-twin,
+#ember-twin {
+    --orbit-radius: 0.0075;
+    --body-radius: 0.005;
+    --orbital-speed: 0;
+}
+
+#ember-twin {
+    --w-offset: 50%;
+}
+
+#timber-hearth {
+    --orbit-radius: 0.18;
+    --body-radius: 0.015;
+    --orbital-speed: 0.191667;
+    --w-color: greenyellow;
+    --w-offset: -12%;
+}
+
+#timber-hearth ow-wanderer {
+    background: url("https://i.imgur.com/s93MtRV.png") no-repeat center center;
+    background-size: cover;
+    animation: spin var(--spin-speed) linear infinite;
+    z-index: 2;
+}
+
+#attlerock {
+    --orbit-radius: 0.0125;
+    --body-radius: 0.01;
+    --orbital-speed: 0;
+    --w-color: slategray;
+}
+
+#attlerock ow-wanderer {
+    background: url("https://i.imgur.com/rxdFlJ8.png") no-repeat center center;
+    background-size: cover;
+    animation: spin var(--spin-speed) linear infinite;
+    z-index: 2;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+#brittle-hollow {
+    --orbit-radius: 0.245;
+    --body-radius: 0.02;
+    --orbital-speed: 0.3;
+    --w-color: darkturquoise;
+    --w-offset: 5%;
+}
+
+#brittle-hollow ow-wanderer {
+    background: url("https://i.imgur.com/e6oWjiF.png") no-repeat center center;
+    background-size: cover;
+    animation: spin var(--spin-speed) linear infinite;
+    z-index: 2;
+}
+
+#hollows-lantern {
+    --orbit-radius: 0.015;
+    --body-radius: 0.01;
+    --orbital-speed: 0;
+    --w-color: darkorange;
+}
+
+#hollows-lantern ow-wanderer {
+    background: url("https://i.imgur.com/sb8xB97.png") no-repeat center center;
+    background-size: cover;
+    animation: spin var(--spin-speed) linear infinite;
+    filter: drop-shadow(0 0 3px #e48a24);
+    z-index: 2;
+}
+
+#giants-deep {
+    --orbit-radius: 0.3425;
+    --body-radius: 0.0225;
+    --orbital-speed: 0.5;
+    --w-color: darkseagreen;
+    --w-offset: -20%;
+    --revolution-dir: reverse;
+    --spin-speed: 0.0666;
+}
+
+#giants-deep ow-wanderer {
+    background: url("https://i.imgur.com/OMosCVo.png") no-repeat center center;
+    background-size: cover;
+    animation: spin var(--spin-speed) linear infinite;
+    z-index: 2;
+}
+
+#orbital-probe-cannon {
+    --orbit-radius: 0.025;
+    --body-radius: 0.01;
+    --orbital-speed: 0.75;
+    --spin-speed: 0;
+    --w-color: gold;
+    --w-angle: 270deg;
+}
+
+#orbital-probe-cannon ow-wanderer {
+    background: url("https://i.imgur.com/v5oGWQN.png") no-repeat center center;
+    background-size: cover;
+    animation: spin var(--spin-speed) linear infinite;
+    z-index: 2;
+}
+
+#dark-bramble {
+    --orbit-radius: 0.4175;
+    --body-radius: 0.01625;
+    --orbital-speed: 0.6667;
+    --w-color: darkslateblue;
+    --w-offset: 27.5%;
+}
+
+#dark-bramble ow-wanderer {
+    background: url("https://i.imgur.com/C0CtSuY.png") no-repeat center center;
+    background-size: cover;
+    animation: spin var(--spin-speed) linear infinite;
+    z-index: 2;
+}
+
+#interloper {
+    --orbit-radius: 0.278;
+    --body-radius: 0.015;
+    --orbit-ratio: 0.575;
+    --orbital-speed: 0.4125;
+    --tilt-axis: -8.9deg;
+    --w-color: cyan;
+    --orbit-dir: -1;
+    --w-offset: 55%;
+    transform-origin: 93.5% 47.6%;
+    transform: translate(-41%, 0) rotate(var(--tilt-axis));
+    animation: --eaten calc(119 / 120 * var(--cycle)) linear 1 forwards;
+}
+
+#interloper ow-wanderer {
+    background: url("https://i.imgur.com/3EF5IMK.png") no-repeat center center;
+    background-size: cover;
+    animation: spin var(--spin-speed) linear infinite;
+    --revolution-animation: none;
+    offset-rotate: auto -90deg;
+    z-index: 2;
+}
+
+#quantum-moon {
+    --orbit-radius: 0.0275;
+    --body-radius: 0.015;
+    --orbital-speed: 0.25;
+    --w-color: slategray;
+    --w-offset: 50%;
+    animation: --quantum 5s ease-in-out infinite;
+}
+
+#quantum-moon ow-wanderer {
+    background: url("https://i.imgur.com/NvXkTjY.png") no-repeat center center;
+    background-size: cover;
+    animation: spin var(--spin-speed) linear infinite;
+    z-index: 2;
+}
+
+#white-hole-station {
+    --orbit-radius: 0.48;
+    --body-radius: 0.0325;
+    --orbital-speed: 0;
+    --w-color: gold;
+    --w-offset: 48%;
+    border-color: transparent; /* The station doesn't orbit */
+}
+
+#white-hole-station ow-wanderer {
+    background: url("https://i.imgur.com/9CC2K51.png") no-repeat center center;
+    background-size: cover;
+    animation: spin var(--spin-speed) linear infinite;
+    z-index: 2;
 }

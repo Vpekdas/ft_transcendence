@@ -9,8 +9,6 @@ import ChangeProfilePicture from "../components/ChangeProfilePicture";
 import { navigateTo } from "../router";
 import { tr } from "../i18n";
 
-// TODO: Outer wilds solar systems
-// https://codepen.io/chriskirknielsen/pen/YzmxERE
 export default class Settings extends Component {
     constructor() {
         super();

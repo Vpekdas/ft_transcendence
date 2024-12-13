@@ -1404,11 +1404,11 @@ ow-system[labels="false"] ow-name {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 200px;
-    width: 200px;
+    height: 100px;
+    width: 100px;
     border-radius: 50%;
-    background-color: #f6ab48;
     box-shadow: 0 0 20px rgba(255, 165, 0, 0.5);
+    border-color: transparent;
 }
 
 #sun ow-wanderer {
@@ -1417,16 +1417,18 @@ ow-system[labels="false"] ow-name {
     border-radius: 50%;
     background: var(--w-image) no-repeat center center;
     background-size: cover;
+    border: none;
 }
 
 #sun-station {
-    --orbit-radius: 0.055;
+    --orbit-radius: 0.085;
     --body-radius: 0.01;
     --orbital-speed: 0.025;
-    --w-color: gold;
+    --w-color: #f6ab48;
     --w-angle: 90deg;
 
     animation: --eaten calc(54.5 / 120 * var(--cycle)) linear 1 forwards;
+    border: none;
 }
 
 #sun-station ow-wanderer {
@@ -1466,11 +1468,12 @@ ow-system[labels="false"] ow-name {
     --w-offset: 60%;
 }
 
-#hourglass-twins > ow-wanderer {
+#hourglass-twins ow-wanderer {
     display: flex;
     justify-content: center;
     align-items: center;
     --revolution-dir: reverse;
+    background-size: cover;
 }
 
 #hourglass-twins > ow-wanderer:defined[image] {
@@ -1488,23 +1491,50 @@ ow-system[labels="false"] ow-name {
     background: inherit;
     scale: 2;
 }
-
 #twins {
-    --orbit-radius: 0.0075;
-    --body-radius: 0.0000001;
+    --orbit-radius: 0.0175;
+    --body-radius: 0.05;
     --orbital-speed: 0;
     --w-offset: 0%;
+    width: 20px;
+    height: 20px;
+    aspect-ratio: 1 / 1;
+    border: transparent;
 }
 
-#ash-twin,
 #ember-twin {
-    --orbit-radius: 0.0075;
+    --orbit-radius: 0.0115;
+    --body-radius: 0.005;
+    --orbital-speed: 0;
+    --w-offset: 50%;
+}
+
+#ash-twin {
+    --orbit-radius: 0;
     --body-radius: 0.005;
     --orbital-speed: 0;
 }
 
-#ember-twin {
-    --w-offset: 50%;
+/* ! Try to solve why this rule does not override. */
+
+#ash-twin ow-wanderer {
+    display: block; /* Ensure the elements are block-level */
+    width: calc(var(--body-radius) * 4 * var(--unit)); /* Set explicit width */
+    height: calc(var(--body-radius) * 4 * var(--unit)); /* Set explicit height */
+    background-size: contain; /* Use contain to ensure the entire image is visible */
+    background-position: center;
+    z-index: 2;
+    background: url("https://i.imgur.com/SUYEIpK.png") no-repeat center center;
+}
+
+#ember-twin ow-wanderer {
+    display: block; /* Ensure the elements are block-level */
+    width: calc(var(--body-radius) * 4 * var(--unit)); /* Set explicit width */
+    height: calc(var(--body-radius) * 4 * var(--unit)); /* Set explicit height */
+    background-size: contain; /* Use contain to ensure the entire image is visible */
+    background-position: center;
+    z-index: 2;
+    background: url("https://i.imgur.com/iPE6eao.png") no-repeat center center;
 }
 
 #timber-hearth {
@@ -1636,6 +1666,7 @@ ow-system[labels="false"] ow-name {
     --w-color: slategray;
     --w-offset: 50%;
     animation: --quantum 5s ease-in-out infinite;
+    border-color: transparent;
 }
 
 #quantum-moon ow-wanderer {

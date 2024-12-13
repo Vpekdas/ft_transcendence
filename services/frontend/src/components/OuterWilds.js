@@ -3,6 +3,7 @@ import { isLoggedIn } from "../api";
 import { tr, setLanguage, getLanguage } from "../i18n";
 import { navigateTo } from "../router";
 
+// TODO Add the following feat: Hide some easter eggs on some planets, for example to redirect to our group projects.
 class Wanderer extends HTMLElement {
     constructor() {
         super();

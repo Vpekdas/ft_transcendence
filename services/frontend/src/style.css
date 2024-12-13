@@ -1348,8 +1348,15 @@ ow-orbit {
     border-radius: 50%;
 }
 
+ow-wanderer,
 ow-name {
-    color: white;
+    --orbit-animation: orbit-animation calc(var(--cycle) * var(--orbital-speed)) linear var(--initial-delay, 0s)
+        infinite;
+
+    offset-path: ellipse(
+        calc(var(--orbit-radius) * var(--unit)) calc(var(--orbit-radius) * var(--unit) * var(--orbit-ratio, 1)) at 50%
+            50%
+    );
 }
 
 ow-wanderer {
@@ -1361,6 +1368,35 @@ ow-wanderer {
     border-radius: 50%;
     background: var(--w-image) no-repeat center center;
     position: relative;
+    animation: var(--orbit-animation);
+}
+
+ow-name {
+    position: absolute;
+    top: 40%;
+    left: calc(100% + 2px);
+    transform: translateY(-50%);
+    white-space: nowrap;
+    color: #fff;
+    padding: 20px 0px;
+    z-index: 3;
+    display: flex;
+    animation: var(--orbit-animation);
+}
+
+ow-name[shy],
+ow-system[labels="false"] ow-name {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+@keyframes orbit-animation {
+    from {
+        offset-distance: 0%;
+    }
+    to {
+        offset-distance: 100%;
+    }
 }
 
 #sun {
@@ -1482,7 +1518,6 @@ ow-wanderer {
 #timber-hearth ow-wanderer {
     background: url("https://i.imgur.com/s93MtRV.png") no-repeat center center;
     background-size: cover;
-    animation: spin var(--spin-speed) linear infinite;
     z-index: 2;
 }
 
@@ -1496,17 +1531,7 @@ ow-wanderer {
 #attlerock ow-wanderer {
     background: url("https://i.imgur.com/rxdFlJ8.png") no-repeat center center;
     background-size: cover;
-    animation: spin var(--spin-speed) linear infinite;
     z-index: 2;
-}
-
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
 }
 
 #brittle-hollow {
@@ -1520,7 +1545,6 @@ ow-wanderer {
 #brittle-hollow ow-wanderer {
     background: url("https://i.imgur.com/e6oWjiF.png") no-repeat center center;
     background-size: cover;
-    animation: spin var(--spin-speed) linear infinite;
     z-index: 2;
 }
 
@@ -1534,7 +1558,6 @@ ow-wanderer {
 #hollows-lantern ow-wanderer {
     background: url("https://i.imgur.com/sb8xB97.png") no-repeat center center;
     background-size: cover;
-    animation: spin var(--spin-speed) linear infinite;
     filter: drop-shadow(0 0 3px #e48a24);
     z-index: 2;
 }
@@ -1552,7 +1575,6 @@ ow-wanderer {
 #giants-deep ow-wanderer {
     background: url("https://i.imgur.com/OMosCVo.png") no-repeat center center;
     background-size: cover;
-    animation: spin var(--spin-speed) linear infinite;
     z-index: 2;
 }
 
@@ -1568,7 +1590,6 @@ ow-wanderer {
 #orbital-probe-cannon ow-wanderer {
     background: url("https://i.imgur.com/v5oGWQN.png") no-repeat center center;
     background-size: cover;
-    animation: spin var(--spin-speed) linear infinite;
     z-index: 2;
 }
 
@@ -1583,7 +1604,6 @@ ow-wanderer {
 #dark-bramble ow-wanderer {
     background: url("https://i.imgur.com/C0CtSuY.png") no-repeat center center;
     background-size: cover;
-    animation: spin var(--spin-speed) linear infinite;
     z-index: 2;
 }
 
@@ -1604,7 +1624,6 @@ ow-wanderer {
 #interloper ow-wanderer {
     background: url("https://i.imgur.com/3EF5IMK.png") no-repeat center center;
     background-size: cover;
-    animation: spin var(--spin-speed) linear infinite;
     --revolution-animation: none;
     offset-rotate: auto -90deg;
     z-index: 2;
@@ -1622,7 +1641,6 @@ ow-wanderer {
 #quantum-moon ow-wanderer {
     background: url("https://i.imgur.com/NvXkTjY.png") no-repeat center center;
     background-size: cover;
-    animation: spin var(--spin-speed) linear infinite;
     z-index: 2;
 }
 
@@ -1638,6 +1656,5 @@ ow-wanderer {
 #white-hole-station ow-wanderer {
     background: url("https://i.imgur.com/9CC2K51.png") no-repeat center center;
     background-size: cover;
-    animation: spin var(--spin-speed) linear infinite;
     z-index: 2;
 }

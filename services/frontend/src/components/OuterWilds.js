@@ -33,7 +33,7 @@ export default class OuterWilds extends Component {
             customElements.define("ow-wanderer", Wanderer);
         }
 
-        document.addEventListener("DOMContentLoaded", function () {
+        this.query("#sun").on("click", async () => {
             // Make the quantum moon jump around randomly
             const quantumMoon = document.getElementById("quantum-moon");
             const quantumOrbits = Array.from(document.querySelectorAll("[quantum]"));
@@ -46,22 +46,6 @@ export default class OuterWilds extends Component {
                 const newOrbit = availableOrbits[Math.floor(Math.random() * availableOrbits.length)];
                 const newWanderer = newOrbit.querySelector(":scope > ow-wanderer");
                 newWanderer.appendChild(quantumMoon);
-            });
-
-            const solarSystem = document.querySelector("ow-system");
-
-            solarSystem.addEventListener("animationiteration", (e) => {
-                if (e.animationName !== "--supernova") {
-                    return;
-                }
-
-                // Restarts all animations from the correct position (yes it's a nasty way to do it, I know...)
-                requestAnimationFrame(() => {
-                    solarSystem.hidden = true;
-                    requestAnimationFrame(() => {
-                        solarSystem.hidden = false;
-                    });
-                });
             });
         });
 
@@ -115,7 +99,6 @@ export default class OuterWilds extends Component {
                             <ow-orbit id="orbital-probe-cannon">
                                 <ow-wanderer image="https://i.imgur.com/v5oGWQN.png"></ow-wanderer>
                             </ow-orbit>
-
                             <ow-orbit id="quantum-moon">
                                 <ow-wanderer image="https://i.imgur.com/NvXkTjY.png"></ow-wanderer>
                             </ow-orbit>

@@ -1306,10 +1306,8 @@ ow-system {
     --unit: calc(var(--scale, 1) * 95vmin);
     --sun-glow: #ba702f;
     --orbit-border-width: 1px;
-
     position: relative;
     isolation: isolate;
-
     flex: 1;
     display: grid;
     grid-template-columns: 1fr;
@@ -1320,10 +1318,8 @@ ow-system {
     inline-size: calc(1 * var(--unit));
     aspect-ratio: 1;
     margin: auto;
-
     background: radial-gradient(circle at center, var(--sun-glow), transparent 35%) no-repeat center / var(--unit)
         var(--unit);
-
     transition: --scale 5ms linear;
     animation: --sun-glow var(--cycle) linear infinite;
 }
@@ -1334,29 +1330,15 @@ ow-system[timelapse="true"] {
 
 ow-orbit {
     position: relative;
-    /* z-index: -1; */
     pointer-events: none;
-
     grid-area: 1 / 1 / -1 / -1;
     place-self: center;
     display: flex;
     block-size: calc(var(--orbit-radius) * 2 * var(--unit) * var(--orbit-ratio, 1));
     inline-size: calc(var(--orbit-radius) * 2 * var(--unit));
-
     border: var(--orbit-border-width) solid #8888;
     border-color: color-mix(in oklch, transparent, color-mix(in oklch, var(--fg), var(--w-color)));
     border-radius: 50%;
-}
-
-ow-wanderer,
-ow-name {
-    --orbit-animation: orbit-animation calc(var(--cycle) * var(--orbital-speed)) linear var(--initial-delay, 0s)
-        infinite;
-
-    offset-path: ellipse(
-        calc(var(--orbit-radius) * var(--unit)) calc(var(--orbit-radius) * var(--unit) * var(--orbit-ratio, 1)) at 50%
-            50%
-    );
 }
 
 ow-wanderer {
@@ -1369,6 +1351,13 @@ ow-wanderer {
     background: var(--w-image) no-repeat center center;
     position: relative;
     animation: var(--orbit-animation);
+    --orbit-animation: orbit-animation calc(var(--cycle) * var(--orbital-speed)) linear var(--initial-delay, 0s)
+        infinite;
+    offset-path: ellipse(
+        calc(var(--orbit-radius) * var(--unit)) calc(var(--orbit-radius) * var(--unit) * var(--orbit-ratio, 1)) at 50%
+            50%
+    );
+    pointer-events: auto;
 }
 
 ow-name {
@@ -1382,21 +1371,18 @@ ow-name {
     z-index: 3;
     display: flex;
     animation: var(--orbit-animation);
+    --orbit-animation: orbit-animation calc(var(--cycle) * var(--orbital-speed)) linear var(--initial-delay, 0s)
+        infinite;
+    offset-path: ellipse(
+        calc(var(--orbit-radius) * var(--unit)) calc(var(--orbit-radius) * var(--unit) * var(--orbit-ratio, 1)) at 50%
+            50%
+    );
 }
 
 ow-name[shy],
 ow-system[labels="false"] ow-name {
     visibility: hidden;
     pointer-events: none;
-}
-
-@keyframes orbit-animation {
-    from {
-        offset-distance: 0%;
-    }
-    to {
-        offset-distance: 100%;
-    }
 }
 
 #sun {
@@ -1411,6 +1397,10 @@ ow-system[labels="false"] ow-name {
     border-color: transparent;
 }
 
+#sun:hover {
+    border-color: #ffa500;
+}
+
 #sun ow-wanderer {
     height: 100%;
     width: 100%;
@@ -1418,6 +1408,7 @@ ow-system[labels="false"] ow-name {
     background: var(--w-image) no-repeat center center;
     background-size: cover;
     border: none;
+    animation: rotate360 10s linear infinite;
 }
 
 #sun-station {
@@ -1426,7 +1417,6 @@ ow-system[labels="false"] ow-name {
     --orbital-speed: 0.025;
     --w-color: #f6ab48;
     --w-angle: 90deg;
-
     animation: --eaten calc(54.5 / 120 * var(--cycle)) linear 1 forwards;
     border: none;
 }
@@ -1438,6 +1428,14 @@ ow-system[labels="false"] ow-name {
     background: url("https://i.imgur.com/KcqPZnw.png") no-repeat center center;
     background-size: cover;
     z-index: 2;
+}
+
+#sun-station:hover {
+    border: 1px solid #ffd700;
+}
+
+#sun-station ow-wanderer:hover {
+    border: 1px solid #ffd700;
 }
 
 #interloper {
@@ -1458,6 +1456,7 @@ ow-system[labels="false"] ow-name {
     background: url("https://i.imgur.com/3EF5IMK.png") no-repeat center center;
     background-size: cover;
     z-index: 2;
+    transform: rotate(280deg);
 }
 
 #hourglass-twins {
@@ -1466,6 +1465,14 @@ ow-system[labels="false"] ow-name {
     --orbital-speed: 0.091667;
     --w-color: orangered;
     --w-offset: 60%;
+}
+
+#hourglass-twins ow-wanderer:hover {
+    border: 1px solid #f4a460;
+}
+
+#hourglass-twins:hover {
+    border-color: #f4a460;
 }
 
 #hourglass-twins ow-wanderer {
@@ -1482,24 +1489,28 @@ ow-system[labels="false"] ow-name {
 
 #hourglass-twins > ow-wanderer:defined[image]::before {
     content: "";
-    position: absolute;
+    position: relative;
     inset: 50%;
     flex-shrink: 0;
     block-size: var(--gap);
     inline-size: var(--gap);
-    margin: auto;
     background: inherit;
     scale: 2;
+    left: 10px;
+    top: 1px;
+    animation: rotate360 10s linear infinite;
 }
 #twins {
     --orbit-radius: 0.0175;
     --body-radius: 0.05;
     --orbital-speed: 0;
     --w-offset: 0%;
-    width: 20px;
-    height: 20px;
+    width: 15px;
+    height: 15px;
     aspect-ratio: 1 / 1;
-    border: transparent;
+    align-items: last baseline;
+    border-color: transparent;
+    animation: rotate360 10s linear infinite;
 }
 
 #ember-twin {
@@ -1507,34 +1518,14 @@ ow-system[labels="false"] ow-name {
     --body-radius: 0.005;
     --orbital-speed: 0;
     --w-offset: 50%;
+    animation: --supernova var(--cycle) linear infinite;
 }
 
 #ash-twin {
     --orbit-radius: 0;
     --body-radius: 0.005;
     --orbital-speed: 0;
-}
-
-/* ! Try to solve why this rule does not override. */
-
-#ash-twin ow-wanderer {
-    display: block; /* Ensure the elements are block-level */
-    width: calc(var(--body-radius) * 4 * var(--unit)); /* Set explicit width */
-    height: calc(var(--body-radius) * 4 * var(--unit)); /* Set explicit height */
-    background-size: contain; /* Use contain to ensure the entire image is visible */
-    background-position: center;
-    z-index: 2;
-    background: url("https://i.imgur.com/SUYEIpK.png") no-repeat center center;
-}
-
-#ember-twin ow-wanderer {
-    display: block; /* Ensure the elements are block-level */
-    width: calc(var(--body-radius) * 4 * var(--unit)); /* Set explicit width */
-    height: calc(var(--body-radius) * 4 * var(--unit)); /* Set explicit height */
-    background-size: contain; /* Use contain to ensure the entire image is visible */
-    background-position: center;
-    z-index: 2;
-    background: url("https://i.imgur.com/iPE6eao.png") no-repeat center center;
+    animation: --supernova var(--cycle) linear infinite;
 }
 
 #timber-hearth {
@@ -1545,23 +1536,40 @@ ow-system[labels="false"] ow-name {
     --w-offset: -12%;
 }
 
+#timber-hearth ow-wanderer:hover {
+    border: 1px solid #228b22;
+}
+
+#timber-hearth:hover {
+    border-color: #228b22;
+}
+
 #timber-hearth ow-wanderer {
     background: url("https://i.imgur.com/s93MtRV.png") no-repeat center center;
     background-size: cover;
     z-index: 2;
+    animation:
+        --supernova var(--cycle) linear infinite,
+        rotate360 10s linear infinite,
+        var(--orbit-animation);
+    align-content: center;
 }
 
 #attlerock {
-    --orbit-radius: 0.0125;
+    --orbit-radius: 0.0225;
     --body-radius: 0.01;
     --orbital-speed: 0;
     --w-color: slategray;
+    border: none;
+    bottom: 4px;
+    right: 4px;
 }
 
 #attlerock ow-wanderer {
     background: url("https://i.imgur.com/rxdFlJ8.png") no-repeat center center;
     background-size: cover;
     z-index: 2;
+    border: none;
 }
 
 #brittle-hollow {
@@ -1572,17 +1580,32 @@ ow-system[labels="false"] ow-name {
     --w-offset: 5%;
 }
 
+#brittle-hollow:hover {
+    border-color: #483d8b;
+}
+
+#brittle-hollow ow-wanderer:hover {
+    border: 1px solid #483d8b;
+}
+
 #brittle-hollow ow-wanderer {
     background: url("https://i.imgur.com/e6oWjiF.png") no-repeat center center;
     background-size: cover;
     z-index: 2;
+    animation:
+        --supernova var(--cycle) linear infinite,
+        rotate360 10s linear infinite,
+        var(--orbit-animation);
 }
 
 #hollows-lantern {
-    --orbit-radius: 0.015;
+    --orbit-radius: 0.0265;
     --body-radius: 0.01;
     --orbital-speed: 0;
     --w-color: darkorange;
+    right: 4px;
+    bottom: 4px;
+    border: none;
 }
 
 #hollows-lantern ow-wanderer {
@@ -1590,6 +1613,7 @@ ow-system[labels="false"] ow-name {
     background-size: cover;
     filter: drop-shadow(0 0 3px #e48a24);
     z-index: 2;
+    border-color: transparent;
 }
 
 #giants-deep {
@@ -1600,27 +1624,51 @@ ow-system[labels="false"] ow-name {
     --w-offset: -20%;
     --revolution-dir: reverse;
     --spin-speed: 0.0666;
+    position: relative;
+}
+
+#giants-deep:hover {
+    border-color: #2e8b57;
+}
+
+#giants-deep ow-wanderer:hover {
+    border: 1px solid #2e8b57;
 }
 
 #giants-deep ow-wanderer {
     background: url("https://i.imgur.com/OMosCVo.png") no-repeat center center;
     background-size: cover;
     z-index: 2;
+    height: calc(var(--body-radius) * 2 * var(--unit));
+    width: calc(var(--body-radius) * 2 * var(--unit));
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation:
+        --supernova var(--cycle) linear infinite,
+        rotate360 10s linear infinite,
+        var(--orbit-animation);
 }
 
 #orbital-probe-cannon {
-    --orbit-radius: 0.025;
+    --orbit-radius: 0.0225;
     --body-radius: 0.01;
     --orbital-speed: 0.75;
     --spin-speed: 0;
     --w-color: gold;
     --w-angle: 270deg;
+    border-color: transparent;
+    right: 2px;
+    bottom: 2px;
 }
 
 #orbital-probe-cannon ow-wanderer {
     background: url("https://i.imgur.com/v5oGWQN.png") no-repeat center center;
     background-size: cover;
     z-index: 2;
+    animation: none;
 }
 
 #dark-bramble {
@@ -1631,10 +1679,22 @@ ow-system[labels="false"] ow-name {
     --w-offset: 27.5%;
 }
 
+#dark-bramble:hover {
+    border-color: #dc143c;
+}
+
+#dark-bramble ow-wanderer:hover {
+    border: 1px solid #dc143c;
+}
+
 #dark-bramble ow-wanderer {
     background: url("https://i.imgur.com/C0CtSuY.png") no-repeat center center;
     background-size: cover;
     z-index: 2;
+    animation:
+        --supernova var(--cycle) linear infinite,
+        rotate360 10s linear infinite,
+        var(--orbit-animation);
 }
 
 #interloper {
@@ -1649,6 +1709,14 @@ ow-system[labels="false"] ow-name {
     transform-origin: 93.5% 47.6%;
     transform: translate(-41%, 0) rotate(var(--tilt-axis));
     animation: --eaten calc(119 / 120 * var(--cycle)) linear 1 forwards;
+}
+
+#interloper:hover {
+    border-color: Cyan;
+}
+
+#interloper ow-wanderer:hover {
+    border: 1px solid cyan;
 }
 
 #interloper ow-wanderer {
@@ -1666,13 +1734,18 @@ ow-system[labels="false"] ow-name {
     --w-color: slategray;
     --w-offset: 50%;
     animation: --quantum 5s ease-in-out infinite;
-    border-color: transparent;
+    border: none;
+}
+
+#quantum-moon ow-wanderer:hover {
+    border: 1px solid #c0c0c0;
 }
 
 #quantum-moon ow-wanderer {
     background: url("https://i.imgur.com/NvXkTjY.png") no-repeat center center;
     background-size: cover;
     z-index: 2;
+    animation: none;
 }
 
 #white-hole-station {
@@ -1688,4 +1761,93 @@ ow-system[labels="false"] ow-name {
     background: url("https://i.imgur.com/9CC2K51.png") no-repeat center center;
     background-size: cover;
     z-index: 2;
+}
+
+#white-hole-station ow-wanderer:hover {
+    border: 1px solid #ffffff;
+}
+
+#white-hole-station:hover {
+    border-color: #ffffff;
+}
+
+@keyframes rotate360 {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes orbit-animation {
+    from {
+        offset-distance: 0%;
+    }
+    to {
+        offset-distance: 100%;
+    }
+}
+
+@keyframes --sun-glow {
+    99% {
+        --sun-glow: red;
+        background-size: 0 0;
+    }
+    99.5% {
+        --sun-glow: cyan;
+        background-size: var(--unit) var(--unit);
+    }
+    100% {
+        --sun-glow: white;
+        background-size: calc(var(--unit) * 4) calc(var(--unit) * 2);
+    }
+}
+
+@keyframes --eaten {
+    0%,
+    99.9% {
+        visibility: visible;
+    }
+    100% {
+        visibility: hidden;
+    }
+}
+
+@keyframes --quantum {
+    0%,
+    1% {
+        opacity: 0;
+    }
+    5%,
+    95% {
+        opacity: 1;
+    }
+    99%,
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes --supernova {
+    0% {
+        transform: scale(1);
+    }
+    99% {
+        transform: scale(1.25);
+        filter: hue-rotate(-20deg);
+        --w-color: #f6ab48;
+        z-index: 2;
+    }
+    99.5% {
+        transform: scale(0.25);
+        filter: hue-rotate(160deg);
+        --w-color: cyan;
+        z-index: 9;
+    }
+    100% {
+        transform: scale(12);
+        filter: hue-rotate(160deg) brightness(2);
+        --w-color: white;
+    }
 }

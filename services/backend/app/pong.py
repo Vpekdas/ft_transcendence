@@ -4,7 +4,7 @@ import json
 import math
 from datetime import datetime
 
-from .gameframework import log, Game, ServerManager, Vec3, Box, Sphere, Body, Scene, Client, BodyType, Area, CollisionResult, State
+from .gameframework import log, sync, Game, ServerManager, Vec3, Box, Sphere, Body, Scene, Client, BodyType, Area, CollisionResult, State
 from .models import PongGameResult, PongOngoingGame
 
 def time_secs():
@@ -117,17 +117,16 @@ class Pong(Game):
 
             # Save the result of the game in the database
             result = PongGameResult(scores=[self.score1.score, self.score2.score], timeStarted=self.timeStarted, timeEnded=time_secs())
-            result.save()
+            sync(lambda: result.save())
 
             # Remove the ongoing game from the database
-            # ongoingGame = PongOngoingGame.objects.filter(gid=self.id).first()
-            # ongoingGame.delete()
+            ongoingGame = sync(lambda: PongOngoingGame.objects.filter(gid=self.id).first())
+            sync(lambda: ongoingGame.delete())
         else:
             # Update the score
-            # ongoingGame = PongOngoingGame.objects.filter(gid=self.id).first()
-            # ongoingGame.scores = [self.player1.score, self.player1.score]
-            # ongoingGame.save()
-            pass
+            ongoingGame = sync(lambda: PongOngoingGame.objects.filter(gid=self.id).first())
+            ongoingGame.scores = [self.player1.score, self.player1.score]
+            sync(lambda: ongoingGame.save())
 
     async def on_update(self):
         if self.state == State.STARTED:
@@ -143,9 +142,9 @@ class Pong(Game):
             self.player1.client = self.clients[0]
             self.player2.client = self.clients[1]
 
-            # self.timeStarted = time_secs()
-            # ongoingGame = PongOngoingGame(gid=self.id, gamemode=self.gamemode, timeStarted=self.timeStarted, players=[player_id], scores=[0, 0])
-            # ongoingGame.save()
+            self.timeStarted = time_secs()
+            ongoingGame = PongOngoingGame(gid=self.id, gamemode=self.gamemode, timeStarted=self.timeStarted, players=[player_id], scores=[0, 0])
+            sync(lambda: ongoingGame.save())
         elif gamemode == "1v1":
             client = Client(id=player_id)
             self.clients.append(client)
@@ -159,9 +158,9 @@ class Pong(Game):
                 self.state = State.STARTED
 
                 # Add an ongoing game to the database
-                # self.timeStarted = time_secs()
-                # ongoingGame = PongOngoingGame(gid=self.id, gamemode=self.gamemode, timeStarted=self.timeStarted, players=[self.player1.id, self.player2.id], scores=[0, 0])
-                # ongoingGame.save()
+                self.timeStarted = time_secs()
+                ongoingGame = PongOngoingGame(gid=self.id, gamemode=self.gamemode, timeStarted=self.timeStarted, players=[self.player1.id, self.player2.id], scores=[0, 0])
+                sync(lambda: ongoingGame.save())
 
             # if self.settings.players_expected == None or ("player_id" in msg and msg["player_id"] in self.settings.players_expected):
             #     pass

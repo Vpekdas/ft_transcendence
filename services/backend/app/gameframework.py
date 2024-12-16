@@ -15,6 +15,7 @@ from math import sqrt
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from threading import Thread
+from multiprocessing.pool import ThreadPool
 
 # https://stackoverflow.com/questions/71384132/best-approach-to-multiple-websocket-client-connections-in-python
 # https://discuss.python.org/t/websocket-messages-sent-to-multiple-clients-are-not-being-received/62781
@@ -411,3 +412,7 @@ class ServerManager:
 
     async def on_join(self, conn) -> bool:
         return False
+
+def sync(f, *args):
+    pool = ThreadPool(processes=1)
+    return pool.apply_async(f, *args).get()

@@ -33,7 +33,9 @@ urlpatterns = [
     path('api/getPlayerProfile', views.getPlayerProfile),
     path('api/getProfilePicture', views.getProfilePicture),
     path('api/updateProfilePicture', views.updateProfilePicture),
-    path('api/deleteProfile', views.deleteProfile)
+    path('api/deleteProfile', views.deleteProfile),
+
+    path('api/getMatch', views.getMatch),
 ]
 
 websocket_urlpatterns = [

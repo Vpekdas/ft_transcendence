@@ -14,7 +14,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 
-from app.models import Player, duck
+from app.models import duck, Player, PongGameResult
 
 def make_id(k=16) -> str:
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
@@ -196,9 +196,18 @@ def deleteProfile(request: HttpRequest):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "User is not authenticated"})
 
-    # data = json.loads(request.body)
-
     user = request.user
     user.delete()
 
     return JsonResponse({})
+
+@require_POST
+def getMatch(request: HttpRequest):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "User is not authenticated"})
+
+    # data = json.loads(request.body)
+    player = Player.objects.filter(user=request.user)
+    results = [r for r in PongGameResult.objects.all() if player.gid in r.players]
+
+    return JsonResponse({ "results": [json.loads(r) for r in results] })

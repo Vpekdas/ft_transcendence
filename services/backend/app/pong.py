@@ -120,20 +120,21 @@ class Pong(Game):
             result.save()
 
             # Remove the ongoing game from the database
-            ongoingGame = PongOngoingGame.objects.filter(gid=self.id).first()
-            ongoingGame.delete()
+            # ongoingGame = PongOngoingGame.objects.filter(gid=self.id).first()
+            # ongoingGame.delete()
         else:
             # Update the score
-            ongoingGame = PongOngoingGame.objects.filter(gid=self.id).first()
-            ongoingGame.scores = [self.player1.score, self.player1.score]
-            ongoingGame.save()
+            # ongoingGame = PongOngoingGame.objects.filter(gid=self.id).first()
+            # ongoingGame.scores = [self.player1.score, self.player1.score]
+            # ongoingGame.save()
+            pass
 
-    def on_update(self):
+    async def on_update(self):
         if self.state == State.STARTED:
             self.scene.update()
-            self.broadcast({ "type": "update", "bodies": self.scene.to_dict(), "scores": [ self.player1.score, self.player2.score ] })
+            await self.broadcast({ "type": "update", "bodies": self.scene.to_dict(), "scores": [ self.player1.score, self.player2.score ] })
 
-    def on_join(self, gamemode: str, player_id: str):
+    async def on_join(self, gamemode: str, player_id: str):
         if gamemode == "1v1local":
             self.state = State.STARTED
             self.clients.append(Client(id=player_id, subid="player1"))
@@ -141,6 +142,10 @@ class Pong(Game):
 
             self.player1.client = self.clients[0]
             self.player2.client = self.clients[1]
+
+            # self.timeStarted = time_secs()
+            # ongoingGame = PongOngoingGame(gid=self.id, gamemode=self.gamemode, timeStarted=self.timeStarted, players=[player_id], scores=[0, 0])
+            # ongoingGame.save()
         elif gamemode == "1v1":
             client = Client(id=player_id)
             self.clients.append(client)
@@ -154,14 +159,14 @@ class Pong(Game):
                 self.state = State.STARTED
 
                 # Add an ongoing game to the database
-                self.timeStarted = time_secs()
-                ongoingGame = PongOngoingGame(gid=self.id, gamemode=self.gamemode, timeStarted=self.timeStarted, players=[self.player1.id, self.player2.id], scores=[0, 0])
-                ongoingGame.save()
+                # self.timeStarted = time_secs()
+                # ongoingGame = PongOngoingGame(gid=self.id, gamemode=self.gamemode, timeStarted=self.timeStarted, players=[self.player1.id, self.player2.id], scores=[0, 0])
+                # ongoingGame.save()
 
             # if self.settings.players_expected == None or ("player_id" in msg and msg["player_id"] in self.settings.players_expected):
             #     pass
 
-    def on_unhandled_message(self, msg):
+    async def on_unhandled_message(self, msg):
         pass
 
 class MatchmakePlayer:
@@ -176,7 +181,7 @@ class PongServer(ServerManager):
 
         self.players = []
 
-    def do_matchmaking(self, conn, msg):
+    async def do_matchmaking(self, conn, msg):
         if self.already_in_game(conn):
             self.err_already_in_game(conn)
             return
@@ -187,8 +192,8 @@ class PongServer(ServerManager):
             self.start_game(game)
 
             # Instantly send a match found to the player since he is playing against himself
-            conn.send(json.dumps({ "type": "matchFound", "id": game.id }))
-            game.on_join(msg["gamemode"], msg["playerId"])
+            await conn.send(json.dumps({ "type": "matchFound", "id": game.id }))
+            await game.on_join(msg["gamemode"], msg["playerId"])
         elif msg["gamemode"] == "1v1":
             try:
                 opponent = next(filter(lambda p: p.gamemode == msg["gamemode"], self.players))
@@ -196,22 +201,20 @@ class PongServer(ServerManager):
                 game = Pong(gamemode=msg["gamemode"])
                 self.start_game(game)
 
-                game.on_join(msg["gamemode"], opponent.player_id)
-                game.on_join(msg["gamemode"], msg["playerId"])
+                await game.on_join(msg["gamemode"], opponent.player_id)
+                await game.on_join(msg["gamemode"], msg["playerId"])
 
-                conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": msg["gamemode"] }))
-                opponent.conn.send(json.dumps({ "type": "matchFound", "id": game.id }))
-
-                log("Hello")
+                await conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": msg["gamemode"] }))
+                await opponent.conn.send(json.dumps({ "type": "matchFound", "id": game.id }))
 
                 self.players.remove(opponent)
             except StopIteration:
                 self.players.append(MatchmakePlayer(conn=conn, player_id=msg["playerId"], gamemode=msg["gamemode"]))
 
-    def on_join(self, conn) -> bool:
+    async def on_join(self, conn) -> bool:
         game = self.get_game(conn.player.gid)
 
         if game is not None:
-            conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": game.gamemode }))
+            await conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": game.gamemode }))
 
         return False

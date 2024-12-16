@@ -2,6 +2,7 @@
 Common logic shared by all games.
 """
 
+import asyncio
 import sys
 import json
 import random
@@ -324,28 +325,27 @@ class Game:
         self.state = State.IN_LOBBY
 
     def start(self):
-        # task = asyncio.create_task(self.run())
-        self.thread = Thread(target=self.run)
-        self.thread.start()
+        self.task = asyncio.create_task(self.run())
+        # self.thread = Thread(target=self.run)
+        # self.thread.start()
 
-    def run(self):
+    async def run(self):
         while self.state != State.ENDED:
-            self.on_update()
-            # await asyncio.sleep(0.010)
-            time.sleep(0.005)
+            await self.on_update()
+            await asyncio.sleep(0.010)
 
         log(f"Game with id {self.id} exited")
         self.manager.games.pop(self.id)
 
-    def broadcast(self, data):
+    async def broadcast(self, data):
         consumers = filter(lambda conn: self.get_client(conn.player.gid, None) is not None, self.manager.consumers)
 
         for consumer in consumers:
-            consumer.send(json.dumps(data))
+            await consumer.send(json.dumps(data))
 
     def get_client(self, id, subid=None) -> Client:
         try:
-            return next(filter(lambda c: c.id == id and (c.subid == subid), self.clients))
+            return next(filter(lambda c: c.id == id and (subid is None or c.subid == subid), self.clients))
         except StopIteration:
             return None
 
@@ -353,13 +353,13 @@ class Game:
     # Callbacks
     #
 
-    def on_join(self, msg) -> bool:
+    async def on_join(self, msg) -> bool:
         pass
 
-    def on_unhandled_message(self, msg):
+    async def on_unhandled_message(self, msg):
         pass
 
-    def on_update(self, conn):
+    async def on_update(self, conn):
         pass
 
 class ServerManager:
@@ -399,15 +399,15 @@ class ServerManager:
     # Error messages
     #
 
-    def err_already_in_game(self, conn):
-        conn.send(json.dumps({ "error": "Already in game" }))
+    async def err_already_in_game(self, conn):
+        await conn.send(json.dumps({ "error": "Already in game" }))
 
     #
     # Callbacks
     #
 
-    def do_matchmaking(self) -> Game:
+    async def do_matchmaking(self) -> Game:
         return None
 
-    def on_join(self, conn) -> bool:
+    async def on_join(self, conn) -> bool:
         return False

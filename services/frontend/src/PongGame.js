@@ -277,6 +277,8 @@ export class PongGame {
     }
 
     async onMessage(data) {
+        console.log(data);
+
         if (data.type == "update" && this.id != null) {
             this.onUpdateReceived(data);
         } else if (data.type == "matchFound") {

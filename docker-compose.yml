@@ -31,9 +31,14 @@ services:
     image: postgres:14
     container_name: database
     volumes:
-      - ./.data/postgres:/var/lib/postgresql/data/
+      - type: volume
+        source: postgres_data
+        target: /var/lib/postgresql/data
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
       interval: 0.2s
+volumes:
+  postgres_data:
+    driver: local

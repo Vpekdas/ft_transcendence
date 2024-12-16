@@ -1,0 +1,25 @@
+import { fetchApi } from "../api";
+import { navigateTo } from "../router";
+import { Component, globalComponents, html } from "../micro";
+import { tr } from "../i18n";
+import OuterWilds from "../components/OuterWilds";
+import NavBar from "../components/NavBar";
+
+export default class SolarSystem extends Component {
+    constructor() {
+        super();
+    }
+
+    async render() {
+        return html(
+            /* HTML */
+            ` <div>
+                <NavBar />
+                <div id="space-background">
+                    <OuterWilds />
+                </div>
+            </div>`
+        );
+    }
+}
+globalComponents.set("SolarSystem", SolarSystem);

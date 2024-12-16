@@ -57,6 +57,14 @@ export default class NavBar extends Component {
                             >Counter</a
                         >
                     </li>
+                    <li class="nav-item">
+                        <a
+                            class="nav-link custom-link ${activeTabClass("/solar-system")}"
+                            data-link
+                            href="/solar-system"
+                            >Solar System</a
+                        >
+                    </li>
                     ${logoutNavItem}
                     <div class="language-picker-container">
                         <LanguagePicker />

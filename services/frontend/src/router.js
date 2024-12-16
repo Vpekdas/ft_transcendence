@@ -11,6 +11,7 @@ import Settings from "./views/Settings";
 import Pong from "./views/Pong";
 import Clicker from "./views/Clicker";
 import { isLoggedIn } from "./api";
+import SolarSystem from "./views/SolarSystem";
 
 /**
  * @param {*} routes
@@ -68,6 +69,7 @@ export const router = async () => {
         { path: "/play", view: Pong },
         { path: "/play/[id]", view: Pong },
         { path: "/duck", view: Clicker },
+        { path: "/solar-system", view: SolarSystem },
     ];
 
     let match = matchRoute(routes, location.pathname);

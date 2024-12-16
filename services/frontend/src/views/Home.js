@@ -1,7 +1,6 @@
 import { fetchApi, isLoggedIn } from "../api";
 import { Component, globalComponents, html } from "../micro";
 import { navigateTo } from "../router";
-import OuterWilds from "../components/OuterWilds";
 
 export default class Home extends Component {
     constructor() {
@@ -48,7 +47,6 @@ export default class Home extends Component {
                         </div>
                     </div>
                 </div>
-                <div id="outer-wilds"><OuterWilds /></div>
             </div>`
         );
     }

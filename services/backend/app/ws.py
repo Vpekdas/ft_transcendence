@@ -38,7 +38,8 @@ class PongClientConsumer(AsyncWebsocketConsumer):
                     return
 
                 if data["type"] == "input":
-                    client = game.get_client(self.player.id, data["playerSubId"] if "playerSubId" in data else None)
+                    log(data)
+                    client = game.get_client(self.player.id, data["playerSubId"] if ("playerSubId" in data) or (data["playerSubId"] is None) else None)
                     if client is not None: client.on_input(data)
                 else:
                     await game.on_unhandled_message(data)

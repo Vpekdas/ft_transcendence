@@ -191,7 +191,7 @@ class PongServer(ServerManager):
             self.start_game(game)
 
             # Instantly send a match found to the player since he is playing against himself
-            await conn.send(json.dumps({ "type": "matchFound", "id": game.id }))
+            await conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": msg["gamemode"] }))
             await game.on_join(msg["gamemode"], msg["playerId"])
         elif msg["gamemode"] == "1v1":
             try:

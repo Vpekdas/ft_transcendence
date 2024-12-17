@@ -246,7 +246,7 @@ def tournament_create(request: HttpRequest):
     if "gameSettings" not in data or "playerCount" not in data:
         return JsonResponse({ "error": "Invalid request" })
 
-    if data["openType"] not in ["open", "password"] or data["playerCount"] not in [2, 4, 8, 16]:
+    if data["openType"] not in ["open", "invite", "password"] or data["playerCount"] not in [2, 4, 8, 16]:
         pass
 
     game_settings = data["gameSettings"]

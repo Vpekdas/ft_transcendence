@@ -327,8 +327,6 @@ class Game:
 
     def start(self):
         self.task = asyncio.create_task(self.run())
-        # self.thread = Thread(target=self.run)
-        # self.thread.start()
 
     async def run(self):
         while self.state != State.ENDED:
@@ -345,6 +343,8 @@ class Game:
             await consumer.send(json.dumps(data))
 
     def get_client(self, id: int, subid=None) -> Client:
+        if subid is not None: log(subid)
+
         try:
             return next(filter(lambda c: c.id == id and (subid is None or c.subid == subid), self.clients))
         except StopIteration:

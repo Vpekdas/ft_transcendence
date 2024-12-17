@@ -146,6 +146,8 @@ export class PongGame {
 
         let lastKey;
 
+        console.log(this.gamemode);
+
         if (this.gamemode == "1v1local") {
             window.addEventListener("keydown", (event) => {
                 if (event.key == lastKey) return;
@@ -277,8 +279,6 @@ export class PongGame {
     }
 
     async onMessage(data) {
-        console.log(data);
-
         if (data.type == "update" && this.id != null) {
             this.onUpdateReceived(data);
         } else if (data.type == "matchFound") {

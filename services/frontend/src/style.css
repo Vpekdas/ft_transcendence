@@ -1856,3 +1856,23 @@ ow-system[labels="false"] ow-name {
     align-items: center;
     background-color: #000;
 }
+
+/* CREATE TOURNAMENT */
+
+.container-fluid.dashboard-container.tournament-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.btn-group.player-count {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+.container-fluid.settings.tournament-password {
+    display: none;
+}
+
+/* ! Update button background (It is blue bootstrap)*/

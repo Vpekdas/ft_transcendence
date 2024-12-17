@@ -24,6 +24,10 @@ export default class Home extends Component {
             navigateTo("/play");
         });
 
+        this.query("#play-pong-tournament").on("click", () => {
+            navigateTo("/create-tournament");
+        });
+
         return html(
             /* HTML */
             `<div>
@@ -44,6 +48,14 @@ export default class Home extends Component {
                         <div class="card-body pong-game">
                             <p class="card-text pong-game">Play 1v1 remote.</p>
                             <button type="button" class="btn btn-success play" id="play-pong-1v1">Play</button>
+                        </div>
+                    </div>
+                    <div class="card pong-game">
+                        <h5 class="card-title pong-game">Pong Game</h5>
+                        <img src="/favicon.svg" class="card-img-top pong-game" alt="..." />
+                        <div class="card-body pong-game">
+                            <p class="card-text pong-game">Create Tournament.</p>
+                            <button type="button" class="btn btn-success play" id="play-pong-tournament">Create</button>
                         </div>
                     </div>
                 </div>

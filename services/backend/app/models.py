@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import ForeignKey, CharField, JSONField, TextField, IntegerField
+from django.db.models import ForeignKey, CharField, JSONField, TextField, IntegerField, BooleanField
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
 
@@ -22,6 +22,21 @@ class Player(models.Model):
 
     friends = ArrayField(IntegerField(), default=list)
     blockedUsers = ArrayField(IntegerField(), default=list)
+
+class Tournament(models.Model):
+    name = TextField()
+    playerCount = IntegerField()
+    openType = TextField()
+    password = TextField(null=True)
+    game = TextField()
+    fillWithAI = BooleanField()
+
+    gameSettings = JSONField()
+
+    tid = CharField(max_length=8)
+    players = ArrayField(IntegerField(), default=list)
+    steps = JSONField(default=dict)
+    state = TextField()
 
 class PongOngoingGame(models.Model):
     gid = CharField(max_length=8)

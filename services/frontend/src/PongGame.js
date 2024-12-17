@@ -109,7 +109,7 @@ export class PongGame {
         const spaceTexture = new THREE.TextureLoader().load("/img/space.jpg");
         this.scene.background = spaceTexture;
 
-        this.ws = new WebSocket(`ws://${getOriginNotProtocol()}:8000/ws`);
+        this.ws = new WebSocket(`ws://${getOriginNotProtocol()}:8000/pong`);
         this.ws.onopen = (event) => {
             if (this.id == undefined) {
                 this.ws.send(

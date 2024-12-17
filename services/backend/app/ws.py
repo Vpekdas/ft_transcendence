@@ -7,7 +7,7 @@ from asgiref.sync import sync_to_async
 
 pong_manager = PongServer()
 
-class ClientConsumer(AsyncWebsocketConsumer):
+class PongClientConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user = self.scope["user"]
 

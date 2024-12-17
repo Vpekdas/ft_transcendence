@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path
 
 from app import views
-from .ws import ClientConsumer
+from .ws import PongClientConsumer
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -36,11 +36,14 @@ urlpatterns = [
     path('api/player/<str:id>/picture', views.getProfilePicture), # was api/getProfilePicture
     path('api/player/<str:id>/picture/update', views.updateProfilePicture), # was api/updateProfilePicture
     path('api/player/<str:id>/delete', views.deleteProfile), # was api/deleteProfile
-
     path('api/player/<str:id>/matches', views.getMatch),
+
+    path('api/tournament/create', views.tournament_create),
+    path('api/tournament/<str:id>', views.tournament_info),
+    path('api/tournament/<str:id>/check-password', views.tournament_check_password),
 ]
 
 websocket_urlpatterns = [
-    path('ws', ClientConsumer.as_asgi())
+    path('pong', PongClientConsumer.as_asgi()),
 ]
 

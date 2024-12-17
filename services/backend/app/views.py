@@ -5,6 +5,7 @@ import string
 
 import django
 import base64
+import hashlib
 
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.http.request import HttpRequest
@@ -14,7 +15,13 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 
-from app.models import duck, Player, PongGameResult
+from app.models import duck, Player, Tournament, PongGameResult
+
+def make_id(k=8) -> str:
+    return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
+
+def hash_weak_password(s) -> str:
+    return hashlib.sha256("salty$" + s).hexdigest()
 
 """
 Create a new user.
@@ -227,3 +234,52 @@ def getMatch(request: HttpRequest, id):
     results = [r for r in PongGameResult.objects.all() if player.id in r.players]
 
     return JsonResponse({ "results": [json.loads(r) for r in results] })
+
+# /api/tournament/create
+@require_POST
+def tournament_create(request: HttpRequest):
+    if not request.user.is_authenticated:
+        return JsonResponse({ "error": "User is not authenticated" })
+
+    data = json.loads(request.body)
+
+    if "gameSettings" not in data or "playerCount" not in data:
+        return JsonResponse({ "error": "Invalid request" })
+
+    if data["openType"] not in ["open", "password"] or data["playerCount"] not in [2, 4, 8, 16]:
+        pass
+
+    game_settings = data["gameSettings"]
+    tid = make_id()
+
+    t = Tournament(name=data["name"], tid=tid, openType=data["openType"], password=hash_weak_password(data["password"]) if "password" in data else None, game=data["game"], gameSettings=game_settings, fillWithAI=bool(data["fillWithAI"]), state="lobby")
+    t.save()
+
+    return JsonResponse({ "id": tid })
+
+@require_POST
+def tournament_info(request: HttpRequest, id: str):
+    t = Tournament.objects.filter(tid=id).first()
+
+    if t is None:
+        return JsonResponse({ "error": "Tournament does not exits" })
+
+    return JsonResponse({
+        "game": t.game,
+        "name": t.name,
+        "openType": t.name,
+        "state": t.state,
+    })
+
+@require_POST
+def tournament_check_password(request: HttpRequest, id: str):
+    data = json.loads(request.body)
+
+    t = Tournament.objects.filter(tid=id).first()
+
+    if t is None:
+        return JsonResponse({ "error": "Tournament does not exits" })
+
+    if hash_weak_password(data["password"]) == t.password:
+        return JsonResponse({})
+    return JsonResponse({ "error": "Password does not match" })

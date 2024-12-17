@@ -47,7 +47,7 @@ export class PongGame {
             return;
         }
 
-        this.playerInfo = await post("/api/getPlayerProfile").then((res) => res.json());
+        this.playerInfo = await post("/api/player/c/profile").then((res) => res.json());
 
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(70, c.clientWidth / c.clientHeight, 0.1, 1000);

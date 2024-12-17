@@ -27,15 +27,17 @@ urlpatterns = [
     path('api/signin', views.signin),
     path('api/login', views.loginRoute),
     path('api/logout', views.logoutRoute),
-    path('api/isLoggedIn', views.isLoggedIn),
-    path('api/updatePassword', views.updatePassword),
-    path('api/updateNickname', views.updateNickname),
-    path('api/getPlayerProfile', views.getPlayerProfile),
-    path('api/getProfilePicture', views.getProfilePicture),
-    path('api/updateProfilePicture', views.updateProfilePicture),
-    path('api/deleteProfile', views.deleteProfile),
+    path('api/check-logged', views.isLoggedIn), # was api/isLoggedIn
 
-    path('api/getMatch', views.getMatch),
+    path('api/player/<str:id>/password/update', views.updatePassword), # was api/updatePassword
+    path('api/player/<str:id>/nickname', views.getNickname),
+    path('api/player/<str:id>/nickname/update', views.updateNickname), # was api/updateNickname
+    path('api/player/<str:id>/profile', views.getPlayerProfile), # was api/getPlayerProfile
+    path('api/player/<str:id>/picture', views.getProfilePicture), # was api/getProfilePicture
+    path('api/player/<str:id>/picture/update', views.updateProfilePicture), # was api/updateProfilePicture
+    path('api/player/<str:id>/delete', views.deleteProfile), # was api/deleteProfile
+
+    path('api/player/<str:id>/matches', views.getMatch),
 ]
 
 websocket_urlpatterns = [

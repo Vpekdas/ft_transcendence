@@ -25,7 +25,7 @@ export default class ChangeProfilePicture extends Component {
 
             reader.onload = async (e) => {
                 const content = e.target.result;
-                const response = await fetchApi("/api/updateProfilePicture", {
+                const response = await fetchApi("/api/player/c/picture/update", {
                     method: "POST",
                     body: JSON.stringify({ type: picture.type, image: content }),
                 })
@@ -45,7 +45,7 @@ export default class ChangeProfilePicture extends Component {
             /* HTML */ ` <div class="container-fluid settings">
                 <div class="card settings">
                     <h5 class="card-title settings">${profilePictureLanguage}</h5>
-                    <img src="${this.api(`/api/getProfilePicture?nickname=test`)}" class="card-img-top profile" />
+                    <img src="${this.api(`/api/player/c/picture`)}" class="card-img-top profile" />
                     <div class="card-body settings">
                         <div class="input-group settings">
                             <input

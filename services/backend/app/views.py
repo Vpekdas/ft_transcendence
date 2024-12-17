@@ -16,9 +16,6 @@ from django.contrib.auth.models import User
 
 from app.models import duck, Player, PongGameResult
 
-def make_id(k=16) -> str:
-    return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
-
 """
 Create a new user.
 """
@@ -88,7 +85,7 @@ def isLoggedIn(request: HttpRequest):
 Update the password
 """
 @require_POST
-def updatePassword(request: HttpRequest):
+def updatePassword(request: HttpRequest, id):
     if request.user.is_authenticated:
         data = json.loads(request.body)
 
@@ -114,7 +111,7 @@ def updatePassword(request: HttpRequest):
 Update a nickname
 """
 @require_POST
-def updateNickname(request: HttpRequest):
+def updateNickname(request: HttpRequest, id):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "User is not authenticated"})
 
@@ -131,10 +128,25 @@ def updateNickname(request: HttpRequest):
 
     return JsonResponse({})
 
+def invalid_user_id():
+    return JsonResponse({ "error": "Invalid user identifier" })
+
+@require_POST
+def getNickname(request: HttpRequest, id):
+    if id == "c" and request.user.is_authenticated:
+        return JsonResponse({ "nickname": Player.objects.filter(user=request.user).first().nickname })
+    else:
+        p = Player.objects.filter(id=int(id)).first()
+
+        if p is None:
+            return invalid_user_id()
+
+        return JsonResponse({ "nickname": p.nickname })
+
 """
 """
 @require_POST
-def getPlayerProfile(request: HttpRequest):
+def getPlayerProfile(request: HttpRequest, id):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "User is not authenticated"})
 
@@ -153,12 +165,16 @@ def getPlayerProfile(request: HttpRequest):
 """
 Return the profile picture of a user
 """
-def getProfilePicture(request: HttpRequest):
+def getProfilePicture(request: HttpRequest, id: str):
+    if id == "c" and request.user.is_authenticated:
+        id = int(Player.objects.filter(user=request.user).first().id)
+    else:
+        id = int(id)
+
     if "nickname" not in request.GET:
         return HttpResponse(duck, content_type="image/svg+xml")
 
-    player = Player.objects.filter(nickname=request.GET["nickname"]).first()
-
+    player = Player.objects.filter(id=id).first()
 
     if not player or player.icon is None:
         return HttpResponse(duck, content_type="image/svg+xml")
@@ -170,7 +186,7 @@ def getProfilePicture(request: HttpRequest):
 Update profile picture
 """
 @require_POST
-def updateProfilePicture(request: HttpRequest):
+def updateProfilePicture(request: HttpRequest, id):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "User is not authenticated"})
 
@@ -192,7 +208,7 @@ def updateProfilePicture(request: HttpRequest):
     return JsonResponse({})
 
 @require_POST
-def deleteProfile(request: HttpRequest):
+def deleteProfile(request: HttpRequest, id):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "User is not authenticated"})
 
@@ -202,7 +218,7 @@ def deleteProfile(request: HttpRequest):
     return JsonResponse({})
 
 @require_POST
-def getMatch(request: HttpRequest):
+def getMatch(request: HttpRequest, id):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "User is not authenticated"})
 

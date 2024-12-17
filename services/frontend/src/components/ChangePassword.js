@@ -20,7 +20,7 @@ export default class ChangePasswordForm extends Component {
                 return;
             }
 
-            const response = await fetchApi("/api/updatePassword", {
+            const response = await fetchApi("/api/player/c/password/update", {
                 method: "POST",
                 body: JSON.stringify({
                     oldPassword: oldPassword,

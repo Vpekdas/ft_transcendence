@@ -15,7 +15,7 @@ export default class DeleteAccount extends Component {
         });
 
         this.query("#confirm-button").on("click", async () => {
-            const response = await post("/api/deleteProfile", {
+            const response = await post("/api/player/c/delete", {
                 body: JSON.stringify({}),
             })
                 .then((res) => res.json())

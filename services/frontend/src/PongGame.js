@@ -185,19 +185,19 @@ export class PongGame {
             window.addEventListener("keydown", (event) => {
                 if (event.key == lastKey) return;
 
-                if (event.key === "w") {
+                if (event.key === "w" || event.key === "ArrowUp") {
                     this.ws.send(JSON.stringify(action(null, "up", "press")));
                 }
-                if (event.key === "s") {
+                if (event.key === "s" || event.key === "ArrowDown") {
                     this.ws.send(JSON.stringify(action(null, "down", "press")));
                 }
                 lastKey = event.key;
             });
             window.addEventListener("keyup", (event) => {
-                if (event.key === "w") {
+                if (event.key === "w" || event.key === "ArrowUp") {
                     this.ws.send(JSON.stringify(action(null, "up", "release")));
                 }
-                if (event.key === "s") {
+                if (event.key === "s" || event.key === "ArrowDown") {
                     this.ws.send(JSON.stringify(action(null, "down", "release")));
                 }
                 lastKey = undefined;

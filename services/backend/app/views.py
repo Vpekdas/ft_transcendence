@@ -37,7 +37,7 @@ def signin(request: HttpRequest):
         return JsonResponse({"error": "Username is already taken"})
 
     user = User.objects.create(username=username)
-    player = Player.objects.create(user=user, nickname=nickname, gid=make_id())
+    player = Player.objects.create(user=user, nickname=nickname)
 
     user.set_password(password)
     user.save()
@@ -147,7 +147,7 @@ def getPlayerProfile(request: HttpRequest):
         "money": player.money,
         "skins": player.skins,
         "pongElo": player.pongElo,
-        "id": player.gid,
+        "id": player.id,
     })
 
 """
@@ -208,6 +208,6 @@ def getMatch(request: HttpRequest):
 
     # data = json.loads(request.body)
     player = Player.objects.filter(user=request.user)
-    results = [r for r in PongGameResult.objects.all() if player.gid in r.players]
+    results = [r for r in PongGameResult.objects.all() if player.id in r.players]
 
     return JsonResponse({ "results": [json.loads(r) for r in results] })

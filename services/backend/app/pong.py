@@ -211,7 +211,7 @@ class PongServer(ServerManager):
                 self.players.append(MatchmakePlayer(conn=conn, player_id=msg["playerId"], gamemode=msg["gamemode"]))
 
     async def on_join(self, conn) -> bool:
-        game = self.get_game(conn.player.gid)
+        game = self.get_game(conn.player.id)
 
         if game is not None:
             await conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": game.gamemode }))

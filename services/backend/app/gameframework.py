@@ -172,7 +172,7 @@ class Scene:
 Represent a remote client in a game.
 """
 class Client:
-    def __init__(self, id: str, subid: str=None):
+    def __init__(self, id: int, subid: str=None):
         self.id = id
         self.subid = subid
         self.inputs = dict()
@@ -339,12 +339,12 @@ class Game:
         self.manager.games.pop(self.id)
 
     async def broadcast(self, data):
-        consumers = filter(lambda conn: self.get_client(conn.player.gid, None) is not None, self.manager.consumers)
+        consumers = filter(lambda conn: self.get_client(conn.player.id, None) is not None, self.manager.consumers)
 
         for consumer in consumers:
             await consumer.send(json.dumps(data))
 
-    def get_client(self, id, subid=None) -> Client:
+    def get_client(self, id: int, subid=None) -> Client:
         try:
             return next(filter(lambda c: c.id == id and (subid is None or c.subid == subid), self.clients))
         except StopIteration:
@@ -368,12 +368,12 @@ class ServerManager:
         self.games = {}
         self.consumers = []
 
-    def get_game(self, gid: str) -> Game:
+    def get_game(self, player_id: int) -> Game:
         for id in self.games:
             game = self.games[id]
 
             for client in game.clients:
-                if client.id == gid:
+                if client.id == player_id:
                     return game
         return None
 
@@ -394,7 +394,7 @@ class ServerManager:
         self.consumers.remove(consumer)
 
     def already_in_game(self, conn) -> bool:
-        return self.get_game(conn.player.gid) is not None
+        return self.get_game(conn.player.id) is not None
 
     #
     # Error messages

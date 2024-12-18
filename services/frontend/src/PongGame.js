@@ -289,6 +289,38 @@ export class PongGame {
             this.gamemode = data.gamemode;
             console.log(`Match with id \`${this.id}\` was found !`);
             await this.setupGameTerrain();
+        } else if (data.type == "winner" && !this.gameEnded) {
+            this.gameEnded = true;
+
+            let geometry;
+
+            if (data.winner == this.playerInfo.id) {
+                geometry = new TextGeometry("You win !", {
+                    font: this.font,
+                    size: 80,
+                    depth: 0,
+                    curveSegments: 12,
+                    bevelEnabled: true,
+                    bevelThickness: 10,
+                    bevelSize: 8,
+                    bevelOffset: 0,
+                    bevelSegments: 5,
+                });
+            } else {
+                geometry = new TextGeometry("You loose :(", {
+                    font: this.font,
+                    size: 80,
+                    depth: 0,
+                    curveSegments: 12,
+                    bevelEnabled: true,
+                    bevelThickness: 10,
+                    bevelSize: 8,
+                    bevelOffset: 0,
+                    bevelSegments: 5,
+                });
+            }
+            const mesh = new THREE.Mesh(geometry);
+            this.scene.add(mesh);
         }
     }
 }

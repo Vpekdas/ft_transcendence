@@ -10,11 +10,12 @@ import string
 import enum
 import time
 import threading
-
-from math import sqrt
+import datetime
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from threading import Thread
+from datetime import datetime
+from math import sqrt
 from multiprocessing.pool import ThreadPool
 from .errors import *
 
@@ -23,6 +24,9 @@ from .errors import *
 
 def log(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
+
+def time_secs():
+    return (datetime.now() - datetime(1970, 1, 1)).total_seconds()
 
 class Vec3:
     def __init__(self, x=0, y=0, z=0):
@@ -148,6 +152,9 @@ class Scene:
         body.scene = self
         self.bodies.append(body)
 
+    def get_bodies(self, ty: str):
+        return filter(lambda b: b.type == ty, self.bodies)
+
     def update(self):
         for body in self.bodies:
             body.process()
@@ -189,6 +196,24 @@ class Client:
             self.inputs[action_name] = True
         elif action_type == "release":
             self.inputs[action_name] = False
+
+class ClientAI(Client):
+    def __init__(self):
+        super().__init__(id=-1,subid="ai")
+
+        self.last_update = 0
+        self.target_y = None
+
+    def process(self, scene: Scene):
+        if time_secs() - self.last_update >= 1:
+            self.last_update = time_secs()
+            self.scene = scene
+
+            ball: Body = next(scene.get_bodies("Ball"))
+            ball.velocity.normalized()
+
+        if self.target_y is not None:
+            pass
 
 class BodyType(enum.Enum):
     STATIC = 0

@@ -2,13 +2,10 @@ import sys
 import os
 import json
 import math
-from datetime import datetime
 
-from .gameframework import log, sync, Game, ServerManager, Vec3, Box, Sphere, Body, Scene, Client, BodyType, Area, CollisionResult, State
+from .gameframework import log, time_secs, sync, Game, ServerManager, Vec3, Box, Sphere, Body, Scene, Client, BodyType, Area, CollisionResult, State, ClientAI
 from .models import PongGameResult, PongOngoingGame
 
-def time_secs():
-    return (datetime.now() - datetime(1970, 1, 1)).total_seconds()
 
 class Player(Body):
     speed = 0.2
@@ -62,9 +59,8 @@ class ScoreArea(Area):
         self.game.reset()
 
 class Settings:
-    def __init__(self, *, max_score=9, players_expected: list[str]=None):
+    def __init__(self, *, max_score=3):
         self.max_score = max_score
-        self.players_expected = players_expected
 
 class Pong(Game):
     def __init__(self, *, gamemode: str, tid: str = None):
@@ -114,7 +110,7 @@ class Pong(Game):
 
         # TODO: Add the tournament id to the game
 
-        if self.score1 == self.settings.max_score and self.state == State.STARTED:
+        if (self.player1.score == self.settings.max_score or self.player2.score == self.settings.max_score) and self.state == State.STARTED:
             self.state = State.ENDED
 
             # Save the result of the game in the database
@@ -136,7 +132,18 @@ class Pong(Game):
     async def on_update(self):
         if self.state == State.STARTED:
             self.scene.update()
+
+            # Update all AIs
+            for client in self.clients:
+                if isinstance(client, ClientAI):
+                    client.process(self.scene)
+
             await self.broadcast({ "type": "update", "bodies": self.scene.to_dict(), "scores": [ self.player1.score, self.player2.score ] })
+        elif self.state == State.ENDED:
+            await self.broadcast({ "type": "update", "bodies": self.scene.to_dict(), "scores": [ self.player1.score, self.player2.score ] })
+
+            winner = self.player1.client.id if self.player1.score > self.player2.score else self.player2.score
+            await self.broadcast({ "type": "gameEnded", "winner": winner })
 
     async def on_join(self, gamemode: str, player_id: str):
         if gamemode == "1v1local":

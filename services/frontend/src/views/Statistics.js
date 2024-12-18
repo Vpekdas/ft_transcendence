@@ -1,8 +1,8 @@
 import { Component, globalComponents, html } from "../micro";
-import NavBar from "../components/NavBar";
-import DonutChart from "../components/DonutChart";
-import LineChart from "../components/LineChart";
-import ProfileNavBar from "../components/ProfileNavBar";
+import NavBar from "../components/NavBars/HomeNavBar";
+import DonutChart from "../components/Charts/DonutChart";
+import LineChart from "../components/Charts/LineChart";
+import ProfileNavBar from "../components/NavBars/ProfileNavBar";
 import { isLoggedIn } from "../api";
 import { navigateTo } from "../router";
 export default class Statistics extends Component {

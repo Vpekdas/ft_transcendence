@@ -4,7 +4,7 @@ import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import { FontLoader } from "three/addons/loaders/FontLoader.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { action } from "./game";
-import { getOriginNotProtocol, post } from "./api";
+import { getOriginNoProtocol, post } from "./api";
 import { navigateTo } from "./router";
 
 function addCube(scene, x, y, width, height, color) {
@@ -109,7 +109,7 @@ export class PongGame {
         const spaceTexture = new THREE.TextureLoader().load("/img/space.jpg");
         this.scene.background = spaceTexture;
 
-        this.ws = new WebSocket(`ws://${getOriginNotProtocol()}:8000/pong`);
+        this.ws = new WebSocket(`ws://${getOriginNoProtocol()}:8000/pong`);
         this.ws.onopen = (event) => {
             if (this.id == undefined) {
                 this.ws.send(

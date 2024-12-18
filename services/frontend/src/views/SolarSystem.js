@@ -3,7 +3,7 @@ import { navigateTo } from "../router";
 import { Component, globalComponents, html } from "../micro";
 import { tr } from "../i18n";
 import OuterWilds from "../components/OuterWilds";
-import NavBar from "../components/NavBar";
+import NavBar from "../components/NavBars/HomeNavBar";
 
 export default class SolarSystem extends Component {
     constructor() {

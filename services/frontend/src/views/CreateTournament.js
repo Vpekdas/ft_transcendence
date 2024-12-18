@@ -1,16 +1,16 @@
 import { Component, globalComponents, html } from "../micro";
-import NavBar from "../components/NavBar";
-import DonutChart from "../components/DonutChart";
-import { fetchApi, isLoggedIn } from "../api";
-import ChangePasswordForm from "../components/ChangePassword";
-import ChangeNicknameForm from "../components/ChangeNickname";
-import DeleteAccount from "../components/DeleteAccount";
-import ChangeProfilePicture from "../components/ChangeProfilePicture";
+import NavBar from "../components/NavBars/HomeNavBar";
+import DonutChart from "../components/Charts/DonutChart";
+import { fetchApi, isLoggedIn, post } from "../api";
+import ChangePasswordForm from "../components/Forms/ChangePasswordForm";
+import ChangeNicknameForm from "../components/Forms/ChangeNicknameForm";
+import DeleteAccountForm from "../components/Forms/DeleteAccountForm";
+import ChangeProfilePictureForm from "../components/Forms/ChangeProfilePictureForm";
 import { navigateTo } from "../router";
 import { tr } from "../i18n";
-import TournamentNameCard from "../components/TournamentNameCard";
-import PlayerCountCard from "../components/PlayerCountCard";
-import TournamentPrivacyCard from "../components/TournamentPrivacyCard";
+import TournamentNameCard from "../components/Cards/TournamentNameCard";
+import PlayerCountCard from "../components/Cards/PlayerCountCard";
+import TournamentPrivacyCard from "../components/Cards/TournamentPrivacyCard";
 
 export default class CreateTournament extends Component {
     constructor() {
@@ -20,7 +20,60 @@ export default class CreateTournament extends Component {
     async render() {
         this.setTitle("CreateTournament");
 
-        const id = this.attrib("id");
+        let playerCount = 2,
+            openType = "open";
+
+        this.query("#btnradio2").on("change", async () => {
+            playerCount = 2;
+        });
+
+        this.query("#btnradio4").on("change", async () => {
+            playerCount = 4;
+        });
+        this.query("#btnradio8").on("change", async () => {
+            playerCount = 8;
+        });
+
+        this.query("#btnradio16").on("change", async () => {
+            playerCount = 16;
+        });
+
+        this.query("#btnradio16").on("change", async () => {
+            playerCount = 16;
+        });
+
+        this.query("#btn-open").on("change", async () => {
+            openType = "open";
+        });
+
+        this.query("#btn-password").on("change", async () => {
+            openType = "password";
+        });
+
+        this.query("#btn-invite-only").on("change", async () => {
+            openType = "invite";
+        });
+
+        this.query(".btn.btn-primary.settings").on("click", async () => {
+            const tournamentName = document.getElementById("tournament-name").value;
+            const tournamentPassword = document.getElementById("tournament-password").value;
+
+            const resp = await post("/api/tournament/create", {
+                body: JSON.stringify({
+                    name: tournamentName,
+                    playerCount: playerCount,
+                    openType: openType,
+                    password: tournamentPassword.length == 0 ? undefined : tournamentPassword,
+                    game: "pong",
+                    fillWithAI: false,
+                    gameSettings: {},
+                }),
+            }).then((r) => r.json());
+
+            const tournamentId = resp["id"];
+
+            navigateTo(`/tournament/${tournamentId}`);
+        });
 
         return html(
             /* HTML */
@@ -45,7 +98,8 @@ globalComponents.set("CreateTournament", CreateTournament);
     "playerCount", // 2, 4, 8, 16
     "openType", // "open", "password",
     "password", // optional
-    "game": "pong"
+    "game": "pong",
+    "gameSettings": {},
 }
 
 */

@@ -2,7 +2,7 @@ function getOrigin() {
     return window.location.origin.substring(0, window.location.origin.lastIndexOf(":"));
 }
 
-export function getOriginNotProtocol() {
+export function getOriginNoProtocol() {
     return window.location.origin
         .substring(0, window.location.origin.lastIndexOf(":"))
         .replace("http://", "")

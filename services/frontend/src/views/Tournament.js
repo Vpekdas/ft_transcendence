@@ -1,11 +1,11 @@
 import { Component, globalComponents, html } from "../micro";
-import NavBar from "../components/NavBar";
-import DonutChart from "../components/DonutChart";
-import { fetchApi, isLoggedIn } from "../api";
-import ChangePasswordForm from "../components/ChangePassword";
-import ChangeNicknameForm from "../components/ChangeNickname";
-import DeleteAccount from "../components/DeleteAccount";
-import ChangeProfilePicture from "../components/ChangeProfilePicture";
+import NavBar from "../components/NavBars/HomeNavBar";
+import DonutChart from "../components/Charts/DonutChart";
+import { fetchApi, isLoggedIn, getOriginNoProtocol } from "../api";
+import ChangePasswordForm from "../components/Forms/ChangePasswordForm";
+import ChangeNicknameForm from "../components/Forms/ChangeNicknameForm";
+import DeleteAccountForm from "../components/Forms/DeleteAccountForm";
+import ChangeProfilePictureForm from "../components/Forms/ChangeProfilePictureForm";
 import { navigateTo } from "../router";
 import { tr } from "../i18n";
 
@@ -18,6 +18,9 @@ export default class Tournament extends Component {
         this.setTitle("Tournament");
 
         const id = this.attrib("id");
+        // const ws = new WebSocket(`ws://${getOriginNoProtocol()}:8000/tournament/${id}`);
+        // ws.onopen = () => {};
+        // ws.onmessage = () => {};
 
         return html(
             /* HTML */

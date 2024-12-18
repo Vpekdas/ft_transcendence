@@ -1,4 +1,4 @@
-import { Component, globalComponents, html } from "../micro";
+import { Component, globalComponents, html } from "../../micro";
 
 export default class LineChart extends Component {
     constructor() {

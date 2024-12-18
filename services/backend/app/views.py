@@ -244,7 +244,8 @@ def tournament_create(request: HttpRequest):
 
     data = json.loads(request.body)
 
-    if "gameSettings" not in data or "playerCount" not in data:
+    if "gameSettings" not in data or "playerCount" not in data or "openType" not in data or "game" not in data or "fillWithAI" not in data:
+        print(data, file=sys.stderr)
         return JsonResponse({ "error": INVALID_REQUEST })
 
     if data["openType"] not in ["open", "invite", "password"] or data["playerCount"] not in [2, 4, 8, 16]:
@@ -253,7 +254,7 @@ def tournament_create(request: HttpRequest):
     game_settings = data["gameSettings"]
     tid = make_id()
 
-    t = Tournament(name=data["name"], tid=tid, openType=data["openType"], password=hash_weak_password(data["password"]) if "password" in data else None, game=data["game"], gameSettings=game_settings, fillWithAI=bool(data["fillWithAI"]), state="lobby")
+    t = Tournament(name=data["name"], tid=tid, playerCount=data["playerCount"], openType=data["openType"], password=hash_weak_password(data["password"]) if "password" in data else None, game=data["game"], gameSettings=game_settings, fillWithAI=bool(data["fillWithAI"]), state="lobby")
     t.save()
 
     return JsonResponse({ "id": tid })

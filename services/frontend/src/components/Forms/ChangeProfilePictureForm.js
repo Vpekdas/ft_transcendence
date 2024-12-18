@@ -1,8 +1,8 @@
-import { Component, globalComponents, html } from "../micro";
-import { tr } from "../i18n";
-import { fetchApi, post } from "../api";
+import { Component, globalComponents, html } from "../../micro";
+import { tr } from "../../i18n";
+import { fetchApi, post } from "../../api";
 
-export default class ChangeProfilePicture extends Component {
+export default class ChangeProfilePictureForm extends Component {
     constructor() {
         super();
     }
@@ -68,4 +68,4 @@ export default class ChangeProfilePicture extends Component {
         );
     }
 }
-globalComponents.set("ChangeProfilePicture", ChangeProfilePicture);
+globalComponents.set("ChangeProfilePictureForm", ChangeProfilePictureForm);

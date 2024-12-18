@@ -1,4 +1,4 @@
-import { Component, globalComponents, html } from "../micro";
+import { Component, globalComponents, html } from "../../micro";
 
 // https://heyoka.medium.com/scratch-made-svg-donut-pie-charts-in-html5-2c587e935d72
 

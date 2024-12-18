@@ -1,7 +1,7 @@
-import { Component, globalComponents, html } from "../micro";
-import { isLoggedIn } from "../api";
-import { tr } from "../i18n";
-import LanguagePicker from "./LanguagePicker";
+import { Component, globalComponents, html } from "../../micro";
+import { isLoggedIn } from "../../api";
+import { tr } from "../../i18n";
+import LanguagePicker from "../LanguagePicker";
 
 export default class NavBar extends Component {
     constructor() {

@@ -1,6 +1,6 @@
-import { Component, globalComponents, html } from "../micro";
-import { tr } from "../i18n";
-import { fetchApi, post } from "../api";
+import { Component, globalComponents, html } from "../../micro";
+import { tr } from "../../i18n";
+import { fetchApi, post } from "../../api";
 
 export default class TournamentPrivacyCard extends Component {
     constructor() {
@@ -44,7 +44,7 @@ export default class TournamentPrivacyCard extends Component {
                                 <p class="card-text settings">You can update your password here.</p>
                                 <input
                                     type="password"
-                                    id="new-password-confirm"
+                                    id="tournament-password"
                                     class="form-control settings"
                                     aria-describedby="passwordHelpBlock"
                                     placeholder="Tournament password"

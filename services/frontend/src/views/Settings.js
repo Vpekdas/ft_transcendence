@@ -1,11 +1,11 @@
 import { Component, globalComponents, html } from "../micro";
-import NavBar from "../components/NavBar";
-import DonutChart from "../components/DonutChart";
+import NavBar from "../components/NavBars/HomeNavBar";
+import DonutChart from "../components/Charts/DonutChart";
 import { fetchApi, isLoggedIn } from "../api";
-import ChangePasswordForm from "../components/ChangePassword";
-import ChangeNicknameForm from "../components/ChangeNickname";
-import DeleteAccount from "../components/DeleteAccount";
-import ChangeProfilePicture from "../components/ChangeProfilePicture";
+import ChangePasswordForm from "../components/Forms/ChangePasswordForm";
+import ChangeNicknameForm from "../components/Forms/ChangeNicknameForm";
+import DeleteAccountForm from "../components/Forms/DeleteAccountForm";
+import ChangeProfilePictureForm from "../components/Forms/ChangeProfilePictureForm";
 import { navigateTo } from "../router";
 import { tr } from "../i18n";
 
@@ -31,10 +31,10 @@ export default class Settings extends Component {
                 <div class="container-fluid dashboard-container">
                     <ProfileNavBar />
                     <ul class="list-group settings">
-                        <ChangeProfilePicture />
+                        <ChangeProfilePictureForm />
                         <ChangePasswordForm />
                         <ChangeNicknameForm />
-                        <DeleteAccount />
+                        <DeleteAccountForm />
                     </ul>
                 </div>
             </div>`

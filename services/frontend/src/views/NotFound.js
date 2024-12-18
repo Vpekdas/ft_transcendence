@@ -1,5 +1,5 @@
 import { Component, globalComponents, html } from "../micro";
-import NavBar from "../components/NavBar";
+import NavBar from "../components/NavBars/HomeNavBar";
 
 export default class NotFound extends Component {
     constructor() {

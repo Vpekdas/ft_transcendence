@@ -1,5 +1,5 @@
-import { Component, globalComponents, html } from "../micro";
-import { tr } from "../i18n";
+import { Component, globalComponents, html } from "../../micro";
+import { tr } from "../../i18n";
 
 export default class ProfileNavBar extends Component {
     constructor() {

@@ -79,7 +79,7 @@ export default class CreateTournament extends Component {
             /* HTML */
             ` <div>
                 <NavBar />
-                <div class="container-fluid dashboard-container tournament-container">
+                <div class="container-fluid dashboard-container create-tournament-container">
                     <TournamentNameCard />
                     <PlayerCountCard />
                     <TournamentPrivacyCard />

@@ -8,6 +8,7 @@ import DeleteAccountForm from "../components/Forms/DeleteAccountForm";
 import ChangeProfilePictureForm from "../components/Forms/ChangeProfilePictureForm";
 import { navigateTo } from "../router";
 import { tr } from "../i18n";
+import TournamentRound from "../components/Tournament/TournamentRound";
 
 export default class Tournament extends Component {
     constructor() {
@@ -26,6 +27,21 @@ export default class Tournament extends Component {
             /* HTML */
             ` <div>
                 <NavBar />
+                <div class="container-fluid dashboard-container tournament-container">
+                    <div class="container-fluid dashboard-container match-container">
+                        <TournamentRound roundCount="4" />
+                        <TournamentRound roundCount="2" />
+                        <TournamentRound roundCount="1" />
+                    </div>
+                    <div class="container-fluid dashboard-container player-container">
+                        <h2>Tournament Name</h2>
+                        <span>Player 1</span>
+                        <span>Player 2</span>
+                        <div class="btn-create-tournament-container">
+                            <button type="submit" class="btn btn-primary settings">Start Game</button>
+                        </div>
+                    </div>
+                </div>
             </div>`
         );
     }

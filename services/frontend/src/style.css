@@ -1859,7 +1859,7 @@ ow-system[labels="false"] ow-name {
 
 /* CREATE TOURNAMENT */
 
-.container-fluid.dashboard-container.tournament-container {
+.container-fluid.dashboard-container.create-tournament-container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1876,3 +1876,76 @@ ow-system[labels="false"] ow-name {
 }
 
 /* ! Update button background (It is blue bootstrap)*/
+
+/* TOURNAMENT */
+
+.container-fluid.dashboard-container.tournament-container {
+    display: flex;
+    justify-content: space-evenly;
+    flex-direction: row;
+    width: 100%;
+    align-items: center;
+}
+
+.container-fluid.dashboard-container.match-container {
+    height: 90%;
+    width: 75%;
+    justify-content: space-evenly;
+}
+
+.container-fluid.dashboard-container.player-container {
+    width: 20%;
+    height: 90%;
+    flex-direction: column;
+    align-items: center;
+}
+
+.tournament-match {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    border: 1px solid cyan;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.tournament-round {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+.btn-create-tournament-container {
+    margin-top: auto;
+    margin-bottom: 10%;
+    display: flex;
+    align-items: center;
+}
+
+.container-fluid.tournament-match-container {
+    display: flex;
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+}
+
+.player-1,
+.player-2 {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    border: 1px solid cyan;
+    padding: 10px;
+
+}
+
+.tournament-match.score {
+    display: flex;
+    height: auto;
+    width: auto;
+    justify-content: space-evenly;
+    align-items: center;
+}

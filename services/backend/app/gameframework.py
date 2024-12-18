@@ -16,6 +16,7 @@ from math import sqrt
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from threading import Thread
 from multiprocessing.pool import ThreadPool
+from .errors import *
 
 # https://stackoverflow.com/questions/71384132/best-approach-to-multiple-websocket-client-connections-in-python
 # https://discuss.python.org/t/websocket-messages-sent-to-multiple-clients-are-not-being-received/62781
@@ -318,12 +319,16 @@ class State(enum.Enum):
     ENDED = 2,
 
 class Game:
-    def __init__(self):
+    def __init__(self, *, tid: str = None):
         self.manager = None
         self.id = ""
         self.clients = []
         self.scene = Scene()
         self.state = State.IN_LOBBY
+        self.tid = tid
+
+    def is_tournament_game(self) -> bool:
+        return self.tid is not None
 
     def start(self):
         self.task = asyncio.create_task(self.run())
@@ -401,7 +406,7 @@ class ServerManager:
     #
 
     async def err_already_in_game(self, conn):
-        await conn.send(json.dumps({ "error": "Already in game" }))
+        await conn.send(json.dumps({ "error": ALREADY_IN_GAME }))
 
     #
     # Callbacks
@@ -412,6 +417,17 @@ class ServerManager:
 
     async def on_join(self, conn) -> bool:
         return False
+
+class Tournament:
+    def __init__(self, tid: str):
+        self.tid = tid
+
+class TournamentManager:
+    def __init__(self, *, game: str, manager: ServerManager):
+        self.game = game
+        self.manager = manager
+
+        # Let's read the database and restore all ongoing tournaments
 
 def sync(f, *args):
     pool = ThreadPool(processes=1)

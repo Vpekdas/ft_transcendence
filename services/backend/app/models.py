@@ -41,6 +41,7 @@ class Tournament(models.Model):
 class PongOngoingGame(models.Model):
     gid = CharField(max_length=8)
     gamemode = TextField()
+    tid = CharField(max_length=8, null=True)
 
     players = ArrayField(IntegerField())
     scores = ArrayField(IntegerField())
@@ -52,6 +53,7 @@ class PongGameResult(models.Model):
     scores = ArrayField(IntegerField())
     timeStarted = IntegerField()
     timeEnded = IntegerField()
+    tid = CharField(max_length=8, null=True)
 
     # TODO: Maybe store the game data to replay it later ?
 

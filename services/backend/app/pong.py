@@ -67,8 +67,8 @@ class Settings:
         self.players_expected = players_expected
 
 class Pong(Game):
-    def __init__(self, *, gamemode: str = None):
-        super().__init__()
+    def __init__(self, *, gamemode: str, tid: str = None):
+        super().__init__(tid=tid)
 
         self.settings = Settings()
         self.service = 0
@@ -112,11 +112,13 @@ class Pong(Game):
         if self.service == 1: self.service = 0
         else: self.service = 1
 
+        # TODO: Add the tournament id to the game
+
         if self.score1 == self.settings.max_score and self.state == State.STARTED:
             self.state = State.ENDED
 
             # Save the result of the game in the database
-            result = PongGameResult(scores=[self.score1.score, self.score2.score], timeStarted=self.timeStarted, timeEnded=time_secs())
+            result = PongGameResult(scores=[self.score1.score, self.score2.score], timeStarted=self.timeStarted, timeEnded=time_secs(), tid=self.tid)
             sync(lambda: result.save())
 
             # Remove the ongoing game from the database
@@ -127,6 +129,9 @@ class Pong(Game):
             ongoingGame = sync(lambda: PongOngoingGame.objects.filter(gid=self.id).first())
             ongoingGame.scores = [self.player1.score, self.player1.score]
             sync(lambda: ongoingGame.save())
+
+        if self.is_tournament_game():
+            pass
 
     async def on_update(self):
         if self.state == State.STARTED:
@@ -143,7 +148,7 @@ class Pong(Game):
             self.player2.client = self.clients[1]
 
             self.timeStarted = time_secs()
-            ongoingGame = PongOngoingGame(gid=self.id, gamemode=self.gamemode, timeStarted=self.timeStarted, players=[player_id], scores=[0, 0])
+            ongoingGame = PongOngoingGame(gid=self.id, gamemode=self.gamemode, timeStarted=self.timeStarted, players=[player_id], scores=[0, 0], tid=self.tid)
             sync(lambda: ongoingGame.save())
         elif gamemode == "1v1":
             client = Client(id=player_id)
@@ -159,7 +164,7 @@ class Pong(Game):
 
                 # Add an ongoing game to the database
                 self.timeStarted = time_secs()
-                ongoingGame = PongOngoingGame(gid=self.id, gamemode=self.gamemode, timeStarted=self.timeStarted, players=[self.player1.id, self.player2.id], scores=[0, 0])
+                ongoingGame = PongOngoingGame(gid=self.id, gamemode=self.gamemode, timeStarted=self.timeStarted, players=[self.player1.id, self.player2.id], scores=[0, 0], tid=self.tid)
                 sync(lambda: ongoingGame.save())
 
             # if self.settings.players_expected == None or ("player_id" in msg and msg["player_id"] in self.settings.players_expected):
@@ -174,7 +179,7 @@ class MatchmakePlayer:
         self.player_id = player_id
         self.gamemode = gamemode
 
-class PongServer(ServerManager):
+class PongManager(ServerManager):
     def __init__(self):
         super().__init__()
 

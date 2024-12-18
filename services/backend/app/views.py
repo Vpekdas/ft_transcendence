@@ -15,7 +15,8 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 
-from app.models import duck, Player, Tournament, PongGameResult
+from .models import duck, Player, Tournament, PongGameResult
+from .errors import *
 
 def make_id(k=8) -> str:
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
@@ -38,7 +39,7 @@ def signin(request: HttpRequest):
     nickname = data["nickname"]
 
     if User.objects.filter(username=username).count() > 0:
-        return JsonResponse({"error": "Username is already taken"})
+        return JsonResponse({"error": ALREADY_IN_GAME})
 
     user = User.objects.create(username=username)
     player = Player.objects.create(user=user, nickname=nickname)
@@ -68,7 +69,7 @@ def loginRoute(request: HttpRequest):
         login(request, user)
         return JsonResponse({ })
     else:
-        return JsonResponse({ "error": "Mismatch username and password" })
+        return JsonResponse({ "error": MISMATCH_CREDENTIALS })
 
 """
 Logout from an account.
@@ -86,7 +87,7 @@ def isLoggedIn(request: HttpRequest):
     if request.user.is_authenticated:
         return JsonResponse({})
     else:
-        return JsonResponse({ "error": "User is not logged in" })
+        return JsonResponse({ "error": NOT_LOGGED_IN })
 
 """
 Update the password
@@ -112,7 +113,7 @@ def updatePassword(request: HttpRequest, id):
 
         return JsonResponse({})
     else:
-        return JsonResponse({ "error": "User is not authenticated" })
+        return JsonResponse({ "error": NOT_AUTHENTICATED })
 
 """
 Update a nickname
@@ -120,7 +121,7 @@ Update a nickname
 @require_POST
 def updateNickname(request: HttpRequest, id):
     if not request.user.is_authenticated:
-        return JsonResponse({"error": "User is not authenticated"})
+        return JsonResponse({ "error": NOT_AUTHENTICATED })
 
     data = json.loads(request.body)
 
@@ -128,7 +129,7 @@ def updateNickname(request: HttpRequest, id):
 
     player = Player.objects.filter(user=request.user).first()
     if not player:
-        return JsonResponse({"error": "Internal error"})
+        return JsonResponse({ "error": INTERNAL_ERROR })
 
     player.nickname = newNickname
     player.save()
@@ -136,7 +137,7 @@ def updateNickname(request: HttpRequest, id):
     return JsonResponse({})
 
 def invalid_user_id():
-    return JsonResponse({ "error": "Invalid user identifier" })
+    return JsonResponse({ "error": INVALID_USER_ID })
 
 @require_POST
 def getNickname(request: HttpRequest, id):
@@ -155,7 +156,7 @@ def getNickname(request: HttpRequest, id):
 @require_POST
 def getPlayerProfile(request: HttpRequest, id):
     if not request.user.is_authenticated:
-        return JsonResponse({"error": "User is not authenticated"})
+        return JsonResponse({ "error": NOT_AUTHENTICATED })
 
     data = json.loads(request.body)
 
@@ -195,7 +196,7 @@ Update profile picture
 @require_POST
 def updateProfilePicture(request: HttpRequest, id):
     if not request.user.is_authenticated:
-        return JsonResponse({"error": "User is not authenticated"})
+        return JsonResponse({ "error": NOT_AUTHENTICATED })
 
     data = json.loads(request.body)
 
@@ -205,7 +206,7 @@ def updateProfilePicture(request: HttpRequest, id):
     valid_types = [ "image/svg+xml", "image/png", "image/jpeg", "image/gif" ]
 
     if type not in valid_types:
-        return JsonResponse({"error": "Invalid image format"})
+        return JsonResponse({ "error": INVALID_IMAGE_FORMAT })
 
     player = Player.objects.filter(user=request.user).first()
     player.icon = { "type": type, "data": image }
@@ -217,7 +218,7 @@ def updateProfilePicture(request: HttpRequest, id):
 @require_POST
 def deleteProfile(request: HttpRequest, id):
     if not request.user.is_authenticated:
-        return JsonResponse({"error": "User is not authenticated"})
+        return JsonResponse({ "error": NOT_AUTHENTICATED })
 
     user = request.user
     user.delete()
@@ -227,7 +228,7 @@ def deleteProfile(request: HttpRequest, id):
 @require_POST
 def getMatch(request: HttpRequest, id):
     if not request.user.is_authenticated:
-        return JsonResponse({"error": "User is not authenticated"})
+        return JsonResponse({ "error": NOT_AUTHENTICATED })
 
     # data = json.loads(request.body)
     player = Player.objects.filter(user=request.user)
@@ -239,15 +240,15 @@ def getMatch(request: HttpRequest, id):
 @require_POST
 def tournament_create(request: HttpRequest):
     if not request.user.is_authenticated:
-        return JsonResponse({ "error": "User is not authenticated" })
+        return JsonResponse({ "error": NOT_AUTHENTICATED })
 
     data = json.loads(request.body)
 
     if "gameSettings" not in data or "playerCount" not in data:
-        return JsonResponse({ "error": "Invalid request" })
+        return JsonResponse({ "error": INVALID_REQUEST })
 
     if data["openType"] not in ["open", "invite", "password"] or data["playerCount"] not in [2, 4, 8, 16]:
-        pass
+        return JsonResponse({ "error": INVALID_REQUEST })
 
     game_settings = data["gameSettings"]
     tid = make_id()
@@ -262,7 +263,7 @@ def tournament_info(request: HttpRequest, id: str):
     t = Tournament.objects.filter(tid=id).first()
 
     if t is None:
-        return JsonResponse({ "error": "Tournament does not exits" })
+        return JsonResponse({ "error": TOURNAMENT_DOESNT_EXISTS })
 
     return JsonResponse({
         "game": t.game,
@@ -270,16 +271,3 @@ def tournament_info(request: HttpRequest, id: str):
         "openType": t.name,
         "state": t.state,
     })
-
-@require_POST
-def tournament_check_password(request: HttpRequest, id: str):
-    data = json.loads(request.body)
-
-    t = Tournament.objects.filter(tid=id).first()
-
-    if t is None:
-        return JsonResponse({ "error": "Tournament does not exits" })
-
-    if hash_weak_password(data["password"]) == t.password:
-        return JsonResponse({})
-    return JsonResponse({ "error": "Password does not match" })

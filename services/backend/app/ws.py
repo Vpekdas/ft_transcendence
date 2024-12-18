@@ -1,11 +1,14 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .gameframework import log, sync, ServerManager
-from .pong import PongServer
-from .models import Player
+from .gameframework import log, sync, ServerManager, TournamentManager
+from .pong import PongManager
+from .models import Player, Tournament
+from .views import hash_weak_password
+from .errors import *
 from asgiref.sync import sync_to_async
 
-pong_manager = PongServer()
+pong_manager = PongManager()
+tournaments = TournamentManager(game="pong", manager=pong_manager)
 
 class PongClientConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -34,7 +37,6 @@ class PongClientConsumer(AsyncWebsocketConsumer):
 
                 if game is None:
                     # The player is not currently in a game
-                    # log("Receiving data from a player, but he is not in a game")
                     return
 
                 if data["type"] == "input":
@@ -43,5 +45,42 @@ class PongClientConsumer(AsyncWebsocketConsumer):
                     if client is not None: client.on_input(data)
                 else:
                     await game.on_unhandled_message(data)
+        except json.JSONDecodeError:
+            pass
+
+class TournamentConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.tid = self.scope["kwargs"]["id"]
+
+        log("id =", self.tid)
+
+        self.tournament = sync(lambda: Tournament.objects.filter(tid=self.tid).first())
+
+        # TODO: Implement invite only
+
+        if tournament.openType == "password":
+            self.is_connected = False
+        elif tournament.openType == "open":
+            self.is_connected = True
+        else:
+            log("Tournament type not supported yet:", tournament.openType)
+
+        self.accept()
+
+    async def disconnect(self, close_code):
+        pass
+
+    async def receive(self, text_data):
+        try:
+            data = json.loads(text_data)
+
+            if "type" not in data:
+                return
+
+            if data["type"] == "connect":
+                if hash_weak_password(data["password"]) == self.tournament.password:
+                    self.is_connected = True
+                else:
+                    self.send(json.dumps({ "error": BAD_PASSWORD }))
         except json.JSONDecodeError:
             pass

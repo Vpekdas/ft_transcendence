@@ -17,12 +17,7 @@ from django.contrib.auth.models import User
 
 from .models import duck, Player, Tournament, PongGameResult
 from .errors import *
-
-def make_id(k=8) -> str:
-    return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
-
-def hash_weak_password(s) -> str:
-    return hashlib.sha256("salty$" + s).hexdigest()
+from .ws import tournaments
 
 """
 Create a new user.
@@ -252,23 +247,20 @@ def tournament_create(request: HttpRequest):
         return JsonResponse({ "error": INVALID_REQUEST })
 
     game_settings = data["gameSettings"]
-    tid = make_id()
-
-    t = Tournament(name=data["name"], tid=tid, playerCount=data["playerCount"], openType=data["openType"], password=hash_weak_password(data["password"]) if "password" in data else None, game=data["game"], gameSettings=game_settings, fillWithAI=bool(data["fillWithAI"]), state="lobby")
-    t.save()
+    tid = tournaments.create(name=data["name"], playerCount=data["playerCount"], privacy=data["openType"], password=data["password"] if "password" in data else None, fillWithAI=bool(data["fillWithAI"]), gameSettings=data["gameSettings"])
 
     return JsonResponse({ "id": tid })
 
-@require_POST
-def tournament_info(request: HttpRequest, id: str):
-    t = Tournament.objects.filter(tid=id).first()
+# @require_POST
+# def tournament_info(request: HttpRequest, id: str):
+#     t = Tournament.objects.filter(tid=id).first()
 
-    if t is None:
-        return JsonResponse({ "error": TOURNAMENT_DOESNT_EXISTS })
+#     if t is None:
+#         return JsonResponse({ "error": TOURNAMENT_DOESNT_EXISTS })
 
-    return JsonResponse({
-        "game": t.game,
-        "name": t.name,
-        "openType": t.name,
-        "state": t.state,
-    })
+#     return JsonResponse({
+#         "game": t.game,
+#         "name": t.name,
+#         "openType": t.name,
+#         "state": t.state,
+#     })

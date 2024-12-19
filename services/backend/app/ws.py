@@ -3,7 +3,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from .gameframework import log, sync, ServerManager, TournamentManager
 from .pong import PongManager
 from .models import Player, Tournament
-from .views import hash_weak_password
+from .utils import hash_weak_password
 from .errors import *
 from asgiref.sync import sync_to_async
 
@@ -50,25 +50,27 @@ class PongClientConsumer(AsyncWebsocketConsumer):
 
 class TournamentConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.tid = self.scope["kwargs"]["id"]
+        self.user = self.scope["user"]
 
-        log("id =", self.tid)
+        if not self.user.is_authenticated:
+            await self.close()
+            return
 
-        self.tournament = sync(lambda: Tournament.objects.filter(tid=self.tid).first())
+        self.player = sync(lambda: Player.objects.filter(user=self.user).first())
+        self.tid = self.scope["url_route"]["kwargs"]["id"]
 
-        # TODO: Implement invite only
+        if self.tid not in tournaments.tournaments:
+            await self.close()
+            return
 
-        if tournament.openType == "password":
-            self.is_connected = False
-        elif tournament.openType == "open":
-            self.is_connected = True
-        else:
-            log("Tournament type not supported yet:", tournament.openType)
+        self.tournament = tournaments.tournaments[self.tid]
+        self.is_connected = False
 
-        self.accept()
+        await tournaments.connect(self)
+        await self.accept()
 
     async def disconnect(self, close_code):
-        pass
+        await tournaments.disconnect(self.tid, self)
 
     async def receive(self, text_data):
         try:
@@ -77,10 +79,10 @@ class TournamentConsumer(AsyncWebsocketConsumer):
             if "type" not in data:
                 return
 
-            if data["type"] == "connect":
-                if hash_weak_password(data["password"]) == self.tournament.password:
+            if data["type"] == "join":
+                if await tournaments.on_join(self.player, self.tid, data["password"] if "password" in data else None):
                     self.is_connected = True
                 else:
-                    self.send(json.dumps({ "error": BAD_PASSWORD }))
+                    await self.send(json.dumps({ "error": BAD_PASSWORD }))
         except json.JSONDecodeError:
             pass

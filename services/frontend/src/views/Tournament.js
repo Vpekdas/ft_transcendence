@@ -1,7 +1,7 @@
 import { Component, globalComponents, html } from "../micro";
 import NavBar from "../components/NavBars/HomeNavBar";
 import DonutChart from "../components/Charts/DonutChart";
-import { fetchApi, isLoggedIn, getOriginNoProtocol } from "../api";
+import { fetchApi, isLoggedIn, getOriginNoProtocol, getNickname } from "../api";
 import ChangePasswordForm from "../components/Forms/ChangePasswordForm";
 import ChangeNicknameForm from "../components/Forms/ChangeNicknameForm";
 import DeleteAccountForm from "../components/Forms/DeleteAccountForm";
@@ -18,10 +18,27 @@ export default class Tournament extends Component {
     async render() {
         this.setTitle("Tournament");
 
+        let players = "";
+
         const id = this.attrib("id");
-        // const ws = new WebSocket(`ws://${getOriginNoProtocol()}:8000/tournament/${id}`);
-        // ws.onopen = () => {};
-        // ws.onmessage = () => {};
+        const ws = new WebSocket(`ws://${getOriginNoProtocol()}:8000/tournament/${id}`);
+        ws.onopen = (event) => {
+            ws.send(JSON.stringify({ type: "join" }));
+        };
+        ws.onmessage = async (event) => {
+            const data = JSON.parse(event.data);
+
+            console.log(data);
+
+            if (data["type"] == "players") {
+                players = "";
+                for (let p of data["players"]) {
+                    let nickname = (await getNickname(p).then((res) => res.json()))["nickname"];
+                    players += /* HTML */ `<span>${nickname}</span>`;
+                }
+                document.getElementById("player-list").innerHTML = players;
+            }
+        };
 
         return html(
             /* HTML */
@@ -35,8 +52,7 @@ export default class Tournament extends Component {
                     </div>
                     <div class="container-fluid dashboard-container player-container">
                         <h2>Tournament Name</h2>
-                        <span>Player 1</span>
-                        <span>Player 2</span>
+                        <div id="player-list"></div>
                         <div class="btn-create-tournament-container">
                             <button type="submit" class="btn btn-primary settings">Start Game</button>
                         </div>

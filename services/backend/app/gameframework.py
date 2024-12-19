@@ -18,6 +18,8 @@ from datetime import datetime
 from math import sqrt
 from multiprocessing.pool import ThreadPool
 from .errors import *
+from .models import Tournament, Player
+from .utils import hash_weak_password
 
 # https://stackoverflow.com/questions/71384132/best-approach-to-multiple-websocket-client-connections-in-python
 # https://discuss.python.org/t/websocket-messages-sent-to-multiple-clients-are-not-being-received/62781
@@ -443,16 +445,92 @@ class ServerManager:
     async def on_join(self, conn) -> bool:
         return False
 
-class Tournament:
-    def __init__(self, tid: str):
+class TournamentW:
+    def __init__(self, manager, tid: str, playerCount: int, privacy: str, password: str, game: str, gameSettings, fillWithAI: bool):
+        self.manager = manager
         self.tid = tid
+        self.playerCount = playerCount
+        self.privacy = privacy
+        self.password = password
+        self.game = game
+        self.gameSettings = gameSettings
+        self.fillWithAI = fillWithAI
+
+        self.players = []
+
+    async def on_join(self, player):
+        self.players.append(player.id)
+        await self.broadcast(json.dumps({ "type": "players", "players": self.players }))
+
+    async def disconnect(self, player):
+        self.players.remove(player.id)
+        await self.broadcast(json.dumps({ "type": "players", "players": self.players }))
+
+    async def broadcast(self, msg: str):
+        """
+        Send a message to all clients
+        """
+
+        for c in self.manager.all_players(self.tid):
+            await c.send(msg)
 
 class TournamentManager:
     def __init__(self, *, game: str, manager: ServerManager):
         self.game = game
         self.manager = manager
 
+        self.tournaments: list[TournamentW] = {}
+        self.consumers = []
+
         # Let's read the database and restore all ongoing tournaments
+
+    def create(self, *, name: str, playerCount: int, privacy: str, password: str = None, fillWithAI: bool, gameSettings) -> str:
+        """
+        Create a new tournament
+        """
+
+        tid = make_id()
+        hashed_password = hash_weak_password(password) if password is not None else None
+
+        # t = sync(lambda: Tournament(name=name, tid=tid, playerCount=playerCount, openType=privacy, password=hashed_password, game=self.game, gameSettings=gameSettings, fillWithAI=fillWithAI, state="lobby"))
+        # sync(lambda: t.save())
+
+        t2 = TournamentW(manager=self, tid=tid, playerCount=playerCount, privacy=privacy, password=hashed_password, game=self.game, gameSettings=gameSettings, fillWithAI=fillWithAI)
+        self.tournaments[tid] = t2
+
+        return tid
+
+    async def on_join(self, player: Player, tid: str, password: str) -> bool:
+        if tid not in self.tournaments:
+            return False
+
+        t = self.tournaments[tid]
+
+        if t.privacy == "password" and (password is None or hash_weak_password(password) != t.password):
+            return False
+
+        if t.privacy == "invite":
+            # TODO: Check if the player has been invited to the tournament
+            return False
+
+        await t.on_join(player)
+        return True
+
+    async def connect(self, consumer):
+        self.consumers.append(consumer)
+
+    async def disconnect(self, tid, consumer):
+        if tid not in self.tournaments:
+            return
+
+        self.consumers.remove(consumer)
+        player = consumer.player
+
+        t = self.tournaments[tid]
+        await t.disconnect(player)
+
+    def all_players(self, tid: str):
+        return filter(lambda v: v.tid == tid, self.consumers)
 
 def sync(f, *args):
     pool = ThreadPool(processes=1)

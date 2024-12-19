@@ -39,7 +39,7 @@ urlpatterns = [
     path('api/player/<str:id>/matches', views.getMatch),
 
     path('api/tournament/create', views.tournament_create),
-    path('api/tournament/<str:id>', views.tournament_info),
+    # path('api/tournament/<str:id>', views.tournament_info),
 ]
 
 websocket_urlpatterns = [

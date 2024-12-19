@@ -28,3 +28,7 @@ export async function isLoggedIn() {
     const response = await post("/api/check-logged", {}).then((res) => res.json());
     return response["error"] === undefined;
 }
+
+export async function getNickname(id) {
+    return await post(`/api/player/${id}/nickname`);
+}

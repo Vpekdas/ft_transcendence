@@ -505,6 +505,23 @@ class TournamentW:
         for c in self.manager.all_players(self.tid):
             await c.send(msg)
 
+    def shuffle_players(self):
+        r = self.rounds[0]
+        s = [id for id in self.players]
+
+        for game in r.games:
+            game.player1 = s[random.randint(0, len(s) - 1)]
+            s.remove(game.player1)
+            game.player2 = s[random.randint(0, len(s) - 1)]
+            s.remove(game.player2)
+
+    async def start(self):
+        if len(self.players) != self.playerCount:
+            return
+
+        self.shuffle_players()
+        await self.send_tree()
+
 class TournamentManager:
     def __init__(self, *, game: str, manager: ServerManager):
         self.game = game
@@ -559,6 +576,13 @@ class TournamentManager:
 
         t = self.tournaments[tid]
         await t.disconnect(player)
+
+    async def start(self, tid: str):
+        if tid not in self.tournaments:
+            return
+
+        t = self.tournaments[tid]
+        await t.start()
 
     def all_players(self, tid: str):
         return filter(lambda v: v.tid == tid, self.consumers)

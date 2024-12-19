@@ -26,12 +26,10 @@ export default class Tournament extends Component {
         ws.onmessage = async (event) => {
             const data = JSON.parse(event.data);
 
-            console.log(data);
-
             if (data["type"] == "players") {
                 let players = "";
                 for (let p of data["players"]) {
-                    let nickname = (await getNickname(p).then((res) => res.json()))["nickname"];
+                    let nickname = await getNickname(p);
                     players += /* HTML */ `<span>${nickname}</span>`;
                 }
                 document.getElementById("player-list").innerHTML = players;
@@ -42,10 +40,18 @@ export default class Tournament extends Component {
 
                 for (let round of data["rounds"]) {
                     let games = round["games"];
-                    container.appendChild(html(/* HTML */ `<TournamentRound roundCount="${games.length}" />`));
+                    container.appendChild(
+                        html(
+                            /* HTML */ `<TournamentRound roundCount="${games.length}" data=${JSON.stringify(games)} />`
+                        )
+                    );
                 }
             }
         };
+
+        this.query("#start-tournament").on("click", () => {
+            ws.send(JSON.stringify({ type: "start" }));
+        });
 
         return html(
             /* HTML */
@@ -57,7 +63,7 @@ export default class Tournament extends Component {
                         <h2>Tournament Name</h2>
                         <div id="player-list"></div>
                         <div class="btn-create-tournament-container">
-                            <button type="submit" class="btn btn-primary settings">Start Game</button>
+                            <button class="btn btn-primary settings" id="start-tournament">Start Game</button>
                         </div>
                     </div>
                 </div>

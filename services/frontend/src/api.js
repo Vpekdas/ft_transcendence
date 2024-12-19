@@ -30,5 +30,5 @@ export async function isLoggedIn() {
 }
 
 export async function getNickname(id) {
-    return await post(`/api/player/${id}/nickname`);
+    return (await post(`/api/player/${id}/nickname`).then((res) => res.json()))["nickname"];
 }

@@ -84,5 +84,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
                     self.is_connected = True
                 else:
                     await self.send(json.dumps({ "error": BAD_PASSWORD }))
+            elif data["type"] == "start":
+                await tournaments.start(self.tid)
         except json.JSONDecodeError:
             pass

@@ -341,15 +341,16 @@ class Area(Body):
         pass
 
 class State(enum.Enum):
-    IN_LOBBY = 0,
-    STARTED = 1,
-    ENDED = 2,
+    IN_LOBBY = 0
+    STARTED = 1
+    ENDED = 2
+    DEAD = 3
 
 class Game:
     def __init__(self, *, tid: str = None):
         self.manager = None
         self.id = ""
-        self.clients = []
+        self.clients: list[Client] = []
         self.scene = Scene()
         self.state = State.IN_LOBBY
         self.tid = tid
@@ -361,7 +362,7 @@ class Game:
         self.task = asyncio.create_task(self.run())
 
     async def run(self):
-        while self.state != State.ENDED:
+        while self.state != State.DEAD:
             await self.on_update()
             await asyncio.sleep(0.010)
 
@@ -386,19 +387,20 @@ class Game:
     # Callbacks
     #
 
-    async def on_join(self, msg) -> bool:
+    async def on_join(self, gamemode: str, player_id: int) -> bool:
         pass
 
     async def on_unhandled_message(self, msg):
         pass
 
-    async def on_update(self, conn):
+    async def on_update(self):
         pass
 
 class ServerManager:
-    def __init__(self):
+    def __init__(self, ty):
         self.games = {}
         self.consumers = []
+        self.ty = ty
 
     def get_game(self, player_id: int) -> Game:
         for id in self.games:
@@ -412,15 +414,18 @@ class ServerManager:
     def make_id(self, k=8) -> str:
         return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
 
-    def start_game(self, game: Game) -> str:
+    def start_game(self, *, gamemode: str, tid: str=None, acceptedPlayers: list[int]=None):
         id = self.make_id()
-        self.games[id] = game
 
+        game = self.ty(gamemode=gamemode, tid=tid, acceptedPlayers=acceptedPlayers)
         game.id = id
         game.manager = self
 
+        self.games[id] = game
+
         log(f"Game started with id", game.id)
         game.start()
+        return game
 
     def disconnect(self, consumer):
         self.consumers.remove(consumer)
@@ -464,8 +469,9 @@ class TournamentRound:
         return { "games": [ game.to_dict() for game in self.games ] }
 
 class TournamentW:
-    def __init__(self, manager, tid: str, playerCount: int, privacy: str, password: str, game: str, gameSettings, fillWithAI: bool):
+    def __init__(self, gameManager, manager, tid: str, playerCount: int, privacy: str, password: str, game: str, gameSettings, fillWithAI: bool):
         self.manager = manager
+        self.gameManager = gameManager
         self.tid = tid
         self.playerCount = playerCount
         self.privacy = privacy
@@ -476,6 +482,7 @@ class TournamentW:
 
         self.players = []
         self.rounds: list[TournamentRound] = []
+        self.currentRound = 0
 
         # Create the empty tournament tree
 
@@ -505,6 +512,9 @@ class TournamentW:
         for c in self.manager.all_players(self.tid):
             await c.send(msg)
 
+    async def send_to(self, id: int, msg: str):
+        await self.manager.get_player(id).send(msg)
+
     def shuffle_players(self):
         r = self.rounds[0]
         s = [id for id in self.players]
@@ -522,6 +532,17 @@ class TournamentW:
         self.shuffle_players()
         await self.send_tree()
 
+        r = self.rounds[self.currentRound]
+
+        for tgame in r.games:
+            game: Game = self.gameManager.start_game(gamemode="1v1", tid=self.tid, acceptedPlayers=[tgame.player1, tgame.player2])
+
+            await game.on_join("1v1", tgame.player1)
+            await game.on_join("1v1", tgame.player2)
+
+            await self.send_to(tgame.player1, json.dumps({ "type": "match", "id": game.id }))
+            await self.send_to(tgame.player2, json.dumps({ "type": "match", "id": game.id }))
+
 class TournamentManager:
     def __init__(self, *, game: str, manager: ServerManager):
         self.game = game
@@ -532,7 +553,7 @@ class TournamentManager:
 
         # Let's read the database and restore all ongoing tournaments
 
-    def create(self, *, name: str, playerCount: int, privacy: str, password: str = None, fillWithAI: bool, gameSettings) -> str:
+    def create(self, *, gameManager, name: str, playerCount: int, privacy: str, password: str = None, fillWithAI: bool, gameSettings) -> str:
         """
         Create a new tournament
         """
@@ -543,7 +564,7 @@ class TournamentManager:
         # t = sync(lambda: Tournament(name=name, tid=tid, playerCount=playerCount, openType=privacy, password=hashed_password, game=self.game, gameSettings=gameSettings, fillWithAI=fillWithAI, state="lobby"))
         # sync(lambda: t.save())
 
-        t2 = TournamentW(manager=self, tid=tid, playerCount=playerCount, privacy=privacy, password=hashed_password, game=self.game, gameSettings=gameSettings, fillWithAI=fillWithAI)
+        t2 = TournamentW(gameManager=gameManager, manager=self, tid=tid, playerCount=playerCount, privacy=privacy, password=hashed_password, game=self.game, gameSettings=gameSettings, fillWithAI=fillWithAI)
         self.tournaments[tid] = t2
 
         return tid
@@ -586,6 +607,12 @@ class TournamentManager:
 
     def all_players(self, tid: str):
         return filter(lambda v: v.tid == tid, self.consumers)
+
+    def get_player(self, id: int):
+        try:
+            return next(filter(lambda v: v.player.id == id, self.consumers))
+        except StopIteration:
+            return None
 
 def sync(f, *args):
     pool = ThreadPool(processes=1)

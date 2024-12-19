@@ -46,6 +46,9 @@ export default class Tournament extends Component {
                         )
                     );
                 }
+            } else if (data["type"] == "match") {
+                // console.log(data);
+                navigateTo(`/play/${data["id"]}`);
             }
         };
 

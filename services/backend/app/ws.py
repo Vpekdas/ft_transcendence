@@ -31,7 +31,7 @@ class PongClientConsumer(AsyncWebsocketConsumer):
             if "type" in data and data["type"] == "matchmake" and "gamemode" in data:
                 await pong_manager.do_matchmaking(self, data)
             elif "type" in data and data["type"] == "join":
-                await pong_manager.on_join(self)
+                await pong_manager.on_join(self, data["id"])
             elif "type" in data:
                 game = pong_manager.get_game(self.player.id)
 

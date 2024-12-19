@@ -17,7 +17,7 @@ from django.contrib.auth.models import User
 
 from .models import duck, Player, Tournament, PongGameResult
 from .errors import *
-from .ws import tournaments
+from .ws import tournaments, pong_manager
 
 """
 Create a new user.
@@ -247,7 +247,9 @@ def tournament_create(request: HttpRequest):
         return JsonResponse({ "error": INVALID_REQUEST })
 
     game_settings = data["gameSettings"]
-    tid = tournaments.create(name=data["name"], playerCount=data["playerCount"], privacy=data["openType"], password=data["password"] if "password" in data else None, fillWithAI=bool(data["fillWithAI"]), gameSettings=data["gameSettings"])
+    manager = pong_manager # TODO: Modify this with data["game"]
+
+    tid = tournaments.create(gameManager=pong_manager, name=data["name"], playerCount=data["playerCount"], privacy=data["openType"], password=data["password"] if "password" in data else None, fillWithAI=bool(data["fillWithAI"]), gameSettings=data["gameSettings"])
 
     return JsonResponse({ "id": tid })
 

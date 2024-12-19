@@ -120,7 +120,7 @@ export class PongGame {
                     })
                 );
             } else {
-                this.ws.send(JSON.stringify({ type: "join" }));
+                this.ws.send(JSON.stringify({ type: "join", id: this.id }));
             }
         };
         this.ws.onmessage = async (event) => {
@@ -279,6 +279,8 @@ export class PongGame {
     }
 
     async onMessage(data) {
+        console.log(data);
+
         if (data.type == "update" && this.id != null) {
             this.onUpdateReceived(data);
         } else if (data.type == "matchFound") {
@@ -321,6 +323,8 @@ export class PongGame {
             }
             const mesh = new THREE.Mesh(geometry);
             this.scene.add(mesh);
+        } else if (data["type"] == "redirectTournament") {
+            navigateTo(`/tournament/${data["id"]}`);
         }
     }
 }

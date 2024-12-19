@@ -445,6 +445,24 @@ class ServerManager:
     async def on_join(self, conn) -> bool:
         return False
 
+class TournamentGame:
+    def __init__(self, *, player1: int, player2: int):
+        self.player1 = player1
+        self.player2 = player2
+
+    def to_dict(self) -> any:
+        return { "player1": self.player1, "player2": self.player2 }
+
+class TournamentRound:
+    def __init__(self, n: int):
+        self.games: list[TournamentGame] = []
+
+        for i in range(n):
+            self.games.append(TournamentGame(player1=None, player2=None))
+
+    def to_dict(self) -> any:
+        return { "games": [ game.to_dict() for game in self.games ] }
+
 class TournamentW:
     def __init__(self, manager, tid: str, playerCount: int, privacy: str, password: str, game: str, gameSettings, fillWithAI: bool):
         self.manager = manager
@@ -457,14 +475,27 @@ class TournamentW:
         self.fillWithAI = fillWithAI
 
         self.players = []
+        self.rounds: list[TournamentRound] = []
+
+        # Create the empty tournament tree
+
+        n = self.playerCount // 2
+
+        while n > 0:
+            self.rounds.append(TournamentRound(n))
+            n //= 2
 
     async def on_join(self, player):
         self.players.append(player.id)
         await self.broadcast(json.dumps({ "type": "players", "players": self.players }))
+        await self.send_tree()
 
     async def disconnect(self, player):
         self.players.remove(player.id)
         await self.broadcast(json.dumps({ "type": "players", "players": self.players }))
+
+    async def send_tree(self):
+        await self.broadcast(json.dumps({ "type": "rounds", "rounds": [round.to_dict() for round in self.rounds] }))
 
     async def broadcast(self, msg: str):
         """

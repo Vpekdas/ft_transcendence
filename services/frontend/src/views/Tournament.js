@@ -18,8 +18,6 @@ export default class Tournament extends Component {
     async render() {
         this.setTitle("Tournament");
 
-        let players = "";
-
         const id = this.attrib("id");
         const ws = new WebSocket(`ws://${getOriginNoProtocol()}:8000/tournament/${id}`);
         ws.onopen = (event) => {
@@ -31,12 +29,21 @@ export default class Tournament extends Component {
             console.log(data);
 
             if (data["type"] == "players") {
-                players = "";
+                let players = "";
                 for (let p of data["players"]) {
                     let nickname = (await getNickname(p).then((res) => res.json()))["nickname"];
                     players += /* HTML */ `<span>${nickname}</span>`;
                 }
                 document.getElementById("player-list").innerHTML = players;
+            } else if (data["type"] == "rounds") {
+                let container = document.getElementById("match-container");
+
+                container.replaceChildren([]);
+
+                for (let round of data["rounds"]) {
+                    let games = round["games"];
+                    container.appendChild(html(/* HTML */ `<TournamentRound roundCount="${games.length}" />`));
+                }
             }
         };
 
@@ -45,11 +52,7 @@ export default class Tournament extends Component {
             ` <div>
                 <NavBar />
                 <div class="container-fluid dashboard-container tournament-container">
-                    <div class="container-fluid dashboard-container match-container">
-                        <TournamentRound roundCount="4" />
-                        <TournamentRound roundCount="2" />
-                        <TournamentRound roundCount="1" />
-                    </div>
+                    <div class="container-fluid dashboard-container match-container" id="match-container"></div>
                     <div class="container-fluid dashboard-container player-container">
                         <h2>Tournament Name</h2>
                         <div id="player-list"></div>

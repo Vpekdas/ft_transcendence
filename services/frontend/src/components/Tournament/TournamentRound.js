@@ -37,7 +37,7 @@ export default class TournamentRound extends Component {
             rounds += this.createRound(player1, player2, score1, score2);
         }
 
-        return html(/* HTML */ ` <div class="tournament-round">${rounds}</div>`);
+        return html(/* HTML */ `<div class="tournament-round">${rounds}</div>`);
     }
 }
 globalComponents.set("TournamentRound", TournamentRound);

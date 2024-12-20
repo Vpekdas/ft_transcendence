@@ -1887,7 +1887,7 @@ ow-system[labels="false"] ow-name {
     align-items: center;
 }
 
-.container-fluid.dashboard-container.match-container {
+#match-container {
     height: 90%;
     width: 75%;
     justify-content: space-evenly;
@@ -1897,6 +1897,23 @@ ow-system[labels="false"] ow-name {
     width: 20%;
     height: 90%;
     flex-direction: column;
+    align-items: center;
+}
+
+.btn-create-tournament-container {
+    margin-top: auto;
+    margin-bottom: 10%;
+    display: flex;
+    align-items: center;
+}
+
+.container-fluid.tournament-match-container {
+    display: flex;
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    border: 3px solid pink;
+    justify-content: center;
     align-items: center;
 }
 
@@ -1915,21 +1932,13 @@ ow-system[labels="false"] ow-name {
     height: 100%;
     width: 100%;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: space-around;
+    border: 1px solid yellow;
 }
 
-.btn-create-tournament-container {
-    margin-top: auto;
-    margin-bottom: 10%;
+#player-list {
     display: flex;
-    align-items: center;
-}
-
-.container-fluid.tournament-match-container {
-    display: flex;
-    width: 100%;
-    height: auto;
-    flex-direction: row;
+    flex-direction: column;
 }
 
 .player-1,
@@ -1937,9 +1946,11 @@ ow-system[labels="false"] ow-name {
     display: flex;
     height: 100%;
     width: 100%;
-    border: 1px solid cyan;
     padding: 10px;
+}
 
+.player-1 {
+    border-bottom: 1px solid cyan;
 }
 
 .tournament-match.score {

@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import ForeignKey, CharField, JSONField, TextField, IntegerField, BooleanField, ImageField
+from django.db.models import ForeignKey, CharField, JSONField, TextField, IntegerField, BooleanField, ImageField, DateTimeField
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
 
@@ -55,6 +55,18 @@ class PongGameResult(models.Model):
     timeEnded = IntegerField()
     tid = CharField(max_length=8, null=True)
 
-    # TODO: Maybe store the game data to replay it later ?
+class Message(models.Model):
+    content = TextField()
+    date = DateTimeField()
+    sender = User()
+    receiver = User()
 
-    # TODO: Add statistics
+class Chat(models.Model):
+    messages = ArrayField(Message())
+    user1 = User()
+    user2 = User()
+
+# TODO: Maybe store the game data to replay it later ?
+
+# TODO: Add statistics
+

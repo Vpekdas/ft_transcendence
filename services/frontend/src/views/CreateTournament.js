@@ -34,14 +34,6 @@ export default class CreateTournament extends Component {
             playerCount = 8;
         });
 
-        this.query("#btnradio16").on("change", async () => {
-            playerCount = 16;
-        });
-
-        this.query("#btnradio16").on("change", async () => {
-            playerCount = 16;
-        });
-
         this.query("#btn-open").on("change", async () => {
             openType = "open";
         });
@@ -95,7 +87,7 @@ globalComponents.set("CreateTournament", CreateTournament);
 
 {
     "name",
-    "playerCount", // 2, 4, 8, 16
+    "playerCount", // 2, 4, 8,
     "openType", // "open", "password",
     "password", // optional
     "game": "pong",

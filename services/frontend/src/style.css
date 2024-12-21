@@ -1887,12 +1887,6 @@ ow-system[labels="false"] ow-name {
     align-items: center;
 }
 
-#match-container {
-    height: 90%;
-    width: 75%;
-    justify-content: space-evenly;
-}
-
 .container-fluid.dashboard-container.player-container {
     width: 20%;
     height: 90%;
@@ -1904,7 +1898,13 @@ ow-system[labels="false"] ow-name {
     margin-top: auto;
     margin-bottom: 10%;
     display: flex;
-    align-items: center;
+}
+
+#match-container {
+    height: 90%;
+    width: 75%;
+    display: flex;
+    flex-direction: co;
 }
 
 .container-fluid.tournament-match-container {
@@ -1912,9 +1912,6 @@ ow-system[labels="false"] ow-name {
     width: 100%;
     height: auto;
     flex-direction: row;
-    border: 3px solid pink;
-    justify-content: center;
-    align-items: center;
 }
 
 .tournament-match {
@@ -1933,7 +1930,6 @@ ow-system[labels="false"] ow-name {
     width: 100%;
     flex-direction: column;
     justify-content: space-around;
-    border: 1px solid yellow;
 }
 
 #player-list {
@@ -1959,4 +1955,29 @@ ow-system[labels="false"] ow-name {
     width: auto;
     justify-content: space-evenly;
     align-items: center;
+}
+
+.container-fluid.round-container {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    flex-direction: row;
+}
+
+.container-fluid.bracket-container {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    flex-direction: column;
+    align-items: left;
+    justify-content: space-around;
+}
+
+.bracket {
+    display: flex;
+    height: 50%;
+    width: 100%;
+    border-top: 1px solid cyan;
+    border-bottom: 1px solid cyan;
+    border-right: 1px solid cyan;
 }

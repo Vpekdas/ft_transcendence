@@ -20,9 +20,6 @@ export default class PlayerCountCard extends Component {
 
                     <input type="radio" class="btn-check" name="btnradio" id="btnradio8" autocomplete="off" />
                     <label class="btn btn-outline-primary" for="btnradio8">8</label>
-
-                    <input type="radio" class="btn-check" name="btnradio" id="btnradio16" autocomplete="off" />
-                    <label class="btn btn-outline-primary" for="btnradio16">16</label>
                 </div>
             </div>`
         );

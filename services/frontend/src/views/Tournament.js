@@ -42,9 +42,49 @@ export default class Tournament extends Component {
                     let games = round["games"];
                     container.appendChild(
                         html(
-                            /* HTML */ `<TournamentRound roundCount="${games.length}" data=${JSON.stringify(games)} />`
+                            /* HTML */ ` <div class="container-fluid round-container">
+                                <TournamentRound roundCount="${games.length}" data=${JSON.stringify(games)} />
+                                <div class="container-fluid bracket-container">
+                                    <div class="bracket" row="1"></div>
+                                </div>
+                            </div>`
                         )
                     );
+                }
+
+                // ! Improve this !
+                const brackets = document.querySelectorAll(".bracket");
+                const games = data["rounds"];
+
+                console.log(games);
+                if (games.length == 1) {
+                    brackets.forEach((bracket) => {
+                        bracket.style.display = "none";
+                    });
+                }
+
+                if (games.length == 2) {
+                    brackets.forEach((bracket) => {
+                        bracket.style.display = "flex";
+                        bracket.style.height = "50%";
+                    });
+                    brackets[1].style.display = "none";
+                }
+
+                if (games.length == 3) {
+                    brackets.forEach((bracket) => {
+                        bracket.style.display = "flex";
+                    });
+                    const bracketContainer = document.querySelector(".container-fluid.bracket-container");
+
+                    const newBracket = document.createElement("div");
+                    newBracket.className = "bracket";
+                    newBracket.setAttribute("row", "1");
+                    newBracket.style.height = "25%";
+                    bracketContainer.appendChild(newBracket);
+
+                    brackets[0].style.height = "25%";
+                    brackets[2].style.display = "none";
                 }
             } else if (data["type"] == "match") {
                 // console.log(data);

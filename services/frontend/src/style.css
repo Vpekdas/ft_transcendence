@@ -2071,6 +2071,23 @@ ow-system[labels="false"] ow-name {
     flex-direction: row;
 }
 
+.tournament-round {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    flex-direction: column;
+    justify-content: space-around;
+    transition: all 0.3s ease;
+}
+
+.tournament-round:hover {
+    box-shadow:
+        0 0 20px #00bcd4,
+        0 0 40px #00bcd4;
+    background: rgba(0, 0, 51, 0.9);
+    transform: scale(1.02);
+}
+
 .tournament-match {
     display: flex;
     height: 100%;
@@ -2078,27 +2095,92 @@ ow-system[labels="false"] ow-name {
     border: 1px solid #00bcd4;
     flex-direction: column;
     justify-content: space-evenly;
+    box-shadow: 0 0 10px #00bcd4;
+}
+
+.player-info {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-}
-
-.tournament-round {
-    display: flex;
-    height: 100%;
-    width: 100%;
-    flex-direction: column;
-    justify-content: space-around;
-}
-
-.player-1,
-.player-2 {
-    display: flex;
-    height: 100%;
     width: 100%;
     padding: 10px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    flex-direction: column;
 }
 
-.player-1 {
-    border-bottom: 1px solid cyan;
+.player-info:hover {
+    box-shadow:
+        0 0 20px #00bcd4,
+        0 0 40px #00bcd4;
+    background: rgba(0, 0, 51, 0.8);
+    transform: scale(1.05);
+    animation: timeWarp 1.5s infinite;
+}
+
+@keyframes timeWarp {
+    0% {
+        transform: scale(1.05) rotate(0deg);
+        filter: blur(0px);
+    }
+    50% {
+        transform: scale(1.1) rotate(2deg);
+        filter: blur(2px);
+    }
+    100% {
+        transform: scale(1.05) rotate(0deg);
+        filter: blur(0px);
+    }
+}
+
+.player-info::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0, 188, 212, 0.2), rgba(0, 0, 51, 0.8));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+}
+
+.player-info:hover::before {
+    opacity: 1;
+}
+
+.player-name,
+.player-score {
+    font-family: "Roboto Mono", monospace;
+    color: #00bcd4;
+    text-shadow: 0 0 5px #00bcd4;
+}
+
+.glitch-wrapper.vs {
+    background-color: inherit;
+    scale: 0.3;
+}
+
+.glitch-wrapper.vs::before {
+    background-color: inherit;
+}
+
+.glitch-wrapper.vs::after {
+    background-color: inherit;
+}
+
+.glitch.vs {
+    background-color: inherit;
+}
+
+.glitch.vs::before {
+    background-color: inherit;
+}
+
+.glitch.vs::after {
+    background-color: inherit;
 }
 
 .tournament-match.score {
@@ -2132,4 +2214,11 @@ ow-system[labels="false"] ow-name {
     border-top: 1px solid white;
     border-bottom: 1px solid white;
     border-right: 1px solid white;
+    transition: all 0.3s ease;
+}
+
+.bracket:hover {
+    border-top: 1px solid #00bcd4;
+    border-bottom: 1px solid #00bcd4;
+    border-right: 1px solid #00bcd4;
 }

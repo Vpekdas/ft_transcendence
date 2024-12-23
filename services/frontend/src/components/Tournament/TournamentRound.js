@@ -11,13 +11,16 @@ export default class TournamentRound extends Component {
     createRound(player1, player2, score1, score2) {
         return /* HTML */ `
             <div class="container-fluid tournament-match-container">
-                <div class="tournament-match">
-                    <span class="player-1">${player1}</span>
-                    <span class="player-2">${player2}</span>
+                <div class="player-info">
+                    <span class="player-name">${player1}</span>
+                    <span class="player-score">${score1}</span>
                 </div>
-                <div class="tournament-match score">
-                    <span class="player-1">${score1}</span>
-                    <span class="player-2">${score2}</span>
+                <div class="glitch-wrapper vs">
+                    <div class="glitch vs" data-glitch="VS">VS</div>
+                </div>
+                <div class="player-info">
+                    <span class="player-name">${player2}</span>
+                    <span class="player-score">${score2}</span>
                 </div>
             </div>
         `;

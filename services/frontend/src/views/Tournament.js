@@ -124,7 +124,11 @@ export default class Tournament extends Component {
                             /* HTML */ ` <div class="container-fluid round-container">
                                 <TournamentRound roundCount="${games.length}" data=${JSON.stringify(games)} />
                                 <div class="container-fluid bracket-container">
-                                    <div class="bracket" row="1"></div>
+                                    <div class="bracket" row="1">
+                                        <div class="dot"></div>
+                                        <div class="dot"></div>
+                                        <div class="dot"></div>
+                                    </div>
                                 </div>
                             </div>`
                         )

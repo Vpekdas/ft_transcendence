@@ -40,9 +40,9 @@ export default class Tournament extends Component {
                 bracket.style.display = "flex";
             });
             const bracketContainer = document.querySelector(".container-fluid.bracket-container");
-
             // Add another bracket with the right percent.
             const newBracket = document.createElement("div");
+
             newBracket.className = "bracket";
             newBracket.setAttribute("row", "1");
             // ! I will remove magic percent.
@@ -51,6 +51,14 @@ export default class Tournament extends Component {
 
             brackets[0].style.height = "25%";
             brackets[2].style.display = "none";
+
+            for (let i = 0; i < 3; i++) {
+                let dot = document.createElement("div");
+                dot.className = "dot";
+
+                const bracket = document.querySelectorAll(".bracket");
+                bracket[1].appendChild(dot);
+            }
         }
     }
 
@@ -94,6 +102,22 @@ export default class Tournament extends Component {
         }
     }
 
+    createRoundTier() {
+        const roundNames = ["Quarterfinals", "Semifinals", "Final"];
+        const roundTiers = document.querySelectorAll(".round-tier");
+        let offset = 0;
+
+        if (roundTiers.length == 1) {
+            offset = 2;
+        } else if (roundTiers.length == 2) {
+            offset = 1;
+        }
+
+        roundTiers.forEach((roundTier, index) => {
+            roundTier.textContent = roundNames[index + offset];
+        });
+    }
+
     async render() {
         this.setTitle("Tournament");
 
@@ -129,12 +153,14 @@ export default class Tournament extends Component {
                                         <div class="dot"></div>
                                         <div class="dot"></div>
                                     </div>
+                                    <span class="round-tier"></span>
                                 </div>
                             </div>`
                         )
                     );
                 }
                 this.createBracket(data["rounds"]);
+                this.createRoundTier();
                 this.createBinaryParticle(15);
                 this.createDotParticle(15);
             } else if (data["type"] == "match") {

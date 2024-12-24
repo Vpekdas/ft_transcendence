@@ -2208,14 +2208,19 @@ ow-system[labels="false"] ow-name {
 }
 
 .bracket {
+    position: relative;
     display: flex;
     height: 50%;
     width: 100%;
-    border-top: 1px solid white;
-    border-bottom: 1px solid white;
-    border-right: 1px solid white;
+    border-top: 5px solid grey;
+    border-bottom: 5px solid grey;
+    border-right: 5px solid grey;
     transition: all 0.3s ease;
-    position: relative;
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    box-shadow:
+        0px -25px 20px -20px rgba(0, 0, 0, 0.45),
+        0px 25px 20px -20px rgba(0, 0, 0, 0.45);
 }
 
 .dot {
@@ -2238,10 +2243,6 @@ ow-system[labels="false"] ow-name {
 
 .dot:nth-child(3) {
     animation-delay: 0.6s;
-}
-
-.dot:nth-child(4) {
-    animation-delay: 0.9s;
 }
 
 @keyframes moveDot {
@@ -2268,6 +2269,13 @@ ow-system[labels="false"] ow-name {
     100% {
         top: -5px;
         left: -5px;
-        opacity: 1;
+        opacity: 0;
     }
+}
+
+.round-tier {
+    display: flex;
+    width: 100%;
+    height: auto;
+    position: absolute;
 }

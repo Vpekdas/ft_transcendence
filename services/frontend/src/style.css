@@ -156,8 +156,28 @@
     box-shadow:
         0 0 10px #d89123,
         0 0 20px #d89123;
-    animation: pulsing-glow 2s infinite;
     --glow-color: #d89123;
+    animation:
+        pulsing-glow 2s infinite,
+        fadeInUp 2s forwards;
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+        filter: blur(5px);
+    }
+    50% {
+        opacity: 0.5;
+        transform: translateY(10px);
+        filter: blur(2px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
 }
 
 .dashboard-tab {
@@ -1288,15 +1308,7 @@ canvas {
     align-items: center;
 }
 
-#outer-wilds {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    width: 100vw;
-    background-color: black;
-    z-index: 10;
-}
+/* OUTER WILDS */
 
 ow-system {
     --cycle: 1320s; /* 22-minute cycle if you want this to be game-accurate */
@@ -1317,8 +1329,8 @@ ow-system {
     margin: auto;
     background: radial-gradient(circle at center, var(--sun-glow), transparent 35%) no-repeat center / var(--unit)
         var(--unit);
-    transition: --scale 5ms linear;
     animation: --sun-glow var(--cycle) linear infinite;
+    transition: --scale 5ms linear;
 }
 
 ow-system[timelapse="true"] {
@@ -1751,13 +1763,14 @@ ow-system[labels="false"] ow-name {
     --orbital-speed: 0;
     --w-color: gold;
     --w-offset: 48%;
-    border-color: transparent; /* The station doesn't orbit */
+    border: transparent;
 }
 
 #white-hole-station ow-wanderer {
     background: url("https://i.imgur.com/9CC2K51.png") no-repeat center center;
     background-size: cover;
     z-index: 2;
+    display: flex;
 }
 
 #white-hole-station ow-wanderer:hover {
@@ -1895,9 +1908,9 @@ ow-system[labels="false"] ow-name {
     box-shadow:
         0 0 10px #00bcd4,
         0 0 20px #00bcd4;
-    animation: pulsing-glow 2s infinite;
     --glow-color: #00bcd4;
     overflow: hidden;
+    opacity: 0;
 }
 
 .particle-container {
@@ -2275,7 +2288,9 @@ ow-system[labels="false"] ow-name {
 
 .round-tier {
     display: flex;
-    width: 100%;
+    width: auto;
     height: auto;
     position: absolute;
+    animation: neonPulse 2s infinite;
+    --neon-color: #00bcd4;
 }

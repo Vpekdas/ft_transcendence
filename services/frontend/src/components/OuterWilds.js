@@ -3,7 +3,6 @@ import { isLoggedIn } from "../api";
 import { tr, setLanguage, getLanguage } from "../i18n";
 import { navigateTo } from "../router";
 
-// TODO Add the following feat: Hide some easter eggs on some planets, for example to redirect to our group projects.
 class Wanderer extends HTMLElement {
     constructor() {
         super();
@@ -33,7 +32,7 @@ export default class OuterWilds extends Component {
             customElements.define("ow-wanderer", Wanderer);
         }
 
-        this.query("#sun").on("click", async () => {
+        this.query("#sun").do(() => {
             // Make the quantum moon jump around randomly
             const quantumMoon = document.getElementById("quantum-moon");
             const quantumOrbits = Array.from(document.querySelectorAll("[quantum]"));
@@ -57,6 +56,7 @@ export default class OuterWilds extends Component {
                     </ow-orbit>
 
                     <ow-orbit id="sun-station" path="false">
+                        <ow-name>Sun Station</ow-name>
                         <ow-wanderer image="https://i.imgur.com/KcqPZnw.png"></ow-wanderer>
                     </ow-orbit>
 
@@ -111,6 +111,7 @@ export default class OuterWilds extends Component {
                     </ow-orbit>
 
                     <ow-orbit id="white-hole-station" path="false">
+                        <ow-name>White Hole Station</ow-name>
                         <ow-wanderer image="https://i.imgur.com/9CC2K51.png"></ow-wanderer>
                     </ow-orbit>
                 </ow-system>

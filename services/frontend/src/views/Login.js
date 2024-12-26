@@ -55,7 +55,7 @@ export default class Login extends Component {
                 <div class="container-fluid login-container">
                     <div id="toast-container"></div>
                     <form class="login-form was-validated" action="javascript:void(0)">
-                        <img src="/img/Amadeus-Logo.webp" class="login-logo" />
+                        <img src="/img/login/Amadeus-Logo.webp" class="login-logo" />
                         <div class="row mb-3 login">
                             <label for="username" class="col-sm-2 col-form-label">${usernameLanguage}</label>
                             <div class="col-sm-8 login">
@@ -83,7 +83,7 @@ export default class Login extends Component {
                             </div>
                             <div class="col-sm-1 login">
                                 <button type="submit" class="btn btn-primary">
-                                    <img src="/img/login-button.png" />
+                                    <img src="/img/login/login-button.png" />
                                 </button>
                             </div>
                         </div>

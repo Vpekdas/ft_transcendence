@@ -41,7 +41,7 @@
     align-items: center;
     height: 100vh;
     width: 100%;
-    background-image: url("/img/Amadeus-Secondary.png");
+    background-image: url("/img/login/Amadeus-Secondary.png");
     background-size: cover;
 }
 
@@ -1084,7 +1084,7 @@ canvas {
     display: flex;
     width: 90%;
     max-width: 500px;
-    background: linear-gradient(135deg, rgba(34, 34, 34, 0.9), rgba(0, 0, 0, 0.9)); /* Dark gradient background */
+    background: linear-gradient(135deg, rgba(34, 34, 34, 0.9), rgba(0, 0, 0, 0.9));
     border: 1px solid #d89123;
     border-radius: 10px;
     box-shadow:
@@ -1436,6 +1436,7 @@ ow-wanderer {
             50%
     );
     pointer-events: auto;
+    offset-distance: var(--w-offset, 0%);
 }
 
 ow-name {
@@ -1473,6 +1474,7 @@ ow-system[labels="false"] ow-name {
     border-radius: 50%;
     box-shadow: 0 0 20px rgba(255, 165, 0, 0.5);
     border-color: transparent;
+    animation: --supernova var(--cycle) linear infinite;
 }
 
 #sun:hover {
@@ -1503,7 +1505,6 @@ ow-system[labels="false"] ow-name {
     height: calc(var(--body-radius) * 2 * var(--unit));
     width: calc(var(--body-radius) * 2 * var(--unit));
     border-radius: 50%; /* Make it circular */
-    background: url("https://i.imgur.com/KcqPZnw.png") no-repeat center center;
     background-size: cover;
     z-index: 2;
 }
@@ -1531,7 +1532,6 @@ ow-system[labels="false"] ow-name {
 }
 
 #interloper ow-wanderer {
-    background: url("https://i.imgur.com/3EF5IMK.png") no-repeat center center;
     background-size: cover;
     z-index: 2;
     transform: rotate(280deg);
@@ -1623,7 +1623,6 @@ ow-system[labels="false"] ow-name {
 }
 
 #timber-hearth ow-wanderer {
-    background: url("https://i.imgur.com/s93MtRV.png") no-repeat center center;
     background-size: cover;
     z-index: 2;
     animation:
@@ -1644,7 +1643,6 @@ ow-system[labels="false"] ow-name {
 }
 
 #attlerock ow-wanderer {
-    background: url("https://i.imgur.com/rxdFlJ8.png") no-repeat center center;
     background-size: cover;
     z-index: 2;
     border: none;
@@ -1667,7 +1665,6 @@ ow-system[labels="false"] ow-name {
 }
 
 #brittle-hollow ow-wanderer {
-    background: url("https://i.imgur.com/e6oWjiF.png") no-repeat center center;
     background-size: cover;
     z-index: 2;
     animation:
@@ -1687,7 +1684,6 @@ ow-system[labels="false"] ow-name {
 }
 
 #hollows-lantern ow-wanderer {
-    background: url("https://i.imgur.com/sb8xB97.png") no-repeat center center;
     background-size: cover;
     filter: drop-shadow(0 0 3px #e48a24);
     z-index: 2;
@@ -1714,7 +1710,6 @@ ow-system[labels="false"] ow-name {
 }
 
 #giants-deep ow-wanderer {
-    background: url("https://i.imgur.com/OMosCVo.png") no-repeat center center;
     background-size: cover;
     z-index: 2;
     height: calc(var(--body-radius) * 2 * var(--unit));
@@ -1743,7 +1738,6 @@ ow-system[labels="false"] ow-name {
 }
 
 #orbital-probe-cannon ow-wanderer {
-    background: url("https://i.imgur.com/v5oGWQN.png") no-repeat center center;
     background-size: cover;
     z-index: 2;
     animation: none;
@@ -1766,7 +1760,6 @@ ow-system[labels="false"] ow-name {
 }
 
 #dark-bramble ow-wanderer {
-    background: url("https://i.imgur.com/C0CtSuY.png") no-repeat center center;
     background-size: cover;
     z-index: 2;
     animation:
@@ -1798,7 +1791,6 @@ ow-system[labels="false"] ow-name {
 }
 
 #interloper ow-wanderer {
-    background: url("https://i.imgur.com/3EF5IMK.png") no-repeat center center;
     background-size: cover;
     --revolution-animation: none;
     offset-rotate: auto -90deg;
@@ -1820,7 +1812,6 @@ ow-system[labels="false"] ow-name {
 }
 
 #quantum-moon ow-wanderer {
-    background: url("https://i.imgur.com/NvXkTjY.png") no-repeat center center;
     background-size: cover;
     z-index: 2;
     animation: none;
@@ -1836,7 +1827,6 @@ ow-system[labels="false"] ow-name {
 }
 
 #white-hole-station ow-wanderer {
-    background: url("https://i.imgur.com/9CC2K51.png") no-repeat center center;
     background-size: cover;
     z-index: 2;
     display: flex;
@@ -1957,8 +1947,6 @@ ow-system[labels="false"] ow-name {
 .container-fluid.settings.tournament-password {
     display: none;
 }
-
-/* ! Update button background (It is blue bootstrap)*/
 
 /* TOURNAMENT */
 

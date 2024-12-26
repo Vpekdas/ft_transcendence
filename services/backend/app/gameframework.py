@@ -376,8 +376,6 @@ class Game:
             await consumer.send(json.dumps(data))
 
     def get_client(self, id: int, subid=None) -> Client:
-        if subid is not None: log(subid)
-
         try:
             return next(filter(lambda c: c.id == id and (subid is None or c.subid == subid), self.clients))
         except StopIteration:

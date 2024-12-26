@@ -8,15 +8,16 @@ export default class ChangePasswordForm extends Component {
     }
 
     async render() {
-        const changeLanguage = tr("Change");
-
         this.query(".btn.btn-primary.settings").on("click", async () => {
             const oldPassword = document.getElementById("old-password").value;
             const newPassword = document.getElementById("new-password").value;
             const newPasswordConfirm = document.getElementById("new-password-confirm").value;
 
             if (newPassword != newPasswordConfirm) {
-                this.showToast("Old password and new password are not the same", "bi bi-exclamation-triangle-fill");
+                this.showToast(
+                    tr("Old password and new password are not the same."),
+                    "bi bi-exclamation-triangle-fill"
+                );
                 return;
             }
 
@@ -29,7 +30,7 @@ export default class ChangePasswordForm extends Component {
             })
                 .then((res) => res.json())
                 .catch((err) => {
-                    this.showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
+                    this.showToast(tr("An error occurred. Please try again."), "bi bi-exclamation-triangle-fill");
                 });
 
             if (response.error) {
@@ -40,9 +41,9 @@ export default class ChangePasswordForm extends Component {
             /* HTML */ `<div class="container-fluid settings">
                 <div id="toast-container"></div>
                 <div class="card settings">
-                    <h5 class="card-title settings">Password</h5>
+                    <h5 class="card-title settings">${tr("Password")}</h5>
                     <div class="card-body settings">
-                        <p class="card-text settings">You can update your password here.</p>
+                        <p class="card-text settings">${tr("Update your password in the form below.")}</p>
                         <input
                             type="password"
                             id="old-password"
@@ -67,7 +68,7 @@ export default class ChangePasswordForm extends Component {
                             placeholder="${tr("Confirm new password")}"
                             autocomplete="off"
                         />
-                        <button type="submit" class="btn btn-primary settings">${changeLanguage}</button>
+                        <button type="submit" class="btn btn-primary settings">${tr("Change")}</button>
                     </div>
                 </div>
             </div>`

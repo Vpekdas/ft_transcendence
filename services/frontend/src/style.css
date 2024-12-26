@@ -631,7 +631,6 @@
     height: 100%;
     flex-direction: column;
     gap: 10px;
-    justify-content: center;
 }
 
 .input-group.settings {
@@ -639,6 +638,19 @@
     height: auto;
     width: auto;
     flex-direction: row;
+    justify-content: center;
+}
+
+.input-group.settings label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.input-group.settings span {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .card-text.settings {

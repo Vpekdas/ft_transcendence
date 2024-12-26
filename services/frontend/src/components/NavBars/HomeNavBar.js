@@ -16,15 +16,13 @@ export default class NavBar extends Component {
 
         let logoutNavItem;
 
-        const logoutLanguage = tr("Logout");
-        const profileLanguage = tr("Profile");
-
         if (await isLoggedIn()) {
-            logoutNavItem = `<li class="nav-item">
-                        <a class="nav-link custom-link ${activeTabClass("/logout")}" data-link href="/logout"
-                            >${logoutLanguage}</a
-                        >
-                    </li>`;
+            logoutNavItem = /* HTML */ `<li class="nav-item">
+                <a class="nav-link custom-link ${activeTabClass("/logout")}" data-link href="/logout">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>${tr("Logout")}</span></a
+                >
+            </li>`;
         }
 
         return html(
@@ -49,7 +47,7 @@ export default class NavBar extends Component {
                             href="/profile/match-history"
                         >
                             <i class="bi bi-person-badge"></i>
-                            <span>${profileLanguage}</span>
+                            <span>${tr("Profile")}</span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -62,8 +60,10 @@ export default class NavBar extends Component {
                             class="nav-link custom-link ${activeTabClass("/solar-system")}"
                             data-link
                             href="/solar-system"
-                            >Solar System</a
                         >
+                            <i class="bi bi-rocket"></i>
+                            <span>${tr("Solar System")}</span>
+                        </a>
                     </li>
                     ${logoutNavItem}
                     <div class="language-picker-container">

@@ -10,9 +10,9 @@ export default class TournamentNameCard extends Component {
     async render() {
         return html(
             /* HTML */ ` <div class="card settings">
-                <h5 class="card-title settings">Tournament Name</h5>
+                <h5 class="card-title settings">${tr("Tournament Name")}</h5>
                 <div class="card-body settings">
-                    <p class="card-text settings">You can choose tournament name here.</p>
+                    <p class="card-text settings">${tr("Choose the tournament name here.")}</p>
                     <input
                         type="text"
                         id="tournament-name"

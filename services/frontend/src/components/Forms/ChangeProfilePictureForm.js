@@ -8,7 +8,7 @@ export default class ChangeProfilePictureForm extends Component {
     }
 
     async render() {
-        let fileName = "No files selected";
+        let fileName = tr("No files selected");
 
         this.query("#inputGroupFile04").on("change", async () => {
             const target = document.getElementById("inputGroupFile04");
@@ -37,14 +37,10 @@ export default class ChangeProfilePictureForm extends Component {
             reader.readAsDataURL(picture);
         });
 
-        const profilePictureLanguage = tr("Profile Picture");
-        const uploadLanguage = tr("Upload");
-        const browseLanguage = tr("Browse");
-
         return html(
             /* HTML */ ` <div class="container-fluid settings">
                 <div class="card settings">
-                    <h5 class="card-title settings">${profilePictureLanguage}</h5>
+                    <h5 class="card-title settings">${tr("Profile Picture")}</h5>
                     <img src="${this.api(`/api/player/c/picture`)}" class="card-img-top profile" />
                     <div class="card-body settings">
                         <div class="input-group settings">
@@ -56,10 +52,10 @@ export default class ChangeProfilePictureForm extends Component {
                                 aria-label="Upload"
                                 style="display: none;"
                             />
-                            <label for="inputGroupFile04" class="btn btn-primary settings">${browseLanguage} </label>
+                            <label for="inputGroupFile04" class="btn btn-primary settings">${tr("Browse")} </label>
                             <span id="file-name" class="file-name">${fileName}</span>
                             <button class="btn btn-primary settings" type="button" id="profilePictureUpload">
-                                ${uploadLanguage}
+                                ${tr("Upload")}
                             </button>
                         </div>
                     </div>

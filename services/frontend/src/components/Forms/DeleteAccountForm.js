@@ -34,9 +34,9 @@ export default class DeleteAccountForm extends Component {
             /* HTML */ ` <div>
                 <div class="container-fluid settings">
                     <div class="card settings">
-                        <h5 class="card-title settings">Delete your account</h5>
+                        <h5 class="card-title settings">${tr("Delete your account")}</h5>
                         <div class="card-body settings">
-                            <p class="card-text settings">You can delete your account here.</p>
+                            <p class="card-text settings">${tr("Permanently delete your account here.")}</p>
                             <button type="submit" class="btn btn-primary settings delete">${changeLanguage}</button>
                         </div>
                     </div>

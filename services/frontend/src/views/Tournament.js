@@ -103,7 +103,7 @@ export default class Tournament extends Component {
     }
 
     createRoundTier() {
-        const roundNames = ["Quarterfinals", "Semifinals", "Final"];
+        const roundNames = [tr("Quarterfinals"), tr("Semifinals"), tr("Final")];
         const roundTiers = document.querySelectorAll(".round-tier");
         let offset = 0;
 
@@ -164,7 +164,6 @@ export default class Tournament extends Component {
                 this.createBinaryParticle(15);
                 this.createDotParticle(15);
             } else if (data["type"] == "match") {
-                // console.log(data);
                 navigateTo(`/play/${data["id"]}`);
             }
         };
@@ -186,7 +185,9 @@ export default class Tournament extends Component {
                             <span>Tournament Name</span>
                         </h2>
                         <div id="player-list"></div>
-                        <button id="start-tournament"><i class="bi bi-rocket-takeoff"></i> <span>Start !</span></button>
+                        <button id="start-tournament">
+                            <i class="bi bi-rocket-takeoff"></i> <span>${tr("Start !")}</span>
+                        </button>
                     </div>
                 </div>
             </div>`

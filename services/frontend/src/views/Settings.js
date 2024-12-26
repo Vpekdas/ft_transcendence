@@ -32,8 +32,8 @@ export default class Settings extends Component {
                     <ProfileNavBar />
                     <ul class="list-group settings">
                         <ChangeProfilePictureForm />
-                        <ChangePasswordForm />
                         <ChangeNicknameForm />
+                        <ChangePasswordForm />
                         <DeleteAccountForm />
                     </ul>
                 </div>

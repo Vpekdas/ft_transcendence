@@ -75,7 +75,7 @@ export default class CreateTournament extends Component {
                     <TournamentNameCard />
                     <PlayerCountCard />
                     <TournamentPrivacyCard />
-                    <button type="submit" class="btn btn-primary settings">Create</button>
+                    <button type="submit" class="btn btn-primary settings">${tr("Create")}</button>
                 </div>
             </div>`
         );

@@ -24,7 +24,7 @@ export default class LanguagePicker extends Component {
         return html(
             /* HTML */ ` <div class="dropdown language-picker">
                 <button
-                    class="btn btn-secondary dropdown-toggle"
+                    class="btn btn-secondary dropdown-toggle settings"
                     type="button"
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
@@ -61,6 +61,12 @@ export default class LanguagePicker extends Component {
                         <button type="button" lang="tr" class="btn btn-outline-info language-picker">
                             <img src="/img/tr.png" />
                             <span>TÜRKÇE</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" lang="hu" class="btn btn-outline-info language-picker">
+                            <img src="/img/hu.png" />
+                            <span>MAGYAR</span>
                         </button>
                     </li>
                 </ul>

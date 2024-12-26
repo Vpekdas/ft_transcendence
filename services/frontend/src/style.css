@@ -1280,6 +1280,26 @@ canvas {
     width: 100%;
     align-items: center;
     justify-content: center;
+    background-color: transparent;
+    border: 1px solid #d89123;
+    color: #d89123;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.btn.btn-secondary.dropdown-toggle:hover {
+    background-color: #d89123;
+    color: #000;
+    box-shadow:
+        0 0 10px #d89123,
+        0 0 20px #d89123;
+    border-color: #d89123;
 }
 
 .dropdown-menu.language-picker li {
@@ -1295,6 +1315,43 @@ canvas {
     height: 100%;
     width: 100%;
     align-items: center;
+}
+
+.dropdown-menu.language-picker span {
+    color: white;
+}
+
+.dropdown-menu.language-picker {
+    animation: fadeInItem 0.5s ease-out forwards;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(216, 145, 35, 0.8));
+    border: 1px solid #d89123;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.btn.btn-outline-info.language-picker {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(216, 145, 35, 0.8));
+    border: 1px solid #d89123;
+}
+
+.btn.btn-outline-info.language-picker:hover {
+    background-color: #d89123;
+    color: #000;
+    box-shadow:
+        0 0 10px #d89123,
+        0 0 20px #d89123;
+    border-color: #d89123;
+}
+
+@keyframes fadeInItem {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .dropdown-menu.language-picker img {
@@ -1944,6 +2001,9 @@ ow-system[labels="false"] ow-name {
 @keyframes moveParticle {
     0% {
         transform: translateY(var(--startY)) translateX(var(--startX));
+        opacity: 0;
+    }
+    25% {
         opacity: 1;
     }
     100% {

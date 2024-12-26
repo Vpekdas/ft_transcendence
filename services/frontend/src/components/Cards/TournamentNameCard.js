@@ -19,7 +19,7 @@ export default class TournamentNameCard extends Component {
                         class="form-control settings"
                         aria-describedby="tournamentName"
                         autocomplete="off"
-                        placeholder="Tournament name"
+                        placeholder="${tr("Tournament Name")}"
                         required
                     />
                 </div>

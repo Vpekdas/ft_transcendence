@@ -15,9 +15,7 @@ export default class SolarSystem extends Component {
             /* HTML */
             ` <div>
                 <NavBar />
-                <div id="space-background">
-                    <OuterWilds />
-                </div>
+                <OuterWilds />
             </div>`
         );
     }

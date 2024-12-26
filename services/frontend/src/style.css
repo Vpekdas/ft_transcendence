@@ -1817,11 +1817,12 @@ ow-system[labels="false"] ow-name {
     --w-color: gold;
     --w-offset: 48%;
     border: transparent;
+    z-index: 3;
 }
 
 #white-hole-station ow-wanderer {
     background-size: cover;
-    z-index: 2;
+    z-index: 3;
     display: flex;
 }
 
@@ -1923,7 +1924,7 @@ ow-system[labels="false"] ow-name {
     }
 }
 
-#space-background {
+#space {
     display: flex;
     height: 100%;
     width: 100%;

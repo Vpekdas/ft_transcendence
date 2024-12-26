@@ -49,7 +49,7 @@ export default class OuterWilds extends Component {
         });
 
         return html(
-            /* HTML */ ` <div>
+            /* HTML */ ` <div id="space">
                 <ow-system timelapse="true" labels="true" orbits="true">
                     <ow-orbit id="sun">
                         <ow-wanderer image="/img/Outer-Wilds/Sun.png"></ow-wanderer>

@@ -1379,8 +1379,14 @@ canvas {
 
 /* OUTER WILDS */
 
+@property --scale {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: 1;
+}
+
 ow-system {
-    --cycle: 1320s; /* 22-minute cycle if you want this to be game-accurate */
+    --cycle: 1320s; /* 22-minute cycle (game-accurate) */
     --unit: calc(var(--scale, 1) * 95vmin);
     --sun-glow: #ba702f;
     --orbit-border-width: 1px;
@@ -1403,7 +1409,7 @@ ow-system {
 }
 
 ow-system[timelapse="true"] {
-    --cycle: 120s; /* Two minutes to make it less boring? */
+    --cycle: 120s; /* You can change supernova timer here ! */
 }
 
 ow-orbit {
@@ -1429,8 +1435,7 @@ ow-wanderer {
     background: var(--w-image) no-repeat center center;
     position: relative;
     animation: var(--orbit-animation);
-    --orbit-animation: orbit-animation calc(var(--cycle) * var(--orbital-speed)) linear var(--initial-delay, 0s)
-        infinite;
+    --orbit-animation: --w-orbit calc(var(--cycle) * var(--orbital-speed)) linear var(--initial-delay, 0s) infinite;
     offset-path: ellipse(
         calc(var(--orbit-radius) * var(--unit)) calc(var(--orbit-radius) * var(--unit) * var(--orbit-ratio, 1)) at 50%
             50%
@@ -1450,12 +1455,12 @@ ow-name {
     z-index: 3;
     display: flex;
     animation: var(--orbit-animation);
-    --orbit-animation: orbit-animation calc(var(--cycle) * var(--orbital-speed)) linear var(--initial-delay, 0s)
-        infinite;
+    --orbit-animation: --w-orbit calc(var(--cycle) * var(--orbital-speed)) linear var(--initial-delay, 0s) infinite;
     offset-path: ellipse(
         calc(var(--orbit-radius) * var(--unit)) calc(var(--orbit-radius) * var(--unit) * var(--orbit-ratio, 1)) at 50%
             50%
     );
+    offset-distance: var(--w-offset, 0%);
 }
 
 ow-name[shy],
@@ -1492,8 +1497,8 @@ ow-system[labels="false"] ow-name {
 }
 
 #sun-station {
-    --orbit-radius: 0.085;
-    --body-radius: 0.01;
+    --orbit-radius: 0.055;
+    --body-radius: 0.005;
     --orbital-speed: 0.025;
     --w-color: #f6ab48;
     --w-angle: 90deg;
@@ -1504,7 +1509,7 @@ ow-system[labels="false"] ow-name {
 #sun-station ow-wanderer {
     height: calc(var(--body-radius) * 2 * var(--unit));
     width: calc(var(--body-radius) * 2 * var(--unit));
-    border-radius: 50%; /* Make it circular */
+    border-radius: 50%;
     background-size: cover;
     z-index: 2;
 }
@@ -1538,6 +1543,7 @@ ow-system[labels="false"] ow-name {
 }
 
 #hourglass-twins {
+    display: flex;
     --orbit-radius: 0.105;
     --body-radius: 0.0000001;
     --orbital-speed: 0.091667;
@@ -1555,17 +1561,20 @@ ow-system[labels="false"] ow-name {
 
 #hourglass-twins ow-wanderer {
     display: flex;
-    justify-content: center;
     align-items: center;
-    --revolution-dir: reverse;
     background-size: cover;
+    animation:
+        rotate360 10s linear infinite,
+        var(--orbit-animation);
 }
 
 #hourglass-twins > ow-wanderer:defined[image] {
     --gap: calc(0.0075 * var(--unit));
+    display: flex;
 }
 
 #hourglass-twins > ow-wanderer:defined[image]::before {
+    display: flex;
     content: "";
     position: relative;
     inset: 50%;
@@ -1575,35 +1584,25 @@ ow-system[labels="false"] ow-name {
     background: inherit;
     scale: 2;
     left: 10px;
-    top: 1px;
-    animation: rotate360 10s linear infinite;
 }
+
 #twins {
-    --orbit-radius: 0.0175;
-    --body-radius: 0.05;
+    --orbit-radius: 0.0075;
+    --body-radius: 0.005;
     --orbital-speed: 0;
     --w-offset: 0%;
-    width: 15px;
-    height: 15px;
-    aspect-ratio: 1 / 1;
-    align-items: last baseline;
     border-color: transparent;
-    animation: rotate360 10s linear infinite;
+}
+
+#ash-twin,
+#ember-twin {
+    --orbit-radius: 0.0075;
+    --body-radius: 0.005;
+    --orbital-speed: 0;
 }
 
 #ember-twin {
-    --orbit-radius: 0.0115;
-    --body-radius: 0.005;
-    --orbital-speed: 0;
     --w-offset: 50%;
-    animation: --supernova var(--cycle) linear infinite;
-}
-
-#ash-twin {
-    --orbit-radius: 0;
-    --body-radius: 0.005;
-    --orbital-speed: 0;
-    animation: --supernova var(--cycle) linear infinite;
 }
 
 #timber-hearth {
@@ -1626,7 +1625,6 @@ ow-system[labels="false"] ow-name {
     background-size: cover;
     z-index: 2;
     animation:
-        --supernova var(--cycle) linear infinite,
         rotate360 10s linear infinite,
         var(--orbit-animation);
     align-content: center;
@@ -1668,7 +1666,6 @@ ow-system[labels="false"] ow-name {
     background-size: cover;
     z-index: 2;
     animation:
-        --supernova var(--cycle) linear infinite,
         rotate360 10s linear infinite,
         var(--orbit-animation);
 }
@@ -1696,7 +1693,6 @@ ow-system[labels="false"] ow-name {
     --orbital-speed: 0.5;
     --w-color: darkseagreen;
     --w-offset: -20%;
-    --revolution-dir: reverse;
     --spin-speed: 0.0666;
     position: relative;
 }
@@ -1720,7 +1716,6 @@ ow-system[labels="false"] ow-name {
     left: 50%;
     transform: translate(-50%, -50%);
     animation:
-        --supernova var(--cycle) linear infinite,
         rotate360 10s linear infinite,
         var(--orbit-animation);
 }
@@ -1763,7 +1758,6 @@ ow-system[labels="false"] ow-name {
     background-size: cover;
     z-index: 2;
     animation:
-        --supernova var(--cycle) linear infinite,
         rotate360 10s linear infinite,
         var(--orbit-animation);
 }
@@ -1792,7 +1786,6 @@ ow-system[labels="false"] ow-name {
 
 #interloper ow-wanderer {
     background-size: cover;
-    --revolution-animation: none;
     offset-rotate: auto -90deg;
     z-index: 2;
 }
@@ -1918,6 +1911,15 @@ ow-system[labels="false"] ow-name {
         transform: scale(12);
         filter: hue-rotate(160deg) brightness(2);
         --w-color: white;
+    }
+}
+
+@keyframes --w-orbit {
+    from {
+        offset-distance: calc(var(--orbit-dir, 1) * (100% - var(--w-offset, 0%)));
+    }
+    to {
+        offset-distance: calc(var(--orbit-dir, 1) * (0% - var(--w-offset, 0%)));
     }
 }
 

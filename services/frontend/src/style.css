@@ -1989,6 +1989,7 @@ ow-system[labels="false"] ow-name {
     height: 50%;
     width: 100%;
     object-fit: contain;
+    animation: rotate360 10s linear infinite;
 }
 
 .planet-description {

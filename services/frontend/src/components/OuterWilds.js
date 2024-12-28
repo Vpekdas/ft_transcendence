@@ -2,6 +2,7 @@ import { Component, globalComponents, html } from "../micro";
 import { isLoggedIn } from "../api";
 import { tr, setLanguage, getLanguage } from "../i18n";
 import { navigateTo } from "../router";
+import { PLANET_DESCRIPTION } from "../constant";
 
 class Wanderer extends HTMLElement {
     constructor() {
@@ -28,8 +29,6 @@ export default class OuterWilds extends Component {
     }
 
     async render() {
-        let imageUrl;
-
         if (!customElements.get("ow-wanderer")) {
             customElements.define("ow-wanderer", Wanderer);
         }
@@ -49,11 +48,25 @@ export default class OuterWilds extends Component {
                 newWanderer.appendChild(quantumMoon);
             });
 
-            const wanderers = document.querySelectorAll("ow-wanderer");
+            const orbits = document.querySelectorAll("ow-orbit");
 
-            wanderers.forEach((wanderer) => {
-                wanderer.addEventListener("click", async () => {
-                    imageUrl = wanderer.getAttribute("image");
+            orbits.forEach((orbit) => {
+                orbit.addEventListener("click", async () => {
+                    // Ensure that clicking on a child element does not switch to the main element.
+                    // For example, clicking on Attlerock should display Attlerock's details, not Timber Hearth's.
+                    event.stopPropagation();
+                    const planetContainer = document.querySelector(".container-fluid.planet-card-container");
+                    const displayedPlanet = document.querySelector(".planet-img");
+                    const displayedPlanetName = document.querySelector(".planet-name");
+                    const displayedPlanetDescription = document.querySelector(".planet-description");
+
+                    planetContainer.style.display = "flex";
+
+                    displayedPlanet.setAttribute("src", orbit.querySelector("ow-wanderer").getAttribute("image"));
+                    displayedPlanetName.textContent = orbit.querySelector("ow-name").textContent;
+
+                    const description = PLANET_DESCRIPTION[displayedPlanetName.textContent];
+                    displayedPlanetDescription.textContent = description;
                 });
             });
         });
@@ -61,12 +74,13 @@ export default class OuterWilds extends Component {
         return html(/* HTML */ ` <div>
                 <div class="container-fluid planet-card-container">
                     <span class="planet-name"></span>
-                    <img class="planet-img" src="/img/Outer-Wilds/Sun.png"> </img>
+                    <img class="planet-img" src=""> </img>
                     <span class="planet-description"></span>
                 </div>
                 <div id="space">
                     <ow-system timelapse="true" labels="true" orbits="true">
                         <ow-orbit id="sun">
+                            <ow-name>Sun</ow-name>
                             <ow-wanderer image="/img/Outer-Wilds/Sun.png"></ow-wanderer>
                         </ow-orbit>
                         <ow-orbit id="sun-station" path="false">
@@ -81,8 +95,12 @@ export default class OuterWilds extends Component {
                             <ow-name>The Hourglass Twins</ow-name>
                             <ow-wanderer image="/img/Outer-Wilds/The-Hourglass-Twins.png">
                                 <ow-orbit id="twins">
-                                    <ow-wanderer id="ash-twin" image="/img/Outer-Wilds/Ash-Twin.png"></ow-wanderer>
-                                    <ow-wanderer id="ember-twin" image="/img/Outer-Wilds/Ember-Twin.png"></ow-wanderer>
+                                    <ow-wanderer id="ash-twin" image="/img/Outer-Wilds/Ash-Twin.png">
+                                        <ow-name>Ash Twin</ow-name>
+                                    </ow-wanderer>
+                                    <ow-wanderer id="ember-twin" image="/img/Outer-Wilds/Ember-Twin.png">
+                                        <ow-name>Ember Twin</ow-name>
+                                    </ow-wanderer>
                                 </ow-orbit>
                             </ow-wanderer>
                         </ow-orbit>
@@ -90,6 +108,7 @@ export default class OuterWilds extends Component {
                             <ow-name>Timber Hearth</ow-name>
                             <ow-wanderer image="/img/Outer-Wilds/Timber-Hearth.png">
                                 <ow-orbit id="attlerock">
+                                    <ow-name>Attlerock</ow-name>
                                     <ow-wanderer image="/img/Outer-Wilds/Attlerock.png"></ow-wanderer>
                                 </ow-orbit>
                             </ow-wanderer>
@@ -98,6 +117,7 @@ export default class OuterWilds extends Component {
                             <ow-name>Brittle Hollow</ow-name>
                             <ow-wanderer image="/img/Outer-Wilds/Brittle-Hollow.png">
                                 <ow-orbit id="hollows-lantern">
+                                    <ow-name>Hollows Lantern</ow-name>
                                     <ow-wanderer image="/img/Outer-Wilds/Hollows-Lantern.png"></ow-wanderer>
                                 </ow-orbit>
                             </ow-wanderer>
@@ -106,9 +126,11 @@ export default class OuterWilds extends Component {
                             <ow-name>Giant's Deep</ow-name>
                             <ow-wanderer image="/img/Outer-Wilds/Giants-Deep.png">
                                 <ow-orbit id="orbital-probe-cannon">
+                                    <ow-name>Orbital Probe Cannon</ow-name>
                                     <ow-wanderer image="/img/Outer-Wilds/Orbital-Probe-Cannon.png"></ow-wanderer>
                                 </ow-orbit>
                                 <ow-orbit id="quantum-moon">
+                                    <ow-name>Quantum Moon</ow-name>
                                     <ow-wanderer image="/img/Outer-Wilds/Quantum-Moon.png"></ow-wanderer>
                                 </ow-orbit>
                             </ow-wanderer>

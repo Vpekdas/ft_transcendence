@@ -1953,7 +1953,7 @@ ow-system[labels="false"] ow-name {
 }
 
 .container-fluid.planet-card-container {
-    display: flex;
+    display: none;
     position: absolute;
     height: 0;
     width: 20%;
@@ -1964,6 +1964,7 @@ ow-system[labels="false"] ow-name {
     flex-direction: column;
     justify-content: space-evenly;
     border-radius: 20px;
+    align-items: center;
 }
 
 @keyframes expandHeight {
@@ -1982,6 +1983,9 @@ ow-system[labels="false"] ow-name {
     border: 1px solid yellow;
     margin-top: 10px;
     border-radius: 20px;
+    color: yellow;
+    align-items: center;
+    justify-content: center;
 }
 
 .planet-img {
@@ -1999,6 +2003,10 @@ ow-system[labels="false"] ow-name {
     border: 1px solid blue;
     margin-top: 10px;
     border-radius: 20px;
+    color: blue;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
 /* TOURNAMENT */

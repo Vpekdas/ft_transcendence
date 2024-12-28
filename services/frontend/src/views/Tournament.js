@@ -158,8 +158,8 @@ export default class Tournament extends Component {
                         }
                         this.createBracket(data["rounds"]);
                         this.createRoundTier();
-                        this.createBinaryParticle(15);
-                        this.createDotParticle(15);
+                        // this.createBinaryParticle(15);
+                        // this.createDotParticle(15);
                     }
                 } else if (data["type"] == "match") {
                     navigateTo(`/play/${data["id"]}`);

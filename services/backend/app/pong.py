@@ -96,6 +96,8 @@ class Pong(Game):
         self.scene.add_body(Body(type="Wall", shape=border_box, pos=Vec3(0, -12, 0)))
         self.scene.add_body(Body(type="Wall", shape=border_box, pos=Vec3(0, 12, 0)))
 
+        self.already_send_redirect = False
+
     def reset(self):
         self.player1.pos.y = 0
         self.player2.pos.y = 0
@@ -114,6 +116,8 @@ class Pong(Game):
         if (self.player1.score == self.settings.max_score or self.player2.score == self.settings.max_score) and self.state == State.STARTED:
             self.state = State.ENDED
 
+            log("> 1")
+
             # Save the result of the game in the database
             # result = PongGameResult(scores=[self.score1.score, self.score2.score], timeStarted=self.timeStarted, timeEnded=time_secs(), tid=self.tid)
             # sync(lambda: result.save())
@@ -123,9 +127,11 @@ class Pong(Game):
             # sync(lambda: ongoingGame.delete())
         else:
             # Update the score
-            ongoingGame = sync(lambda: PongOngoingGame.objects.filter(gid=self.id).first())
-            ongoingGame.scores = [self.player1.score, self.player1.score]
-            sync(lambda: ongoingGame.save())
+            # ongoingGame = sync(lambda: PongOngoingGame.objects.filter(gid=self.id).first())
+            # ongoingGame.scores = [self.player1.score, self.player1.score]
+            # sync(lambda: ongoingGame.save())
+
+            pass
 
     async def on_update(self):
         if self.state == State.STARTED:
@@ -143,10 +149,13 @@ class Pong(Game):
             winner = self.player1.client.id if self.player1.score > self.player2.score else self.player2.score
             await self.broadcast({ "type": "gameEnded", "winner": winner })
 
-            if self.is_tournament_game():
-                await self.broadcast({ "type": "redirectTournament", "id": self.tid })
+            if self.is_tournament_game() and not self.already_send_redirect:
+                # Tournaments need to collect the result of the game, so its up to it to set the state to DEAD
 
-            self.state = State.DEAD
+                await self.broadcast({ "type": "redirectTournament", "id": self.tid })
+                self.already_send_redirect = True
+            elif not self.is_tournament_game():
+                self.state = State.DEAD
 
     async def on_join(self, gamemode: str, player_id: int):
         if self.acceptedPlayers is not None and player_id not in self.acceptedPlayers:
@@ -183,6 +192,12 @@ class Pong(Game):
     async def on_unhandled_message(self, msg):
         pass
 
+    def get_score(self, index: int) -> int:
+        if index == 0:
+            return self.player1.score
+        else:
+            return self.player2.score
+
 class MatchmakePlayer:
     def __init__(self, *, conn, player_id: str, gamemode: str):
         self.conn = conn
@@ -196,9 +211,9 @@ class PongManager(ServerManager):
         self.players = []
 
     async def do_matchmaking(self, conn, msg):
-        if self.already_in_game(conn):
-            self.err_already_in_game(conn)
-            return
+        # if self.already_in_game(conn):
+        #     self.err_already_in_game(conn)
+        #     return
 
         if msg["gamemode"] == "1v1local":
             game = self.start_game(gamemode=msg["gamemode"])

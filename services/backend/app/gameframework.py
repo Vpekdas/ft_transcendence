@@ -394,6 +394,9 @@ class Game:
     async def on_update(self):
         pass
 
+    def get_score(self, index: int) -> int:
+        return 0
+
 class ServerManager:
     def __init__(self, ty):
         self.games = {}
@@ -408,6 +411,9 @@ class ServerManager:
                 if client.id == player_id:
                     return game
         return None
+
+    def get_game_by_id(self, id: str) -> Game:
+        return self.games[id] if id in self.games else None
 
     def make_id(self, k=8) -> str:
         return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
@@ -452,9 +458,15 @@ class TournamentGame:
     def __init__(self, *, player1: int, player2: int):
         self.player1 = player1
         self.player2 = player2
+        self.id = None
+        self.score1 = 0
+        self.score2 = 0
+    
+    def get_winner(self) -> int:
+        return self.player1 if self.score1 > self.score2 else self.player2
 
     def to_dict(self) -> any:
-        return { "player1": self.player1, "player2": self.player2 }
+        return { "player1": self.player1, "player2": self.player2, "score1": self.score1, "score2": self.score2, "id": self.id }
 
 class TournamentRound:
     def __init__(self, n: int):
@@ -463,10 +475,19 @@ class TournamentRound:
         for i in range(n):
             self.games.append(TournamentGame(player1=None, player2=None))
 
+    def get_game_by_id(self, id: str) -> TournamentGame:
+        games = [game for game in self.games if game.id == id]
+        return games[0] if len(games) == 1 else None
+
     def to_dict(self) -> any:
         return { "games": [ game.to_dict() for game in self.games ] }
 
-class TournamentW:
+class TournamentState(enum.Enum):
+    LOBBY = 0,
+    WAITING_FOR_GAMES = 1,
+    DEAD = 2,
+
+class Tournament:
     def __init__(self, gameManager, manager, tid: str, playerCount: int, privacy: str, password: str, game: str, gameSettings, fillWithAI: bool):
         self.manager = manager
         self.gameManager = gameManager
@@ -482,6 +503,10 @@ class TournamentW:
         self.rounds: list[TournamentRound] = []
         self.currentRound = 0
 
+        self.currentGames = []
+
+        self.state = TournamentState.LOBBY
+
         # Create the empty tournament tree
 
         n = self.playerCount // 2
@@ -489,6 +514,86 @@ class TournamentW:
         while n > 0:
             self.rounds.append(TournamentRound(n))
             n //= 2
+        
+        self.run()
+
+    def run(self):
+        self.thread = Thread(target=self.run_inner)
+        self.thread.start()
+
+    def run_inner(self):
+        self.event_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.event_loop)
+        self.event_loop.create_task(self.runner())
+        self.event_loop.run_forever()
+
+    async def runner(self):
+        while self.state != TournamentState.DEAD:
+            if self.state == TournamentState.WAITING_FOR_GAMES:
+                removed = []
+
+                for id in self.currentGames:
+                    game = self.gameManager.get_game_by_id(id)
+                    tgame = self.rounds[self.currentRound].get_game_by_id(id)
+
+                    if game.state == State.ENDED:
+                        removed.append(id)
+                        await game.on_update()
+                        game.state = State.DEAD
+
+                    tgame.score1 = game.get_score(0)
+                    tgame.score2 = game.get_score(1)
+
+                for id in removed:
+                    self.currentGames.remove(id)
+
+                if len(self.currentGames) == 0:
+                    self.state = TournamentState.LOBBY
+                    await self.next_round()
+                else:
+                    await asyncio.sleep(0.1)
+
+    async def next_round(self):
+        if self.currentRound == len(self.rounds) - 1:
+            # End of the tournament !
+            log("Tournament", self.tid, " has ended, winner is", self.rounds[self.currentRound].games[0].get_winner())
+        else:
+            winners = []
+
+            for game in self.rounds[self.currentRound].games:
+                winners.append(game.get_winner())
+
+            self.currentRound += 1
+
+            round = self.rounds[self.currentRound]
+
+            for i in range(len(round.games)):
+                game = round.games[i]
+                game.player1 = winners[i * 2]
+                game.player2 = winners[i * 2 + 1]
+            
+            await self.send_tree()
+            await self.start_games()
+
+    async def start_games(self):
+        r = self.rounds[self.currentRound]
+
+        for tgame in r.games:
+            game: Game = self.gameManager.start_game(gamemode="1v1", tid=self.tid, acceptedPlayers=[tgame.player1, tgame.player2])
+
+            log(game.id, [tgame.player1, tgame.player2])
+
+            await game.on_join("1v1", tgame.player1)
+            await game.on_join("1v1", tgame.player2)
+
+            await self.send_to(tgame.player1, json.dumps({ "type": "match", "id": game.id }))
+            await self.send_to(tgame.player2, json.dumps({ "type": "match", "id": game.id }))
+
+            tgame.id = game.id
+
+            self.currentGames.append(game.id)
+        
+        self.state = TournamentState.WAITING_FOR_GAMES
 
     async def on_join(self, player):
         if player.id not in self.players:
@@ -531,24 +636,14 @@ class TournamentW:
 
         self.shuffle_players()
         await self.send_tree()
-
-        r = self.rounds[self.currentRound]
-
-        for tgame in r.games:
-            game: Game = self.gameManager.start_game(gamemode="1v1", tid=self.tid, acceptedPlayers=[tgame.player1, tgame.player2])
-
-            await game.on_join("1v1", tgame.player1)
-            await game.on_join("1v1", tgame.player2)
-
-            await self.send_to(tgame.player1, json.dumps({ "type": "match", "id": game.id }))
-            await self.send_to(tgame.player2, json.dumps({ "type": "match", "id": game.id }))
+        await self.start_games()
 
 class TournamentManager:
     def __init__(self, *, game: str, manager: ServerManager):
         self.game = game
         self.manager = manager
 
-        self.tournaments: list[TournamentW] = {}
+        self.tournaments: list[Tournament] = {}
         self.consumers = []
 
         # Let's read the database and restore all ongoing tournaments
@@ -564,7 +659,7 @@ class TournamentManager:
         # t = sync(lambda: Tournament(name=name, tid=tid, playerCount=playerCount, openType=privacy, password=hashed_password, game=self.game, gameSettings=gameSettings, fillWithAI=fillWithAI, state="lobby"))
         # sync(lambda: t.save())
 
-        t2 = TournamentW(gameManager=gameManager, manager=self, tid=tid, playerCount=playerCount, privacy=privacy, password=hashed_password, game=self.game, gameSettings=gameSettings, fillWithAI=fillWithAI)
+        t2 = Tournament(gameManager=gameManager, manager=self, tid=tid, playerCount=playerCount, privacy=privacy, password=hashed_password, game=self.game, gameSettings=gameSettings, fillWithAI=fillWithAI)
         self.tournaments[tid] = t2
 
         return tid

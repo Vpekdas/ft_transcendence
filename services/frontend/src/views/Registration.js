@@ -2,6 +2,7 @@ import { navigateTo } from "../router";
 import { Component, html } from "../micro";
 import { sanitizeInput } from "../validateInput";
 import { tr } from "../i18n";
+
 export default class Registration extends Component {
     constructor() {
         super();
@@ -43,7 +44,7 @@ export default class Registration extends Component {
             }
         });
 
-        this.query(".login-redirect").on("click", () => navigateTo("login"));
+        this.query(".login-redirect").on("click", () => navigateTo("login" + window.location.search));
 
         const usernameLanguage = tr("Username");
         const nicknameLanguage = tr("Nickname");

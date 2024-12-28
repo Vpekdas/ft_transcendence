@@ -39,11 +39,16 @@ export default class Login extends Component {
             if (response.error) {
                 this.showToast(response.error, "bi bi-exclamation-triangle-fill");
             } else {
-                navigateTo("/");
+                if (window.location.search.length == 0) {
+                    navigateTo("/");
+                } else {
+                    const redirect = window.location.search.substring(1).replace("redirect=", "");
+                    navigateTo(redirect);
+                }
             }
         });
 
-        this.query(".create-account-redirect").on("click", () => navigateTo("register"));
+        this.query(".create-account-redirect").on("click", () => navigateTo("register" + window.location.search));
 
         const usernameLanguage = tr("Username");
         const passwordLanguage = tr("Password");

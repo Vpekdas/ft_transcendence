@@ -84,7 +84,7 @@ export const router = async () => {
     const viewName = match.route.view.name;
 
     if (location.pathname != "/login" && location.pathname != "/register" && !(await isLoggedIn())) {
-        navigateTo("/login");
+        navigateTo("/login?redirect=" + location.pathname);
         return;
     }
 

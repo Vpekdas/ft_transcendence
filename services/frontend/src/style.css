@@ -1498,8 +1498,8 @@ ow-system[labels="false"] ow-name {
 }
 
 #sun-station {
-    --orbit-radius: 0.055;
-    --body-radius: 0.005;
+    --orbit-radius: 0.065;
+    --body-radius: 0.01;
     --orbital-speed: 0.025;
     --w-color: #f6ab48;
     --w-angle: 90deg;
@@ -1521,6 +1521,7 @@ ow-system[labels="false"] ow-name {
 
 #sun-station ow-wanderer:hover {
     border: 1px solid #ffd700;
+    animation-play-state: paused;
 }
 
 #interloper {
@@ -1537,8 +1538,18 @@ ow-system[labels="false"] ow-name {
     animation: --eaten calc(119 / 120 * var(--cycle)) linear 1 forwards;
 }
 
+#interloper:hover {
+    border-color: Cyan;
+}
+
+#interloper ow-wanderer:hover {
+    border: 1px solid cyan;
+    animation-play-state: paused;
+}
+
 #interloper ow-wanderer {
     background-size: cover;
+    offset-rotate: auto -90deg;
     z-index: 2;
     transform: rotate(280deg);
 }
@@ -1554,6 +1565,7 @@ ow-system[labels="false"] ow-name {
 
 #hourglass-twins ow-wanderer:hover {
     border: 1px solid #f4a460;
+    animation-play-state: paused;
 }
 
 #hourglass-twins:hover {
@@ -1584,7 +1596,7 @@ ow-system[labels="false"] ow-name {
     inline-size: var(--gap);
     background: inherit;
     scale: 2;
-    left: 10px;
+    left: 4px;
 }
 
 #twins {
@@ -1593,6 +1605,12 @@ ow-system[labels="false"] ow-name {
     --orbital-speed: 0;
     --w-offset: 0%;
     border-color: transparent;
+    scale: 1.5;
+    position: absolute;
+}
+
+#twins ow-name {
+    scale: 0.5;
 }
 
 #ash-twin,
@@ -1600,6 +1618,7 @@ ow-system[labels="false"] ow-name {
     --orbit-radius: 0.0075;
     --body-radius: 0.005;
     --orbital-speed: 0;
+    position: absolute;
 }
 
 #ember-twin {
@@ -1616,6 +1635,7 @@ ow-system[labels="false"] ow-name {
 
 #timber-hearth ow-wanderer:hover {
     border: 1px solid #228b22;
+    animation-play-state: paused;
 }
 
 #timber-hearth:hover {
@@ -1661,6 +1681,7 @@ ow-system[labels="false"] ow-name {
 
 #brittle-hollow ow-wanderer:hover {
     border: 1px solid #483d8b;
+    animation-play-state: paused;
 }
 
 #brittle-hollow ow-wanderer {
@@ -1704,6 +1725,7 @@ ow-system[labels="false"] ow-name {
 
 #giants-deep ow-wanderer:hover {
     border: 1px solid #2e8b57;
+    animation-play-state: paused;
 }
 
 #giants-deep ow-wanderer {
@@ -1753,6 +1775,7 @@ ow-system[labels="false"] ow-name {
 
 #dark-bramble ow-wanderer:hover {
     border: 1px solid #dc143c;
+    animation-play-state: paused;
 }
 
 #dark-bramble ow-wanderer {
@@ -1761,34 +1784,6 @@ ow-system[labels="false"] ow-name {
     animation:
         rotate360 10s linear infinite,
         var(--orbit-animation);
-}
-
-#interloper {
-    --orbit-radius: 0.278;
-    --body-radius: 0.015;
-    --orbit-ratio: 0.575;
-    --orbital-speed: 0.4125;
-    --tilt-axis: -8.9deg;
-    --w-color: cyan;
-    --orbit-dir: -1;
-    --w-offset: 55%;
-    transform-origin: 93.5% 47.6%;
-    transform: translate(-41%, 0) rotate(var(--tilt-axis));
-    animation: --eaten calc(119 / 120 * var(--cycle)) linear 1 forwards;
-}
-
-#interloper:hover {
-    border-color: Cyan;
-}
-
-#interloper ow-wanderer:hover {
-    border: 1px solid cyan;
-}
-
-#interloper ow-wanderer {
-    background-size: cover;
-    offset-rotate: auto -90deg;
-    z-index: 2;
 }
 
 #quantum-moon {
@@ -1803,6 +1798,7 @@ ow-system[labels="false"] ow-name {
 
 #quantum-moon ow-wanderer:hover {
     border: 1px solid #c0c0c0;
+    animation-play-state: paused;
 }
 
 #quantum-moon ow-wanderer {
@@ -1810,6 +1806,8 @@ ow-system[labels="false"] ow-name {
     z-index: 2;
     animation: none;
 }
+
+/* !FIXME: Hovering works only if screen has certain size ?  (Ex: when pressing alt) */
 
 #white-hole-station {
     --orbit-radius: 0.48;
@@ -1829,10 +1827,6 @@ ow-system[labels="false"] ow-name {
 
 #white-hole-station ow-wanderer:hover {
     border: 1px solid #ffffff;
-}
-
-#white-hole-station:hover {
-    border-color: #ffffff;
 }
 
 @keyframes rotate360 {
@@ -1934,30 +1928,12 @@ ow-system[labels="false"] ow-name {
     background-color: #000;
 }
 
-/* CREATE TOURNAMENT */
-
-.container-fluid.dashboard-container.create-tournament-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.btn-group.player-count {
-    display: flex;
-    height: 100%;
-    width: 100%;
-}
-
-.container-fluid.settings.tournament-password {
-    display: none;
-}
-
 .container-fluid.planet-card-container {
     display: none;
     position: absolute;
     height: 0;
     width: 20%;
-    border: 3px solid cyan;
+    border: 3px solid var(--card-color);
     right: 0;
     overflow: hidden;
     animation: expandHeight 1s forwards;
@@ -2000,13 +1976,31 @@ ow-system[labels="false"] ow-name {
     display: flex;
     height: 30%;
     width: 100%;
-    border: 1px solid blue;
+    border: 1px solid white;
     margin-top: 10px;
     border-radius: 20px;
-    color: blue;
+    color: white;
     align-items: center;
     justify-content: center;
     text-align: center;
+}
+
+/* CREATE TOURNAMENT */
+
+.container-fluid.dashboard-container.create-tournament-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.btn-group.player-count {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+.container-fluid.settings.tournament-password {
+    display: none;
 }
 
 /* TOURNAMENT */

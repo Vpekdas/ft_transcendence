@@ -7,4 +7,11 @@ export const PLANET_DESCRIPTION = {
     "Ember Twin": "",
     "Timber Hearth": "Never saw the credits roll so fast in a game, haha...",
     Attlerock: "Yup, I'm in the top 0.01% of players who started exploring the universe from here.",
+    "Brittle Hollow": "",
+    "Hollows Lantern": "",
+    "Giant's Deep": "",
+    "Orbital Probe Cannon": "",
+    "Quantum Moon": "",
+    "Dark Bramble": "Cutest fish ever seen here !",
+    "White Hole Station": "",
 };

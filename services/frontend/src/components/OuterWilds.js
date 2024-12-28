@@ -1,4 +1,4 @@
-import { Component, globalComponents, html } from "../micro";
+import { Component, html } from "../micro";
 import { isLoggedIn } from "../api";
 import { tr, setLanguage, getLanguage } from "../i18n";
 import { navigateTo } from "../router";
@@ -148,4 +148,3 @@ export default class OuterWilds extends Component {
             </div>`);
     }
 }
-globalComponents.set("OuterWilds", OuterWilds);

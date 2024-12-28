@@ -1,6 +1,5 @@
-import { Component, globalComponents, html } from "../../micro";
+import { Component, html } from "../../micro";
 import { tr } from "../../i18n";
-import { fetchApi, post } from "../../api";
 
 export default class TournamentNameCard extends Component {
     constructor() {
@@ -27,4 +26,3 @@ export default class TournamentNameCard extends Component {
         );
     }
 }
-globalComponents.set("TournamentNameCard", TournamentNameCard);

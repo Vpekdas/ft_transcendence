@@ -1,4 +1,4 @@
-import { Component, globalComponents, html } from "../micro";
+import { Component, html } from "../micro";
 import { isLoggedIn } from "../api";
 import { tr, setLanguage, getLanguage } from "../i18n";
 import { navigateTo } from "../router";
@@ -74,4 +74,3 @@ export default class LanguagePicker extends Component {
         );
     }
 }
-globalComponents.set("LanguagePicker", LanguagePicker);

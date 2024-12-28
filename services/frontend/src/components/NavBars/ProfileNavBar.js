@@ -1,4 +1,4 @@
-import { Component, globalComponents, html } from "../../micro";
+import { Component, html } from "./micro";
 import { tr } from "../../i18n";
 
 export default class ProfileNavBar extends Component {
@@ -66,4 +66,3 @@ export default class ProfileNavBar extends Component {
         );
     }
 }
-globalComponents.set("ProfileNavBar", ProfileNavBar);

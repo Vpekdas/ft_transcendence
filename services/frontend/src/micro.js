@@ -33,6 +33,8 @@ export class Component {
         this.updateHandler = undefined;
     }
 
+    static registry = new Map();
+
     setTitle(title) {
         document.title = title;
     }
@@ -348,6 +350,10 @@ export function html(str) {
         customElements.define("micro-reactive-value", HTMLReactiveValue);
     }
 
+    if (str == null) {
+        return null;
+    }
+
     class Token {
         static IDENT = 0;
         static EQUALS = 1; // `=`
@@ -550,12 +556,12 @@ export function html(str) {
         /** @type HTMLElement */
         let el;
 
-        if (globalComponents.has(name)) {
+        if (Component.registry.has(name)) {
             el = document.createElement("micro-component");
 
             el.setAttribute("c", name);
 
-            const c = globalComponents.get(name);
+            const c = Component.registry.get(name);
 
             el.component = new c();
             el.component.updateHandler = async () => {
@@ -705,6 +711,3 @@ export function html(str) {
     }
     return el;
 }
-
-/** @type Map<string, any> */
-export const globalComponents = new Map();

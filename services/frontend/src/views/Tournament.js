@@ -1,4 +1,4 @@
-import { Component, globalComponents, html } from "../micro";
+import { Component, html } from "../micro";
 import NavBar from "../components/NavBars/HomeNavBar";
 import DonutChart from "../components/Charts/DonutChart";
 import { fetchApi, isLoggedIn, getOriginNoProtocol, getNickname } from "../api";
@@ -194,4 +194,3 @@ export default class Tournament extends Component {
         );
     }
 }
-globalComponents.set("Tournament", Tournament);

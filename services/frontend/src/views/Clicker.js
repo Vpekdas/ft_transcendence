@@ -1,4 +1,4 @@
-import { Component, globalComponents, html } from "../micro";
+import { Component, html } from "../micro";
 import NavBar from "../components/NavBars/HomeNavBar";
 import { tr } from "../i18n";
 
@@ -43,4 +43,3 @@ export default class Clicker extends Component {
         );
     }
 }
-globalComponents.set("Clicker", Clicker);

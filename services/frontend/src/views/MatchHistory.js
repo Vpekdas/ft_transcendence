@@ -1,4 +1,4 @@
-import { Component, globalComponents, html } from "../micro";
+import { Component, html } from "../micro";
 import NavBar from "../components/NavBars/HomeNavBar";
 import ProfileNavBar from "../components/NavBars/ProfileNavBar";
 import { isLoggedIn } from "../api";
@@ -33,4 +33,3 @@ export default class MatchHistory extends Component {
         );
     }
 }
-globalComponents.set("MatchHistory", MatchHistory);

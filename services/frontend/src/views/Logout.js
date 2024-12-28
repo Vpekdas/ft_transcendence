@@ -1,5 +1,5 @@
 import { post } from "../api";
-import { Component, globalComponents, html } from "../micro";
+import { Component, html } from "../micro";
 import { navigateTo } from "../router";
 
 export default class Logout extends Component {
@@ -13,4 +13,3 @@ export default class Logout extends Component {
         return html(/* HTML */ `<div></div>`);
     }
 }
-globalComponents.set("Logout", Logout);

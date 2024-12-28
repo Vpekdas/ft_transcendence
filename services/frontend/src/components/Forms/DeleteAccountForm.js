@@ -1,4 +1,4 @@
-import { Component, globalComponents, html } from "../../micro";
+import { Component, html } from "../../micro";
 import { tr } from "../../i18n";
 import { fetchApi, post } from "../../api";
 
@@ -59,4 +59,3 @@ export default class DeleteAccountForm extends Component {
         );
     }
 }
-globalComponents.set("DeleteAccountForm", DeleteAccountForm);

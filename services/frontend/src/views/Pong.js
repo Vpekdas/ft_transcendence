@@ -1,5 +1,5 @@
 import { isLoggedIn, post } from "../api";
-import { Component, globalComponents, html } from "../micro";
+import { Component, html } from "../micro";
 import { action } from "../game";
 import { PongGame } from "../PongGame";
 import { navigateTo } from "../router";
@@ -27,4 +27,3 @@ export default class Pong extends Component {
         );
     }
 }
-globalComponents.set("Pong", Pong);

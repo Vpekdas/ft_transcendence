@@ -1,4 +1,4 @@
-import { Component, globalComponents, html } from "../../micro";
+import { Component, html } from "../../micro";
 
 export default class LineChart extends Component {
     constructor() {
@@ -26,7 +26,6 @@ export default class LineChart extends Component {
         );
     }
 }
-globalComponents.set("LineChart", LineChart);
 
 // TODO: Add a function to dynamically add circles to the line chart.
 // TODO: Add a title to the line chart.

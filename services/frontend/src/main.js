@@ -19,15 +19,13 @@ document.addEventListener("DOMContentLoaded", () => {
             navigateTo(target.href);
         }
     });
+    registerAll();
     router();
 });
 
-// document.addEventListener("vite:load", (event) => {
-//     console.log("HOT RELOADING !!!!");
-// });
-
 if (import.meta.hot) {
     import.meta.hot.accept((newModule) => {
+        registerAll();
         router();
     });
 }

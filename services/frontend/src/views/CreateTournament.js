@@ -1,4 +1,4 @@
-import { Component, globalComponents, html } from "../micro";
+import { Component, html } from "../micro";
 import NavBar from "../components/NavBars/HomeNavBar";
 import DonutChart from "../components/Charts/DonutChart";
 import { fetchApi, isLoggedIn, post } from "../api";
@@ -81,17 +81,3 @@ export default class CreateTournament extends Component {
         );
     }
 }
-globalComponents.set("CreateTournament", CreateTournament);
-
-/*
-
-{
-    "name",
-    "playerCount", // 2, 4, 8,
-    "openType", // "open", "password",
-    "password", // optional
-    "game": "pong",
-    "gameSettings": {},
-}
-
-*/

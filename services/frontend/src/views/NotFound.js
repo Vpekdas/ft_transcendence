@@ -1,4 +1,4 @@
-import { Component, globalComponents, html } from "../micro";
+import { Component, html } from "../micro";
 import NavBar from "../components/NavBars/HomeNavBar";
 
 export default class NotFound extends Component {
@@ -25,4 +25,3 @@ export default class NotFound extends Component {
         );
     }
 }
-globalComponents.set("NotFound", NotFound);

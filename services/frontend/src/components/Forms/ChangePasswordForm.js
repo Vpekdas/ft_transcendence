@@ -1,4 +1,4 @@
-import { Component, globalComponents, html } from "../../micro";
+import { Component, html } from "../../micro";
 import { tr } from "../../i18n";
 import { fetchApi } from "../../api";
 
@@ -75,4 +75,3 @@ export default class ChangePasswordForm extends Component {
         );
     }
 }
-globalComponents.set("ChangePasswordForm", ChangePasswordForm);

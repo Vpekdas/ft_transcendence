@@ -1,6 +1,5 @@
-import { Component, globalComponents, html } from "../../micro";
+import { Component, html } from "../../micro";
 import { tr } from "../../i18n";
-import { fetchApi, post } from "../../api";
 
 export default class PlayerCountCard extends Component {
     constructor() {
@@ -25,4 +24,3 @@ export default class PlayerCountCard extends Component {
         );
     }
 }
-globalComponents.set("PlayerCountCard", PlayerCountCard);

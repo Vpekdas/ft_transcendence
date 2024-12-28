@@ -1,6 +1,5 @@
-import { Component, globalComponents, html } from "../../micro";
+import { Component, html } from "../../micro";
 import NavBar from "../../components/NavBars/HomeNavBar";
-import { tr } from "../../i18n";
 import { getNickname } from "../../api";
 
 export default class TournamentRound extends Component {
@@ -43,4 +42,3 @@ export default class TournamentRound extends Component {
         return html(/* HTML */ `<div class="tournament-round">${rounds}</div>`);
     }
 }
-globalComponents.set("TournamentRound", TournamentRound);

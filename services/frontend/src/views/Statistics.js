@@ -1,4 +1,4 @@
-import { Component, globalComponents, html } from "../micro";
+import { Component, html } from "../micro";
 import NavBar from "../components/NavBars/HomeNavBar";
 import DonutChart from "../components/Charts/DonutChart";
 import LineChart from "../components/Charts/LineChart";
@@ -46,7 +46,6 @@ export default class Statistics extends Component {
         );
     }
 }
-globalComponents.set("Statistics", Statistics);
 
 // TODO Win/Loss Ratio Chart: Donut Chart.
 // TODO Most Used Skins: Donut Chart.

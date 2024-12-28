@@ -1,5 +1,5 @@
 import { fetchApi, isLoggedIn } from "../api";
-import { Component, globalComponents, html } from "../micro";
+import { Component, html } from "../micro";
 import { navigateTo } from "../router";
 import { tr } from "../i18n";
 
@@ -40,7 +40,9 @@ export default class Home extends Component {
                         <img src="/favicon.svg" class="card-img-top pong-game" alt="..." />
                         <div class="card-body pong-game">
                             <p class="card-text pong-game">${tr("Play 1v1 Local Pong.")}</p>
-                            <button type="button" class="btn btn-success play" id="play-pong-1v1local">${tr("Play")}</button>
+                            <button type="button" class="btn btn-success play" id="play-pong-1v1local">
+                                ${tr("Play")}
+                            </button>
                         </div>
                     </div>
                     <div class="card pong-game">
@@ -56,7 +58,9 @@ export default class Home extends Component {
                         <img src="/favicon.svg" class="card-img-top pong-game" alt="..." />
                         <div class="card-body pong-game">
                             <p class="card-text pong-game">${tr("Create a Pong Tournament.")}</p>
-                            <button type="button" class="btn btn-success play" id="play-pong-tournament">${tr("Create")}</button>
+                            <button type="button" class="btn btn-success play" id="play-pong-tournament">
+                                ${tr("Create")}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -64,4 +68,3 @@ export default class Home extends Component {
         );
     }
 }
-globalComponents.set("Home", Home);

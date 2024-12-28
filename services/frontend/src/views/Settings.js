@@ -1,4 +1,4 @@
-import { Component, globalComponents, html } from "../micro";
+import { Component, html } from "../micro";
 import NavBar from "../components/NavBars/HomeNavBar";
 import DonutChart from "../components/Charts/DonutChart";
 import { fetchApi, isLoggedIn } from "../api";
@@ -41,4 +41,3 @@ export default class Settings extends Component {
         );
     }
 }
-globalComponents.set("Settings", Settings);

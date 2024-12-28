@@ -1,5 +1,5 @@
 import { navigateTo } from "../router";
-import { Component, globalComponents, html } from "../micro";
+import { Component, html } from "../micro";
 import { sanitizeInput } from "../validateInput";
 import { tr } from "../i18n";
 export default class Registration extends Component {
@@ -108,4 +108,3 @@ export default class Registration extends Component {
         );
     }
 }
-globalComponents.set("Registration", Registration);

@@ -1,14 +1,7 @@
 import { Component, html } from "../micro";
-import NavBar from "../components/NavBars/HomeNavBar";
-import DonutChart from "../components/Charts/DonutChart";
-import { fetchApi, isLoggedIn, getOriginNoProtocol, getNickname } from "../api";
-import ChangePasswordForm from "../components/Forms/ChangePasswordForm";
-import ChangeNicknameForm from "../components/Forms/ChangeNicknameForm";
-import DeleteAccountForm from "../components/Forms/DeleteAccountForm";
-import ChangeProfilePictureForm from "../components/Forms/ChangeProfilePictureForm";
+import { getOriginNoProtocol, getNickname } from "../api";
 import { navigateTo } from "../router";
 import { tr } from "../i18n";
-import TournamentRound from "../components/Tournament/TournamentRound";
 
 export default class Tournament extends Component {
     constructor() {
@@ -119,64 +112,70 @@ export default class Tournament extends Component {
     }
 
     async render() {
-        this.setTitle("Tournament");
+        this.setTitle(tr("Tournament"));
 
         const id = this.attrib("id");
-        const ws = new WebSocket(`ws://${getOriginNoProtocol()}:8000/tournament/${id}`);
-        ws.onopen = (event) => {
-            ws.send(JSON.stringify({ type: "join" }));
-        };
-        ws.onmessage = async (event) => {
-            const data = JSON.parse(event.data);
 
-            if (data["type"] == "players") {
-                let players = "";
-                for (let p of data["players"]) {
-                    let nickname = await getNickname(p);
-                    players += /* HTML */ `<span>${nickname}</span>`;
+        this.query("#tournament-container").do(async () => {
+            const ws = new WebSocket(`ws://${getOriginNoProtocol()}:8000/tournament/${id}`);
+
+            ws.onopen = (event) => {
+                ws.send(JSON.stringify({ type: "join" }));
+            };
+            ws.onmessage = async (event) => {
+                const data = JSON.parse(event.data);
+
+                if (data["type"] == "players") {
+                    let players = "";
+                    for (let p of data["players"]) {
+                        let nickname = await getNickname(p);
+                        players += /* HTML */ `<span>${nickname}</span>`;
+                    }
+                    document.getElementById("player-list").innerHTML = players;
+                } else if (data["type"] == "rounds") {
+                    let container = document.getElementById("match-container");
+
+                    if (container != null) {
+                        container.replaceChildren([]);
+
+                        for (let round of data["rounds"]) {
+                            let games = round["games"];
+                            container.appendChild(
+                                html(
+                                    /* HTML */ ` <div class="container-fluid round-container">
+                                        <TournamentRound roundCount="${games.length}" data=${JSON.stringify(games)} />
+                                        <div class="container-fluid bracket-container">
+                                            <div class="bracket" row="1">
+                                                <div class="dot"></div>
+                                                <div class="dot"></div>
+                                                <div class="dot"></div>
+                                            </div>
+                                            <span class="round-tier"></span>
+                                        </div>
+                                    </div>`
+                                )
+                            );
+                        }
+                        this.createBracket(data["rounds"]);
+                        this.createRoundTier();
+                        this.createBinaryParticle(15);
+                        this.createDotParticle(15);
+                    }
+                } else if (data["type"] == "match") {
+                    navigateTo(`/play/${data["id"]}`);
                 }
-                document.getElementById("player-list").innerHTML = players;
-            } else if (data["type"] == "rounds") {
-                let container = document.getElementById("match-container");
+            };
 
-                container.replaceChildren([]);
-
-                for (let round of data["rounds"]) {
-                    let games = round["games"];
-                    container.appendChild(
-                        html(
-                            /* HTML */ ` <div class="container-fluid round-container">
-                                <TournamentRound roundCount="${games.length}" data=${JSON.stringify(games)} />
-                                <div class="container-fluid bracket-container">
-                                    <div class="bracket" row="1">
-                                        <div class="dot"></div>
-                                        <div class="dot"></div>
-                                        <div class="dot"></div>
-                                    </div>
-                                    <span class="round-tier"></span>
-                                </div>
-                            </div>`
-                        )
-                    );
-                }
-                this.createBracket(data["rounds"]);
-                this.createRoundTier();
-                this.createBinaryParticle(15);
-                this.createDotParticle(15);
-            } else if (data["type"] == "match") {
-                navigateTo(`/play/${data["id"]}`);
-            }
-        };
-
-        this.query("#start-tournament").on("click", () => {
-            ws.send(JSON.stringify({ type: "start" }));
+            this.query("#start-tournament").on("click", () => {
+                ws.send(JSON.stringify({ type: "start" }));
+            });
         });
 
         return html(
             /* HTML */
             ` <div>
                 <NavBar />
-                <div class="container-fluid dashboard-container tournament-container">
+                <div class="container-fluid dashboard-container tournament-container" id="tournament-container">
                     <div class="particle-container"></div>
                     <div class="container-fluid dashboard-container match-container" id="match-container"></div>
                     <div class="container-fluid dashboard-container player-container">

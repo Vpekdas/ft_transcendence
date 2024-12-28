@@ -491,7 +491,9 @@ class TournamentW:
             n //= 2
 
     async def on_join(self, player):
-        self.players.append(player.id)
+        if player.id not in self.players:
+            self.players.append(player.id)
+
         await self.broadcast(json.dumps({ "type": "players", "players": self.players }))
         await self.send_tree()
 
@@ -587,14 +589,14 @@ class TournamentManager:
         self.consumers.append(consumer)
 
     async def disconnect(self, tid, consumer):
-        if tid not in self.tournaments:
-            return
+        if tid in self.tournaments:
+            player = consumer.player
 
-        self.consumers.remove(consumer)
-        player = consumer.player
+            t = self.tournaments[tid]
+            await t.disconnect(player)
 
-        t = self.tournaments[tid]
-        await t.disconnect(player)
+        if consumer in self.consumers:
+            self.consumers.remove(consumer)
 
     async def start(self, tid: str):
         if tid not in self.tournaments:

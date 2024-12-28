@@ -35,11 +35,12 @@
     "Number of Players": "Nombre de joueurs",
     "Tournament Privacy Settings": "Paramètres de confidentialité du tournoi",
     "Open": "Ouvert",
-    "Invite-Only Access": "Accès sur invitation uniquement",
+    "Invite-Only Access": "Invitation uniquement",
     "Choose your tournament password here.": "Choisissez ici votre mot de passe de tournoi.",
     "Tournament Password": "Mot de passe du tournoi",
     "Start !": "Commencer !",
     "Quarterfinals": "Quarts de finale",
     "Semifinals": "Demi-finales",
-    "Final": "Finale"
+    "Final": "Finale",
+    "Tournament": "Tournoi"
 }

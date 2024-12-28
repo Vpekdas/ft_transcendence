@@ -31,8 +31,6 @@ const microPlugin = () => {
                 const name = result[1];
                 const module = currentModuleFolder + "/" + file.substring(0, file.length - 3);
                 components.push({ name: name, modulePath: module });
-            } else {
-                console.warn(path, " does not have any match for component");
             }
         }
     }

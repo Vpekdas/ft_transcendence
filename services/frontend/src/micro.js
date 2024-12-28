@@ -575,12 +575,16 @@ export function html(str) {
         } else {
             if (
                 name === "svg" ||
-                (isInSvg(parent) && (name == "circle" || name === "a" || name == "text" || name === "polyline")) ||
-                name === "defs" ||
-                name === "radialGradient" ||
-                name === "stop" ||
-                name === "symbol" ||
-                name === "path"
+                (isInSvg(parent) &&
+                    (name == "circle" ||
+                        name === "a" ||
+                        name == "text" ||
+                        name === "polyline" ||
+                        name === "defs" ||
+                        name === "radialGradient" ||
+                        name === "stop" ||
+                        name === "symbol" ||
+                        name === "path"))
             ) {
                 el = document.createElementNS("http://www.w3.org/2000/svg", name);
             } else {

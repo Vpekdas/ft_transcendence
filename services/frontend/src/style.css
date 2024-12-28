@@ -138,6 +138,7 @@
     font-size: 20px;
 }
 
+/* TODO: Reduce the time of animation. */
 .container-fluid.dashboard-container {
     display: flex;
     position: relative;
@@ -1069,12 +1070,12 @@ canvas {
 
 .delete-modal-overlay {
     position: fixed;
+    display: flex;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 200%;
     background: rgba(0, 0, 0, 0.8);
-    display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
@@ -1112,7 +1113,7 @@ canvas {
     display: flex;
     height: 100%;
     width: 100%;
-    justify-content: center;
+    justify-content: space-around;
     align-items: center;
 }
 
@@ -1516,11 +1517,11 @@ ow-system[labels="false"] ow-name {
 }
 
 #sun-station:hover {
-    border: 1px solid #ffd700;
+    border: 1px solid #f6ab48;
 }
 
 #sun-station ow-wanderer:hover {
-    border: 1px solid #ffd700;
+    border: 1px solid #f6ab48;
     animation-play-state: paused;
 }
 
@@ -1564,12 +1565,12 @@ ow-system[labels="false"] ow-name {
 }
 
 #hourglass-twins ow-wanderer:hover {
-    border: 1px solid #f4a460;
+    border: 1px solid orangered;
     animation-play-state: paused;
 }
 
 #hourglass-twins:hover {
-    border-color: #f4a460;
+    border-color: orangered;
 }
 
 #hourglass-twins ow-wanderer {
@@ -1634,12 +1635,12 @@ ow-system[labels="false"] ow-name {
 }
 
 #timber-hearth ow-wanderer:hover {
-    border: 1px solid #228b22;
+    border: 1px solid greenyellow;
     animation-play-state: paused;
 }
 
-#timber-hearth:hover {
-    border-color: #228b22;
+timber-hearth:hover {
+    border-color: greenyellow;
 }
 
 #timber-hearth ow-wanderer {
@@ -1676,11 +1677,11 @@ ow-system[labels="false"] ow-name {
 }
 
 #brittle-hollow:hover {
-    border-color: #483d8b;
+    border-color: darkturquoise;
 }
 
 #brittle-hollow ow-wanderer:hover {
-    border: 1px solid #483d8b;
+    border: 1px solid darkturquoise;
     animation-play-state: paused;
 }
 
@@ -1720,11 +1721,11 @@ ow-system[labels="false"] ow-name {
 }
 
 #giants-deep:hover {
-    border-color: #2e8b57;
+    border-color: darkseagreen;
 }
 
 #giants-deep ow-wanderer:hover {
-    border: 1px solid #2e8b57;
+    border: 1px solid darkseagreen;
     animation-play-state: paused;
 }
 
@@ -1770,11 +1771,11 @@ ow-system[labels="false"] ow-name {
 }
 
 #dark-bramble:hover {
-    border-color: #dc143c;
+    border-color: darkslateblue;
 }
 
 #dark-bramble ow-wanderer:hover {
-    border: 1px solid #dc143c;
+    border: 1px solid darkslateblue;
     animation-play-state: paused;
 }
 
@@ -1784,27 +1785,6 @@ ow-system[labels="false"] ow-name {
     animation:
         rotate360 10s linear infinite,
         var(--orbit-animation);
-}
-
-#quantum-moon {
-    --orbit-radius: 0.0275;
-    --body-radius: 0.015;
-    --orbital-speed: 0.25;
-    --w-color: slategray;
-    --w-offset: 50%;
-    animation: --quantum 5s ease-in-out infinite;
-    border: none;
-}
-
-#quantum-moon ow-wanderer:hover {
-    border: 1px solid #c0c0c0;
-    animation-play-state: paused;
-}
-
-#quantum-moon ow-wanderer {
-    background-size: cover;
-    z-index: 2;
-    animation: none;
 }
 
 /* !FIXME: Hovering works only if screen has certain size ?  (Ex: when pressing alt) */
@@ -1826,7 +1806,28 @@ ow-system[labels="false"] ow-name {
 }
 
 #white-hole-station ow-wanderer:hover {
-    border: 1px solid #ffffff;
+    border: 1px solid gold;
+}
+
+#quantum-moon {
+    --orbit-radius: 0.0275;
+    --body-radius: 0.015;
+    --orbital-speed: 0.25;
+    --w-color: slategray;
+    --w-offset: 50%;
+    animation: --quantum 5s ease-in-out infinite;
+    border: none;
+}
+
+#quantum-moon ow-wanderer:hover {
+    border: 1px solid slategray;
+    animation-play-state: paused;
+}
+
+#quantum-moon ow-wanderer {
+    background-size: cover;
+    z-index: 2;
+    animation: none;
 }
 
 @keyframes rotate360 {
@@ -1983,6 +1984,53 @@ ow-system[labels="false"] ow-name {
     align-items: center;
     justify-content: center;
     text-align: center;
+}
+
+/* TODO: Change display to flex */
+
+.typewriter-wrapper {
+    display: none;
+    position: fixed;
+    height: 90%;
+    width: 90%;
+    left: 5%;
+    justify-content: center;
+    background-color: #005f73;
+    z-index: 10;
+}
+
+.typewriter-text {
+    position: relative;
+    margin: 2rem auto;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 0;
+    border-right: 1px solid white;
+}
+
+.line-1 {
+    animation:
+        type 3s 0.5s steps(30, end) forwards,
+        blink 0.5s step-end infinite;
+}
+
+@keyframes type {
+    0% {
+        width: 0;
+    }
+    100% {
+        width: 100%;
+    }
+}
+
+@keyframes blink {
+    0%,
+    100% {
+        border-color: transparent;
+    }
+    50% {
+        border-color: white;
+    }
 }
 
 /* CREATE TOURNAMENT */

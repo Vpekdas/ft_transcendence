@@ -88,7 +88,7 @@ export default class OuterWilds extends Component {
 
                     // Update the card with the selected planet's description.
                     displayedPlanetDescription.textContent = PLANET_DESCRIPTION[displayedPlanetName.textContent];
-                    
+
                     // Prevent rotation for specific planets.
                     if (
                         displayedPlanetName.textContent === "White Hole Station" ||
@@ -102,7 +102,15 @@ export default class OuterWilds extends Component {
             });
         });
 
+        // TODO: Probably will append each line.
+        // TODO: Remove the border of previous line so the "cursor" will not be visible.
+
         return html(/* HTML */ ` <div>
+            <div class="typewriter-wrapper">
+                <div>
+                    <h1 class="typewriter-text line-1">Lorem Ipsum Dolor</h1>
+                </div>
+            </div>   
                 <div class="container-fluid planet-card-container" >
                     <span class="planet-name"></span>
                     <img class="planet-img" src=""> </img>
@@ -124,12 +132,12 @@ export default class OuterWilds extends Component {
                         </ow-orbit>
                         <ow-orbit id="hourglass-twins" quantum>
                             <ow-name>The Hourglass Twins</ow-name>
-                            <ow-wanderer image="/img/Outer-Wilds/The-Hourglass-Twins.png" card-color="#f4a460">
+                            <ow-wanderer image="/img/Outer-Wilds/The-Hourglass-Twins.png" card-color="orangered">
                                 <ow-orbit id="twins">
-                                    <ow-wanderer id="ash-twin" image="/img/Outer-Wilds/Ash-Twin.png" card-color="#f4a460">
+                                    <ow-wanderer id="ash-twin" image="/img/Outer-Wilds/Ash-Twin.png" card-color="orangered">
                                         <ow-name>Ash Twin</ow-name>
                                     </ow-wanderer>
-                                    <ow-wanderer id="ember-twin" image="/img/Outer-Wilds/Ember-Twin.png" card-color="#f4a460">
+                                    <ow-wanderer id="ember-twin" image="/img/Outer-Wilds/Ember-Twin.png" card-color="orangered">
                                         <ow-name>Ember Twin</ow-name>
                                     </ow-wanderer>
                                 </ow-orbit>
@@ -137,42 +145,42 @@ export default class OuterWilds extends Component {
                         </ow-orbit>
                         <ow-orbit id="timber-hearth" quantum>
                             <ow-name>Timber Hearth</ow-name>
-                            <ow-wanderer image="/img/Outer-Wilds/Timber-Hearth.png" card-color="#228b22">
+                            <ow-wanderer image="/img/Outer-Wilds/Timber-Hearth.png" card-color="greenyellow">
                                 <ow-orbit id="attlerock">
                                     <ow-name>Attlerock</ow-name>
-                                    <ow-wanderer image="/img/Outer-Wilds/Attlerock.png" card-color="#228b22"></ow-wanderer>
+                                    <ow-wanderer image="/img/Outer-Wilds/Attlerock.png" card-color="slategray"></ow-wanderer>
                                 </ow-orbit>
                             </ow-wanderer>
                         </ow-orbit>
                         <ow-orbit id="brittle-hollow" quantum>
                             <ow-name>Brittle Hollow</ow-name>
-                            <ow-wanderer image="/img/Outer-Wilds/Brittle-Hollow.png" card-color="#483d8b">
+                            <ow-wanderer image="/img/Outer-Wilds/Brittle-Hollow.png" card-color="darkturquoise">
                                 <ow-orbit id="hollows-lantern">
                                     <ow-name>Hollows Lantern</ow-name>
-                                    <ow-wanderer image="/img/Outer-Wilds/Hollows-Lantern.png" card-color="#483d8b"> </ow-wanderer>
+                                    <ow-wanderer image="/img/Outer-Wilds/Hollows-Lantern.png" card-color="darkorange"> </ow-wanderer>
                                 </ow-orbit>
                             </ow-wanderer>
                         </ow-orbit>
                         <ow-orbit id="giants-deep" quantum>
                             <ow-name>Giant's Deep</ow-name>
-                            <ow-wanderer image="/img/Outer-Wilds/Giants-Deep.png" card-color="#2e8b57">
+                            <ow-wanderer image="/img/Outer-Wilds/Giants-Deep.png" card-color="darkseagreen">
                                 <ow-orbit id="orbital-probe-cannon">
                                     <ow-name>Orbital Probe Cannon</ow-name>
-                                    <ow-wanderer image="/img/Outer-Wilds/Orbital-Probe-Cannon.png" card-color="#2e8b57"></ow-wanderer>
+                                    <ow-wanderer image="/img/Outer-Wilds/Orbital-Probe-Cannon.png" card-color="gold"></ow-wanderer>
                                 </ow-orbit>
                                 <ow-orbit id="quantum-moon">
                                     <ow-name>Quantum Moon</ow-name>
-                                    <ow-wanderer image="/img/Outer-Wilds/Quantum-Moon.png" card-color=""></ow-wanderer>
+                                    <ow-wanderer image="/img/Outer-Wilds/Quantum-Moon.png" card-color="slategray"></ow-wanderer>
                                 </ow-orbit>
                             </ow-wanderer>
                         </ow-orbit>
                         <ow-orbit id="dark-bramble" quantum>
                             <ow-name>Dark Bramble</ow-name>
-                            <ow-wanderer image="/img/Outer-Wilds/Dark-Bramble.png" card-color="#dc143c"></ow-wanderer>
+                            <ow-wanderer image="/img/Outer-Wilds/Dark-Bramble.png" card-color="darkslateblue"></ow-wanderer>
                         </ow-orbit>
                         <ow-orbit id="white-hole-station" path="false">
                             <ow-name>White Hole Station</ow-name>
-                            <ow-wanderer image="/img/Outer-Wilds/White-Hole-Station.png" card-color="#c0c0c0"></ow-wanderer>
+                            <ow-wanderer image="/img/Outer-Wilds/White-Hole-Station.png" card-color="gold"></ow-wanderer>
                         </ow-orbit>
                     </ow-system>
                 </div>

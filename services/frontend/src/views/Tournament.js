@@ -1,5 +1,5 @@
 import { Component, html } from "../micro";
-import { getOriginNoProtocol, getNickname } from "../api";
+import { getOriginNoProtocol, getNickname, post } from "../api";
 import { navigateTo } from "../router";
 import { tr } from "../i18n";
 
@@ -115,6 +115,9 @@ export default class Tournament extends Component {
         this.setTitle(tr("Tournament"));
 
         const id = this.attrib("id");
+        const playerInfo = await post("/api/player/c/profile").then((res) => res.json());
+
+        let host = undefined;
 
         this.query("#tournament-container").do(async () => {
             const ws = new WebSocket(`ws://${getOriginNoProtocol()}:8000/tournament/${id}`);
@@ -132,6 +135,11 @@ export default class Tournament extends Component {
                         players += /* HTML */ `<span>${nickname}</span>`;
                     }
                     document.getElementById("player-list").innerHTML = players;
+                    host = data["host"];
+
+                    if (host != playerInfo.id) {
+                        document.getElementById("start-tournament").disabled = true;
+                    }
                 } else if (data["type"] == "rounds") {
                     let container = document.getElementById("match-container");
 

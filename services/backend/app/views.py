@@ -238,6 +238,7 @@ def tournament_create(request: HttpRequest):
         return JsonResponse({ "error": NOT_AUTHENTICATED })
 
     data = json.loads(request.body)
+    player = Player.objects.filter(user=request.user).first()
 
     if "gameSettings" not in data or "playerCount" not in data or "openType" not in data or "game" not in data or "fillWithAI" not in data:
         print(data, file=sys.stderr)
@@ -249,7 +250,7 @@ def tournament_create(request: HttpRequest):
     game_settings = data["gameSettings"]
     manager = pong_manager # TODO: Modify this with data["game"]
 
-    tid = tournaments.create(gameManager=pong_manager, name=data["name"], playerCount=data["playerCount"], privacy=data["openType"], password=data["password"] if "password" in data else None, fillWithAI=bool(data["fillWithAI"]), gameSettings=data["gameSettings"])
+    tid = tournaments.create(gameManager=pong_manager, host=player.id, name=data["name"], playerCount=data["playerCount"], privacy=data["openType"], password=data["password"] if "password" in data else None, fillWithAI=bool(data["fillWithAI"]), gameSettings=data["gameSettings"])
 
     return JsonResponse({ "id": tid })
 

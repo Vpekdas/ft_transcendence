@@ -491,7 +491,7 @@ class TournamentState(enum.Enum):
     DEAD = 4,
 
 class Tournament:
-    def __init__(self, gameManager, manager, tid: str, playerCount: int, privacy: str, password: str, game: str, gameSettings, fillWithAI: bool):
+    def __init__(self, gameManager, manager, tid: str, playerCount: int, privacy: str, password: str, game: str, host: int, gameSettings, fillWithAI: bool):
         self.manager = manager
         self.gameManager = gameManager
         self.tid = tid
@@ -499,6 +499,7 @@ class Tournament:
         self.privacy = privacy
         self.password = password
         self.game = game
+        self.host = host
         self.gameSettings = gameSettings
         self.fillWithAI = fillWithAI
 
@@ -601,17 +602,17 @@ class Tournament:
         self.state = TournamentState.WAITING_FOR_GAMES
 
     async def on_join(self, player):
-        if self.state == TournamentState.LOBBY_BEFORE:
+        if self.state == TournamentState.LOBBY_BEFORE and (player.id != self.host or player.id not in self.players):
             if player.id not in self.players:
                 self.players.append(player.id)
 
-        await self.broadcast(json.dumps({ "type": "players", "players": self.players }))
+        await self.broadcast(json.dumps({ "type": "players", "players": self.players, "host": self.host }))
         await self.send_tree()
 
     async def disconnect(self, player):
-        if self.state == TournamentState.LOBBY_BEFORE:
+        if self.state == TournamentState.LOBBY_BEFORE and player.id != self.host:
             self.players.remove(player.id)
-            await self.broadcast(json.dumps({ "type": "players", "players": self.players }))
+            await self.broadcast(json.dumps({ "type": "players", "players": self.players, "host": self.host }))
 
     async def send_tree(self):
         await self.broadcast(json.dumps({ "type": "rounds", "rounds": [round.to_dict() for round in self.rounds], "winner": self.winner }))
@@ -653,7 +654,7 @@ class TournamentManager:
         self.tournaments: list[Tournament] = {}
         self.consumers = []
 
-    def create(self, *, gameManager, name: str, playerCount: int, privacy: str, password: str = None, fillWithAI: bool, gameSettings) -> str:
+    def create(self, *, gameManager, name: str, playerCount: int, privacy: str, password: str = None, fillWithAI: bool, host: int, gameSettings) -> str:
         """
         Create a new tournament
         """
@@ -664,7 +665,7 @@ class TournamentManager:
         # t = sync(lambda: Tournament(name=name, tid=tid, playerCount=playerCount, openType=privacy, password=hashed_password, game=self.game, gameSettings=gameSettings, fillWithAI=fillWithAI, state="lobby"))
         # sync(lambda: t.save())
 
-        t2 = Tournament(gameManager=gameManager, manager=self, tid=tid, playerCount=playerCount, privacy=privacy, password=hashed_password, game=self.game, gameSettings=gameSettings, fillWithAI=fillWithAI)
+        t2 = Tournament(gameManager=gameManager, manager=self, tid=tid, playerCount=playerCount, privacy=privacy, password=hashed_password, game=self.game, host=host, gameSettings=gameSettings, fillWithAI=fillWithAI)
         self.tournaments[tid] = t2
 
         return tid

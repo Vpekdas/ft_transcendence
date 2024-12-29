@@ -42,7 +42,7 @@ urlpatterns = [
 ]
 
 websocket_urlpatterns = [
-    path('pong/<str:id>', PongClientConsumer.as_asgi()),
-    path('matchmake/pong', PongMatchmakeConsumer.as_asgi()),
-    path('tournament/<str:id>', TournamentConsumer.as_asgi())
+    path('ws/pong/<str:id>', PongClientConsumer.as_asgi()),
+    path('ws/matchmake/pong', PongMatchmakeConsumer.as_asgi()),
+    path('ws/tournament/<str:id>', TournamentConsumer.as_asgi())
 ]

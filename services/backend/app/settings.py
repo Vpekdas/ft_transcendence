@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-5zsmlrjib3n!3t(g52*khi9*iahz&+gm^v8zrn!1&d)v@j0q27
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["127.0.0.1"]
 
 
 # Application definition
@@ -138,6 +138,9 @@ CORS_ALLOW_PRIVATE_NETWORK = True
 
 SESSION_COOKIE_SAMESITE = None
 
-CSRF_TRUSTED_ORIGINS = [ "http://localhost:8080", "http://127.0.0.1:8080" ]
+CSRF_TRUSTED_ORIGINS = [ "http://127.0.0.1:4444" ]
 
 ASGI_APPLICATION = "app.asgi.application"
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True

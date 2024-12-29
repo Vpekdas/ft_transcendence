@@ -1,6 +1,6 @@
 import { Component, html } from "../../micro";
 import { tr } from "../../i18n";
-import { fetchApi } from "../../api";
+import { fetchApi } from "../../utils";
 
 export default class ChangePasswordForm extends Component {
     constructor() {

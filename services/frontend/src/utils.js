@@ -9,8 +9,8 @@ export function getOriginNoProtocol() {
         .replace("https://", "");
 }
 
-function api(route, port = 8000) {
-    return getOrigin() + ":" + port + route;
+function api(route) {
+    return getOrigin() + ":8080" + route;
 }
 
 export async function fetchApi(url, init) {
@@ -18,10 +18,10 @@ export async function fetchApi(url, init) {
     return await fetch(api(url), init);
 }
 
-export async function post(url, init = { body: "{}" }, port = 8000) {
+export async function post(url, init = { body: "{}" }) {
     init.method = "POST";
     init.credentials = "include";
-    return await fetch(api(url, port), init);
+    return await fetch(api(url), init);
 }
 
 export async function isLoggedIn() {

@@ -3,7 +3,7 @@ import NavBar from "../components/NavBars/HomeNavBar";
 import DonutChart from "../components/Charts/DonutChart";
 import LineChart from "../components/Charts/LineChart";
 import ProfileNavBar from "../components/NavBars/ProfileNavBar";
-import { isLoggedIn } from "../api";
+import { isLoggedIn } from "../utils";
 import { navigateTo } from "../router";
 export default class Statistics extends Component {
     constructor() {

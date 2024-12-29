@@ -1,7 +1,7 @@
 import { Component, html } from "../micro";
 import NavBar from "../components/NavBars/HomeNavBar";
 import DonutChart from "../components/Charts/DonutChart";
-import { fetchApi, isLoggedIn, post } from "../api";
+import { fetchApi, isLoggedIn, post } from "../utils";
 import ChangePasswordForm from "../components/Forms/ChangePasswordForm";
 import ChangeNicknameForm from "../components/Forms/ChangeNicknameForm";
 import DeleteAccountForm from "../components/Forms/DeleteAccountForm";

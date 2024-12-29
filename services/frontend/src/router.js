@@ -10,7 +10,7 @@ import Logout from "./views/Logout";
 import Settings from "./views/Settings";
 import Pong from "./views/Pong";
 import Clicker from "./views/Clicker";
-import { isLoggedIn } from "./api";
+import { isLoggedIn } from "./utils";
 import SolarSystem from "./views/SolarSystem";
 import Tournament from "./views/Tournament";
 import CreateTournament from "./views/CreateTournament";

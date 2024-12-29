@@ -1,5 +1,5 @@
 import { Component, html } from "../micro";
-import { isLoggedIn } from "../api";
+import { isLoggedIn } from "../utils";
 import { tr, setLanguage, getLanguage } from "../i18n";
 import { navigateTo } from "../router";
 

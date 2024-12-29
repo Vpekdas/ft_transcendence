@@ -1,4 +1,4 @@
-import { getOriginNoProtocol } from "../api";
+import { getOriginNoProtocol } from "../utils";
 import { Component, html } from "../micro";
 import { navigateTo } from "../router";
 
@@ -15,7 +15,7 @@ export default class PongMatchmake extends Component {
             .reduce((obj, item) => ((obj[item[0]] = item[1]), obj), {});
 
         this.query("#matchmake-container").do(() => {
-            const ws = new WebSocket(`ws://${getOriginNoProtocol()}:8000/matchmake/pong`);
+            const ws = new WebSocket(`wss://${getOriginNoProtocol()}:8080/ws/matchmake/pong`);
             ws.onopen = (event) => {
                 ws.send(
                     JSON.stringify({

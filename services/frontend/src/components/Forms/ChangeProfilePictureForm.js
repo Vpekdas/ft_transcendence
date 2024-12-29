@@ -1,6 +1,6 @@
 import { Component, html } from "../../micro";
 import { tr } from "../../i18n";
-import { fetchApi, post } from "../../api";
+import { fetchApi, post } from "../../utils";
 
 export default class ChangeProfilePictureForm extends Component {
     constructor() {

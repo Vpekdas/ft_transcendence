@@ -1,7 +1,7 @@
 import { Component, html } from "../micro";
 import NavBar from "../components/NavBars/HomeNavBar";
 import ProfileNavBar from "../components/NavBars/ProfileNavBar";
-import { isLoggedIn } from "../api";
+import { isLoggedIn } from "../utils";
 import { navigateTo } from "../router";
 
 export default class MatchHistory extends Component {

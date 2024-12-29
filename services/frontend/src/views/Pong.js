@@ -1,4 +1,4 @@
-import { isLoggedIn, post } from "../api";
+import { isLoggedIn, post } from "../utils";
 import { Component, html } from "../micro";
 import { action } from "../game";
 import { PongGame } from "../PongGame";

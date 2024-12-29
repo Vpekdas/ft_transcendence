@@ -1,4 +1,4 @@
-import { fetchApi } from "../api";
+import { fetchApi } from "../utils";
 import { navigateTo } from "../router";
 import { Component, html } from "../micro";
 import { sanitizeInput } from "../validateInput";

@@ -1,4 +1,4 @@
-import { post } from "../api";
+import { post } from "../utils";
 import { Component, html } from "../micro";
 import { navigateTo } from "../router";
 

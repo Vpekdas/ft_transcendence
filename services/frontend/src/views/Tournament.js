@@ -1,5 +1,5 @@
 import { Component, html } from "../micro";
-import { getOriginNoProtocol, getNickname, post } from "../api";
+import { getOriginNoProtocol, getNickname, post } from "../utils";
 import { navigateTo } from "../router";
 import { tr } from "../i18n";
 
@@ -120,7 +120,7 @@ export default class Tournament extends Component {
         let host = undefined;
 
         this.query("#tournament-container").do(async () => {
-            const ws = new WebSocket(`ws://${getOriginNoProtocol()}:8000/tournament/${id}`);
+            const ws = new WebSocket(`wss://${getOriginNoProtocol()}:8080/ws/tournament/${id}`);
 
             ws.onopen = (event) => {
                 ws.send(JSON.stringify({ type: "join" }));

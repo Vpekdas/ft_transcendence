@@ -2,7 +2,7 @@ import Home from "./views/Home";
 import NotFound from "./views/NotFound";
 import Counter from "./views/Counter";
 import Registration from "./views/Registration";
-import { Component, html } from "./micro";
+import { html } from "./micro";
 import MatchHistory from "./views/MatchHistory";
 import Statistics from "./views/Statistics";
 import Login from "./views/Login";
@@ -14,6 +14,8 @@ import { isLoggedIn } from "./api";
 import SolarSystem from "./views/SolarSystem";
 import Tournament from "./views/Tournament";
 import CreateTournament from "./views/CreateTournament";
+import PongMatchmake from "./views/PongMatchmake";
+
 /**
  * @param {*} routes
  * @param {string} path
@@ -67,10 +69,10 @@ export const router = async () => {
         { path: "/profile/match-history", view: MatchHistory },
         { path: "/profile/statistics", view: Statistics },
         { path: "/profile/settings", view: Settings },
-        { path: "/play", view: Pong },
-        { path: "/play/[id]", view: Pong },
         { path: "/duck", view: Clicker },
         { path: "/solar-system", view: SolarSystem },
+        { path: "/play/pong/[id]", view: Pong },
+        { path: "/matchmake/pong", view: PongMatchmake },
         { path: "/tournament/[id]", view: Tournament },
         { path: "/create-tournament", view: CreateTournament },
     ];

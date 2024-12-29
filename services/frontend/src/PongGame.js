@@ -42,11 +42,6 @@ export class PongGame {
 
     async setup(cc, c) {
         this.id = cc.attrib("id");
-
-        if (this.id == undefined && localStorage.getItem("pongGamemode") == null) {
-            return;
-        }
-
         this.playerInfo = await post("/api/player/c/profile").then((res) => res.json());
 
         this.scene = new THREE.Scene();
@@ -109,19 +104,9 @@ export class PongGame {
         const spaceTexture = new THREE.TextureLoader().load("/img/space.jpg");
         this.scene.background = spaceTexture;
 
-        this.ws = new WebSocket(`ws://${getOriginNoProtocol()}:8000/pong`);
-        this.ws.onopen = (event) => {
-            if (this.id == undefined) {
-                this.ws.send(
-                    JSON.stringify({
-                        type: "matchmake",
-                        gamemode: localStorage.getItem("pongGamemode"),
-                        playerId: this.playerInfo.id,
-                    })
-                );
-            } else {
-                this.ws.send(JSON.stringify({ type: "join", id: this.id }));
-            }
+        this.ws = new WebSocket(`ws://${getOriginNoProtocol()}:8000/pong/${this.id}`);
+        this.ws.onopen = async (event) => {
+            await this.setupGameTerrain();
         };
         this.ws.onmessage = async (event) => {
             const data = JSON.parse(event.data);
@@ -146,65 +131,40 @@ export class PongGame {
 
         let lastKey;
 
-        console.log(this.gamemode);
+        window.addEventListener("keydown", (event) => {
+            if (event.key == lastKey) return;
 
-        if (this.gamemode == "1v1local") {
-            window.addEventListener("keydown", (event) => {
-                if (event.key == lastKey) return;
+            if (event.key === "w") {
+                this.ws.send(JSON.stringify(action("player1", "up", "press")));
+            }
+            if (event.key === "s") {
+                this.ws.send(JSON.stringify(action("player1", "down", "press")));
+            }
+            if (event.key === "ArrowUp") {
+                this.ws.send(JSON.stringify(action("player2", "up", "press")));
+            }
+            if (event.key === "ArrowDown") {
+                this.ws.send(JSON.stringify(action("player2", "down", "press")));
+            }
 
-                if (event.key === "w") {
-                    this.ws.send(JSON.stringify(action("player1", "up", "press")));
-                }
-                if (event.key === "s") {
-                    this.ws.send(JSON.stringify(action("player1", "down", "press")));
-                }
-                if (event.key === "ArrowUp") {
-                    this.ws.send(JSON.stringify(action("player2", "up", "press")));
-                }
-                if (event.key === "ArrowDown") {
-                    this.ws.send(JSON.stringify(action("player2", "down", "press")));
-                }
+            lastKey = event.key;
+        });
 
-                lastKey = event.key;
-            });
-
-            window.addEventListener("keyup", (event) => {
-                if (event.key === "w") {
-                    this.ws.send(JSON.stringify(action("player1", "up", "release")));
-                }
-                if (event.key === "s") {
-                    this.ws.send(JSON.stringify(action("player1", "down", "release")));
-                }
-                if (event.key === "ArrowUp") {
-                    this.ws.send(JSON.stringify(action("player2", "up", "release")));
-                }
-                if (event.key === "ArrowDown") {
-                    this.ws.send(JSON.stringify(action("player2", "down", "release")));
-                }
-                lastKey = undefined;
-            });
-        } else {
-            window.addEventListener("keydown", (event) => {
-                if (event.key == lastKey) return;
-
-                if (event.key === "w" || event.key === "ArrowUp") {
-                    this.ws.send(JSON.stringify(action(null, "up", "press")));
-                }
-                if (event.key === "s" || event.key === "ArrowDown") {
-                    this.ws.send(JSON.stringify(action(null, "down", "press")));
-                }
-                lastKey = event.key;
-            });
-            window.addEventListener("keyup", (event) => {
-                if (event.key === "w" || event.key === "ArrowUp") {
-                    this.ws.send(JSON.stringify(action(null, "up", "release")));
-                }
-                if (event.key === "s" || event.key === "ArrowDown") {
-                    this.ws.send(JSON.stringify(action(null, "down", "release")));
-                }
-                lastKey = undefined;
-            });
-        }
+        window.addEventListener("keyup", (event) => {
+            if (event.key === "w") {
+                this.ws.send(JSON.stringify(action("player1", "up", "release")));
+            }
+            if (event.key === "s") {
+                this.ws.send(JSON.stringify(action("player1", "down", "release")));
+            }
+            if (event.key === "ArrowUp") {
+                this.ws.send(JSON.stringify(action("player2", "up", "release")));
+            }
+            if (event.key === "ArrowDown") {
+                this.ws.send(JSON.stringify(action("player2", "down", "release")));
+            }
+            lastKey = undefined;
+        });
     }
 
     createBody(type, id, shape, position) {
@@ -279,18 +239,8 @@ export class PongGame {
     }
 
     async onMessage(data) {
-        console.log(data);
-
         if (data.type == "update" && this.id != null) {
             this.onUpdateReceived(data);
-        } else if (data.type == "matchFound") {
-            if (this.id == null) {
-                navigateTo(`/play/${data.id}`, false);
-            }
-            this.id = data.id;
-            this.gamemode = data.gamemode;
-            console.log(`Match with id \`${this.id}\` was found !`);
-            await this.setupGameTerrain();
         } else if (data.type == "winner" && !this.gameEnded) {
             this.gameEnded = true;
 

@@ -347,13 +347,14 @@ class State(enum.Enum):
     DEAD = 3
 
 class Game:
-    def __init__(self, *, tid: str = None):
+    def __init__(self, *, tid: str = None, gamemode: str):
         self.manager = None
         self.id = ""
         self.clients: list[Client] = []
         self.scene = Scene()
         self.state = State.IN_LOBBY
         self.tid = tid
+        self.gamemode = gamemode
 
     def is_tournament_game(self) -> bool:
         return self.tid is not None
@@ -385,7 +386,7 @@ class Game:
     # Callbacks
     #
 
-    async def on_join(self, gamemode: str, player_id: int) -> bool:
+    async def on_join(self, player_id: int) -> bool:
         pass
 
     async def on_unhandled_message(self, msg):

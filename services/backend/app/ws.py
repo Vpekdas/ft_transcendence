@@ -10,13 +10,51 @@ from asgiref.sync import sync_to_async
 pong_manager = PongManager()
 tournaments = TournamentManager(game="pong", manager=pong_manager)
 
+class PongMatchmakeConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.user = self.scope["user"]
+
+        if not self.user.is_authenticated:
+            await self.close()
+            return
+
+        self.player = sync(lambda: Player.objects.filter(user=self.user).first())
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.close()
+
+    async def receive(self, text_data):
+        try:
+            data = json.loads(text_data)
+
+            if "type" not in data:
+                return
+
+            if data["type"] == "request":
+                await pong_manager.do_matchmaking(self, data["gamemode"], self.player)
+        except json.JSONDecodeError:
+            pass
+
 class PongClientConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user = self.scope["user"]
 
-        if self.user.is_authenticated:
-            self.player = sync(lambda: Player.objects.filter(user=self.user).first())
-            pong_manager.consumers.append(self)
+        if not self.user.is_authenticated:
+            await self.close()
+            return
+
+        self.game_id = self.scope["url_route"]["kwargs"]["id"]
+        self.game = pong_manager.get_game_by_id(self.game_id)
+
+        if self.game is None:
+            await self.close()
+            return
+
+        self.player = sync(lambda: Player.objects.filter(user=self.user).first())
+        pong_manager.consumers.append(self)
+
+        if await self.game.on_join(self.player.id):
             await self.accept()
         else:
             await self.close()
@@ -28,22 +66,15 @@ class PongClientConsumer(AsyncWebsocketConsumer):
         try:
             data = json.loads(text_data)
 
-            if "type" in data and data["type"] == "matchmake" and "gamemode" in data:
-                await pong_manager.do_matchmaking(self, data)
-            elif "type" in data and data["type"] == "join":
-                await pong_manager.on_join(self, data["id"])
-            elif "type" in data:
-                game = pong_manager.get_game(self.player.id)
-
-                if game is None:
-                    # The player is not currently in a game
-                    return
-
+            if "type" in data:
                 if data["type"] == "input":
-                    client = game.get_client(self.player.id, data["playerSubId"] if ("playerSubId" in data) or (data["playerSubId"] is None) else None)
+                    if self.game.gamemode == "1v1local" and "playerSubId" in data:
+                        client = self.game.get_client(self.player.id, data["playerSubId"])
+                    else:
+                        client = self.game.get_client(self.player.id, None)
                     if client is not None: client.on_input(data)
                 else:
-                    await game.on_unhandled_message(data)
+                    await self.game.on_unhandled_message(data)
         except json.JSONDecodeError:
             pass
 

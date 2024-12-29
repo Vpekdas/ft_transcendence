@@ -1,4 +1,3 @@
-import { fetchApi, isLoggedIn } from "../api";
 import { Component, html } from "../micro";
 import { navigateTo } from "../router";
 import { tr } from "../i18n";
@@ -9,20 +8,14 @@ export default class Home extends Component {
     }
 
     async render() {
-        this.setTitle("Home");
-
-        if (!(await isLoggedIn())) {
-            navigateTo("/login");
-        }
+        this.setTitle(tr("Home"));
 
         this.query("#play-pong-1v1local").on("click", () => {
-            localStorage.setItem("pongGamemode", "1v1local");
-            navigateTo("/play");
+            navigateTo("/matchmake/pong?gamemode=1v1local");
         });
 
         this.query("#play-pong-1v1").on("click", () => {
-            localStorage.setItem("pongGamemode", "1v1");
-            navigateTo("/play");
+            navigateTo("/matchmake/pong?gamemode=1v1");
         });
 
         this.query("#play-pong-tournament").on("click", () => {

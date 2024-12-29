@@ -186,7 +186,7 @@ export default class Tournament extends Component {
                         );
                     }
                 } else if (data["type"] == "match") {
-                    navigateTo(`/play/${data["id"]}`);
+                    navigateTo(`/play/pong/${data["id"]}`);
                 }
             };
 

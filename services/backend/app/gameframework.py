@@ -588,8 +588,8 @@ class Tournament:
         for tgame in r.games:
             game: Game = self.gameManager.start_game(gamemode="1v1", tid=self.tid, acceptedPlayers=[tgame.player1, tgame.player2])
 
-            await game.on_join("1v1", tgame.player1)
-            await game.on_join("1v1", tgame.player2)
+            await game.on_join(tgame.player1)
+            await game.on_join(tgame.player2)
 
             await self.send_to(tgame.player1, json.dumps({ "type": "match", "id": game.id }))
             await self.send_to(tgame.player2, json.dumps({ "type": "match", "id": game.id }))

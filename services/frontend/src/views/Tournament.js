@@ -160,6 +160,30 @@ export default class Tournament extends Component {
                         this.createRoundTier();
                         // this.createBinaryParticle(15);
                         // this.createDotParticle(15);
+
+                        const winner =
+                            "winner" in data && data["winner"] !== null
+                                ? await getNickname(data["winner"])
+                                : "<i>TDB</i>";
+
+                        container.appendChild(
+                            html(
+                                /* HTML */ `<div class="container-fluid round-container">
+                                    <div class="container-fluid tournament-match-container">
+                                        <div class="tournament-round">
+                                            <div class="player-info">
+                                                <span class="player-name">${winner}</span>
+                                            </div>
+                                        </div>
+                                        <div class="container-fluid bracket-container">
+                                            <div>
+                                                <span class="round-tier">${tr("Winner")}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>`
+                            )
+                        );
                     }
                 } else if (data["type"] == "match") {
                     navigateTo(`/play/${data["id"]}`);

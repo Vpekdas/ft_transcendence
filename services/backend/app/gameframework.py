@@ -483,9 +483,11 @@ class TournamentRound:
         return { "games": [ game.to_dict() for game in self.games ] }
 
 class TournamentState(enum.Enum):
-    LOBBY = 0,
-    WAITING_FOR_GAMES = 1,
-    DEAD = 2,
+    LOBBY_BEFORE = 0,
+    LOBBY = 1,
+    WAITING_FOR_GAMES = 2,
+    ENDED = 3,
+    DEAD = 4,
 
 class Tournament:
     def __init__(self, gameManager, manager, tid: str, playerCount: int, privacy: str, password: str, game: str, gameSettings, fillWithAI: bool):
@@ -505,7 +507,8 @@ class Tournament:
 
         self.currentGames = []
 
-        self.state = TournamentState.LOBBY
+        self.state = TournamentState.LOBBY_BEFORE
+        self.winner = None
 
         # Create the empty tournament tree
 
@@ -550,13 +553,16 @@ class Tournament:
                 if len(self.currentGames) == 0:
                     self.state = TournamentState.LOBBY
                     await self.next_round()
-                else:
-                    await asyncio.sleep(0.1)
+
+            await asyncio.sleep(0.1)
 
     async def next_round(self):
         if self.currentRound == len(self.rounds) - 1:
             # End of the tournament !
-            log("Tournament", self.tid, " has ended, winner is", self.rounds[self.currentRound].games[0].get_winner())
+            self.state = State.ENDED
+            self.winner = self.rounds[self.currentRound].games[0].get_winner()
+
+            await self.send_tree()
         else:
             winners = []
 
@@ -581,8 +587,6 @@ class Tournament:
         for tgame in r.games:
             game: Game = self.gameManager.start_game(gamemode="1v1", tid=self.tid, acceptedPlayers=[tgame.player1, tgame.player2])
 
-            log(game.id, [tgame.player1, tgame.player2])
-
             await game.on_join("1v1", tgame.player1)
             await game.on_join("1v1", tgame.player2)
 
@@ -592,22 +596,24 @@ class Tournament:
             tgame.id = game.id
 
             self.currentGames.append(game.id)
-        
+
         self.state = TournamentState.WAITING_FOR_GAMES
 
     async def on_join(self, player):
-        if player.id not in self.players:
-            self.players.append(player.id)
+        if self.state == TournamentState.LOBBY_BEFORE:
+            if player.id not in self.players:
+                self.players.append(player.id)
 
         await self.broadcast(json.dumps({ "type": "players", "players": self.players }))
         await self.send_tree()
 
     async def disconnect(self, player):
-        self.players.remove(player.id)
-        await self.broadcast(json.dumps({ "type": "players", "players": self.players }))
+        if self.state == TournamentState.LOBBY_BEFORE:
+            self.players.remove(player.id)
+            await self.broadcast(json.dumps({ "type": "players", "players": self.players }))
 
     async def send_tree(self):
-        await self.broadcast(json.dumps({ "type": "rounds", "rounds": [round.to_dict() for round in self.rounds] }))
+        await self.broadcast(json.dumps({ "type": "rounds", "rounds": [round.to_dict() for round in self.rounds], "winner": self.winner }))
 
     async def broadcast(self, msg: str):
         """
@@ -645,8 +651,6 @@ class TournamentManager:
 
         self.tournaments: list[Tournament] = {}
         self.consumers = []
-
-        # Let's read the database and restore all ongoing tournaments
 
     def create(self, *, gameManager, name: str, playerCount: int, privacy: str, password: str = None, fillWithAI: bool, gameSettings) -> str:
         """

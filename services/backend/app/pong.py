@@ -116,8 +116,6 @@ class Pong(Game):
         if (self.player1.score == self.settings.max_score or self.player2.score == self.settings.max_score) and self.state == State.STARTED:
             self.state = State.ENDED
 
-            log("> 1")
-
             # Save the result of the game in the database
             # result = PongGameResult(scores=[self.score1.score, self.score2.score], timeStarted=self.timeStarted, timeEnded=time_secs(), tid=self.tid)
             # sync(lambda: result.save())

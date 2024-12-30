@@ -16,6 +16,9 @@ class Player(models.Model):
     user = ForeignKey(User, on_delete=models.CASCADE)
     nickname = CharField(max_length=20)
 
+    external = BooleanField(default=False)
+    accessToken = TextField(null=True)
+
     icon = JSONField(null=True)
 
     money = IntegerField(default=0)

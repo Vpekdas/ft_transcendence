@@ -3,3 +3,4 @@
 games/
 .DS_Store
 .vscode
+.env

@@ -15,6 +15,7 @@ import SolarSystem from "./views/SolarSystem";
 import Tournament from "./views/Tournament";
 import CreateTournament from "./views/CreateTournament";
 import PongMatchmake from "./views/PongMatchmake";
+import LoginExernal from "./views/LoginExternal";
 
 /**
  * @param {*} routes
@@ -64,6 +65,7 @@ export const router = async () => {
         { path: "/", view: Home },
         { path: "/register", view: Registration },
         { path: "/login", view: Login },
+        { path: "/login-external", view: LoginExernal },
         { path: "/logout", view: Logout },
         { path: "/counter", view: Counter },
         { path: "/profile/match-history", view: MatchHistory },

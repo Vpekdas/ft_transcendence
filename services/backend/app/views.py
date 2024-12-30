@@ -6,8 +6,10 @@ import string
 import django
 import base64
 import hashlib
+import requests
+import os
 
-from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponseServerError
 from django.http.request import HttpRequest
 from django.views.decorators.http import require_POST
 
@@ -43,6 +45,38 @@ def signin(request: HttpRequest):
     user.save()
 
     login(request, user)
+
+    return JsonResponse({})
+
+CLIENT_ID="u-s4t2ud-113d89636c434e478745914966fff13deb2d93ec00210a1f8033f12f8e0d06b2"
+
+"""
+Create a new user using 42 API
+"""
+@require_POST
+def signin(request: HttpRequest):
+    data = json.loads(request.body)
+
+    code = data["code"]
+
+    # Exchange the code provided by the api for an access token
+    res = requests.post("https://api.intra.42.fr/oauth/token", json={ "grant_type": "authorization_code", "client_id": CLIENT_ID, "client_secret": os.environ.get("API42_SECRET"), "code": code })
+
+    if res.status_code != 200:
+        return HttpResponseServerError()
+
+    response = json.loads(res.content)
+    print(response, file=sys.stderr)
+
+    # One last request to query the login, profile picture and other basic info to fill the database
+    # https://api.intra.42.fr/v2/me
+
+    # user = User.objects.create(username=username)
+    # player = Player.objects.create(user=user, nickname=nickname, external=True)
+
+    # user.save()
+
+    # login(request, user)
 
     return JsonResponse({})
 

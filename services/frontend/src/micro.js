@@ -152,14 +152,6 @@ export class Component {
         return this.constructor.name + "#" + this.name;
     }
 
-    getOrigin() {
-        return window.location.origin.substring(0, window.location.origin.lastIndexOf(":"));
-    }
-
-    api(route) {
-        return this.getOrigin() + ":8000" + route;
-    }
-
     showToast(message, iconClass) {
         const toastContainer = document.getElementById("toast-container");
         const toast = document.createElement("div");

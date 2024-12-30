@@ -7,7 +7,7 @@ import django
 import base64
 import hashlib
 
-from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.http.request import HttpRequest
 from django.views.decorators.http import require_POST
 
@@ -174,16 +174,18 @@ def getProfilePicture(request: HttpRequest, id: str):
     else:
         id = int(id)
 
-    if "nickname" not in request.GET:
-        return HttpResponse(duck, content_type="image/svg+xml")
-
     player = Player.objects.filter(id=id).first()
 
-    if not player or player.icon is None:
-        return HttpResponse(duck, content_type="image/svg+xml")
+    if player.icon is None:
+        return HttpResponse(duck, "image/svg+xml")
 
-    return HttpResponse(duck, content_type="image/svg+xml")
-    # return HttpResponse(base64.b64decode(player.icon["data"]), content_type=player.icon["type"])
+    icon = player.icon
+    data = str(icon["data"])
+    data = data[data.find(","):]
+
+    bdata = base64.b64decode(data)
+
+    return HttpResponse(bdata, icon["type"])
 
 """
 Update profile picture
@@ -194,18 +196,16 @@ def updateProfilePicture(request: HttpRequest, id):
         return JsonResponse({ "error": NOT_AUTHENTICATED })
 
     data = json.loads(request.body)
-
-    type = data["type"]
-    image = data["image"]
-
     valid_types = [ "image/svg+xml", "image/png", "image/jpeg", "image/gif" ]
 
-    if type not in valid_types:
+    if data["type"] not in valid_types:
         return JsonResponse({ "error": INVALID_IMAGE_FORMAT })
 
-    player = Player.objects.filter(user=request.user).first()
-    player.icon = { "type": type, "data": image }
+    if len(data["image"]) > 250000:
+        return JsonResponse({ "error": IMAGE_TOO_BIG }) 
 
+    player = Player.objects.filter(user=request.user).first()
+    player.icon = { "type": data["type"], "data": data["image"] }
     player.save()
 
     return JsonResponse({})

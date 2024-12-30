@@ -1,6 +1,6 @@
 import { Component, html } from "../../micro";
 import { tr } from "../../i18n";
-import { fetchApi, post } from "../../utils";
+import { api, fetchApi, post } from "../../utils";
 
 export default class ChangeProfilePictureForm extends Component {
     constructor() {
@@ -9,6 +9,7 @@ export default class ChangeProfilePictureForm extends Component {
 
     async render() {
         let fileName = tr("No files selected");
+        const playerInfo = await post("/api/player/c/profile").then((res) => res.json());
 
         this.query("#inputGroupFile04").on("change", async () => {
             const target = document.getElementById("inputGroupFile04");
@@ -25,8 +26,8 @@ export default class ChangeProfilePictureForm extends Component {
 
             reader.onload = async (e) => {
                 const content = e.target.result;
-                const response = await fetchApi("/api/player/c/picture/update", {
-                    method: "POST",
+
+                const response = await post("/api/player/c/picture/update", {
                     body: JSON.stringify({ type: picture.type, image: content }),
                 })
                     .then((res) => res.json())
@@ -41,7 +42,7 @@ export default class ChangeProfilePictureForm extends Component {
             /* HTML */ ` <div class="container-fluid settings">
                 <div class="card settings">
                     <h5 class="card-title settings">${tr("Profile Picture")}</h5>
-                    <img src="${this.api(`/api/player/c/picture`)}" class="card-img-top profile" />
+                    <img src="${api("/api/player/c/picture")}" class="card-img-top profile" id="profile-picture" />
                     <div class="card-body settings">
                         <div class="input-group settings">
                             <input

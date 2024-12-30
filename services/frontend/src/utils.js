@@ -1,4 +1,4 @@
-function getOrigin() {
+export function getOrigin() {
     return window.location.origin.substring(0, window.location.origin.lastIndexOf(":"));
 }
 
@@ -9,7 +9,7 @@ export function getOriginNoProtocol() {
         .replace("https://", "");
 }
 
-function api(route) {
+export function api(route) {
     return getOrigin() + ":8080" + route;
 }
 

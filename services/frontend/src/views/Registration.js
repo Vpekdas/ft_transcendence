@@ -2,6 +2,7 @@ import { navigateTo } from "../router";
 import { Component, html } from "../micro";
 import { sanitizeInput } from "../validateInput";
 import { tr } from "../i18n";
+import { api } from "../utils";
 
 export default class Registration extends Component {
     constructor() {
@@ -25,7 +26,7 @@ export default class Registration extends Component {
                 return;
             }
 
-            const response = await fetch(this.api("/api/signin"), {
+            const response = await fetch(api("/api/signin"), {
                 method: "POST",
                 body: JSON.stringify({
                     username: username,
@@ -40,7 +41,12 @@ export default class Registration extends Component {
             if (response.error) {
                 this.showToast(response.error, "bi bi-exclamation-triangle-fill");
             } else {
-                navigateTo("/");
+                if (window.location.search.length == 0) {
+                    navigateTo("/");
+                } else {
+                    const redirect = window.location.search.substring(1).replace("redirect=", "");
+                    navigateTo(redirect);
+                }
             }
         });
 

@@ -144,3 +144,6 @@ ASGI_APPLICATION = "app.asgi.application"
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
+
+MEDIA_ROOT = '/var/media'
+MEDIA_URL = '/media/'

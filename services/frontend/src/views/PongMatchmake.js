@@ -14,6 +14,10 @@ export default class PongMatchmake extends Component {
             .map((value) => value.split("="))
             .reduce((obj, item) => ((obj[item[0]] = item[1]), obj), {});
 
+        if (GET["gamemode"] == undefined) {
+            navigateTo("/");
+        }
+
         this.query("#matchmake-container").do(() => {
             const ws = new WebSocket(`wss://${getOriginNoProtocol()}:8080/ws/matchmake/pong`);
             ws.onopen = (event) => {

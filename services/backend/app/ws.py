@@ -31,7 +31,7 @@ class PongMatchmakeConsumer(AsyncWebsocketConsumer):
             if "type" not in data:
                 return
 
-            if data["type"] == "request":
+            if data["type"] == "request" and "gamemode" in data:
                 await pong_manager.do_matchmaking(self, data["gamemode"], self.player)
         except json.JSONDecodeError:
             pass

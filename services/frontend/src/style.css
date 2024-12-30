@@ -2188,12 +2188,12 @@ timber-hearth:hover {
     box-shadow: 0 0 10px #00bcd4;
 }
 
-#player-list span::before {
+/* #player-list span::before {
     content: "\F2D4";
     font-family: "Bootstrap-icons";
     margin-right: 10px;
     color: #00bcd4;
-}
+} */
 
 #start-tournament {
     background-color: #00bcd4;

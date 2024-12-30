@@ -1,5 +1,5 @@
 import { Component, html } from "../micro";
-import { getOriginNoProtocol, getNickname, post } from "../utils";
+import { getOriginNoProtocol, getNickname, post, api } from "../utils";
 import { navigateTo } from "../router";
 import { tr } from "../i18n";
 
@@ -132,7 +132,9 @@ export default class Tournament extends Component {
                     let players = "";
                     for (let p of data["players"]) {
                         let nickname = await getNickname(p);
-                        players += /* HTML */ `<span>${nickname}</span>`;
+                        players += /* HTML */ `<span
+                            ><img src="${api("/api/player/" + p + "/picture")}" alt="" width="40vw" />${nickname}</span
+                        >`;
                     }
                     document.getElementById("player-list").innerHTML = players;
                     host = data["host"];

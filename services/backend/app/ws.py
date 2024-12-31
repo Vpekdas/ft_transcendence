@@ -52,7 +52,7 @@ class PongClientConsumer(AsyncWebsocketConsumer):
             return
 
         self.player = sync(lambda: Player.objects.filter(user=self.user).first())
-        pong_manager.consumers.append(self)
+        self.game.connect(self)
 
         if await self.game.on_join(self.player.id):
             await self.accept()
@@ -60,7 +60,7 @@ class PongClientConsumer(AsyncWebsocketConsumer):
             await self.close()
 
     async def disconnect(self, close_code):
-        pong_manager.disconnect(self)
+        self.game.disconnect(self)
 
     async def receive(self, text_data):
         try:

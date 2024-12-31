@@ -42,16 +42,7 @@ class Tournament(models.Model):
     tid = CharField(max_length=8)
     players = ArrayField(IntegerField(), default=list)
     steps = JSONField(default=dict)
-    state = TextField()
-
-class PongOngoingGame(models.Model):
-    gid = CharField(max_length=8)
-    gamemode = TextField()
-    tid = CharField(max_length=8, null=True)
-
-    players = ArrayField(IntegerField())
-    scores = ArrayField(IntegerField())
-    timeStarted = IntegerField()
+    state = TextField() # lobby, ended
 
 class PongGameResult(models.Model):
     gamemode = TextField()

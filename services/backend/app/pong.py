@@ -4,8 +4,7 @@ import json
 import math
 
 from .gameframework import log, time_secs, sync, Game, ServerManager, Vec3, Box, Sphere, Body, Scene, Client, BodyType, Area, CollisionResult, State, ClientAI
-from .models import PongGameResult, PongOngoingGame
-
+from .models import PongGameResult
 
 class Player(Body):
     speed = 0.2
@@ -30,23 +29,35 @@ class Player(Body):
     def move_down(self):
         self.velocity.y -= self.speed
 
-    def on_collision(self, dir: Vec3, collision: CollisionResult):
-        collision.collider.velocity = self._bounce_vec(-collision.normal, dir, collision.collider.bounce) * Ball.speed
+    #def on_collision(self, dir: Vec3, collision: CollisionResult):
+    #    collision.collider.velocity = self._bounce_vec(-collision.normal, dir, collision.collider.bounce) * Ball.speed
 
 class Ball(Body):
     speed = 0.3
 
     def __init__(self):
-        super().__init__(type="Ball", shape=Sphere(0.5, Vec3()), body_type=BodyType.DYNAMIC)
+        super().__init__(type="Ball", shape=Sphere(0.5, Vec3()), body_type=BodyType.DYNAMIC, bounce=1.0)
         self.last_collision = None
         self.velocity = Vec3(1, -1, 0).normalized() * Ball.speed
-        self.bounce = 1.0
 
     def process(self):
         self.try_move()
 
     def on_collision(self, dir: Vec3, collision: CollisionResult):
-        self.velocity = self._bounce_vec(collision.normal, dir, self.bounce) * self.speed
+        if isinstance(collision.collider, Player):
+            player: Player = collision.collider
+
+            y_diff = self.pos.y - player.pos.y
+
+            if y_diff < 0:
+                dir = Vec3(collision.normal.x, -1, 0)
+            elif y_diff > 0:
+                dir = Vec3(collision.normal.x, 1, 0)
+
+            factor = abs(y_diff) / 2.5
+            self.velocity = (dir + collision.normal * (1.0 - factor)).normalized() * self.speed
+        else:
+            self.velocity = self._bounce_vec(collision.normal, dir, self.bounce) * self.speed
 
 class ScoreArea(Area):
     def __init__(self, *, player=None, pos=Vec3(), game=None):
@@ -110,25 +121,12 @@ class Pong(Game):
         if self.service == 1: self.service = 0
         else: self.service = 1
 
-        # TODO: Add the tournament id to the game model
-
         if (self.player1.score == self.settings.max_score or self.player2.score == self.settings.max_score) and self.state == State.STARTED:
             self.state = State.ENDED
 
             # Save the result of the game in the database
             # result = PongGameResult(scores=[self.score1.score, self.score2.score], timeStarted=self.timeStarted, timeEnded=time_secs(), tid=self.tid)
             # sync(lambda: result.save())
-
-            # Remove the ongoing game from the database
-            # ongoingGame = sync(lambda: PongOngoingGame.objects.filter(gid=self.id).first())
-            # sync(lambda: ongoingGame.delete())
-        else:
-            # Update the score
-            # ongoingGame = sync(lambda: PongOngoingGame.objects.filter(gid=self.id).first())
-            # ongoingGame.scores = [self.player1.score, self.player1.score]
-            # sync(lambda: ongoingGame.save())
-
-            pass
 
     async def on_update(self):
         if self.state == State.STARTED:

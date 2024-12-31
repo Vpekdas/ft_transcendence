@@ -21,9 +21,6 @@ from .errors import *
 from .models import Tournament, Player
 from .utils import hash_weak_password
 
-# https://stackoverflow.com/questions/71384132/best-approach-to-multiple-websocket-client-connections-in-python
-# https://discuss.python.org/t/websocket-messages-sent-to-multiple-clients-are-not-being-received/62781
-
 def log(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
@@ -226,7 +223,7 @@ def make_id(k=8) -> str:
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
 
 class Body:
-    def __init__(self, *, type="Body", scene: Scene=None, shape=None, body_type=BodyType.STATIC, client=None, pos=Vec3()):
+    def __init__(self, *, type="Body", scene: Scene=None, shape=None, body_type=BodyType.STATIC, client=None, pos=Vec3(), bounce: float=0.0):
         self.type = type
         self.scene = scene
         self.pos = pos
@@ -234,17 +231,15 @@ class Body:
         self.shape = shape
         self.body_type = body_type
         self.client = client
+        self.bounce = bounce
         self.id = make_id()
 
-        # Physics properties
-
-        # The "bounce" property of the body. 0 means nothing will bounce, 1.0 means total conservation of energy
-        self.bounce = 0.0
-
-    def _bounce_vec(self, n, v, bounce) -> Vec3:
+    def _bounce_vec(self, n: Vec3, v: Vec3, bounce: float) -> Vec3:
         u = n * (v.dot(n) / (n.dot(n)))
+        # u = n * (v.dot(n) / (n.dot(n))) * factor
         w = v - u
         v2 = w - u
+        # v2 = ((w * factor) - (u * (1.0 - factor))).normalized()
 
         return v2 * bounce
 
@@ -316,7 +311,7 @@ class Body:
             direction = (rb.pos - self.pos).normalized()
 
         if check_collision(shape_a, shape_b):
-            return CollisionResult(collider=rb, normal=direction)
+            return CollisionResult(collider=self, normal=direction)
 
     def to_dict(self):
         return { "pos": self.pos.to_dict(), "type": self.type, "id": self.id, "shape": {} if self.shape is None else self.shape.to_dict() }
@@ -355,6 +350,7 @@ class Game:
         self.state = State.IN_LOBBY
         self.tid = tid
         self.gamemode = gamemode
+        self.consumers = []
 
     def is_tournament_game(self) -> bool:
         return self.tid is not None
@@ -371,9 +367,7 @@ class Game:
         self.manager.games.pop(self.id)
 
     async def broadcast(self, data):
-        consumers = filter(lambda conn: self.get_client(conn.player.id, None) is not None, self.manager.consumers)
-
-        for consumer in consumers:
+        for consumer in self.consumers:
             await consumer.send(json.dumps(data))
 
     def get_client(self, id: int, subid=None) -> Client:
@@ -381,6 +375,12 @@ class Game:
             return next(filter(lambda c: c.id == id and (subid is None or c.subid == subid), self.clients))
         except StopIteration:
             return None
+
+    def connect(self, consumer):
+        self.consumers.append(consumer)
+
+    def disconnect(self, consumer):
+        self.consumers.remove(consumer)
 
     #
     # Callbacks
@@ -431,9 +431,6 @@ class ServerManager:
         log(f"Game started with id", game.id)
         game.start()
         return game
-
-    def disconnect(self, consumer):
-        self.consumers.remove(consumer)
 
     def already_in_game(self, conn) -> bool:
         return self.get_game(conn.player.id) is not None

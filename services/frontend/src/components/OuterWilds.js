@@ -4,6 +4,28 @@ import { tr, setLanguage, getLanguage } from "../i18n";
 import { navigateTo } from "../router";
 import { PLANET_DESCRIPTION } from "../constant";
 
+// Since Ash Twin and Ember Twin are under the "twins" ID, we need to add event listeners to both elements individually.
+// Additionally, they are not part of the "ow-orbit" elements.
+const handlePlanetClick = (planetElement) => {
+    const planetContainer = document.querySelector(".container-fluid.planet-card-container");
+    const displayedPlanet = document.querySelector(".planet-img");
+    const displayedPlanetName = document.querySelector(".planet-name");
+    const displayedPlanetDescription = document.querySelector(".planet-description");
+
+    // Display the card with a subtle animation and update the border color to match the planet's color.
+    planetContainer.style.display = "flex";
+    planetContainer.style.setProperty("--card-color", planetElement.getAttribute("card-color"));
+
+    // Update the card with the selected planet's name.
+    displayedPlanetName.textContent = planetElement.querySelector("ow-name").textContent;
+
+    // Update the card with the selected planet's image.
+    displayedPlanet.setAttribute("src", planetElement.getAttribute("image"));
+
+    // Update the card with the selected planet's description.
+    displayedPlanetDescription.textContent = PLANET_DESCRIPTION[displayedPlanetName.textContent];
+};
+
 class Wanderer extends HTMLElement {
     constructor() {
         super();
@@ -48,11 +70,19 @@ export default class OuterWilds extends Component {
                 newWanderer.appendChild(quantumMoon);
             });
 
-            // TODO: Handle Twins differently since they have one orbit ID for 2 wanderers.
-            // TODO: When "click" events happen, only the first wanderer in the HTML structure is displayed (here it's Ash Twin).
             const orbits = document.querySelectorAll("ow-orbit");
 
+            const ashTwin = document.getElementById("ash-twin");
+            const emberTwin = document.getElementById("ember-twin");
+
+            ashTwin.addEventListener("click", () => handlePlanetClick(ashTwin));
+            emberTwin.addEventListener("click", () => handlePlanetClick(emberTwin));
+            var audio, musicName;
+
             orbits.forEach((orbit) => {
+                if (orbit.id === "twins" || orbit.id === "hourglass-twins") {
+                    return;
+                }
                 // Ensure that names does not move too.
                 orbit.addEventListener("mouseover", async () => {
                     const orbitName = orbit.querySelector("ow-name");
@@ -88,6 +118,15 @@ export default class OuterWilds extends Component {
 
                     // Update the card with the selected planet's description.
                     displayedPlanetDescription.textContent = PLANET_DESCRIPTION[displayedPlanetName.textContent];
+
+                    // Avoid playing the same music multiples times.
+                    if (musicName === displayedPlanetName.textContent) {
+                        return;
+                    } else {
+                        audio = new Audio("/music/" + displayedPlanetName.textContent + ".mp3");
+                        audio.play();
+                        musicName = displayedPlanetName.textContent;
+                    }
 
                     // Prevent rotation for specific planets.
                     if (

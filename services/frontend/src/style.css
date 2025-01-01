@@ -138,7 +138,6 @@
     font-size: 20px;
 }
 
-/* TODO: Reduce the time of animation. */
 .container-fluid.dashboard-container {
     display: flex;
     position: relative;
@@ -160,7 +159,7 @@
     --glow-color: #d89123;
     animation:
         pulsing-glow 2s infinite,
-        fadeInUp 2s forwards;
+        fadeInUp 1s forwards;
 }
 
 @keyframes fadeInUp {

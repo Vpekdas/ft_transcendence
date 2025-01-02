@@ -459,12 +459,13 @@ class TournamentGame:
         self.id = None
         self.score1 = 0
         self.score2 = 0
+        self.has_ended = False
 
     def get_winner(self) -> int:
         return self.player1 if self.score1 > self.score2 else self.player2
 
     def to_dict(self) -> any:
-        return { "player1": self.player1, "player2": self.player2, "score1": self.score1, "score2": self.score2, "id": self.id }
+        return { "player1": self.player1, "player2": self.player2, "score1": self.score1, "score2": self.score2, "id": self.id, "winner": self.get_winner() if self.has_ended else None }
 
 class TournamentRound:
     def __init__(self, n: int):
@@ -542,6 +543,7 @@ class Tournament:
                         removed.append(id)
                         await game.on_update()
                         game.state = State.DEAD
+                        tgame.has_ended = True
 
                     tgame.score1 = game.get_score(0)
                     tgame.score2 = game.get_score(1)

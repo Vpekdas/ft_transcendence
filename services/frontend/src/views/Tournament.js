@@ -140,7 +140,10 @@ export default class Tournament extends Component {
                     host = data["host"];
 
                     if (host != playerInfo.id) {
-                        document.getElementById("start-tournament").disabled = true;
+                        const startBtn = document.getElementById("start-tournament");
+                        startBtn.disabled = true;
+                        startBtn.style.opacity = "0.3";
+                        startBtn.style.pointerEvents = "none";
                     }
                 } else if (data["type"] == "rounds") {
                     let container = document.getElementById("match-container");

@@ -7,17 +7,22 @@ export default class TournamentRound extends Component {
         super();
     }
 
-    createRound(player1, player2, score1, score2) {
+    createRound(player1, player2, id1, id2, score1, score2, winner) {
+        const winner1 = winner == undefined ? "" : winner == id1 ? "winner" : "looser";
+        const winner2 = winner == undefined ? "" : winner == id2 ? "winner" : "looser";
+
+        console.log(winner, player1, player2);
+
         return /* HTML */ `
             <div class="container-fluid tournament-match-container">
-                <div class="player-info">
+                <div class="player-info ${winner1}">
                     <span class="player-name">${player1}</span>
                     <span class="player-score">${score1}</span>
                 </div>
                 <div class="glitch-wrapper vs">
                     <div class="glitch vs" data-glitch="VS">VS</div>
                 </div>
-                <div class="player-info">
+                <div class="player-info ${winner2}">
                     <span class="player-name">${player2}</span>
                     <span class="player-score">${score2}</span>
                 </div>
@@ -34,9 +39,18 @@ export default class TournamentRound extends Component {
             const player1 = data[i]["player1"] ? await getNickname("" + data[i]["player1"]) : "<i>TBD</i>";
             const player2 = data[i]["player2"] ? await getNickname("" + data[i]["player2"]) : "<i>TBD</i>";
             const score1 = data[i]["score1"] ? data[i]["score1"] : "0";
-            const score2 = data[i]["score2"] ? data[i]["score1"] : "0";
+            const score2 = data[i]["score2"] ? data[i]["score2"] : "0";
+            const winner = data[i]["winner"];
 
-            rounds += this.createRound(player1, player2, score1, score2);
+            rounds += this.createRound(
+                player1,
+                player2,
+                data[i]["player1"],
+                data[i]["player2"],
+                score1,
+                score2,
+                winner
+            );
         }
 
         return html(/* HTML */ `<div class="tournament-round">${rounds}</div>`);

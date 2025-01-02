@@ -1409,8 +1409,9 @@ ow-system {
     transition: --scale 5ms linear;
 }
 
+
 ow-system[timelapse="true"] {
-    --cycle: 120s; /* You can change supernova timer here ! */
+    --cycle: 130s; /* You can change supernova timer here ! */
 }
 
 ow-orbit {

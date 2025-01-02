@@ -2,11 +2,11 @@ import { Component, html } from "../micro";
 import { isLoggedIn } from "../utils";
 import { tr, setLanguage, getLanguage } from "../i18n";
 import { navigateTo } from "../router";
-import { PLANET_DESCRIPTION } from "../constant";
+import { PLANETS } from "../constant";
 
 // Since Ash Twin and Ember Twin are under the "twins" ID, we need to add event listeners to both elements individually.
 // Additionally, they are not part of the "ow-orbit" elements.
-const handlePlanetClick = (planetElement) => {
+const handlePlanetClick = (planetElement, music, supernova) => {
     const planetContainer = document.querySelector(".container-fluid.planet-card-container");
     const displayedPlanet = document.querySelector(".planet-img");
     const displayedPlanetName = document.querySelector(".planet-name");
@@ -23,7 +23,25 @@ const handlePlanetClick = (planetElement) => {
     displayedPlanet.setAttribute("src", planetElement.getAttribute("image"));
 
     // Update the card with the selected planet's description.
-    displayedPlanetDescription.textContent = PLANET_DESCRIPTION[displayedPlanetName.textContent];
+    displayedPlanetDescription.textContent = PLANETS[displayedPlanetName.textContent].Description;
+
+    // If there is multiple music, choose one randomly :).
+    if (PLANETS[displayedPlanetName.textContent].Music.length > 1 && !supernova) {
+        music.index = Math.floor(Math.random() * PLANETS[displayedPlanetName.textContent].Music.length);
+    } else {
+        music.index = 0;
+    }
+
+    // Ensure that only one music track is played at a time by pausing the current track before playing a new one.
+    if (music.name && !supernova) {
+        music.audio.pause();
+    }
+
+    if (!supernova) {
+        music.audio = new Audio("/music/" + PLANETS[displayedPlanetName.textContent].Music[music.index] + ".mp3");
+        music.audio.play();
+        music.name = PLANETS[displayedPlanetName.textContent].Music[music.index];
+    }
 };
 
 class Wanderer extends HTMLElement {
@@ -55,7 +73,24 @@ export default class OuterWilds extends Component {
             customElements.define("ow-wanderer", Wanderer);
         }
 
-        this.query("#sun").do(() => {
+        this.query("#sun").do(async () => {
+            const music = { audio: Audio, name: "", index: 0 };
+            const chronometer = { timerId: 0, seconds: 0 };
+            let supernova = false;
+
+            chronometer.timerId = setInterval(() => {
+                chronometer.seconds++;
+                if (chronometer.seconds === 3) {
+                    supernova = true;
+                    if (music.audio.duration > 0 && !music.audio.paused) {
+                        music.audio.pause();
+                    }
+                    music.audio = new Audio("/music/End Times.mp3");
+                    music.audio.play();
+                    clearInterval(chronometer.timerId);
+                }
+            }, 1000);
+
             // Make the quantum moon jump around randomly.
             const quantumMoon = document.getElementById("quantum-moon");
             const quantumOrbits = Array.from(document.querySelectorAll("[quantum]"));
@@ -75,25 +110,24 @@ export default class OuterWilds extends Component {
             const ashTwin = document.getElementById("ash-twin");
             const emberTwin = document.getElementById("ember-twin");
 
-            ashTwin.addEventListener("click", () => handlePlanetClick(ashTwin));
-            emberTwin.addEventListener("click", () => handlePlanetClick(emberTwin));
-            var audio, musicName;
+            ashTwin.addEventListener("click", () => handlePlanetClick(ashTwin, music, supernova));
+            emberTwin.addEventListener("click", () => handlePlanetClick(emberTwin, music, supernova));
 
             orbits.forEach((orbit) => {
                 if (orbit.id === "twins" || orbit.id === "hourglass-twins") {
                     return;
                 }
                 // Ensure that names does not move too.
-                orbit.addEventListener("mouseover", async () => {
+                orbit.addEventListener("mouseover", () => {
                     const orbitName = orbit.querySelector("ow-name");
                     orbitName.style.animationPlayState = "paused";
                 });
-                orbit.addEventListener("mouseleave", async () => {
+                orbit.addEventListener("mouseleave", () => {
                     const orbitName = orbit.querySelector("ow-name");
                     orbitName.style.animationPlayState = "running";
                 });
 
-                orbit.addEventListener("click", async () => {
+                orbit.addEventListener("click", () => {
                     // Ensure that clicking on a child element does not switch to the main element.
                     // For example, clicking on Attlerock should display Attlerock's details, not Timber Hearth's.
                     event.stopPropagation();
@@ -117,16 +151,7 @@ export default class OuterWilds extends Component {
                     displayedPlanet.setAttribute("src", orbit.querySelector("ow-wanderer").getAttribute("image"));
 
                     // Update the card with the selected planet's description.
-                    displayedPlanetDescription.textContent = PLANET_DESCRIPTION[displayedPlanetName.textContent];
-
-                    // Avoid playing the same music multiples times.
-                    if (musicName === displayedPlanetName.textContent) {
-                        return;
-                    } else {
-                        audio = new Audio("/music/" + displayedPlanetName.textContent + ".mp3");
-                        audio.play();
-                        musicName = displayedPlanetName.textContent;
-                    }
+                    displayedPlanetDescription.textContent = PLANETS[displayedPlanetName.textContent].Description;
 
                     // Prevent rotation for specific planets.
                     if (
@@ -136,6 +161,26 @@ export default class OuterWilds extends Component {
                         displayedPlanet.style.animationPlayState = "paused";
                     } else {
                         displayedPlanet.style.animationPlayState = "running";
+                    }
+
+                    // If there is multiple music, choose one randomly :).
+                    if (PLANETS[displayedPlanetName.textContent].Music.length > 1 && !supernova) {
+                        music.index = Math.floor(Math.random() * PLANETS[displayedPlanetName.textContent].Music.length);
+                    } else {
+                        music.index = 0;
+                    }
+
+                    // Ensure that only one music track is played at a time by pausing the current track before playing a new one.
+                    if (music.name && !supernova) {
+                        music.audio.pause();
+                    }
+
+                    if (!supernova) {
+                        music.audio = new Audio(
+                            "/music/" + PLANETS[displayedPlanetName.textContent].Music[music.index] + ".mp3"
+                        );
+                        music.audio.play();
+                        music.name = PLANETS[displayedPlanetName.textContent].Music[music.index];
                     }
                 });
             });

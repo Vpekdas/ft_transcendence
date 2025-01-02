@@ -460,6 +460,7 @@ class TournamentGame:
         self.score1 = 0
         self.score2 = 0
         self.has_ended = False
+        self.has_started = False
 
     def get_winner(self) -> int:
         return self.player1 if self.score1 > self.score2 else self.player2
@@ -505,7 +506,7 @@ class Tournament:
         self.rounds: list[TournamentRound] = []
         self.currentRound = 0
 
-        self.currentGames = []
+        self.currentGames: list[TournamentGame] = []
 
         self.state = TournamentState.LOBBY_BEFORE
         self.winner = None
@@ -519,6 +520,8 @@ class Tournament:
             n //= 2
 
         self.run()
+
+        self.timer = 0
 
     def run(self):
         self.thread = Thread(target=self.run_inner)
@@ -535,12 +538,11 @@ class Tournament:
             if self.state == TournamentState.WAITING_FOR_GAMES:
                 removed = []
 
-                for id in self.currentGames:
-                    game = self.gameManager.get_game_by_id(id)
-                    tgame = self.rounds[self.currentRound].get_game_by_id(id)
+                for tgame in self.currentGames:
+                    game = self.gameManager.get_game_by_id(tgame.id)
 
                     if game.state == State.ENDED:
-                        removed.append(id)
+                        removed.append(tgame)
                         await game.on_update()
                         game.state = State.DEAD
                         tgame.has_ended = True
@@ -548,12 +550,24 @@ class Tournament:
                     tgame.score1 = game.get_score(0)
                     tgame.score2 = game.get_score(1)
 
-                for id in removed:
-                    self.currentGames.remove(id)
+                for tgame in removed:
+                    self.currentGames.remove(tgame)
 
                 if len(self.currentGames) == 0:
                     self.state = TournamentState.LOBBY
                     await self.next_round()
+            elif self.state == TournamentState.LOBBY:
+                log("hello world@")
+
+                if time_secs() - self.timer >= 3.0:
+                    for tgame in self.currentGames:
+                        if tgame.has_started: continue
+
+                        await self.send_to(tgame.player1, json.dumps({ "type": "match", "id": tgame.id }))
+                        await self.send_to(tgame.player2, json.dumps({ "type": "match", "id": tgame.id }))
+                        tgame.has_started = True
+
+                    self.state = TournamentState.WAITING_FOR_GAMES
 
             await asyncio.sleep(0.1)
 
@@ -588,17 +602,18 @@ class Tournament:
         for tgame in r.games:
             game: Game = self.gameManager.start_game(gamemode="1v1", tid=self.tid, acceptedPlayers=[tgame.player1, tgame.player2])
 
-            await game.on_join(tgame.player1)
-            await game.on_join(tgame.player2)
+            # await game.on_join(tgame.player1)
+            # await game.on_join(tgame.player2)
 
-            await self.send_to(tgame.player1, json.dumps({ "type": "match", "id": game.id }))
-            await self.send_to(tgame.player2, json.dumps({ "type": "match", "id": game.id }))
+            await self.send_to(tgame.player1, json.dumps({ "type": "matchWillStart" }))
+            await self.send_to(tgame.player2, json.dumps({ "type": "matchWillStart" }))
 
             tgame.id = game.id
 
-            self.currentGames.append(game.id)
+            self.timer = time_secs()
+            self.currentGames.append(tgame)
 
-        self.state = TournamentState.WAITING_FOR_GAMES
+        self.state = TournamentState.LOBBY
 
     async def on_join(self, player):
         if self.state == TournamentState.LOBBY_BEFORE and (player.id != self.host or player.id not in self.players):

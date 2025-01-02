@@ -215,7 +215,7 @@ def getProfilePicture(request: HttpRequest, id: str):
 
     icon = player.icon
     data = str(icon["data"])
-    data = data[data.find(","):]
+    data = data[data.find(",") + 1:]
 
     bdata = base64.b64decode(data)
 
@@ -235,8 +235,8 @@ def updateProfilePicture(request: HttpRequest, id):
     if data["type"] not in valid_types:
         return JsonResponse({ "error": INVALID_IMAGE_FORMAT })
 
-    if len(data["image"]) > 250000:
-        return JsonResponse({ "error": IMAGE_TOO_BIG })
+    # if len(data["image"]) > 250000:
+    #     return JsonResponse({ "error": IMAGE_TOO_BIG })
 
     player = Player.objects.filter(user=request.user).first()
     player.icon = { "type": data["type"], "data": data["image"] }

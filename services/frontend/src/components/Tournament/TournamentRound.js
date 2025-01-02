@@ -11,8 +11,6 @@ export default class TournamentRound extends Component {
         const winner1 = winner == undefined ? "" : winner == id1 ? "winner" : "looser";
         const winner2 = winner == undefined ? "" : winner == id2 ? "winner" : "looser";
 
-        console.log(winner, player1, player2);
-
         return /* HTML */ `
             <div class="container-fluid tournament-match-container">
                 <div class="player-info ${winner1}">

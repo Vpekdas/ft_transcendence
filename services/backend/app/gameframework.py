@@ -459,7 +459,7 @@ class TournamentGame:
         self.id = None
         self.score1 = 0
         self.score2 = 0
-    
+
     def get_winner(self) -> int:
         return self.player1 if self.score1 > self.score2 else self.player2
 
@@ -516,7 +516,7 @@ class Tournament:
         while n > 0:
             self.rounds.append(TournamentRound(n))
             n //= 2
-        
+
         self.run()
 
     def run(self):
@@ -558,7 +558,7 @@ class Tournament:
     async def next_round(self):
         if self.currentRound == len(self.rounds) - 1:
             # End of the tournament !
-            self.state = State.ENDED
+            self.state = State.DEAD # Kill the monitoring thread
             self.winner = self.rounds[self.currentRound].games[0].get_winner()
 
             await self.send_tree()
@@ -576,7 +576,7 @@ class Tournament:
                 game = round.games[i]
                 game.player1 = winners[i * 2]
                 game.player2 = winners[i * 2 + 1]
-            
+
             await self.send_tree()
             await self.start_games()
 

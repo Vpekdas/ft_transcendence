@@ -54,7 +54,7 @@ CLIENT_ID="u-s4t2ud-113d89636c434e478745914966fff13deb2d93ec00210a1f8033f12f8e0d
 Create a new user using 42 API
 """
 @require_POST
-def signin(request: HttpRequest):
+def signinExternal(request: HttpRequest):
     data = json.loads(request.body)
 
     code = data["code"]
@@ -236,7 +236,7 @@ def updateProfilePicture(request: HttpRequest, id):
         return JsonResponse({ "error": INVALID_IMAGE_FORMAT })
 
     if len(data["image"]) > 250000:
-        return JsonResponse({ "error": IMAGE_TOO_BIG }) 
+        return JsonResponse({ "error": IMAGE_TOO_BIG })
 
     player = Player.objects.filter(user=request.user).first()
     player.icon = { "type": data["type"], "data": data["image"] }

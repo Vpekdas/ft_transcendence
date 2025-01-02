@@ -48,14 +48,22 @@ class Ball(Body):
             player: Player = collision.collider
 
             y_diff = self.pos.y - player.pos.y
+            n_x = Vec3()
+
+            if self.pos.x > 0:
+                n_x = -1
+            else:
+                n_x = 1
+
+            normal = Vec3(n_x, 0, 0)
 
             if y_diff < 0:
-                dir = Vec3(collision.normal.x, -1, 0)
+                dir = Vec3(n_x, -1, 0)
             elif y_diff > 0:
-                dir = Vec3(collision.normal.x, 1, 0)
+                dir = Vec3(n_x, 1, 0)
 
-            factor = abs(y_diff) / 2.5
-            self.velocity = (dir + collision.normal * (1.0 - factor)).normalized() * self.speed
+            factor = abs(y_diff) / 2.5 * 0.5
+            self.velocity = (dir + normal * (1.0 - factor)).normalized() * self.speed
         else:
             self.velocity = self._bounce_vec(collision.normal, dir, self.bounce) * self.speed
 
@@ -179,7 +187,7 @@ class Pong(Game):
 
                 # Add an ongoing game to the database
                 self.timeStarted = time_secs()
-        
+
         return True
 
     async def on_unhandled_message(self, msg):

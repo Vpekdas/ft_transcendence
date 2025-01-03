@@ -576,7 +576,8 @@ export function html(str) {
                         name === "radialGradient" ||
                         name === "stop" ||
                         name === "symbol" ||
-                        name === "path"))
+                        name === "path" ||
+                        name === "polygon"))
             ) {
                 el = document.createElementNS("http://www.w3.org/2000/svg", name);
             } else {

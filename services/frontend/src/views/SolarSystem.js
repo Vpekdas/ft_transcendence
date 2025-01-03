@@ -2,8 +2,6 @@ import { fetchApi } from "../utils";
 import { navigateTo } from "../router";
 import { Component, html } from "../micro";
 import { tr } from "../i18n";
-import OuterWilds from "../components/OuterWilds";
-import NavBar from "../components/NavBars/HomeNavBar";
 
 export default class SolarSystem extends Component {
     constructor() {
@@ -12,10 +10,10 @@ export default class SolarSystem extends Component {
 
     async render() {
         return html(
-            /* HTML */
-            ` <div>
+            /* HTML */ `<div>
                 <NavBar />
                 <OuterWilds />
+                <Coordinates />
             </div>`
         );
     }

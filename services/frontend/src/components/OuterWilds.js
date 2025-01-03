@@ -2,11 +2,20 @@ import { Component, html } from "../micro";
 import { isLoggedIn } from "../utils";
 import { tr, setLanguage, getLanguage } from "../i18n";
 import { navigateTo } from "../router";
-import { PLANETS } from "../constant";
+import { PLANETS, END_GAME } from "../constant";
+
+function isRightPath(currentPath) {
+    for (let i = 0; i < END_GAME.length; i++) {
+        if (END_GAME[i] !== currentPath[i]) {
+            return false;
+        }
+    }
+    return true;
+}
 
 // Since Ash Twin and Ember Twin are under the "twins" ID, we need to add event listeners to both elements individually.
 // Additionally, they are not part of the "ow-orbit" elements.
-const handlePlanetClick = (planetElement, music, supernova) => {
+const handlePlanetClick = (planetElement, music, supernova, coordinates) => {
     const planetContainer = document.querySelector(".container-fluid.planet-card-container");
     const displayedPlanet = document.querySelector(".planet-img");
     const displayedPlanetName = document.querySelector(".planet-name");
@@ -42,6 +51,17 @@ const handlePlanetClick = (planetElement, music, supernova) => {
         music.audio.play();
         music.name = PLANETS[displayedPlanetName.textContent].Music[music.index];
     }
+
+    if (!coordinates.endGame) {
+        if (coordinates.currentPath.length < 3) {
+            coordinates.currentPath.push(displayedPlanetName.textContent);
+        }
+
+        if (coordinates.currentPath.length == 3) {
+            coordinates.endGame = isRightPath(coordinates.currentPath);
+            coordinates.currentPath.length = 0;
+        }
+    }
 };
 
 class Wanderer extends HTMLElement {
@@ -76,11 +96,13 @@ export default class OuterWilds extends Component {
         this.query("#sun").do(async () => {
             const music = { audio: Audio, name: "", index: 0 };
             const chronometer = { timerId: 0, seconds: 0 };
+            const coordinates = { endGame: false, currentPath: [] };
             let supernova = false;
 
+            // ! If the user does not interact, a Promise is returned by audio.
             chronometer.timerId = setInterval(() => {
                 chronometer.seconds++;
-                if (chronometer.seconds === 3) {
+                if (chronometer.seconds === 120 && !supernova) {
                     supernova = true;
                     if (music.audio.duration > 0 && !music.audio.paused) {
                         music.audio.pause();
@@ -110,8 +132,8 @@ export default class OuterWilds extends Component {
             const ashTwin = document.getElementById("ash-twin");
             const emberTwin = document.getElementById("ember-twin");
 
-            ashTwin.addEventListener("click", () => handlePlanetClick(ashTwin, music, supernova));
-            emberTwin.addEventListener("click", () => handlePlanetClick(emberTwin, music, supernova));
+            ashTwin.addEventListener("click", () => handlePlanetClick(ashTwin, music, supernova, coordinates));
+            emberTwin.addEventListener("click", () => handlePlanetClick(emberTwin, music, supernova, coordinates));
 
             orbits.forEach((orbit) => {
                 if (orbit.id === "twins" || orbit.id === "hourglass-twins") {
@@ -171,7 +193,7 @@ export default class OuterWilds extends Component {
                     }
 
                     // Ensure that only one music track is played at a time by pausing the current track before playing a new one.
-                    if (music.name && !supernova) {
+                    if (music.audio.duration > 0 && !music.audio.paused && !supernova) {
                         music.audio.pause();
                     }
 
@@ -181,6 +203,17 @@ export default class OuterWilds extends Component {
                         );
                         music.audio.play();
                         music.name = PLANETS[displayedPlanetName.textContent].Music[music.index];
+                    }
+
+                    if (!coordinates.endGame) {
+                        if (coordinates.currentPath.length < 3) {
+                            coordinates.currentPath.push(displayedPlanetName.textContent);
+                        }
+
+                        if (coordinates.currentPath.length === 3) {
+                            coordinates.endGame = isRightPath(coordinates.currentPath);
+                            coordinates.currentPath.length = 0;
+                        }
                     }
                 });
             });
@@ -194,7 +227,7 @@ export default class OuterWilds extends Component {
                 <div>
                     <h1 class="typewriter-text line-1">Lorem Ipsum Dolor</h1>
                 </div>
-            </div>   
+            </div>
                 <div class="container-fluid planet-card-container" >
                     <span class="planet-name"></span>
                     <img class="planet-img" src=""> </img>

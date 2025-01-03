@@ -27,4 +27,6 @@ export const PLANETS = {
     "White Hole Station": { Description: "", Music: ["Space"] },
 };
 
+export const END_GAME = ["Timber Hearth", "Ash Twin", "Dark Bramble"];
+
 // End Times, Final Voyage

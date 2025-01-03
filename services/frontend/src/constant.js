@@ -29,4 +29,23 @@ export const PLANETS = {
 
 export const END_GAME = ["Timber Hearth", "Ash Twin", "Dark Bramble"];
 
-// End Times, Final Voyage
+export const FIRST_COORDINATES = [
+    { x1: 85, y1: 260, x2: 23, y2: 150 },
+    { x1: 23, y1: 150, x2: 215, y2: 40 },
+];
+// { x1: 0, y1: 0, x2: 0, y2: 0 }
+export const SECOND_COORDINATES = [
+    { x1: 85, y1: 260, x2: 215, y2: 40 },
+    { x1: 215, y1: 40, x2: 85, y2: 40 },
+    { x1: 85, y1: 40, x2: 215, y2: 260 },
+];
+
+export const THIRD_COORDINATES = [
+    { x1: 85, y1: 260, x2: 23, y2: 150 },
+    { x1: 23, y1: 150, x2: 85, y2: 40 },
+    { x1: 85, y1: 40, x2: 215, y2: 260 },
+    { x1: 215, y1: 260, x2: 278, y2: 150 },
+    { x1: 278, y1: 150, x2: 215, y2: 40 },
+];
+
+//  Final Voyage

@@ -1,4 +1,4 @@
-import { Component, html } from "./micro";
+import { Component, html } from "../../micro";
 import { tr } from "../../i18n";
 
 export default class ProfileNavBar extends Component {

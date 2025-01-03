@@ -1,21 +1,15 @@
 import { defineConfig } from "vite";
-import { readFileSync, readdirSync, statSync } from "fs";
+import { readFileSync, readdirSync, statSync, writeFileSync } from "fs";
 
 const microPlugin = () => {
-    const registryVirtualModuleId = "./micro-registry";
-    const registryResolvedVirtualModuleId = "\0" + registryVirtualModuleId;
-
-    const microVirtualModuleId = "./micro";
-    const microResolvedVirtualModuleId = "\0" + microVirtualModuleId;
-
-    let components = [];
-
     function importAllComponents(currentFolder = __dirname + "/src", currentModuleFolder = ".") {
+        let components = [];
+
         for (let file of readdirSync(currentFolder)) {
             const stats = statSync(currentFolder + "/" + file);
 
             if (stats.isDirectory()) {
-                importAllComponents(currentFolder + "/" + file, currentModuleFolder + "/" + file);
+                components.push(...importAllComponents(currentFolder + "/" + file, currentModuleFolder + "/" + file));
                 continue;
             } else if (!file.endsWith(".js")) {
                 continue;
@@ -33,11 +27,13 @@ const microPlugin = () => {
                 components.push({ name: name, modulePath: module });
             }
         }
+
+        return components;
     }
 
-    importAllComponents();
-
     function generateRegistry() {
+        let components = importAllComponents();
+
         let s = "";
 
         s += 'import { Component } from "./micro";\n';
@@ -61,25 +57,22 @@ const microPlugin = () => {
     return {
         name: "micro-gen",
 
-        resolveId(id) {
-            if (id == microVirtualModuleId) {
-                return microResolvedVirtualModuleId;
-            }
-        },
+        resolveId(id) {},
 
         load(id) {
-            if (id == registryResolvedVirtualModuleId) {
-                const source = generateRegistry();
-                return source;
-            } else if (id == microResolvedVirtualModuleId) {
-                return readFileSync(__dirname + "/src/micro.js").toString();
-            }
+            // if (id == "/app/src/main.js") {
+            //     const originalSource = readFileSync("/app/src/main.js").toString();
+            //     const injectedSource = originalSource + "\n" + generateRegistry();
+            //     return injectedSource;
+            // }
+        },
 
-            if (id == "/app/src/main.js") {
-                const originalSource = readFileSync("/app/src/main.js").toString();
-                const injectedSource = originalSource + "\n" + generateRegistry();
-                return injectedSource;
-            }
+        /**
+         * @param {string} html
+         */
+        transformIndexHtml(html) {
+            writeFileSync("/app/src/micro.generated.js", generateRegistry());
+            return html;
         },
     };
 };

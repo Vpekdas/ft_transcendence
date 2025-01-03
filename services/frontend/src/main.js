@@ -2,6 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { navigateTo, router } from "./router";
+import { registerAll } from "./micro.generated";
 
 // If the clicked element contains a data-link attribute, prevent the default page reload,
 // update the browser's history, and render the new HTML content.

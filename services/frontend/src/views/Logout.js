@@ -1,15 +1,8 @@
 import { post } from "../utils";
-import { Component, html } from "../micro";
-import { navigateTo } from "../router";
+import { navigateTo } from "../micro";
 
-export default class Logout extends Component {
-    constructor() {
-        super();
-    }
-
-    async render() {
-        await post("/api/logout", {});
-        navigateTo("login");
-        return html(/* HTML */ `<div></div>`);
-    }
+export default async function Logout({}) {
+    await post("/api/logout", {});
+    navigateTo("login");
+    return /* HTML */ `<div></div>`;
 }

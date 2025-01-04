@@ -1,30 +1,21 @@
-import { Component, html } from "../../micro";
+/** @type {import("../../micro").Component} */
+export default async function LineChart({ attributes }) {
+    const width = parseInt(attributes.get("width"));
+    const height = parseInt(attributes.get("height"));
 
-export default class LineChart extends Component {
-    constructor() {
-        super();
-    }
+    const viewWidth = parseInt(attributes.get("viewWidth"));
+    const viewHeight = parseInt(attributes.get("viewHeight"));
 
-    async render() {
-        const width = parseInt(this.attrib("width"));
-        const height = parseInt(this.attrib("height"));
+    const points = attributes.get("points");
 
-        const viewWidth = parseInt(this.attrib("viewWidth"));
-        const viewHeight = parseInt(this.attrib("viewHeight"));
-
-        const points = this.attrib("points");
-
-        return html(
-            /* HTML */ ` <svg
-                width="${width}"
-                height="${height}"
-                viewBox="0 0 ${viewWidth} ${viewHeight}"
-                class="line-chart"
-            >
-                <polyline fill="none" stroke="#d2320a" stroke-width="2" points="${points}" />
-            </svg>`
-        );
-    }
+    return /* HTML */ ` <svg
+        width="${width}"
+        height="${height}"
+        viewBox="0 0 ${viewWidth} ${viewHeight}"
+        class="line-chart"
+    >
+        <polyline fill="none" stroke="#d2320a" stroke-width="2" points="${points}" />
+    </svg>`;
 }
 
 // TODO: Add a function to dynamically add circles to the line chart.

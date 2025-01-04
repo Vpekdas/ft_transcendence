@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "eslint": "^9.17.0",
+    "eslint-plugin-no-floating-promise": "^2.0.0",
     "prettier": "^3.3.3",
     "terser": "^5.36.0",
     "vite": "^5.4.11"

@@ -1,43 +1,21 @@
-import { Component, html } from "../micro";
-import NavBar from "../components/NavBars/HomeNavBar";
-import DonutChart from "../components/Charts/DonutChart";
-import { fetchApi, isLoggedIn } from "../utils";
-import ChangePasswordForm from "../components/Forms/ChangePasswordForm";
-import ChangeNicknameForm from "../components/Forms/ChangeNicknameForm";
-import DeleteAccountForm from "../components/Forms/DeleteAccountForm";
-import ChangeProfilePictureForm from "../components/Forms/ChangeProfilePictureForm";
-import { navigateTo } from "../router";
 import { tr } from "../i18n";
 
-export default class Settings extends Component {
-    constructor() {
-        super();
-    }
+export default async function Settings({}) {
+    document.title = tr("Settings");
 
-    async render() {
-        if (!(await isLoggedIn())) {
-            navigateTo("/login");
-        }
+    const profilePictureLanguage = tr("Profile Picture");
+    const uploadLanguage = tr("Upload");
 
-        this.setTitle("Settings");
-
-        const profilePictureLanguage = tr("Profile Picture");
-        const uploadLanguage = tr("Upload");
-
-        return html(
-            /* HTML */
-            ` <div>
-                <NavBar />
-                <div class="container-fluid dashboard-container">
-                    <ProfileNavBar />
-                    <ul class="list-group settings">
-                        <ChangeProfilePictureForm />
-                        <ChangeNicknameForm />
-                        <ChangePasswordForm />
-                        <DeleteAccountForm />
-                    </ul>
-                </div>
-            </div>`
-        );
-    }
+    return /* HTML */ `<div>
+        <NavBar />
+        <div class="container-fluid dashboard-container">
+            <ProfileNavBar />
+            <ul class="list-group settings">
+                <ChangeProfilePictureForm />
+                <ChangeNicknameForm />
+                <ChangePasswordForm />
+                <DeleteAccountForm />
+            </ul>
+        </div>
+    </div>`;
 }

@@ -1,710 +1,703 @@
-class Store {
-    constructor(defaultValue) {
-        this.value = defaultValue;
-    }
+import { registerAll } from "./micro.generated";
+
+/**
+ * @type Map<string, any>
+ */
+export let components = new Map();
+let routerSettings = undefined;
+
+/*
+    ROOTER
+ */
+
+// TODO: This only works when saving this file for some reason
+if (import.meta.hot) {
+    import.meta.hot.accept(async (newModule) => {
+        registerAll();
+        await router();
+    });
 }
 
-class ElementAccessor {
-    constructor() {
-        this.eventCallbacks = new Map();
-        this.doCallback = undefined;
-    }
+window.onpopstate = async () => {
+    await router();
+};
 
-    on(eventName, callback) {
-        this.eventCallbacks.set(eventName, callback);
-    }
-
-    do(callback) {
-        this.doCallback = callback;
-    }
-}
-
-export class Component {
-    constructor(parent, name = "default") {
-        /** @type Map<string, Store> */
-        this.stores = new Map();
-        /** @type Map<string, Selector>  */
-        this.accessors = new Map();
-        /** @type Map<string, any> */
-        this.attributes = new Map();
-        this.parent = parent;
-        /** @type string */
-        this.name = name;
-        this.updateHandler = undefined;
-    }
-
-    static registry = new Map();
-
-    setTitle(title) {
-        document.title = title;
-    }
-
-    /**
-     * @returns {Promise<HTMLElement>} The generated HTML
-     */
-    async render() {
-        return null;
-    }
-
-    attrib(name) {
-        if (this.attributes.has(name)) {
-            return this.attributes.get(name);
+async function handleRedirect(callback) {
+    try {
+        return await callback();
+    } catch (ex) {
+        if (ex.url != undefined) {
+            history.pushState(null, null, ex.url);
+            await router();
+        } else {
+            throw ex;
         }
-        return null;
+    }
+}
+
+/**
+ * @param {Node} node
+ * @returns {string}
+ */
+function elementToString(node) {
+    if (node instanceof Element) {
+        let s = node.tagName + "-attribs[";
+
+        for (let index = 0; index < node.attributes.length; index++) {
+            s += node.attributes.item(index).name + "=" + node.attributes.item(index).value;
+        }
+
+        s += "]";
+        return s;
+    } else if (node instanceof Text) {
+        return node.data;
+    }
+}
+
+/**
+ * Recursively go down through the node tree and replace nodes only when necessary.
+ *
+ * @param {Element} old
+ * @param {Element} element
+ */
+function applyTreeDifference(old, element) {
+    let index = 0;
+
+    // NOTE: When calling `Element.replaceChild` the node is removed from the original tree before
+    //       replacing in the new tree, decrementing `element.childNodes.length` in the process.
+    //       We need to clone the node before!
+
+    for (; index < old.childNodes.length; index++) {
+        if (index >= element.childNodes.length) {
+            old.removeChild(old.childNodes.item(index));
+        } else {
+            let oldString = elementToString(old.childNodes.item(index));
+            let newString = elementToString(element.childNodes.item(index));
+
+            if (oldString != newString) {
+                // replace the node
+                old.replaceChild(element.childNodes[index].cloneNode(true), old.childNodes[index]);
+            } else {
+                // nothing to do, go down the tree recursively
+                if (old.childNodes[index] instanceof Element) {
+                    applyTreeDifference(old.childNodes[index], element.childNodes[index]);
+                }
+            }
+        }
+    }
+
+    for (; index < element.childNodes.length; index++) {
+        old.appendChild(element.childNodes.item(index));
+    }
+}
+
+function matchRoute(routes, path) {
+    const parts = path.substring(1).split("/");
+
+    for (let route of routes) {
+        const routeParts = route.path.substring(1).split("/");
+
+        if (routeParts.length !== parts.length) {
+            continue;
+        }
+
+        let params = new Map();
+
+        let index = 0;
+        for (; index < parts.length; index++) {
+            let part = parts[index];
+            let routePart = routeParts[index];
+
+            if (routePart[0] == "[" && routePart[routePart.length - 1] == "]") {
+                let param = routePart.substring(1, routePart.length - 1);
+                let value = part;
+
+                params.set(param, value);
+            } else if (routePart != part) {
+                break;
+            }
+        }
+
+        if (index == parts.length) {
+            return { route: route, params: params };
+        }
+    }
+
+    return undefined;
+}
+
+async function router() {
+    let app = document.getElementById("micro-app");
+    let oldElement = app.firstElementChild;
+
+    if (routerSettings == undefined) {
+        return;
+    }
+
+    const route = matchRoute(routerSettings.routes, location.pathname);
+
+    if (route == undefined) {
+        console.error("TODO: 404!");
+        return;
+    }
+
+    // This should not be called here, only once during load and after each hot reload
+    registerAll();
+
+    /** @type {{object: any, element: Element}} */
+    const { object, element } = await handleRedirect(
+        async () => await createComponent(route.route.view, new Map(), route.params)
+    );
+
+    await registerComponentCallbacks(element, object);
+
+    if (element == undefined) {
+        throw new Error("What happened here ????");
+    }
+
+    if (oldElement == null) {
+        app.append(element);
+    } else {
+        applyTreeDifference(oldElement, element);
+    }
+}
+
+/**
+ * @param {import("./micro").RouterSettings} settings
+ */
+export function defineRouter(settings) {
+    routerSettings = settings;
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        // Prevent <a> tags from reloading the page by preventing the default behaviour
+        // and using our own `navigateTo`
+        // TODO: check parents ?
+        document.body.addEventListener("click", async (event) => {
+            if (event.target instanceof HTMLAnchorElement) {
+                event.preventDefault();
+                await handleRedirect(async () => navigateTo(event.target.href));
+            }
+        });
+
+        await handleRedirect(async () => await router());
+    });
+}
+
+class NavigateTo {
+    constructor(url) {
+        this.url = url;
+    }
+}
+
+/**
+ * Redirect to another page without reload.
+ *
+ * @param {string} url
+ */
+export function navigateTo(url) {
+    throw new NavigateTo(url);
+}
+
+/*
+    COMPONENT MANIPULATION
+ */
+
+/**
+ * An interface to manipulate the inner DOM of a component.
+ */
+class ComponentDOM {
+    constructor() {
+        /** @type {Array<ComponentDOMElementRef} */
+        this.elements = [];
     }
 
     /**
      * @param {string} name
+     * @param {any} callback
+     * @returns {ComponentDOMElementRef}
      */
-    useStore(name, defaultValue) {
-        var store;
-
-        if (!this.stores.has(name)) {
-            this.stores.set(name, new Store(defaultValue));
-        }
-        store = this.stores.get(name);
-
-        return [
-            store.value,
-            (value) => {
-                store.value = value;
-                setTimeout(() => this.update(), 0);
-            },
-        ];
-    }
-
-    useGlobalStore(name, defaultValue) {
-        const key = "global__" + name;
-        var item = localStorage.getItem(key);
-
-        if (item == null) {
-            item = JSON.stringify(defaultValue);
-            localStorage.setItem(key, item);
-        }
-
-        return [
-            JSON.parse(localStorage.getItem(key)),
-            (value) => {
-                localStorage.setItem(key, value);
-                setTimeout(() => this.update(), 0);
-            },
-        ];
-    }
-
-    usePersistentStore(name, defaultValue) {
-        var key = this.getFullPath() + "__" + name;
-        var item = localStorage.getItem(key);
-
-        if (item == null) {
-            item = JSON.stringify(defaultValue);
-            localStorage.setItem(key, item);
-        }
-
-        return [
-            JSON.parse(localStorage.getItem(key)),
-            (value) => {
-                localStorage.setItem(key, value);
-                setTimeout(() => this.update(), 0);
-            },
-        ];
-    }
-
-    getPersistentStoreValue(name) {
-        var key = this.getFullPath() + "__" + name;
-        return JSON.parse(localStorage.getItem(key));
-    }
-
-    async update() {
-        if (this.updateHandler != undefined) await this.updateHandler();
-        if (this.parent != undefined) await this.parent.update();
+    querySelector(selector) {
+        const ref = new ComponentDOMElementRef("querySelector", selector);
+        this.elements.push(ref);
+        return ref;
     }
 
     /**
-     * @param {string} selector
-     * @returns {ElementAccessor}
+     * @param {string} name
+     * @param {any} callback
      */
-    query(selector) {
-        var accessor;
-        if (!this.accessors.has(selector)) {
-            accessor = new ElementAccessor();
-            this.accessors.set(selector, accessor);
-        } else {
-            accessor = this.accessors.get(selector);
-        }
-        return accessor;
-    }
-
-    events() {
-        for (let [selector, values] of this.accessors) {
-            for (let [eventName, callback] of values.eventCallbacks) {
-                const el = document.querySelector(selector);
-
-                if (el == null) continue;
-
-                el.addEventListener(eventName, callback);
-            }
-        }
-    }
-
-    getFullPath() {
-        if (this.parent != undefined)
-            return this.parent.getFullPath() + "_" + (this.constructor.name + "#" + this.name);
-        return this.constructor.name + "#" + this.name;
-    }
-
-    showToast(message, iconClass) {
-        const toastContainer = document.getElementById("toast-container");
-        const toast = document.createElement("div");
-        toast.className = "toast";
-        toast.innerHTML = `<i class="${iconClass} toast-icon"></i> ${message}`;
-        toast.style.display = "flex";
-        toastContainer.appendChild(toast);
-
-        setTimeout(() => {
-            toast.remove();
-        }, 5000);
+    querySelectorAll(selector) {
+        const ref = new ComponentDOMElementRef("querySelectorAll", selector);
+        this.elements.push(ref);
+        return ref;
     }
 }
 
-class ParsingError extends Error {
-    static EXPECTING_TAG = 0;
-    static UNKNOWN_ELEMENT = 1;
-    static ONE_TOP_LEVEL_ELEMENT = 2;
-    static NO_CLOSING_TAG = 3;
-    static EXPECTING_IDENT = 4;
-
-    constructor(err, token, source, data) {
-        super(ParsingError.errorString(err, token, source, data), null);
-
-        this.err = err;
-        this.token = token;
-        this.source = source;
-        this.data = data;
-    }
-
-    static errorString(err, token, source, data) {
-        switch (err) {
-            case ParsingError.EXPECTING_TAG:
-                return (
-                    `Expecting an element but found ${token.s}` +
-                    ParsingError.errorLocation(source, token.line, token.column, token.s.length)
-                );
-            case ParsingError.UNKNOWN_ELEMENT:
-                return `Unknown element <${token.s}>`;
-            case ParsingError.ONE_TOP_LEVEL_ELEMENT:
-                return `Only top element is supported` /*+
-                    ParsingError.errorLocation(source, token.line, token.column, 2 + token.s.length)*/;
-            case ParsingError.NO_CLOSING_TAG:
-                return (
-                    `No closing tag for <${token.s}>` +
-                    ParsingError.errorLocation(source, token.line, token.column, token.s.length)
-                );
-            case ParsingError.EXPECTING_IDENT:
-                return (
-                    `Expecting identifier but got \`${token.s}\`` +
-                    ParsingError.errorLocation(source, token.line, token.column, token.s.length)
-                );
-        }
+class ComponentDOMElementRef {
+    constructor(type, selector) {
+        this.type = type;
+        this.selector = selector;
+        this.eventCallbacks = new Map();
+        this.doCallbacks = [];
     }
 
     /**
-     * @param {string} source
-     * @param {number} line
-     * @param {number} columnStart
-     * @param {number} size
+     * @param {string} name
+     * @param {any} callback
      */
-    static errorLocation(source, line, columnStart, size) {
-        const lines = source.split("\n");
-        let s = `\n${lines[line - 1]}\n`;
-
-        for (let i = 0; i < columnStart - 1; i++) {
-            s += " ";
-        }
-
-        s += "^";
-
-        for (let i = 1; i < size; i++) {
-            s += "~";
-        }
-
-        return s;
-    }
-}
-
-class HTMLComponent extends HTMLElement {
-    constructor() {
-        super();
-        /** @type Component */
-        this.component = undefined;
+    on(name, callback) {
+        this.eventCallbacks.set(name, callback);
     }
 
-    async connectedCallback() {
-        await this.updateHTML();
+    /**
+     * @param {any} callback
+     */
+    do(callback) {
+        this.doCallbacks.push(callback);
     }
-
-    disconnectedCallback() {}
-
-    async adoptedCallback() {
-        await this.updateHTML();
-    }
-
-    async attributeChangedCallback(name, oldValue, newValue) {
-        if (oldValue == newValue) {
-            return;
-        }
-
-        if (this.component != undefined) {
-            this.component.attributes.set(name, newValue);
-            await this.updateHTML();
-        }
-    }
-
-    forEachReactiveValue(f, n = this) {
-        for (let element of n.children) {
-            if (element instanceof HTMLReactiveValue) {
-                f(element);
-            } else {
-                this.forEachReactiveValue(f, element);
-            }
-        }
-    }
-
-    async updateHTML() {
-        if (this.component != undefined) {
-            // if (this.children.length == 0) {
-            const newChild = await this.component.render();
-            if (this.children.length > 0) this.removeChild(this.children[0]);
-            this.appendChild(newChild);
-            await this.do();
-            // }
-            this.forEachReactiveValue((el) => el.updateInnerText(this.component));
-        }
-
-        this.events();
-    }
-
-    async do() {
-        if (this.component != undefined) {
-            for (let [selector, values] of this.component.accessors) {
-                if (values.doCallback != undefined) values.doCallback(this.querySelector(selector));
-            }
-        }
-    }
-
-    events() {
-        if (this.component != undefined) {
-            for (let [selector, values] of this.component.accessors) {
-                const elements = this.querySelectorAll(selector);
-
-                if (elements.length == 0) {
-                    continue;
-                }
-
-                for (let [eventName, callback] of values.eventCallbacks) {
-                    for (let el of elements) {
-                        el.addEventListener(eventName, callback);
-                    }
-                }
-            }
-        }
-    }
-}
-
-class HTMLReactiveValue extends HTMLElement {
-    constructor() {
-        super();
-        /** @type Component */
-        this.globalStoreName = "";
-    }
-
-    async connectedCallback() {}
-
-    updateInnerText(component) {
-        const [value, _] = component.usePersistentStore(this.globalStoreName, {});
-        this.textContent = `${value}`;
-    }
-
-    disconnectedCallback() {}
-
-    async adoptedCallback() {}
-
-    async attributeChangedCallback(name, oldValue, newValue) {}
 }
 
 /**
- * @param {string} str
- * @returns {HTMLElement | ParsingError}
+ * @param {any} comp
+ * @param {Map<string, string>} attributes
+ * @param {Map<string, string>} params
+ * @returns {Promise<Element>}
  */
-export function html(str) {
-    // There is probably a better place to put this. This maybe should go away when parsing is done.
-    if (customElements.get("micro-component") == undefined) {
-        customElements.define("micro-component", HTMLComponent);
-        customElements.define("micro-reactive-value", HTMLReactiveValue);
-    }
+async function createComponent(comp, attributes, params) {
+    let object = {
+        params: params,
+        dom: new ComponentDOM(),
+        attributes: attributes,
+    };
 
-    if (str == null) {
-        return null;
-    }
+    const element = await parseHTML(await comp(object), comp.name);
+    return { object, element };
+}
 
-    class Token {
-        static IDENT = 0;
-        static EQUALS = 1; // `=`
-        static OPEN_TAG = 2; // `<`
-        static CLOSE_TAG = 3; // `>`
-        static QUOTES_STRING = 4; // `'...'`
-        static DQUOTES_STRING = 5; // `"..."`
-        static SLASH = 6; // `/`
-        static CONTENT = 7; // Any text inside an element
+async function registerComponentCallbacks(element, object) {
+    for (let elementRef of object.dom.elements) {
+        if (elementRef.type == "querySelector") {
+            let query = element.querySelector(elementRef.selector);
 
-        constructor(type, s, line, column) {
-            this.type = type;
-            this.s = s;
-            this.line = line;
-            this.column = column;
+            if (query == null) {
+                console.warn("invalid querySelector string", elementRef.selector);
+                continue;
+            }
+
+            for (let [eventName, callback] of elementRef.eventCallbacks.entries()) {
+                query.addEventListener(eventName, async () => await handleRedirect(callback));
+            }
+        } else if (elementRef.type == "querySelectorAll") {
+            let query = element.querySelectorAll(elementRef.selector);
+
+            if (query.length == 0) {
+                console.warn("invalid querySelectorAll string", elementRef.selector);
+                continue;
+            }
+
+            for (let el of query) {
+                for (let [eventName, callback] of elementRef.eventCallbacks.entries()) {
+                    el.addEventListener(eventName, async () => await handleRedirect(callback));
+                }
+            }
+        } else {
+            throw new Error("invalid reference type " + elementRef.type);
+        }
+
+        // Execute `do` callbacks
+        for (let callback of elementRef.doCallbacks) {
+            await callback(element);
         }
     }
+}
 
-    /** @type Array<Token> */
-    let tokens = new Array();
+/*
+    PARSER
+ */
+
+class Token {}
+
+class TokenTag extends Token {
+    constructor(name, attribs) {
+        super();
+        this.name = name;
+        this.attribs = attribs;
+    }
+}
+
+class TokenOpenTag extends Token {
+    constructor(name, attribs) {
+        super();
+        this.name = name;
+        this.attribs = attribs;
+    }
+}
+
+class TokenCloseTag extends Token {
+    constructor(name) {
+        super();
+        this.name = name;
+    }
+}
+
+class TokenString extends Token {
+    constructor(text) {
+        super();
+        this.text = text;
+    }
+}
+
+class ParseError extends Error {
+    constructor(message) {
+        super();
+        this.message = message;
+    }
+}
+
+function isWhitespace(c) {
+    return c == " " || c == "\n" || c == "\r" || c == "\t";
+}
+
+function isOperator(c) {
+    return c == "<" || c == ">" || c == "/" || c == "=" || c == "'" || c == '"';
+}
+
+/**
+ * @param {string} source
+ * @returns {Token[]}
+ */
+function tokenizeHTML(source, parentName) {
+    /** @type {Token[]} */
+    let tokens = [];
     let index = 0;
-    let line = 1;
-    let column = 1;
 
-    function isWhitespace(c) {
-        return c == " " || c == "\n" || c == "\r" || c == "\t";
-    }
+    while (index < source.length) {
+        if (source[index] == "<") {
+            index++;
 
-    function skipWhitespaces() {
-        while (index < str.length && isWhitespace(str[index])) {
-            if (str[index] == "\n") {
-                line++;
-                column = 1;
-            } else {
-                column++;
-            }
-            index++;
-        }
-    }
+            let name = "";
+            let closing = false;
 
-    let insideElement = false;
-
-    while (index < str.length) {
-        skipWhitespaces();
-
-        if (str[index] == "<") {
-            tokens.push(new Token(Token.OPEN_TAG, str[index], line, column));
-            index++;
-            column++;
-            insideElement = false;
-        } else if (str[index] == ">") {
-            tokens.push(new Token(Token.CLOSE_TAG, str[index], line, column));
-            index++;
-            column++;
-            insideElement = true;
-        } else if (str[index] == "/") {
-            tokens.push(new Token(Token.SLASH, str[index], line, column));
-            index++;
-            column++;
-        } else if (str[index] == "=") {
-            tokens.push(new Token(Token.EQUALS, str[index], line, column));
-            index++;
-            column++;
-        } else if (str[index] == '"') {
-            let value = "";
-            let startColumn = column;
-            index++;
-            column++;
-            while (index < str.length && str[index] != '"') {
-                value += str[index];
+            if (source[index] == "/") {
+                closing = true;
                 index++;
-                column++;
             }
-            // TODO: Check for errors
-            tokens.push(new Token(Token.DQUOTES_STRING, value, line, startColumn));
-            index++;
-            column++;
-        } else if (str[index] == "'") {
-            let value = "";
-            let startColumn = column;
-            index++;
-            column++;
-            while (index < str.length && str[index] != "'") {
-                value += str[index];
+
+            while (index < source.length && !isWhitespace(source[index]) && !isOperator(source[index])) {
+                name += source[index];
                 index++;
-                column++;
-            }
-            // TODO: Check for errors
-            tokens.push(new Token(Token.QUOTES_STRING, value, line, startColumn));
-            index++;
-            column++;
-        } else if (insideElement) {
-            let value = "";
-            let startColumn = column;
-            while (index < str.length && str[index] != "<") {
-                value += str[index];
-                index++;
-                column++;
-            }
-            // TODO: Check for errors
-            tokens.push(new Token(Token.CONTENT, value, line, startColumn));
-        } else {
-            let value = "";
-            let startColumn = column;
-            while (
-                index < str.length &&
-                !isWhitespace(str[index]) &&
-                str[index] != "<" &&
-                str[index] != ">" &&
-                str[index] != "/" &&
-                str[index] != "="
-            ) {
-                value += str[index];
-                index++;
-                column++;
-            }
-            // TODO: Check for errors
-            tokens.push(new Token(Token.IDENT, value, line, startColumn));
-        }
-    }
-
-    /**
-     * @param {HTMLElement} el
-     * @returns
-     */
-    function isInSvg(el) {
-        if (el == null) {
-            return false;
-        } else if (el instanceof SVGElement) {
-            return true;
-        } else {
-            return isInSvg(el.parentElement);
-        }
-    }
-
-    function parseTags(parent, tokens, start, end) {
-        let index = start;
-
-        // console.log(...tokens.slice(start, end).map((v) => v.s));
-
-        if (tokens[index].type != Token.OPEN_TAG) {
-            throw new ParsingError(ParsingError.EXPECTING_TAG, tokens[index], str); // Expected opening tag!!!
-        }
-
-        index++;
-
-        if (tokens[index].type != Token.IDENT) {
-            throw new ParsingError(ParsingError.EXPECTING_IDENT, tokens[index], str); // Expecting element name!!!
-        }
-
-        const startToken = tokens[index];
-        const name = tokens[index].s;
-        index++;
-
-        /** @type Map<string, string> */
-        let attributes = new Map();
-        let hasInnerHTML = false;
-
-        // TODO: Check unexpected end of element
-
-        while (index < end) {
-            if (tokens[index].type == Token.CLOSE_TAG || tokens[index].type == Token.SLASH) {
-                break;
-            } else if (tokens[index].type != Token.IDENT) {
-                throw new ParsingError(ParsingError.EXPECTING_IDENT, tokens[index], str); // Expecting attribute name !!!
             }
 
-            const name = tokens[index].s;
-            let value = "";
+            if (closing) {
+                // Closing tags are only allowed to have a whitespace after the name
 
-            index++;
-
-            if (tokens[index].type == Token.EQUALS) {
-                if (
-                    tokens[index + 1].type == Token.IDENT ||
-                    tokens[index + 1].type == Token.QUOTES_STRING ||
-                    tokens[index + 1].type == Token.DQUOTES_STRING
-                ) {
-                    value += tokens[index + 1].s;
+                while (index < source.length && isWhitespace(source[index])) {
                     index++;
-                } else {
-                    throw new ParsingError(); // Expecting attribute value !!!
                 }
+
+                if (source[index] != ">") {
+                    throw ParseError("Invalid character in closing tag");
+                }
+
                 index++;
-            }
+                tokens.push(new TokenCloseTag(name));
+            } else {
+                // Parse attributes if any
+                let attributes = new Map();
 
-            attributes.set(name, value);
-        }
+                while (index < source.length) {
+                    while (index < source.length && isWhitespace(source[index])) {
+                        index++;
+                    }
 
-        if (tokens[index].type == Token.CLOSE_TAG) {
-            hasInnerHTML = true;
-            index++;
-        } else if (tokens[index].type == Token.SLASH) {
-            if (tokens[index + 1].type != Token.CLOSE_TAG) {
-                throw new ParsingError(); // Expected `>` after `/` !!!
-            }
-            index += 2;
-        }
+                    let attributeName = "";
 
-        /** @type HTMLElement */
-        let el;
+                    if (source[index] == ">") {
+                        break;
+                    } else if (source[index] == "/" || source[index] == ">") {
+                        break;
+                    } else if (isOperator(source[index])) {
+                        throw new ParseError("unexpected character in open tag");
+                    }
 
-        if (Component.registry.has(name)) {
-            el = document.createElement("micro-component");
+                    while (index < source.length && !isWhitespace(source[index]) && !isOperator(source[index])) {
+                        attributeName += source[index];
+                        index++;
+                    }
 
-            el.setAttribute("c", name);
+                    while (index < source.length && isWhitespace(source[index])) {
+                        index++;
+                    }
 
-            const c = Component.registry.get(name);
+                    if (!isOperator(source[index]) && source[index] != "=") {
+                        attributes.set(attributeName, "");
+                        continue;
+                    } else if (source[index] == ">" || (source[index] == "/" && source[index + 1] == ">")) {
+                        break;
+                    } else if (source[index] != "=") {
+                        throw new ParseError("unexpected character in open tag 2 " + parentName);
+                    }
 
-            el.component = new c();
-            el.component.updateHandler = async () => {
-                el.forEachReactiveValue((el2) => el2.updateInnerText(el.component));
-            };
+                    index++; // skip '='
 
-            for (let [key, value] of attributes) {
-                el.setAttribute(key, value);
-                el.component.attributes.set(key, value);
+                    while (index < source.length && isWhitespace(source[index])) {
+                        index++;
+                    }
+
+                    let attributeValue = "";
+
+                    if (source[index] == '"' || source[index] == "'") {
+                        let delim = source[index];
+                        let isEscape = false;
+
+                        index++;
+
+                        while (index < source.length && source[index] != delim && !isEscape) {
+                            if (source[index] == "\\" && !isEscape) {
+                                isEscape = true;
+                            } else {
+                                isEscape = false;
+                                attributeValue += source[index];
+                            }
+                            index++;
+                        }
+
+                        if (source[index] != delim) {
+                            throw new ParseError("expected string delimiter");
+                        }
+
+                        index++;
+                    } else {
+                        // TODO: implement custom types, like event listeners
+                        throw new ParseError("expected string as attribute value");
+                    }
+
+                    attributes.set(attributeName, attributeValue);
+                }
+
+                if (source[index] == "/" && source[index + 1] == ">") {
+                    index += 2;
+                    tokens.push(new TokenTag(name, attributes));
+                } else if (source[index] == ">") {
+                    index++;
+                    tokens.push(new TokenOpenTag(name, attributes));
+                } else {
+                    console.log(source[index]);
+                    throw new ParseError("expected '>' or '/>' to close the tag " + parentName);
+                }
             }
         } else {
-            if (
-                name === "svg" ||
-                (isInSvg(parent) &&
-                    (name == "circle" ||
-                        name === "a" ||
-                        name == "text" ||
-                        name === "polyline" ||
-                        name === "defs" ||
-                        name === "radialGradient" ||
-                        name === "stop" ||
-                        name === "symbol" ||
-                        name === "path" ||
-                        name === "polygon"))
-            ) {
-                el = document.createElementNS("http://www.w3.org/2000/svg", name);
-            } else {
-                el = document.createElement(name);
-            }
+            let s = "";
 
-            if (el instanceof HTMLUnknownElement) {
-                throw new ParsingError(ParsingError.UNKNOWN_ELEMENT, { s: name }, str); // Unknown element!!!
-            }
-
-            for (let [key, value] of attributes) {
-                el.setAttribute(key, value);
-            }
-        }
-
-        function findClosingTag(tagName) {
-            let index2 = index;
-            /** @type Map<string, number> */
-            let openTags = new Map();
-
-            function checkAllClosed() {
-                for (let [key, count] of openTags) {
-                    if (count != 0) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            openTags.set(tagName, 1);
-
-            while (index2 < end) {
-                if (tokens[index2].type == Token.OPEN_TAG) {
-                    if (tokens[index2 + 1].type == Token.SLASH) {
-                        // We reach a closing tag.
-
-                        index2 += 2;
-
-                        const name = tokens[index2].s;
-                        if (!openTags.has(name)) {
-                            openTags.set(name, -1);
-                        } else {
-                            openTags.set(name, openTags.get(name) - 1);
-                        }
-
-                        if (name == tagName && checkAllClosed()) {
-                            return index2 - 2;
-                        }
-                    } else {
-                        // We reach an opening tag.
-
-                        index2++;
-                        const name = tokens[index2].s;
-                        while (
-                            index2 < end &&
-                            tokens[index2].type != Token.CLOSE_TAG &&
-                            tokens[index2].type != Token.SLASH
-                        ) {
-                            index2++;
-                        }
-                        if (tokens[index2].type == Token.CLOSE_TAG) {
-                            if (!openTags.has(name)) {
-                                openTags.set(name, 1);
-                            } else {
-                                openTags.set(name, openTags.get(name) + 1);
-                            }
-                        } else if (tokens[index2].type == Token.SLASH) {
-                            index2++;
-                        }
-                    }
-                }
-
-                index2++;
-            }
-
-            return Infinity;
-        }
-
-        if (hasInnerHTML) {
-            // console.log(name, startToken);
-            const newEnd = findClosingTag(name);
-
-            if (newEnd >= tokens.length) {
-                throw new ParsingError(ParsingError.NO_CLOSING_TAG, startToken, str);
-            }
-
-            // console.log(newEnd, tokens.length);
-
-            if (tokens[index].type == Token.CONTENT) {
-                const unescapeHTML = (msg) => {
-                    return msg.replace("&lt;", "<").replace("&gt;", ">");
-                };
-
-                /** @type string */
-                var text = unescapeHTML(tokens[index].s);
-
-                // TODO: Only works with global stores
-
-                if (text.startsWith("{") && text.endsWith("}")) {
-                    var reactiveValue = document.createElement("micro-reactive-value");
-                    // reactiveValue.component = microParent.component;
-                    reactiveValue.globalStoreName = text.substring(1, text.length - 1);
-                    el.appendChild(reactiveValue);
-                } else {
-                    el.textContent = unescapeHTML(tokens[index].s);
-                }
-
+            while (index < source.length && source[index] != "<") {
+                s += source[index];
                 index++;
-            } else {
-                while (index < newEnd) {
-                    const [child, stoppedIndex] = parseTags(el, tokens, index, newEnd); // `el` here could mess up events.
-                    // console.log(child, tokens[stoppedIndex]);
-                    index = stoppedIndex;
-                    el.appendChild(child);
-                }
             }
 
-            index += 4; // `<`, `/`, `...` and `>`
+            tokens.push(new TokenString(s));
+        }
+    }
+
+    return tokens;
+}
+
+/**
+ * @param {HTMLElement} parent
+ * @returns {boolean}
+ */
+function isInSvg(parent) {
+    if (parent instanceof SVGElement) {
+        return true;
+    } else if (parent == null) {
+        return false;
+    } else {
+        return isInSvg(parent.parentNode);
+    }
+}
+
+function isValidSVGTag(name) {
+    return (
+        [
+            "a",
+            "animate",
+            "animateMotion",
+            "animateTransform",
+            "circle",
+            "clipPath",
+            "defs",
+            "desc",
+            "ellipse",
+            "feBlend",
+            "feColorMatrix",
+            "feComponentTransfer",
+            "feComposite",
+            "feConvolveMatrix",
+            "feDiffuseLighting",
+            "feDisplacementMap",
+            "feDistantLight",
+            "feDropShadow",
+            "feFlood",
+            "feFuncA",
+            "feFuncB",
+            "feFuncG",
+            "feFuncR",
+            "feGaussianBlur",
+            "feImage",
+            "feMerge",
+            "feMergeNode",
+            "feMorphology",
+            "feOffset",
+            "fePointLight",
+            "feSpecularLighting",
+            "feSpotLight",
+            "feTile",
+            "feTurbulence",
+            "filter",
+            "foreignObject",
+            "g",
+            "image",
+            "line",
+            "linearGradient",
+            "marker",
+            "mask",
+            "metadata",
+            "mpath",
+            "path",
+            "pattern",
+            "polygon",
+            "polyline",
+            "radialGradient",
+            "rect",
+            "script",
+            "set",
+            "stop",
+            "style",
+            "svg",
+            "switch",
+            "symbol",
+            "text",
+            "textPath",
+            "title",
+            "tspan",
+            "use",
+            "view",
+        ].find((v) => v === name) != undefined
+    );
+}
+
+/**
+ * @param {string} name
+ * @param {Map<string, string>} attributes
+ * @param {Element} parent
+ * @param {Map<string, string>} params
+ * @returns {Promise<Element | { object: any, element: Element } | undefined>}
+ */
+async function createElement(name, attributes, parent, params) {
+    let element = null;
+
+    if (name == "svg" || (isInSvg(parent) && isValidSVGTag(name))) {
+        element = document.createElementNS("http://www.w3.org/2000/svg", name);
+    } else {
+        element = document.createElement(name);
+    }
+
+    if (element instanceof HTMLUnknownElement) {
+        const component = components.get(name);
+
+        if (component == undefined) {
+            throw new ParseError("Unknown component " + name);
         }
 
-        return [el, index];
+        return await createComponent(component, attributes, params);
     }
 
-    const [el, stoppedIndex] = parseTags(null, tokens, 0, tokens.length);
-
-    if (stoppedIndex < tokens.length) {
-        throw new ParsingError(ParsingError.ONE_TOP_LEVEL_ELEMENT, tokens[stoppedIndex], str);
+    for (let attribute of attributes.keys()) {
+        element.setAttribute(attribute, attributes.get(attribute));
     }
-    return el;
+
+    return element;
+}
+
+/**
+ * @param {Token[]} tokens
+ * @param {HTMLElement} parent
+ */
+async function parseHTMLInner(tokens, parent, params) {
+    let index = 0;
+
+    while (index < tokens.length) {
+        if (tokens[index] instanceof TokenString) {
+            parent.append(tokens[index].text);
+        } else if (tokens[index] instanceof TokenTag) {
+            const res = await createElement(tokens[index].name, tokens[index].attribs, parent, params);
+
+            if (res.element != undefined) {
+                await registerComponentCallbacks(res.element, res.object);
+                parent.append(res.element);
+            } else {
+                parent.append(res);
+            }
+        } else if (tokens[index] instanceof TokenOpenTag) {
+            /** @type {TokenOpenTag} */
+            let token = tokens[index];
+
+            const tokenStart = index;
+            let openTags = 0;
+            let tagName = token.name;
+
+            // find the closing tag, then recursively parse the tags
+            index++;
+
+            while (index < tokens.length) {
+                if (tokens[index] instanceof TokenCloseTag && tokens[index].name == tagName && openTags == 0) {
+                    break;
+                } else if (tokens[index] instanceof TokenOpenTag && tokens[index].name == tagName) {
+                    openTags++;
+                } else if (tokens[index] instanceof TokenCloseTag && tokens[index].name == tagName) {
+                    openTags--;
+                }
+                index++;
+            }
+
+            if (tokens[index] instanceof TokenCloseTag && tokens[index].name == tagName && openTags == 0) {
+                const element = await createElement(token.name, token.attribs, parent, params);
+
+                if (element.element != undefined && element.element.hasAttribute("micro-component")) {
+                    const innerTokens = tokens.slice(tokenStart + 1, index);
+
+                    await parseHTMLInner(innerTokens, element.element);
+                    await registerComponentCallbacks(element.element, element.object);
+                    parent.append(element.element);
+                } else {
+                    const innerTokens = tokens.slice(tokenStart + 1, index);
+
+                    await parseHTMLInner(innerTokens, element);
+                    parent.append(element);
+                }
+            } else {
+                throw new ParseError("cannot find closing tag");
+            }
+        }
+
+        index++;
+    }
+}
+
+/**
+ * Parse an HTML string into an HTMLElement
+ *
+ * @param {string} source
+ * @param {string} name
+ * @returns {Promise<HTMLElement>}
+ */
+async function parseHTML(source, name, params) {
+    const tokens = tokenizeHTML(source, name);
+    // console.log(...tokens);
+
+    let div = document.createElement("div");
+    div.classList.add("micro-" + name);
+    div.setAttribute("micro-component", "");
+
+    await parseHTMLInner(tokens, div, params);
+    return div;
 }

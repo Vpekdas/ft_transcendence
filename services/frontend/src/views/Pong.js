@@ -1,29 +1,14 @@
-import { isLoggedIn, post } from "../utils";
-import { Component, html } from "../micro";
-import { action } from "../game";
 import { PongGame } from "../PongGame";
-import { navigateTo } from "../router";
 
-export default class Pong extends Component {
-    constructor() {
-        super();
-    }
+/** @type {import("../micro").Component} */
+export default async function Pong({ dom }) {
+    dom.querySelector("#pong").do(async (c) => {
+        const game = new PongGame();
+        game.setup(this, c); // TODO: this should not be used here
+    });
 
-    async render() {
-        if (!(await isLoggedIn())) {
-            navigateTo("/login");
-        }
-
-        this.query("#pong").do(async (c) => {
-            const game = new PongGame();
-            game.setup(this, c);
-        });
-
-        return html(
-            /* HTML */ ` <div>
-                <NavBar />
-                <div id="pong"></div>
-            </div>`
-        );
-    }
+    return /* HTML */ ` <div>
+        <NavBar />
+        <div id="pong"></div>
+    </div>`;
 }

@@ -1,83 +1,62 @@
-import { Component, html } from "../micro";
-import NavBar from "../components/NavBars/HomeNavBar";
-import DonutChart from "../components/Charts/DonutChart";
-import { fetchApi, isLoggedIn, post } from "../utils";
-import ChangePasswordForm from "../components/Forms/ChangePasswordForm";
-import ChangeNicknameForm from "../components/Forms/ChangeNicknameForm";
-import DeleteAccountForm from "../components/Forms/DeleteAccountForm";
-import ChangeProfilePictureForm from "../components/Forms/ChangeProfilePictureForm";
-import { navigateTo } from "../router";
+import { post } from "../utils";
 import { tr } from "../i18n";
-import TournamentNameCard from "../components/Cards/TournamentNameCard";
-import PlayerCountCard from "../components/Cards/PlayerCountCard";
-import TournamentPrivacyCard from "../components/Cards/TournamentPrivacyCard";
+import { navigateTo } from "../micro";
 
-export default class CreateTournament extends Component {
-    constructor() {
-        super();
-    }
+/** @type {import("../micro").Component} */
+export default async function CreateTournamen({ dom }) {
+    document.title = tr("Create Tournament");
 
-    async render() {
-        this.setTitle("CreateTournament");
+    let playerCount = 2,
+        openType = "open";
 
-        let playerCount = 2,
-            openType = "open";
+    dom.querySelector("#btnradio2").on("change", async () => {
+        playerCount = 2;
+    });
+    dom.querySelector("#btnradio4").on("change", async () => {
+        playerCount = 4;
+    });
+    dom.querySelector("#btnradio8").on("change", async () => {
+        playerCount = 8;
+    });
 
-        this.query("#btnradio2").on("change", async () => {
-            playerCount = 2;
-        });
+    dom.querySelector("#btn-open").on("change", async () => {
+        openType = "open";
+    });
+    dom.querySelector("#btn-password").on("change", async () => {
+        openType = "password";
+    });
+    dom.querySelector("#btn-invite-only").on("change", async () => {
+        openType = "invite";
+    });
 
-        this.query("#btnradio4").on("change", async () => {
-            playerCount = 4;
-        });
-        this.query("#btnradio8").on("change", async () => {
-            playerCount = 8;
-        });
+    dom.querySelector(".btn.btn-primary.settings").on("click", async () => {
+        const tournamentName = document.getElementById("tournament-name").value;
+        const tournamentPassword = document.getElementById("tournament-password").value;
 
-        this.query("#btn-open").on("change", async () => {
-            openType = "open";
-        });
+        const resp = await post("/api/tournament/create", {
+            body: JSON.stringify({
+                name: tournamentName,
+                playerCount: playerCount,
+                openType: openType,
+                password: tournamentPassword.length == 0 ? undefined : tournamentPassword,
+                game: "pong",
+                fillWithAI: false,
+                gameSettings: {},
+            }),
+        }).then((r) => r.json());
 
-        this.query("#btn-password").on("change", async () => {
-            openType = "password";
-        });
+        const tournamentId = resp["id"];
 
-        this.query("#btn-invite-only").on("change", async () => {
-            openType = "invite";
-        });
+        navigateTo(`/tournament/${tournamentId}`);
+    });
 
-        this.query(".btn.btn-primary.settings").on("click", async () => {
-            const tournamentName = document.getElementById("tournament-name").value;
-            const tournamentPassword = document.getElementById("tournament-password").value;
-
-            const resp = await post("/api/tournament/create", {
-                body: JSON.stringify({
-                    name: tournamentName,
-                    playerCount: playerCount,
-                    openType: openType,
-                    password: tournamentPassword.length == 0 ? undefined : tournamentPassword,
-                    game: "pong",
-                    fillWithAI: false,
-                    gameSettings: {},
-                }),
-            }).then((r) => r.json());
-
-            const tournamentId = resp["id"];
-
-            navigateTo(`/tournament/${tournamentId}`);
-        });
-
-        return html(
-            /* HTML */
-            ` <div>
-                <NavBar />
-                <div class="container-fluid dashboard-container create-tournament-container">
-                    <TournamentNameCard />
-                    <PlayerCountCard />
-                    <TournamentPrivacyCard />
-                    <button type="submit" class="btn btn-primary settings">${tr("Create")}</button>
-                </div>
-            </div>`
-        );
-    }
+    return /* HTML */ ` <div>
+        <NavBar />
+        <div class="container-fluid dashboard-container create-tournament-container">
+            <TournamentNameCard />
+            <PlayerCountCard />
+            <TournamentPrivacyCard />
+            <button type="submit" class="btn btn-primary settings">${tr("Create")}</button>
+        </div>
+    </div>`;
 }

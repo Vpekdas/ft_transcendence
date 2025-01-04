@@ -5,7 +5,6 @@ import { FontLoader } from "three/addons/loaders/FontLoader.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { action } from "./game";
 import { getOriginNoProtocol, post } from "./utils";
-import { navigateTo } from "./router";
 
 function addCube(scene, x, y, width, height, color) {
     const geometry = new THREE.BoxGeometry(1, 1, 1);

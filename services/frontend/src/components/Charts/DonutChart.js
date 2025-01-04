@@ -1,19 +1,14 @@
-import { Component, html } from "../../micro";
-
 // https://heyoka.medium.com/scratch-made-svg-donut-pie-charts-in-html5-2c587e935d72
 
 const r = 15.91549430918954;
-export default class DonutChart extends Component {
-    constructor() {
-        super();
-    }
 
+export default async function DonutChart({ attributes }) {
     // r = 100/(2π)
 
     // stroke-dashoffset="25" -> stroke-dashoffset moves counter-clockwise.
     // So, we’d need to set this value for 25% in the opposite direction from 3:00 back to 12:00)
 
-    generateSegment(color, dashArray, dashOffset, textPosition, content) {
+    function generateSegment(color, dashArray, dashOffset, textPosition, content) {
         return /* HTML */ `
             <circle
                 class="donut-segment"
@@ -40,7 +35,7 @@ export default class DonutChart extends Component {
         `;
     }
 
-    calculateOffset(circles, length) {
+    function calculateOffset(circles, length) {
         if (length === 0) {
             return 25;
         }
@@ -53,7 +48,7 @@ export default class DonutChart extends Component {
         return 100 - precedingSegments + 25;
     }
 
-    calculateTextPosition(percentageFilled, dashOffset) {
+    function calculateTextPosition(percentageFilled, dashOffset) {
         const angle = (dashOffset - percentageFilled / 2) * 3.6;
         const radians = (angle * Math.PI) / 180;
         const x = 21 + r * Math.cos(radians);
@@ -62,53 +57,49 @@ export default class DonutChart extends Component {
         return { x, y };
     }
 
-    async render() {
-        const width = parseInt(this.attrib("width"));
+    const width = parseInt(attributes.get("width"));
 
-        const colorNumber = parseInt(this.attrib("colorNumber"));
+    const colorNumber = parseInt(attributes.get("colorNumber"));
 
-        const circles = [];
+    const circles = [];
 
-        for (let i = 0; i < colorNumber; i++) {
-            const circle = {
-                color: "",
-                fillPercent: "",
-                fillOffset: "",
-                textPosition: { x: 0, y: 0 },
-                content: "",
-            };
-            circle.color = this.attrib("color" + (i + 1));
+    for (let i = 0; i < colorNumber; i++) {
+        const circle = {
+            color: "",
+            fillPercent: "",
+            fillOffset: "",
+            textPosition: { x: 0, y: 0 },
+            content: "",
+        };
+        circle.color = attributes.get("color" + (i + 1));
 
-            const fillingPercent = parseInt(this.attrib("fillPercent" + (i + 1)));
-            const notFilledPercent = 100 - fillingPercent;
+        const fillingPercent = parseInt(attributes.get("fillPercent" + (i + 1)));
+        const notFilledPercent = 100 - fillingPercent;
 
-            circle.fillPercent = this.attrib("fillPercent" + (i + 1)) + " " + notFilledPercent.toString();
-            circle.fillOffset = this.calculateOffset(circles, i);
-            circle.textPosition = this.calculateTextPosition(fillingPercent, circle.fillOffset);
-            circle.content = fillingPercent.toString();
+        circle.fillPercent = attributes.get("fillPercent" + (i + 1)) + " " + notFilledPercent.toString();
+        circle.fillOffset = calculateOffset(circles, i);
+        circle.textPosition = calculateTextPosition(fillingPercent, circle.fillOffset);
+        circle.content = fillingPercent.toString();
 
-            circles.push(circle);
-        }
+        circles.push(circle);
+    }
 
-        let segment = "";
-        for (let i = 0; i < circles.length; i++) {
-            segment += this.generateSegment(
-                circles[i].color,
-                circles[i].fillPercent,
-                circles[i].fillOffset,
-                circles[i].textPosition,
-                circles[i].content
-            );
-        }
-
-        return html(
-            /* HTML */ ` <svg width="${width}" height="${width * 1.2}" viewBox="0 0 42 42" class="donut">
-                <text x="21" y="0" text-anchor="middle" alignment-baseline="middle" font-size="4" fill="#d2320a">
-                    Chart Title
-                </text>
-                <circle class="donut-hole" cx="21" cy="21" r="${r}" fill="transparent"></circle>
-                ${segment}
-            </svg>`
+    let segment = "";
+    for (let i = 0; i < circles.length; i++) {
+        segment += generateSegment(
+            circles[i].color,
+            circles[i].fillPercent,
+            circles[i].fillOffset,
+            circles[i].textPosition,
+            circles[i].content
         );
     }
+
+    return /* HTML */ ` <svg width="${width}" height="${width * 1.2}" viewBox="0 0 42 42" class="donut">
+        <text x="21" y="0" text-anchor="middle" alignment-baseline="middle" font-size="4" fill="#d2320a">
+            Chart Title
+        </text>
+        <circle class="donut-hole" cx="21" cy="21" r="${r}" fill="transparent"></circle>
+        ${segment}
+    </svg>`;
 }

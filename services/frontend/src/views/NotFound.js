@@ -1,4 +1,4 @@
-import { Component, html } from "../micro";
+import { Component } from "../micro";
 import NavBar from "../components/NavBars/HomeNavBar";
 
 export default class NotFound extends Component {

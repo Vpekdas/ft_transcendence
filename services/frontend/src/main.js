@@ -1,32 +1,40 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import { navigateTo, router } from "./router";
-import { registerAll } from "./micro.generated";
 
-// If the clicked element contains a data-link attribute, prevent the default page reload,
-// update the browser's history, and render the new HTML content.
-document.addEventListener("DOMContentLoaded", () => {
-    document.body.addEventListener("click", (event) => {
-        let target = event.target;
-        // Traverse up the DOM tree to find the closest ancestor element with the data-link attribute.
-        // This ensures that clicks on child elements (such as an image inside a link) are correctly handled.
-        while (target && !target.matches("[data-link]")) {
-            target = target.parentElement;
-        }
+import { defineRouter } from "./micro";
+import Home from "./views/Home";
+import Registration from "./views/Registration";
+import Login from "./views/Login";
+import LoginExernal from "./views/LoginExternal";
+import Logout from "./views/Logout";
+import Counter from "./views/Counter";
+import MatchHistory from "./views/MatchHistory";
+import Statistics from "./views/Statistics";
+import Settings from "./views/Settings";
+import Clicker from "./views/Clicker";
+import SolarSystem from "./views/SolarSystem";
+import Pong from "./views/Pong";
+import PongMatchmake from "./views/PongMatchmake";
+import Tournament from "./views/Tournament";
+import CreateTournament from "./views/CreateTournament";
 
-        if (target && target.matches("[data-link]")) {
-            event.preventDefault();
-            navigateTo(target.href);
-        }
-    });
-    registerAll();
-    router();
+defineRouter({
+    routes: [
+        { path: "/", view: Home },
+        { path: "/register", view: Registration },
+        { path: "/login", view: Login },
+        { path: "/login-external", view: LoginExernal },
+        { path: "/logout", view: Logout },
+        { path: "/counter", view: Counter },
+        { path: "/profile/match-history", view: MatchHistory },
+        { path: "/profile/statistics", view: Statistics },
+        { path: "/profile/settings", view: Settings },
+        { path: "/duck", view: Clicker },
+        { path: "/solar-system", view: SolarSystem },
+        { path: "/play/pong/[id]", view: Pong },
+        { path: "/matchmake/pong", view: PongMatchmake },
+        { path: "/tournament/[id]", view: Tournament },
+        { path: "/create-tournament", view: CreateTournament },
+    ],
 });
-
-if (import.meta.hot) {
-    import.meta.hot.accept((newModule) => {
-        registerAll();
-        router();
-    });
-}

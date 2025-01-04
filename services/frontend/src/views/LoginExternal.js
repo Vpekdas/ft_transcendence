@@ -1,11 +1,4 @@
-import { Component } from "../micro";
-
-export default class LoginExernal extends Component {
-    constructor() {
-        super();
-    }
-
-    async render() {
-        return html("<div></div>");
-    }
+/** @type {import("../micro").Component} */
+export default async function LoginExternal({}) {
+    return `<div></div>`;
 }

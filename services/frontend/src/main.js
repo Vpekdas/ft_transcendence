@@ -18,6 +18,8 @@ import Pong from "./views/Pong";
 import PongMatchmake from "./views/PongMatchmake";
 import Tournament from "./views/Tournament";
 import CreateTournament from "./views/CreateTournament";
+import { isLoggedIn } from "./utils";
+import { navigateTo } from "./micro";
 
 defineRouter({
     routes: [
@@ -37,4 +39,9 @@ defineRouter({
         { path: "/tournament/[id]", view: Tournament },
         { path: "/create-tournament", view: CreateTournament },
     ],
+    hook: async (route) => {
+        if (!(await isLoggedIn()) && route != "/login" && route != "/register") {
+            navigateTo("/login?redirect=" + route);
+        }
+    },
 });

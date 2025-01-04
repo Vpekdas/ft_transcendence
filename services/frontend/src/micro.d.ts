@@ -1,8 +1,10 @@
 // Component types
 
+export type DoCallback = ((component: Element) => Promise<void>) | ((component: Element) => void);
+
 export type ComponentDOMElementRef = {
     on(name: string, callback: any): void;
-    do(callback: any): void;
+    do(callback: DoCallback): void;
 };
 
 export type ComponentDOM = {
@@ -18,7 +20,8 @@ export type Component = (_: {
 
 // Router types
 
-export type RouterSettings = { routes: { path: string; comp: any }[] };
+export type RouterHook = (route: string) => void;
+export type RouterSettings = { routes: { path: string; comp: any }[]; hook: RouterHook };
 
 // Parser types
 

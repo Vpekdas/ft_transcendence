@@ -60,7 +60,8 @@ class PongClientConsumer(AsyncWebsocketConsumer):
             await self.close()
 
     async def disconnect(self, close_code):
-        self.game.disconnect(self)
+        if self.game is not None:
+            self.game.disconnect(self)
 
     async def receive(self, text_data):
         try:

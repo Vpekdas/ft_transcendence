@@ -1,4 +1,5 @@
 import { getOriginNoProtocol } from "../utils";
+import { navigateTo } from "../micro";
 
 /** @type {import("../micro").Component} */
 export default async function PongMatchmake({ dom }) {
@@ -31,7 +32,7 @@ export default async function PongMatchmake({ dom }) {
         };
     });
 
-    return /* HTML */ `<div class="matchmake-container">
+    return /* HTML */ `<div id="matchmake-container">
         <NavBar />
     </div>`;
 }

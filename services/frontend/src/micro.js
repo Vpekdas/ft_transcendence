@@ -22,19 +22,6 @@ window.onpopstate = async () => {
     await router();
 };
 
-async function handleRedirect(callback) {
-    try {
-        return await callback();
-    } catch (ex) {
-        if (ex.url != undefined) {
-            history.pushState(null, null, ex.url);
-            await router();
-        } else {
-            throw ex;
-        }
-    }
-}
-
 /**
  * @param {Node} node
  * @returns {string}
@@ -141,14 +128,15 @@ async function router() {
         return;
     }
 
+    if (routerSettings.hook) {
+        await routerSettings.hook(route.route.path);
+    }
+
     // This should not be called here, only once during load and after each hot reload
     registerAll();
 
     /** @type {{object: any, element: Element}} */
-    const { object, element } = await handleRedirect(
-        async () => await createComponent(route.route.view, new Map(), route.params)
-    );
-
+    const { object, element } = await createComponent(route.route.view, new Map(), route.params);
     await registerComponentCallbacks(element, object);
 
     if (element == undefined) {
@@ -175,18 +163,12 @@ export function defineRouter(settings) {
         document.body.addEventListener("click", async (event) => {
             if (event.target instanceof HTMLAnchorElement) {
                 event.preventDefault();
-                await handleRedirect(async () => navigateTo(event.target.href));
+                navigateTo(event.target.href);
             }
         });
 
-        await handleRedirect(async () => await router());
+        await router();
     });
-}
-
-class NavigateTo {
-    constructor(url) {
-        this.url = url;
-    }
 }
 
 /**
@@ -195,7 +177,8 @@ class NavigateTo {
  * @param {string} url
  */
 export function navigateTo(url) {
-    throw new NavigateTo(url);
+    history.pushState(null, null, url);
+    setTimeout(async () => await router());
 }
 
 /*
@@ -285,7 +268,7 @@ async function registerComponentCallbacks(element, object) {
             }
 
             for (let [eventName, callback] of elementRef.eventCallbacks.entries()) {
-                query.addEventListener(eventName, async () => await handleRedirect(callback));
+                query.addEventListener(eventName, callback);
             }
         } else if (elementRef.type == "querySelectorAll") {
             let query = element.querySelectorAll(elementRef.selector);
@@ -297,7 +280,7 @@ async function registerComponentCallbacks(element, object) {
 
             for (let el of query) {
                 for (let [eventName, callback] of elementRef.eventCallbacks.entries()) {
-                    el.addEventListener(eventName, async () => await handleRedirect(callback));
+                    el.addEventListener(eventName, callback);
                 }
             }
         } else {

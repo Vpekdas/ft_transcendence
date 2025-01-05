@@ -26,7 +26,7 @@ export default async function NavBar({}) {
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link custom-link ${activeTabClass("/counter")}" href="/counter">Counter</a>
+                <a class="nav-link custom-link ${activeTabClass("/duck")}" href="/duck">Clicker</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link custom-link ${activeTabClass("/solar-system")}" href="/solar-system">

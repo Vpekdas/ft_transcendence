@@ -1,11 +1,12 @@
 import { tr } from "../i18n";
 
-export default async function Clicker({}) {
-    let count = 0;
-
+/** @type {import("../micro").Component}  */
+export default async function Clicker({ dom, stores }) {
     document.title = tr("Duck");
 
-    this.query("#the-duck").on("click", (event) => {
+    const [count, setCount] = stores.usePersistent("count", 0);
+
+    dom.querySelector("#the-duck").on("click", (event) => {
         event.target.animate(
             [
                 {
@@ -19,6 +20,8 @@ export default async function Clicker({}) {
             ],
             2000
         );
+
+        setCount(count() + 1);
     });
 
     return /* HTML */ `<div>
@@ -26,7 +29,7 @@ export default async function Clicker({}) {
         <div class="duck-container">
             <ul class="duck-list">
                 <li><img src="/favicon.svg" width="20%" id="the-duck" /></li>
-                <li><div class="duck-count">${count}</div></li>
+                <li><div class="duck-count">${count()}</div></li>
             </ul>
         </div>
     </div>`;

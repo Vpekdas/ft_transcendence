@@ -5,6 +5,7 @@ import { registerAll } from "./micro.generated";
  */
 export let components = new Map();
 let routerSettings = undefined;
+let initialPageLoad = true;
 
 /*
     ROOTER
@@ -128,7 +129,9 @@ async function router() {
     registerAll();
 
     if (route != undefined) {
-        if (routerSettings.hook) {
+        if (routerSettings.hook && initialPageLoad) {
+            // We don't want to call the hook every time we refresh the page, only when navigating
+            // between pages.
             await routerSettings.hook(route.route.path);
         }
 
@@ -158,6 +161,8 @@ async function router() {
     } else {
         applyTreeDifference(oldElement, newElement);
     }
+
+    initialPageLoad = false;
 }
 
 /**
@@ -188,6 +193,7 @@ export function defineRouter(settings) {
  */
 export function navigateTo(url) {
     history.pushState(null, null, url);
+    initialPageLoad = true;
     setTimeout(async () => await router());
 }
 
@@ -251,6 +257,49 @@ class ComponentDOMElementRef {
 }
 
 /**
+ * An interface to access different types of scores.
+ */
+class Stores {
+    constructor(componentName) {
+        this.componentName = componentName;
+        this.stores = new Map();
+    }
+
+    // /**
+    //  * @param {string} name
+    //  * @returns {[ value: typeof defaultValue, setValue: (value: typeof defaultValue) => void ]}
+    //  */
+    // use(name, defaultValue) {}
+
+    /**
+     * A store which use localStorage to persist its value.
+     *
+     * @param {string} name
+     * @returns {[() => typeof defaultValue, (value: typeof defaultValue) => void ]}
+     */
+    usePersistent(name, defaultValue) {
+        const fullName = this.componentName + "_" + name;
+
+        return [
+            () => {
+                const value = localStorage.getItem(fullName);
+
+                if (value == null) {
+                    localStorage.setItem(fullName, JSON.stringify(defaultValue));
+                    return defaultValue;
+                } else {
+                    return JSON.parse(value);
+                }
+            },
+            (value) => {
+                localStorage.setItem(fullName, JSON.stringify(value));
+                setTimeout(async () => await router());
+            },
+        ];
+    }
+}
+
+/**
  * @param {any} comp
  * @param {Map<string, string>} attributes
  * @param {Map<string, string>} params
@@ -261,6 +310,7 @@ async function createComponent(comp, attributes, params) {
         params: params,
         dom: new ComponentDOM(),
         attributes: attributes,
+        stores: new Stores(comp.name),
     };
 
     const element = await parseHTML(await comp(object), comp.name);

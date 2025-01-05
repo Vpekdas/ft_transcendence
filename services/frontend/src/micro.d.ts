@@ -12,10 +12,15 @@ export type ComponentDOM = {
     querySelectorAll(selector: string): ComponentDOMElementRef;
 };
 
+export type Stores = {
+    usePersistent(name: string, defaultValue: any): [() => typeof defaultValue, (value: typeof defaultValue) => void];
+};
+
 export type Component = (_: {
     params: Map<string, string>;
     attributes: Map<string, string>;
     dom: ComponentDOM;
+    stores: Stores;
 }) => string;
 
 // Router types

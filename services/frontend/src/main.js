@@ -8,7 +8,6 @@ import Registration from "./views/Registration";
 import Login from "./views/Login";
 import LoginExernal from "./views/LoginExternal";
 import Logout from "./views/Logout";
-import Counter from "./views/Counter";
 import MatchHistory from "./views/MatchHistory";
 import Statistics from "./views/Statistics";
 import Settings from "./views/Settings";
@@ -29,7 +28,6 @@ defineRouter({
         { path: "/login", view: Login },
         { path: "/login-external", view: LoginExernal },
         { path: "/logout", view: Logout },
-        { path: "/counter", view: Counter },
         { path: "/profile/match-history", view: MatchHistory },
         { path: "/profile/statistics", view: Statistics },
         { path: "/profile/settings", view: Settings },

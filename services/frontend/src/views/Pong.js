@@ -3,7 +3,6 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import { FontLoader } from "three/addons/loaders/FontLoader.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { action } from "../game";
 import { getOriginNoProtocol, post } from "../utils";
 
 function addCube(scene, x, y, width, height, color) {
@@ -35,6 +34,10 @@ function debuggingBox2(scene, position, width, height) {
 }
 
 const DEBUG = true;
+
+export function action(subId, actionName, actionType) {
+    return { type: "input", playerSubId: subId, action_name: actionName, action: actionType };
+}
 
 /** @type {import("../micro").Component} */
 export default async function Pong({ dom, params }) {

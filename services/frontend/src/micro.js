@@ -122,31 +122,41 @@ async function router() {
     }
 
     const route = matchRoute(routerSettings.routes, location.pathname);
-
-    if (route == undefined) {
-        console.error("TODO: 404!");
-        return;
-    }
-
-    if (routerSettings.hook) {
-        await routerSettings.hook(route.route.path);
-    }
+    let newElement;
 
     // This should not be called here, only once during load and after each hot reload
     registerAll();
 
-    /** @type {{object: any, element: Element}} */
-    const { object, element } = await createComponent(route.route.view, new Map(), route.params);
-    await registerComponentCallbacks(element, object);
+    if (route != undefined) {
+        if (routerSettings.hook) {
+            await routerSettings.hook(route.route.path);
+        }
 
-    if (element == undefined) {
-        throw new Error("What happened here ????");
+        /** @type {{object: any, element: Element}} */
+        const { object, element } = await createComponent(route.route.view, new Map(), route.params);
+        await registerComponentCallbacks(element, object);
+
+        newElement = element;
+    } else if (routerSettings.notFound != undefined) {
+        const { object, element } = await createComponent(routerSettings.notFound, new Map(), new Map());
+        await registerComponentCallbacks(element, object);
+
+        newElement = element;
+    } else {
+        const element = await parseHTML(
+            "<div style='width: 100%; height: 100%; background-color: white; text-align: center;'><h1>404 - Not Found</h1></div>"
+        );
+        newElement = element;
+    }
+
+    if (newElement == undefined) {
+        throw new Error("Invalid view");
     }
 
     if (oldElement == null) {
-        app.append(element);
+        app.append(newElement);
     } else {
-        applyTreeDifference(oldElement, element);
+        applyTreeDifference(oldElement, newElement);
     }
 }
 

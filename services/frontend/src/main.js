@@ -18,6 +18,7 @@ import Pong from "./views/Pong";
 import PongMatchmake from "./views/PongMatchmake";
 import Tournament from "./views/Tournament";
 import CreateTournament from "./views/CreateTournament";
+import NotFound from "./views/NotFound";
 import { isLoggedIn } from "./utils";
 import { navigateTo } from "./micro";
 
@@ -44,4 +45,5 @@ defineRouter({
             navigateTo("/login?redirect=" + route);
         }
     },
+    notFound: NotFound,
 });

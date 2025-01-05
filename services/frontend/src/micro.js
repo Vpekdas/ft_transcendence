@@ -103,10 +103,20 @@ function matchRoute(routes, path) {
 
                 if (param.includes("=")) {
                     let name = param.substring(0, param.indexOf("="));
-                    let values = param.substring(param.indexOf("=") + 1).split(",");
+                    let values = param.substring(param.indexOf("=") + 1);
 
-                    if (!values.includes(value)) {
-                        break;
+                    if (values[0] == "/" && values[values.length - 1] == "/") {
+                        const regex = new RegExp(values.substring(1, values.length - 1));
+
+                        if (!regex.test(value)) {
+                            break;
+                        }
+                    } else {
+                        let values2 = values.split(",");
+
+                        if (!values2.includes(value)) {
+                            break;
+                        }
                     }
 
                     param = name;
@@ -158,6 +168,9 @@ async function router() {
         await registerComponentCallbacks(element, object);
 
         newElement = element;
+
+        // TODO: Something is wrong: route.route points to itself even when clicking a linl
+        console.log(route.route);
     } else if (routerSettings.notFound != undefined) {
         const { object, element } = await createComponent(routerSettings.notFound, new Map(), new Map());
         await registerComponentCallbacks(element, object);
@@ -203,7 +216,7 @@ export function defineRouter(settings) {
 
             if (target instanceof HTMLAnchorElement) {
                 event.preventDefault();
-                navigateTo(event.target.href);
+                navigateTo(target.href);
             }
         });
 
@@ -217,6 +230,8 @@ export function defineRouter(settings) {
  * @param {string} url
  */
 export function navigateTo(url) {
+    console.log("goto =>", url);
+
     history.pushState(null, null, url);
     initialPageLoad = true;
     setTimeout(async () => await router());

@@ -26,7 +26,11 @@ export type Component = (_: {
 // Router types
 
 export type RouterHook = (route: string) => void;
-export type RouterSettings = { routes: { path: string; comp: any }[]; hook: RouterHook; notFound: Component };
+export type RouterSettings = {
+    routes: { path: string; comp: any; attributes: any }[];
+    hook: RouterHook;
+    notFound: Component;
+};
 
 // Parser types
 

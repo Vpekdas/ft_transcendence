@@ -20,6 +20,7 @@ import CreateTournament from "./views/CreateTournament";
 import NotFound from "./views/NotFound";
 import { isLoggedIn } from "./utils";
 import { navigateTo } from "./micro";
+import Profile from "./views/Profile";
 
 defineRouter({
     routes: [
@@ -28,9 +29,7 @@ defineRouter({
         { path: "/login", view: Login },
         { path: "/login-external", view: LoginExernal },
         { path: "/logout", view: Logout },
-        { path: "/profile/match-history", view: MatchHistory },
-        { path: "/profile/statistics", view: Statistics },
-        { path: "/profile/settings", view: Settings },
+        { path: "/profile/[tab=match-history,statistics,settings]", view: Profile },
         { path: "/duck", view: Clicker },
         { path: "/solar-system", view: SolarSystem },
         { path: "/play/pong/[id]", view: Pong },

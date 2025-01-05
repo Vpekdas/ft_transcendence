@@ -97,8 +97,20 @@ function matchRoute(routes, path) {
             let routePart = routeParts[index];
 
             if (routePart[0] == "[" && routePart[routePart.length - 1] == "]") {
+                /** @type {string} */
                 let param = routePart.substring(1, routePart.length - 1);
                 let value = part;
+
+                if (param.includes("=")) {
+                    let name = param.substring(0, param.indexOf("="));
+                    let values = param.substring(param.indexOf("=") + 1).split(",");
+
+                    if (!values.includes(value)) {
+                        break;
+                    }
+
+                    param = name;
+                }
 
                 params.set(param, value);
             } else if (routePart != part) {
@@ -135,8 +147,14 @@ async function router() {
             await routerSettings.hook(route.route.path);
         }
 
+        let attributes = new Map();
+
+        if (route.route.attributes != undefined) {
+            attributes = new Map(Object.entries(route.route.attributes));
+        }
+
         /** @type {{object: any, element: Element}} */
-        const { object, element } = await createComponent(route.route.view, new Map(), route.params);
+        const { object, element } = await createComponent(route.route.view, attributes, route.params);
         await registerComponentCallbacks(element, object);
 
         newElement = element;
@@ -176,7 +194,14 @@ export function defineRouter(settings) {
         // and using our own `navigateTo`
         // TODO: check parents ?
         document.body.addEventListener("click", async (event) => {
-            if (event.target instanceof HTMLAnchorElement) {
+            /** @type {Element | null} */
+            let target = event.target;
+
+            while (target != null && !(target instanceof HTMLAnchorElement)) {
+                target = target.parentElement;
+            }
+
+            if (target instanceof HTMLAnchorElement) {
                 event.preventDefault();
                 navigateTo(event.target.href);
             }

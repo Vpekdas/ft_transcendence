@@ -6,16 +6,13 @@ export default async function Settings({}) {
     const profilePictureLanguage = tr("Profile Picture");
     const uploadLanguage = tr("Upload");
 
-    return /* HTML */ `<div>
-        <NavBar />
-        <div class="container-fluid dashboard-container">
-            <ProfileNavBar />
-            <ul class="list-group settings">
-                <ChangeProfilePictureForm />
-                <ChangeNicknameForm />
-                <ChangePasswordForm />
-                <DeleteAccountForm />
-            </ul>
-        </div>
+    return /* HTML */ `<div class="container-fluid dashboard-container">
+        <ProfileNavBar />
+        <ul class="list-group settings">
+            <ChangeProfilePictureForm />
+            <ChangeNicknameForm />
+            <ChangePasswordForm />
+            <DeleteAccountForm />
+        </ul>
     </div>`;
 }

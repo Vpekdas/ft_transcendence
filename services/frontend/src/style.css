@@ -1409,9 +1409,10 @@ ow-system {
     transition: --scale 5ms linear;
 }
 
-ow-system[timelapse="true"] {
-    --cycle: 180s; /* You can change supernova timer here ! */
-}
+/* You can change supernova timer here */
+/* ow-system[timelapse="true"] {
+    --cycle: 180s; 
+} */
 
 ow-orbit {
     position: relative;
@@ -2044,10 +2045,50 @@ timber-hearth:hover {
     left: 0;
     justify-content: center;
     transform: translate(50%, 50%);
+    background-color: red;
 }
 
-.poly:hover {
-    fill: red;
+.path {
+    stroke: #bdc7e5;
+    stroke-width: 15;
+    stroke-linecap: square;
+    stroke-linejoin: round;
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    fill: none;
+    filter: drop-shadow(0 0 8px #8a2be2) drop-shadow(0 0 16px #8a2be2) drop-shadow(0 0 24px #8a2be2);
+    animation:
+        draw 2s forwards,
+        pulsePath 1.5s infinite;
+}
+
+.glow {
+    fill: #bdc7e5;
+    filter: drop-shadow(0 0 10px #bdc7e5) drop-shadow(0 0 20px #bdc7e5);
+    transition:
+        fill 0.3s,
+        filter 0.3s;
+}
+
+@keyframes draw {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes pulsePath {
+    0% {
+        stroke-width: 15;
+        filter: drop-shadow(0 0 8px #8a2be2) drop-shadow(0 0 16px #8a2be2) drop-shadow(0 0 24px #8a2be2);
+    }
+    50% {
+        stroke-width: 16;
+        filter: drop-shadow(0 0 12px #8a2be2) drop-shadow(0 0 24px #8a2be2) drop-shadow(0 0 36px #8a2be2);
+    }
+    100% {
+        stroke-width: 15;
+        filter: drop-shadow(0 0 8px #8a2be2) drop-shadow(0 0 16px #8a2be2) drop-shadow(0 0 24px #8a2be2);
+    }
 }
 
 /* CREATE TOURNAMENT */
@@ -2077,7 +2118,7 @@ timber-hearth:hover {
     flex-direction: row;
     width: 100%;
     align-items: center;
-    background-image: url("/img/pong-dashboard-background.webp");
+    background-image: url("/img/pong-dashboard-background.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

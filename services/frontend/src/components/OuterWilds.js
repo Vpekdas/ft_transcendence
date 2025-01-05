@@ -91,19 +91,19 @@ export default async function OuterWilds({ dom }) {
         const coordinates = { endGame: false, currentPath: [] };
         let supernova = false;
 
-        // ! If the user does not interact, a Promise is returned by audio.
-        chronometer.timerId = setInterval(() => {
-            chronometer.seconds++;
-            if (chronometer.seconds === 120 && !supernova) {
-                supernova = true;
-                if (music.audio.duration > 0 && !music.audio.paused) {
-                    music.audio.pause();
+            // ! If the user does not interact, a Promise is returned by audio.
+            chronometer.timerId = setInterval(() => {
+                chronometer.seconds++;
+                if (chronometer.seconds === 1200 && !supernova) {
+                    supernova = true;
+                    if (music.audio.duration > 0 && !music.audio.paused) {
+                        music.audio.pause();
+                    }
+                    music.audio = new Audio("/music/End Times.mp3");
+                    music.audio.play();
+                    clearInterval(chronometer.timerId);
                 }
-                music.audio = new Audio("/music/End Times.mp3");
-                music.audio.play();
-                clearInterval(chronometer.timerId);
-            }
-        }, 1000);
+            }, 1000);
 
         // Make the quantum moon jump around randomly.
         const quantumMoon = el.querySelector("#quantum-moon");

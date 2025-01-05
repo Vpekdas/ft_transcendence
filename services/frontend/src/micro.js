@@ -105,7 +105,7 @@ function matchRoute(routes, path) {
                     let name = param.substring(0, param.indexOf("="));
                     let values = param.substring(param.indexOf("=") + 1);
 
-                    if (values[0] == "/" && values[values.length - 1] == "/") {
+                    if (values[0] == "$" && values[values.length - 1] == "$") {
                         const regex = new RegExp(values.substring(1, values.length - 1));
 
                         if (!regex.test(value)) {
@@ -168,9 +168,6 @@ async function router() {
         await registerComponentCallbacks(element, object);
 
         newElement = element;
-
-        // TODO: Something is wrong: route.route points to itself even when clicking a linl
-        console.log(route.route);
     } else if (routerSettings.notFound != undefined) {
         const { object, element } = await createComponent(routerSettings.notFound, new Map(), new Map());
         await registerComponentCallbacks(element, object);
@@ -230,7 +227,7 @@ export function defineRouter(settings) {
  * @param {string} url
  */
 export function navigateTo(url) {
-    console.log("goto =>", url);
+    // console.log("goto =>", url);
 
     history.pushState(null, null, url);
     initialPageLoad = true;
@@ -370,6 +367,11 @@ async function registerComponentCallbacks(element, object) {
             for (let [eventName, callback] of elementRef.eventCallbacks.entries()) {
                 query.addEventListener(eventName, callback);
             }
+
+            // Execute `do` callbacks
+            for (let callback of elementRef.doCallbacks) {
+                await callback(query);
+            }
         } else if (elementRef.type == "querySelectorAll") {
             let query = element.querySelectorAll(elementRef.selector);
 
@@ -382,14 +384,14 @@ async function registerComponentCallbacks(element, object) {
                 for (let [eventName, callback] of elementRef.eventCallbacks.entries()) {
                     el.addEventListener(eventName, callback);
                 }
+
+                // Execute `do` callbacks
+                for (let callback of elementRef.doCallbacks) {
+                    await callback(query);
+                }
             }
         } else {
             throw new Error("invalid reference type " + elementRef.type);
-        }
-
-        // Execute `do` callbacks
-        for (let callback of elementRef.doCallbacks) {
-            await callback(element);
         }
     }
 }

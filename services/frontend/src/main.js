@@ -32,9 +32,9 @@ defineRouter({
         { path: "/profile/[tab=match-history,statistics,settings]", view: Profile },
         { path: "/duck", view: Clicker },
         { path: "/solar-system", view: SolarSystem },
-        { path: "/play/pong/[id=/[a-zA-Z0-9]+/]", view: Pong },
+        { path: "/play/pong/[id=$[a-zA-Z0-9]+$]", view: Pong },
         { path: "/matchmake/pong", view: PongMatchmake },
-        { path: "/tournament/[id=/[a-zA-Z0-9]+/]", view: Tournament },
+        { path: "/tournament/[id=$[a-zA-Z0-9]+$]", view: Tournament },
         { path: "/create-tournament", view: CreateTournament },
     ],
     hook: async (route) => {

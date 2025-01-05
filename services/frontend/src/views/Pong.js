@@ -43,6 +43,8 @@ export function action(subId, actionName, actionType) {
 export default async function Pong({ dom, params }) {
     const id = params.get("id");
 
+    let playerProfile = await post("/api/player/c/profile").then((res) => res.json());
+
     /** @type {THREE.Scene} */
     let scene = new THREE.Scene();
     /** @type {WebSocket} */
@@ -54,18 +56,19 @@ export default async function Pong({ dom, params }) {
     const playerWidth = 1.0;
     const playerHeight = 5.0;
 
+    const textureLoader = new THREE.TextureLoader();
     const fontLoader = new FontLoader();
+    const modelLoader = new GLTFLoader();
+
     const font = await fontLoader.loadAsync("/fonts/TakaoMincho_Regular.json");
     let textMesh = new THREE.Mesh(undefined);
+
+    const terrain = await modelLoader.loadAsync("/models/TerrainPlaceholder.glb");
 
     textMesh.scale.set(0.01, 0.01, 0.01);
     scene.add(textMesh);
 
     async function setupGameTerrain() {
-        // Place both terrains
-        const modelLoader = new GLTFLoader();
-        const terrain = await modelLoader.loadAsync("/models/TerrainPlaceholder.glb");
-
         const terrainSceneRight = terrain.scene;
         terrainSceneRight.rotation.set(Math.PI / 2, 0, 0);
         terrainSceneRight.position.set(13, 0, -1);
@@ -226,7 +229,6 @@ export default async function Pong({ dom, params }) {
     }
 
     dom.querySelector("#pong").do(async (c) => {
-        let playerProfile = await post("/api/player/c/profile").then((res) => res.json());
         let camera = new THREE.PerspectiveCamera(70, c.clientWidth / c.clientHeight, 0.1, 1000);
         let renderer = new THREE.WebGLRenderer();
 
@@ -271,10 +273,10 @@ export default async function Pong({ dom, params }) {
                 scene.add(star);
             });
 
-        const spaceTexture = new THREE.TextureLoader().load("/img/space.jpg");
+        const spaceTexture = textureLoader.load("/img/space.jpg");
         scene.background = spaceTexture;
 
-        let ws = new WebSocket(`wss://${getOriginNoProtocol()}:8080/ws/pong/${id}`);
+        ws = new WebSocket(`wss://${getOriginNoProtocol()}:8080/ws/pong/${id}`);
         ws.onopen = async (event) => {
             await setupGameTerrain();
         };

@@ -2045,7 +2045,6 @@ timber-hearth:hover {
     left: 0;
     justify-content: center;
     transform: translate(50%, 50%);
-    background-color: red;
 }
 
 .path {
@@ -2544,6 +2543,7 @@ timber-hearth:hover {
     font-size: 1.5em;
 }
 
-.matchmake-container .player-card, .matchmake-container .vs-card {
+.matchmake-container .player-card,
+.matchmake-container .vs-card {
     display: inline-block;
 }

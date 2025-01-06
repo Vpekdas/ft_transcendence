@@ -108,7 +108,6 @@ export default async function OuterWilds({ dom }) {
         // Make the quantum moon jump around randomly.
         const quantumMoon = el.querySelector("#quantum-moon");
         const quantumOrbits = Array.from(el.querySelectorAll("[quantum]"));
-        console.log(quantumOrbits);
         quantumMoon.addEventListener("animationiteration", (e) => {
             if (e.animationName !== "--quantum") {
                 return;

@@ -27,6 +27,12 @@ function elementToString(node) {
             s += node.attributes.item(index).name + "=" + node.attributes.item(index).value;
         }
 
+        s += "]-class[";
+
+        for (let index = 0; index < node.classList.length; index++) {
+            s += node.classList.item(index);
+        }
+
         s += "]";
         return s;
     } else if (node instanceof Text) {
@@ -176,13 +182,13 @@ async function router() {
     if (oldElement == null) {
         app.append(newElement);
     } else {
-        applyTreeDifference(oldElement, newElement);
+        app.replaceChildren([]);
+        app.appendChild(newElement);
+        // applyTreeDifference(oldElement, newElement);
     }
 
-    if (initialPageLoad) {
-        node.addEventListeners();
-        await node.applyDoCallbacks();
-    }
+    node.addEventListeners();
+    await node.applyDoCallbacks();
 
     initialPageLoad = false;
 }

@@ -32,6 +32,10 @@
     z-index: 2;
 }
 
+.hidden {
+    display: none;
+}
+
 /* LOGIN FORM */
 
 .container-fluid.login-container {

@@ -27,55 +27,7 @@ export default async function PongMatchmake({ dom, stores, node }) {
         return minutes + ":" + seconds;
     }
 
-    const duringMatchmakingCode = await parseHTML(
-        /* HTML */ `<ul>
-            <li>
-                <span class="searching-for-game">Searching for a game</span>
-            </li>
-            <li>
-                <span>
-                    <span class="timer">${timeInMinutes()}</span>
-                </span>
-            </li>
-            <li>
-                <Duck />
-            </li>
-        </ul>`,
-        undefined,
-        undefined,
-        node
-    );
-
-    const matchFoundCode = await parseHTML(
-        /* HTML */ ` <div class="player-card">
-                <ul>
-                    <li>
-                        <img src="/favicon.svg" alt="" />
-                    </li>
-                    <li>
-                        <span>test</span>
-                    </li>
-                </ul>
-            </div>
-            <div class="vs-card">VS</div>
-            <div class="player-card">
-                <ul>
-                    <li>
-                        <img src="/favicon.svg" alt="" />
-                    </li>
-                    <li>
-                        <span>test</span>
-                    </li>
-                </ul>
-            </div>`,
-        undefined,
-        undefined,
-        node
-    );
-
     dom.querySelector(".matchmake-container").do(async (c) => {
-        c.appendChild(duringMatchmakingCode);
-
         const ws = new WebSocket(`wss://${getOriginNoProtocol()}:8080/ws/matchmake/pong`);
         ws.onopen = (event) => {
             ws.send(
@@ -104,5 +56,42 @@ export default async function PongMatchmake({ dom, stores, node }) {
     });
 
     return /* HTML */ `<NavBar />
-        <div class="matchmake-container"></div>`;
+        <div class="matchmake-container">
+            <ul>
+                <li>
+                    <span class="searching-for-game">Searching for a game</span>
+                </li>
+                <li>
+                    <span>
+                        <span class="timer">${timeInMinutes()}</span>
+                    </span>
+                </li>
+                <li>
+                    <Duck />
+                </li>
+            </ul>
+            <div class="hidden">
+                <div class="player-card">
+                    <ul>
+                        <li>
+                            <img src="/favicon.svg" alt="" />
+                        </li>
+                        <li>
+                            <span>test</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="vs-card">VS</div>
+                <div class="player-card">
+                    <ul>
+                        <li>
+                            <img src="/favicon.svg" alt="" />
+                        </li>
+                        <li>
+                            <span>test</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>`;
 }

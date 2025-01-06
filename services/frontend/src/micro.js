@@ -52,7 +52,7 @@ function applyTreeDifference(old, element) {
             old.removeChild(old.childNodes.item(index));
         } else {
             let oldString = elementToString(old.childNodes.item(index));
-            let newString = elementToString(element.childNodes.item(newIndex));
+            let newString = elementToString(element.childNodes.item(index));
 
             if (oldString != newString) {
                 // replace the node
@@ -130,7 +130,7 @@ function matchRoute(routes, path) {
 
 async function router() {
     let app = document.getElementById("micro-app");
-    let node = new ComponentNode(undefined, "$Root");
+    let node = new ComponentNode(undefined, "$Root", undefined);
     let oldElement = app.firstElementChild;
 
     if (routerSettings == undefined) {
@@ -156,8 +156,6 @@ async function router() {
             attributes = new Map(Object.entries(route.route.attributes));
         }
 
-        console.log(node);
-
         newElement = await createComponent(route.route.view, attributes, route.params, node);
     } else if (routerSettings.notFound != undefined) {
         newElement = await createComponent(routerSettings.notFound, new Map(), new Map(), node);
@@ -166,7 +164,7 @@ async function router() {
             "<div style='width: 100%; height: 100%; background-color: white; text-align: center;'><h1>404 - Not Found</h1></div>",
             undefined,
             undefined,
-            new ComponentNode({}, "")
+            new ComponentNode({}, "", undefined)
         );
         newElement = element;
     }
@@ -181,10 +179,10 @@ async function router() {
         applyTreeDifference(oldElement, newElement);
     }
 
-    console.log(node);
-
-    node.addEventListeners();
-    await node.applyDoCallbacks();
+    if (initialPageLoad) {
+        node.addEventListeners();
+        await node.applyDoCallbacks();
+    }
 
     initialPageLoad = false;
 }
@@ -239,15 +237,34 @@ export function navigateTo(url) {
     COMPONENT MANIPULATION
  */
 
+/**
+ * @param {string} str
+ * @returns
+ */
+function hash(str) {
+    let h;
+
+    h = 0;
+    for (let index = 0; index < str.length; index++) {
+        h = 37 * h + str.charCodeAt(index);
+    }
+    return h;
+}
+
 class ComponentNode {
     /**
      * @param {any} object
+     * @param {string} name
      */
-    constructor(object, name) {
+    constructor(object, name, parent) {
         /** @type {Array<ComponentNode>} */
         this.children = [];
         this.object = object;
-        this.id = name + "-" + Math.random().toString(16).slice(2);
+        this.parent = parent;
+        this.name = name;
+
+        // TODO: Id cant be random or reloading the page will not work
+        this.id = name + "-" + this.createComponentId();
     }
 
     /**
@@ -258,6 +275,10 @@ class ComponentNode {
     }
 
     addEventListeners() {
+        for (let child of this.children) {
+            child.addEventListeners();
+        }
+
         if (this.object != undefined) {
             const element = document.querySelector("." + this.id);
 
@@ -267,6 +288,7 @@ class ComponentNode {
 
             for (let elementRef of this.object.dom.elements) {
                 if (elementRef.type == "querySelector") {
+                    /** @type {Element} */
                     let query = element.querySelector(elementRef.selector);
 
                     if (query == null) {
@@ -293,13 +315,13 @@ class ComponentNode {
                 }
             }
         }
-
-        for (let child of this.children) {
-            child.addEventListeners();
-        }
     }
 
     async applyDoCallbacks() {
+        for (let child of this.children) {
+            await child.applyDoCallbacks();
+        }
+
         if (this.object != undefined) {
             const element = document.querySelector("." + this.id);
 
@@ -335,10 +357,18 @@ class ComponentNode {
                 }
             }
         }
+    }
 
-        for (let child of this.children) {
-            await child.applyDoCallbacks();
+    createComponentId() {
+        let parents = [];
+        let node = this.parent;
+
+        while (node != undefined) {
+            parents.push(node.name);
+            node = node.parent;
         }
+
+        return hash(parents.reverse().join("-")).toString(32);
     }
 }
 
@@ -455,7 +485,7 @@ async function createComponent(comp, attributes, params, parentNode) {
         stores: new Stores(comp.name),
     };
 
-    const node = new ComponentNode(object, comp.name);
+    const node = new ComponentNode(object, comp.name, parentNode);
     object.node = node;
 
     const element = await parseHTML(await comp(object), comp.name, params, node);

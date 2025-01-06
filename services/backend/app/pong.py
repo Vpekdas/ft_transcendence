@@ -212,6 +212,12 @@ class PongManager(ServerManager):
         self.players = []
 
     async def do_matchmaking(self, conn, gamemode: str, player: Player):
+        try:
+            p = next(filter(lambda p: p.player_id == player.id, self.players))
+            return
+        except:
+            pass
+
         if gamemode == "1v1local":
             game = self.start_game(gamemode=gamemode)
 

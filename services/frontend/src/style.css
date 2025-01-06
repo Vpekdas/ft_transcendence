@@ -1411,7 +1411,7 @@ ow-system {
 
 /* You can change supernova timer here */
 /* ow-system[timelapse="true"] {
-    --cycle: 180s; 
+    --cycle: 180s;
 } */
 
 ow-orbit {
@@ -2522,4 +2522,28 @@ timber-hearth:hover {
     position: absolute;
     animation: neonPulse 2s infinite;
     --neon-color: #00bcd4;
+}
+
+/* MATCHMAKING */
+
+.matchmake-container {
+    background-color: #222;
+    color: #eee;
+    text-align: center;
+}
+
+.matchmake-container ul li {
+    list-style: none;
+}
+
+.matchmake-container .searching-for-game {
+    font-size: 2em;
+}
+
+.matchmake-container .timer {
+    font-size: 1.5em;
+}
+
+.matchmake-container .player-card, .matchmake-container .vs-card {
+    display: inline-block;
 }

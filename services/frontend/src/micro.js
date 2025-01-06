@@ -775,7 +775,7 @@ async function parseHTMLInner(tokens, parent, params) {
  * @param {string} name
  * @returns {Promise<HTMLElement>}
  */
-async function parseHTML(source, name, params) {
+export async function parseHTML(source, name, params) {
     const tokens = tokenizeHTML(source, name);
     // console.log(...tokens);
 

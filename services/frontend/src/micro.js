@@ -11,14 +11,6 @@ let initialPageLoad = true;
     ROOTER
  */
 
-// TODO: This only works when saving this file for some reason
-if (import.meta.hot) {
-    import.meta.hot.accept(async (newModule) => {
-        registerAll();
-        await router();
-    });
-}
-
 window.onpopstate = async () => {
     await router();
 };
@@ -60,7 +52,7 @@ function applyTreeDifference(old, element) {
             old.removeChild(old.childNodes.item(index));
         } else {
             let oldString = elementToString(old.childNodes.item(index));
-            let newString = elementToString(element.childNodes.item(index));
+            let newString = elementToString(element.childNodes.item(newIndex));
 
             if (oldString != newString) {
                 // replace the node
@@ -138,6 +130,7 @@ function matchRoute(routes, path) {
 
 async function router() {
     let app = document.getElementById("micro-app");
+    let node = new ComponentNode(undefined, "$Root");
     let oldElement = app.firstElementChild;
 
     if (routerSettings == undefined) {
@@ -163,19 +156,17 @@ async function router() {
             attributes = new Map(Object.entries(route.route.attributes));
         }
 
-        /** @type {{object: any, element: Element}} */
-        const { object, element } = await createComponent(route.route.view, attributes, route.params);
-        await registerComponentCallbacks(element, object);
+        console.log(node);
 
-        newElement = element;
+        newElement = await createComponent(route.route.view, attributes, route.params, node);
     } else if (routerSettings.notFound != undefined) {
-        const { object, element } = await createComponent(routerSettings.notFound, new Map(), new Map());
-        await registerComponentCallbacks(element, object);
-
-        newElement = element;
+        newElement = await createComponent(routerSettings.notFound, new Map(), new Map(), node);
     } else {
         const element = await parseHTML(
-            "<div style='width: 100%; height: 100%; background-color: white; text-align: center;'><h1>404 - Not Found</h1></div>"
+            "<div style='width: 100%; height: 100%; background-color: white; text-align: center;'><h1>404 - Not Found</h1></div>",
+            undefined,
+            undefined,
+            new ComponentNode({}, "")
         );
         newElement = element;
     }
@@ -190,6 +181,11 @@ async function router() {
         applyTreeDifference(oldElement, newElement);
     }
 
+    console.log(node);
+
+    node.addEventListeners();
+    await node.applyDoCallbacks();
+
     initialPageLoad = false;
 }
 
@@ -202,7 +198,6 @@ export function defineRouter(settings) {
     document.addEventListener("DOMContentLoaded", async () => {
         // Prevent <a> tags from reloading the page by preventing the default behaviour
         // and using our own `navigateTo`
-        // TODO: check parents ?
         document.body.addEventListener("click", async (event) => {
             /** @type {Element | null} */
             let target = event.target;
@@ -219,6 +214,14 @@ export function defineRouter(settings) {
 
         await router();
     });
+
+    // TODO: This only works when saving this file for some reason
+    if (import.meta.hot) {
+        import.meta.hot.accept(async (newModule) => {
+            registerAll();
+            await router();
+        });
+    }
 }
 
 /**
@@ -227,8 +230,6 @@ export function defineRouter(settings) {
  * @param {string} url
  */
 export function navigateTo(url) {
-    // console.log("goto =>", url);
-
     history.pushState(null, null, url);
     initialPageLoad = true;
     setTimeout(async () => await router());
@@ -237,6 +238,109 @@ export function navigateTo(url) {
 /*
     COMPONENT MANIPULATION
  */
+
+class ComponentNode {
+    /**
+     * @param {any} object
+     */
+    constructor(object, name) {
+        /** @type {Array<ComponentNode>} */
+        this.children = [];
+        this.object = object;
+        this.id = name + "-" + Math.random().toString(16).slice(2);
+    }
+
+    /**
+     * @param {ComponentNode} node
+     */
+    appendChild(node) {
+        this.children.push(node);
+    }
+
+    addEventListeners() {
+        if (this.object != undefined) {
+            const element = document.querySelector("." + this.id);
+
+            if (element == undefined) {
+                throw new Error("no component with id " + this.id);
+            }
+
+            for (let elementRef of this.object.dom.elements) {
+                if (elementRef.type == "querySelector") {
+                    let query = element.querySelector(elementRef.selector);
+
+                    if (query == null) {
+                        console.warn("invalid querySelector string", elementRef.selector);
+                        continue;
+                    }
+
+                    for (let [eventName, callback] of elementRef.eventCallbacks.entries()) {
+                        query.addEventListener(eventName, callback);
+                    }
+                } else if (elementRef.type == "querySelectorAll") {
+                    let query = element.querySelectorAll(elementRef.selector);
+
+                    if (query.length == 0) {
+                        console.warn("invalid querySelectorAll string", elementRef.selector);
+                        continue;
+                    }
+
+                    for (let el of query) {
+                        for (let [eventName, callback] of elementRef.eventCallbacks.entries()) {
+                            el.addEventListener(eventName, callback);
+                        }
+                    }
+                }
+            }
+        }
+
+        for (let child of this.children) {
+            child.addEventListeners();
+        }
+    }
+
+    async applyDoCallbacks() {
+        if (this.object != undefined) {
+            const element = document.querySelector("." + this.id);
+
+            for (let elementRef of this.object.dom.elements) {
+                if (elementRef.type == "querySelector") {
+                    let query = element.querySelector(elementRef.selector);
+
+                    if (query == null) {
+                        console.warn("invalid querySelector string", elementRef.selector);
+                        continue;
+                    }
+
+                    for (let elementRef of this.object.dom.elements) {
+                        for (let callback of elementRef.doCallbacks) {
+                            await callback(query);
+                        }
+                    }
+                } else if (elementRef.type == "querySelectorAll") {
+                    let query = element.querySelectorAll(elementRef.selector);
+
+                    if (query.length == 0) {
+                        console.warn("invalid querySelectorAll string", elementRef.selector);
+                        continue;
+                    }
+
+                    for (let el of query) {
+                        for (let elementRef of this.object.dom.elements) {
+                            for (let callback of elementRef.doCallbacks) {
+                                await callback(query);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (let child of this.children) {
+            await child.applyDoCallbacks();
+        }
+    }
+}
 
 /**
  * An interface to manipulate the inner DOM of a component.
@@ -340,9 +444,10 @@ class Stores {
  * @param {any} comp
  * @param {Map<string, string>} attributes
  * @param {Map<string, string>} params
+ * @param {ComponentNode} parentNode
  * @returns {Promise<Element>}
  */
-async function createComponent(comp, attributes, params) {
+async function createComponent(comp, attributes, params, parentNode) {
     let object = {
         params: params,
         dom: new ComponentDOM(),
@@ -350,50 +455,15 @@ async function createComponent(comp, attributes, params) {
         stores: new Stores(comp.name),
     };
 
-    const element = await parseHTML(await comp(object), comp.name);
-    return { object, element };
-}
+    const node = new ComponentNode(object, comp.name);
+    object.node = node;
 
-async function registerComponentCallbacks(element, object) {
-    for (let elementRef of object.dom.elements) {
-        if (elementRef.type == "querySelector") {
-            let query = element.querySelector(elementRef.selector);
+    const element = await parseHTML(await comp(object), comp.name, params, node);
+    element.classList.add(node.id);
 
-            if (query == null) {
-                console.warn("invalid querySelector string", elementRef.selector);
-                continue;
-            }
+    parentNode.appendChild(node);
 
-            for (let [eventName, callback] of elementRef.eventCallbacks.entries()) {
-                query.addEventListener(eventName, callback);
-            }
-
-            // Execute `do` callbacks
-            for (let callback of elementRef.doCallbacks) {
-                await callback(query);
-            }
-        } else if (elementRef.type == "querySelectorAll") {
-            let query = element.querySelectorAll(elementRef.selector);
-
-            if (query.length == 0) {
-                console.warn("invalid querySelectorAll string", elementRef.selector);
-                continue;
-            }
-
-            for (let el of query) {
-                for (let [eventName, callback] of elementRef.eventCallbacks.entries()) {
-                    el.addEventListener(eventName, callback);
-                }
-
-                // Execute `do` callbacks
-                for (let callback of elementRef.doCallbacks) {
-                    await callback(query);
-                }
-            }
-        } else {
-            throw new Error("invalid reference type " + elementRef.type);
-        }
-    }
+    return element;
 }
 
 /*
@@ -675,9 +745,10 @@ function isValidSVGTag(name) {
  * @param {Map<string, string>} attributes
  * @param {Element} parent
  * @param {Map<string, string>} params
- * @returns {Promise<Element | { object: any, element: Element } | undefined>}
+ * @param {ComponentNode} parentNode
+ * @returns {Promise<Element | undefined>}
  */
-async function createElement(name, attributes, parent, params) {
+async function createElement(name, attributes, parent, params, parentNode) {
     let element = null;
 
     if (name == "svg" || (isInSvg(parent) && isValidSVGTag(name))) {
@@ -693,7 +764,7 @@ async function createElement(name, attributes, parent, params) {
             throw new ParseError("Unknown component " + name);
         }
 
-        return await createComponent(component, attributes, params);
+        return await createComponent(component, attributes, params, parentNode);
     }
 
     for (let attribute of attributes.keys()) {
@@ -706,22 +777,19 @@ async function createElement(name, attributes, parent, params) {
 /**
  * @param {Token[]} tokens
  * @param {HTMLElement} parent
+ * @param {Map<string, string>} params
+ * @param {ComponentNode} parentNode
  */
-async function parseHTMLInner(tokens, parent, params) {
+async function parseHTMLInner(tokens, parent, params, parentNode) {
     let index = 0;
 
     while (index < tokens.length) {
         if (tokens[index] instanceof TokenString) {
             parent.append(tokens[index].text);
         } else if (tokens[index] instanceof TokenTag) {
-            const res = await createElement(tokens[index].name, tokens[index].attribs, parent, params);
+            const res = await createElement(tokens[index].name, tokens[index].attribs, parent, params, parentNode);
 
-            if (res.element != undefined) {
-                await registerComponentCallbacks(res.element, res.object);
-                parent.append(res.element);
-            } else {
-                parent.append(res);
-            }
+            parent.append(res);
         } else if (tokens[index] instanceof TokenOpenTag) {
             /** @type {TokenOpenTag} */
             let token = tokens[index];
@@ -745,20 +813,11 @@ async function parseHTMLInner(tokens, parent, params) {
             }
 
             if (tokens[index] instanceof TokenCloseTag && tokens[index].name == tagName && openTags == 0) {
-                const element = await createElement(token.name, token.attribs, parent, params);
+                const element = await createElement(token.name, token.attribs, parent, params, parentNode);
+                const innerTokens = tokens.slice(tokenStart + 1, index);
 
-                if (element.element != undefined && element.element.hasAttribute("micro-component")) {
-                    const innerTokens = tokens.slice(tokenStart + 1, index);
-
-                    await parseHTMLInner(innerTokens, element.element);
-                    await registerComponentCallbacks(element.element, element.object);
-                    parent.append(element.element);
-                } else {
-                    const innerTokens = tokens.slice(tokenStart + 1, index);
-
-                    await parseHTMLInner(innerTokens, element);
-                    parent.append(element);
-                }
+                await parseHTMLInner(innerTokens, element, params, parentNode);
+                parent.append(element);
             } else {
                 throw new ParseError("cannot find closing tag");
             }
@@ -773,16 +832,17 @@ async function parseHTMLInner(tokens, parent, params) {
  *
  * @param {string} source
  * @param {string} name
+ * @param {Map<string, string>} params
+ * @param {ComponentNode} parentNode
  * @returns {Promise<HTMLElement>}
  */
-export async function parseHTML(source, name, params) {
+export async function parseHTML(source, name, params, parentNode) {
     const tokens = tokenizeHTML(source, name);
     // console.log(...tokens);
 
     let div = document.createElement("div");
     div.classList.add("micro-" + name);
-    div.setAttribute("micro-component", "");
 
-    await parseHTMLInner(tokens, div, params);
+    await parseHTMLInner(tokens, div, params, parentNode);
     return div;
 }

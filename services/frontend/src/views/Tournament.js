@@ -1,8 +1,9 @@
 import { getOriginNoProtocol, getNickname, post, api } from "../utils";
 import { tr } from "../i18n";
+import { parseHTML } from "../micro";
 
 /** @type {import("../micro").Component} */
-export default async function Tournament({ dom, attributes }) {
+export default async function Tournament({ dom, params, node }) {
     function createBracket(games) {
         const brackets = document.querySelectorAll(".bracket");
 
@@ -108,12 +109,12 @@ export default async function Tournament({ dom, attributes }) {
 
     document.title = tr("Tournament");
 
-    const id = attributes.get("id");
+    const id = params.get("id");
     const playerInfo = await post("/api/player/c/profile").then((res) => res.json());
 
     let host = undefined;
 
-    dom.query("#tournament-container").do(async (el) => {
+    dom.querySelector("#tournament-container").do(async (el) => {
         const ws = new WebSocket(`wss://${getOriginNoProtocol()}:8080/ws/tournament/${id}`);
 
         ws.onopen = (event) => {
@@ -148,9 +149,9 @@ export default async function Tournament({ dom, attributes }) {
                     for (let round of data["rounds"]) {
                         let games = round["games"];
                         container.appendChild(
-                            html(
+                            await parseHTML(
                                 /* HTML */ ` <div class="container-fluid round-container">
-                                    <TournamentRound roundCount="${games.length}" data=${JSON.stringify(games)} />
+                                    <TournamentRound roundCount="${games.length}" data="${JSON.stringify(games)}" />
                                     <div class="container-fluid bracket-container">
                                         <div class="bracket" row="1">
                                             <div class="dot"></div>
@@ -159,7 +160,10 @@ export default async function Tournament({ dom, attributes }) {
                                         </div>
                                         <span class="round-tier"></span>
                                     </div>
-                                </div>`
+                                </div>`,
+                                undefined,
+                                undefined,
+                                node
                             )
                         );
                     }
@@ -178,8 +182,7 @@ export default async function Tournament({ dom, attributes }) {
         });
     });
 
-    return /* HTML */ ` <div>
-        <NavBar />
+    return /* HTML */ ` <NavBar />
         <div class="container-fluid dashboard-container tournament-container" id="tournament-container">
             <div class="particle-container"></div>
             <div class="container-fluid dashboard-container match-container" id="match-container"></div>
@@ -193,6 +196,5 @@ export default async function Tournament({ dom, attributes }) {
                     <i class="bi bi-rocket-takeoff"></i> <span>${tr("Start !")}</span>
                 </button>
             </div>
-        </div>
-    </div>`;
+        </div>`;
 }

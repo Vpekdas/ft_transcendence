@@ -3,7 +3,7 @@ import { navigateTo } from "../micro";
 import { parseHTML } from "../micro";
 
 /** @type {import("../micro").Component} */
-export default async function PongMatchmake({ dom, stores }) {
+export default async function PongMatchmake({ dom, stores, node }) {
     const GET = location.search
         .substring(1)
         .split("&")
@@ -40,7 +40,10 @@ export default async function PongMatchmake({ dom, stores }) {
             <li>
                 <Duck />
             </li>
-        </ul>`
+        </ul>`,
+        undefined,
+        undefined,
+        node
     );
 
     const matchFoundCode = await parseHTML(
@@ -64,7 +67,10 @@ export default async function PongMatchmake({ dom, stores }) {
                         <span>test</span>
                     </li>
                 </ul>
-            </div>`
+            </div>`,
+        undefined,
+        undefined,
+        node
     );
 
     dom.querySelector(".matchmake-container").do(async (c) => {

@@ -1,6 +1,8 @@
 import { getOriginNoProtocol, showToast } from "../utils";
 import { navigateTo } from "../micro";
 import { parseHTML } from "../micro";
+import { dirty } from "../micro";
+import { tr } from "../i18n";
 
 /** @type {import("../micro").Component} */
 export default async function PongMatchmake({ dom, stores, node }) {
@@ -14,11 +16,11 @@ export default async function PongMatchmake({ dom, stores, node }) {
         navigateTo("/");
     }
 
-    let time = 0;
+    const [time, setTime] = stores.usePersistent("matchmakeTimer", 0); // TODO: No need to store the value in localStorage here.
 
     function timeInMinutes() {
-        const minutes = Math.floor(time / 60);
-        let seconds = Math.floor(time % 60);
+        const minutes = Math.floor(time() / 60);
+        let seconds = Math.floor(time() % 60);
 
         if (seconds < 10) {
             seconds = "0" + seconds;
@@ -26,6 +28,8 @@ export default async function PongMatchmake({ dom, stores, node }) {
 
         return minutes + ":" + seconds;
     }
+
+    let timer;
 
     dom.querySelector(".matchmake-container").do(async (c) => {
         const ws = new WebSocket(`wss://${getOriginNoProtocol()}:8080/ws/matchmake/pong`);
@@ -37,29 +41,30 @@ export default async function PongMatchmake({ dom, stores, node }) {
                 })
             );
         };
-
-        ws.onerror = (event) => {
-            showToast("Cannot connect to game", "bi bi-exclamation-triangle-fill");
-        };
-
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
+
+            console.log(data);
 
             if (data["type"] == "matchFound") {
                 document.querySelector(".match-found-container").classList.remove("hidden");
                 document.querySelector(".matchmake-container").classList.add("hidden");
+
+                // Do not wait if we are playing against ourself.
                 if (GET["gamemode"].endsWith("local")) {
+                    clearInterval(timer);
                     navigateTo("/play/pong/" + data["id"]);
                 } else {
+                    clearInterval(timer);
                     setTimeout(() => navigateTo("/play/pong/" + data["id"]), 5000);
                 }
             }
         };
 
-        setInterval(() => {
-            time += 1;
-            const timerDiv = c.querySelector(".timer");
-            timerDiv.textContent = timeInMinutes();
+        setTime(0);
+
+        timer = setInterval(() => {
+            setTime(time() + 1);
         }, 1000);
     });
 
@@ -68,7 +73,7 @@ export default async function PongMatchmake({ dom, stores, node }) {
         <div class="matchmake-container">
             <ul>
                 <li>
-                    <span class="searching-for-game">Searching for a game</span>
+                    <span class="searching-for-game">${tr("Searching for a game")}</span>
                 </li>
                 <li>
                     <span>

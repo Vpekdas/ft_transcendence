@@ -250,6 +250,13 @@ export function navigateTo(url) {
     setTimeout(async () => await router());
 }
 
+/**
+ * Force the refresh of the DOM.
+ */
+export async function dirty() {
+    setTimeout(async () => await router());
+}
+
 /*
     COMPONENT MANIPULATION
  */

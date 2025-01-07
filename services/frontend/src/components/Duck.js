@@ -25,7 +25,7 @@ export default async function Duck({ dom, stores }) {
     return /* HTML */ ` <div class="duck-container">
         <ul class="duck-list">
             <li><img src="/favicon.svg" width="20%" id="the-duck" /></li>
-            <li><div class="duck-count">${count()} ${count() < 2 ? "duck" : "ducks"}</div></li>
+            <li><div class="duck-count">${count()} ${tr("ducks")}</div></li>
         </ul>
     </div>`;
 }

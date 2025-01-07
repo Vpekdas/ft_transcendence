@@ -44,5 +44,8 @@
     "Final": "Finale",
     "Home": "Accueil",
     "Tournament": "Tournoi",
-    "Duck": "Canard"
+    "Duck": "Canard",
+    "ducks": "canards",
+    "Searching for a game": "Recherche d'une partie",
+    "Cannot connect to the game": "Impossible de se connecter"
 }

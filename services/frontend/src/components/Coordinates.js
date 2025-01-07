@@ -151,15 +151,13 @@ export default async function Coordinates({ dom }) {
                         }
                     }
 
-                    const newPos = points.split(" ");
-
                     // ! create a function.
                     // Ensure the same polygon is not drawn twice in the reverse order.
 
                     for (let i = 0; i < drawnPolygons.length; i++) {
-                        const actualPos = drawnPolygons[i].split(" ");
+                        console.log("points: ", points, "polygons: ", drawnPolygons[i].split(" ").reverse().join(" "));
 
-                        if (newPos[0] === actualPos[2] && newPos[1] === actualPos[3]) {
+                        if (points === drawnPolygons[i].split(" ").reverse().join(" ")) {
                             click = 0;
                             skip = 0;
                             topSkip = 0;

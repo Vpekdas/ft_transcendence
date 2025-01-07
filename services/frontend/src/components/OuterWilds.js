@@ -44,8 +44,10 @@ const handlePlanetClick = (planetElement, music, supernova, coordinates) => {
 
     if (!supernova) {
         music.audio = new Audio("/music/" + PLANETS[displayedPlanetName.textContent].Music[music.index] + ".mp3");
-        music.audio.play();
-        music.name = PLANETS[displayedPlanetName.textContent].Music[music.index];
+        if (music.audio) {
+            music.audio.play();
+            music.name = PLANETS[displayedPlanetName.textContent].Music[music.index];
+        }
     }
 
     if (!coordinates.endGame) {
@@ -95,8 +97,10 @@ export default async function OuterWilds({ dom }) {
                     music.audio.pause();
                 }
                 music.audio = new Audio("/music/End Times.mp3");
-                music.audio.play();
-                clearInterval(chronometer.timerId);
+                if (music.audio) {
+                    music.audio.play();
+                    clearInterval(chronometer.timerId);
+                }
             }
         }, 1000);
 
@@ -112,8 +116,10 @@ export default async function OuterWilds({ dom }) {
             const currOrbit = quantumMoon.closest("[quantum]");
             const availableOrbits = quantumOrbits.filter((o) => o !== currOrbit);
             const newOrbit = availableOrbits[Math.floor(Math.random() * availableOrbits.length)];
-            const newWanderer = newOrbit.querySelector(":scope > ow-wanderer");
-            newWanderer.appendChild(quantumMoon);
+            if (newOrbit) {
+                const newWanderer = newOrbit.querySelector(":scope > ow-wanderer");
+                newWanderer.appendChild(quantumMoon);
+            }
         });
 
         const orbits = document.querySelectorAll("ow-orbit");
@@ -190,8 +196,10 @@ export default async function OuterWilds({ dom }) {
                     music.audio = new Audio(
                         "/music/" + PLANETS[displayedPlanetName.textContent].Music[music.index] + ".mp3"
                     );
-                    music.audio.play();
-                    music.name = PLANETS[displayedPlanetName.textContent].Music[music.index];
+                    if (music.audio) {
+                        music.audio.play();
+                        music.name = PLANETS[displayedPlanetName.textContent].Music[music.index];
+                    }
                 }
 
                 if (!coordinates.endGame) {

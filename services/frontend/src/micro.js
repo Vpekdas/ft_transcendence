@@ -187,6 +187,9 @@ async function router() {
         // applyTreeDifference(oldElement, newElement);
     }
 
+    // TODO: Restore the previous behavior with applyTreeDifference and the two following calls inside a if (initialPageLoad)
+    //       But find why elements with the differente class are not replaced correctly in applyTreeDifference
+
     node.addEventListeners();
     await node.applyDoCallbacks();
 

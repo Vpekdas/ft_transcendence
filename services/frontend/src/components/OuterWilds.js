@@ -52,11 +52,6 @@ const handlePlanetClick = (planetElement, music, supernova, coordinates) => {
         if (coordinates.currentPath.length < 3) {
             coordinates.currentPath.push(displayedPlanetName.textContent);
         }
-
-        if (coordinates.currentPath.length == 3) {
-            coordinates.endGame = isRightPath(coordinates.currentPath);
-            coordinates.currentPath.length = 0;
-        }
     }
 };
 
@@ -85,29 +80,31 @@ export default async function OuterWilds({ dom }) {
         customElements.define("ow-wanderer", Wanderer);
     }
 
-    dom.querySelector("#space").do(async (el) => {
+    dom.querySelector("#space").do(async () => {
         const music = { audio: Audio, name: "", index: 0 };
         const chronometer = { timerId: 0, seconds: 0 };
         const coordinates = { endGame: false, currentPath: [] };
         let supernova = false;
 
-            // ! If the user does not interact, a Promise is returned by audio.
-            chronometer.timerId = setInterval(() => {
-                chronometer.seconds++;
-                if (chronometer.seconds === 1200 && !supernova) {
-                    supernova = true;
-                    if (music.audio.duration > 0 && !music.audio.paused) {
-                        music.audio.pause();
-                    }
-                    music.audio = new Audio("/music/End Times.mp3");
-                    music.audio.play();
-                    clearInterval(chronometer.timerId);
+        // ! If the user does not interact, a Promise is returned by audio.
+        chronometer.timerId = setInterval(() => {
+            chronometer.seconds++;
+            if (chronometer.seconds === 1200 && !supernova) {
+                supernova = true;
+                if (music.audio.duration > 0 && !music.audio.paused) {
+                    music.audio.pause();
                 }
-            }, 1000);
+                music.audio = new Audio("/music/End Times.mp3");
+                music.audio.play();
+                clearInterval(chronometer.timerId);
+            }
+        }, 1000);
 
         // Make the quantum moon jump around randomly.
-        const quantumMoon = el.querySelector("#quantum-moon");
-        const quantumOrbits = Array.from(el.querySelectorAll("[quantum]"));
+        const quantumMoon = document.querySelector("#quantum-moon");
+
+        const quantumOrbits = Array.from(document.querySelectorAll("[quantum]"));
+
         quantumMoon.addEventListener("animationiteration", (e) => {
             if (e.animationName !== "--quantum") {
                 return;
@@ -119,10 +116,10 @@ export default async function OuterWilds({ dom }) {
             newWanderer.appendChild(quantumMoon);
         });
 
-        const orbits = el.querySelectorAll("ow-orbit");
+        const orbits = document.querySelectorAll("ow-orbit");
 
-        const ashTwin = el.querySelector("#ash-twin");
-        const emberTwin = el.querySelector("#ember-twin");
+        const ashTwin = document.querySelector("#ash-twin");
+        const emberTwin = document.querySelector("#ember-twin");
 
         ashTwin.addEventListener("click", () => handlePlanetClick(ashTwin, music, supernova, coordinates));
         emberTwin.addEventListener("click", () => handlePlanetClick(emberTwin, music, supernova, coordinates));
@@ -146,10 +143,10 @@ export default async function OuterWilds({ dom }) {
                 // For example, clicking on Attlerock should display Attlerock's details, not Timber Hearth's.
                 event.stopPropagation();
 
-                const planetContainer = el.querySelector(".container-fluid.planet-card-container");
-                const displayedPlanet = el.querySelector(".planet-img");
-                const displayedPlanetName = el.querySelector(".planet-name");
-                const displayedPlanetDescription = el.querySelector(".planet-description");
+                const planetContainer = document.querySelector(".container-fluid.planet-card-container");
+                const displayedPlanet = document.querySelector(".planet-img");
+                const displayedPlanetName = document.querySelector(".planet-name");
+                const displayedPlanetDescription = document.querySelector(".planet-description");
 
                 // Display the card with a subtle animation and update the border color to match the planet's color.
                 planetContainer.style.display = "flex";
@@ -205,6 +202,10 @@ export default async function OuterWilds({ dom }) {
                     if (coordinates.currentPath.length === 3) {
                         coordinates.endGame = isRightPath(coordinates.currentPath);
                         coordinates.currentPath.length = 0;
+
+                        if (coordinates.endGame) {
+                            document.querySelector(".fluid-container.coordinates-container").style.display = "flex";
+                        }
                     }
                 }
             });
@@ -214,12 +215,14 @@ export default async function OuterWilds({ dom }) {
     // TODO: Probably will append each line.
     // TODO: Remove the border of previous line so the "cursor" will not be visible.
 
+    //     <div class="typewriter-wrapper">
+    //     <div>
+    //         <h1 class="typewriter-text line-1">Lorem Ipsum Dolor</h1>
+    //     </div>
+    // </div>
+
+    // ! FIXME: quantum attribute not visible in element inspector ?
     return /* HTML */ ` 
-            <div class="typewriter-wrapper">
-                <div>
-                    <h1 class="typewriter-text line-1">Lorem Ipsum Dolor</h1>
-                </div>
-            </div>
                 <div class="container-fluid planet-card-container" >
                     <span class="planet-name"></span>
                     <img class="planet-img" src=""> </img>

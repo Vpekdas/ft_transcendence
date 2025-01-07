@@ -1,4 +1,5 @@
 import { SCALE, POLYGON_VERTICES } from "../constant";
+import { FIRST_COORDINATES, SECOND_COORDINATES, THIRD_COORDINATES } from "../constant";
 
 /** @type {import("../micro").Component} */
 export default async function Coordinates({ dom }) {
@@ -6,7 +7,22 @@ export default async function Coordinates({ dom }) {
         return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
     }
 
-    function isPolygonAlreadyExists(polygon) {}
+    function isRIghtCoordinate(userPath, rightPath) {
+        if (userPath.length !== rightPath.length) {
+            return false;
+        }
+        for (let i = 0; i < rightPath.length; i++) {
+            if (userPath[i] !== rightPath[i]) {
+                return false;
+            }
+        }
+        const coordinate = document.querySelector(".fluid-container.coordinates-container");
+        if (coordinate) {
+            const paths = document.querySelectorAll(".path");
+            paths.forEach((path) => path.remove());
+        }
+        return true;
+    }
 
     dom.querySelector(".fluid-container.coordinates-container").do(async (container) => {
         const coordinates = container.querySelectorAll(".coordinates");
@@ -14,6 +30,7 @@ export default async function Coordinates({ dom }) {
         var click = 0,
             skip = 0,
             topSkip = 0,
+            validatedStep = 0,
             x,
             y,
             xp,
@@ -158,10 +175,8 @@ export default async function Coordinates({ dom }) {
                     // Draw the polygon.
                     const navigate = container.querySelector("#navigate");
                     var newPoly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-                    newPoly.setAttribute("class", "poly");
+                    newPoly.setAttribute("class", "path");
                     newPoly.setAttribute("points", points);
-                    newPoly.setAttribute("fill", "cyan");
-                    newPoly.setAttribute("stroke-width", "3");
 
                     navigate.append(newPoly);
 
@@ -172,6 +187,38 @@ export default async function Coordinates({ dom }) {
                     firstPolyVertices.length = 0;
                     secondPolyVertices.length = 0;
                     closestVertices.length = 0;
+
+                    window.addEventListener("keydown", (event) => {
+                        if (event.key === "c") {
+                            const coordinate = document.querySelector(".fluid-container.coordinates-container");
+                            if (coordinate) {
+                                const paths = document.querySelectorAll(".path");
+                                paths.forEach((path) => path.remove());
+                                drawnPolygons.length = 0;
+                            }
+                        }
+                    });
+
+                    if (validatedStep === 0) {
+                        if (isRIghtCoordinate(drawnPolygons, FIRST_COORDINATES)) {
+                            validatedStep++;
+                            drawnPolygons.length = 0;
+                        }
+                    } else if (validatedStep === 1) {
+                        if (isRIghtCoordinate(drawnPolygons, SECOND_COORDINATES)) {
+                            validatedStep++;
+                            drawnPolygons.length = 0;
+                        }
+                    } else {
+                        if (isRIghtCoordinate(drawnPolygons, THIRD_COORDINATES)) {
+                            validatedStep++;
+                            drawnPolygons.length = 0;
+                        }
+                    }
+
+                    if (validatedStep === 3) {
+                        console.log("congrats x)");
+                    }
                 }
             });
         });

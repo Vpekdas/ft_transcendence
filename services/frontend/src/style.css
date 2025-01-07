@@ -1643,7 +1643,7 @@ ow-system[labels="false"] ow-name {
     animation-play-state: paused;
 }
 
-timber-hearth:hover {
+#timber-hearth:hover {
     border-color: greenyellow;
 }
 

@@ -1,5 +1,5 @@
 import { tr } from "../../i18n";
-import { fetchApi } from "../../utils";
+import { fetchApi, showToast } from "../../utils";
 
 /** @type {import("../../micro").Component} */
 export default async function ChangePasswordForm({ dom }) {
@@ -9,8 +9,7 @@ export default async function ChangePasswordForm({ dom }) {
         const newPasswordConfirm = el.querySelector("#new-password-confirm").value;
 
         if (newPassword != newPasswordConfirm) {
-            // this.showToast(tr("Old password and new password are not the same."), "bi bi-exclamation-triangle-fill");
-            // TODO: TOASTS
+            showToast(tr("Old password and new password are not the same."), "bi bi-exclamation-triangle-fill");
             return;
         }
 
@@ -23,11 +22,11 @@ export default async function ChangePasswordForm({ dom }) {
         })
             .then((res) => res.json())
             .catch((err) => {
-                // this.showToast(tr("An error occurred. Please try again."), "bi bi-exclamation-triangle-fill");
+                showToast(tr("An error occurred. Please try again."), "bi bi-exclamation-triangle-fill");
             });
 
         if (response.error) {
-            // this.showToast(response.error, "bi bi-exclamation-triangle-fill");
+            showToast(response.error, "bi bi-exclamation-triangle-fill");
         }
     });
     return /* HTML */ `<div class="container-fluid settings">

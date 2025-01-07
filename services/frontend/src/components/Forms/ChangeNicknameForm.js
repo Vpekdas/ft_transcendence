@@ -1,5 +1,5 @@
 import { tr } from "../../i18n";
-import { fetchApi, post } from "../../utils";
+import { fetchApi, post, showToast } from "../../utils";
 
 /** @type {import("../../micro").Component} */
 export default async function ChangeNicknameForm({ dom }) {
@@ -18,12 +18,11 @@ export default async function ChangeNicknameForm({ dom }) {
         })
             .then((res) => res.json())
             .catch((err) => {
-                // this.showToast(tr("An error occurred. Please try again."), "bi bi-exclamation-triangle-fill");
-                // TODO: TOASTS
+                showToast(tr("An error occurred. Please try again."), "bi bi-exclamation-triangle-fill");
             });
 
         if (response.error) {
-            // this.showToast(response.error, "bi bi-exclamation-triangle-fill");
+            showToast(response.error, "bi bi-exclamation-triangle-fill");
         }
     });
 

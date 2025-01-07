@@ -1,4 +1,4 @@
-import { getOriginNoProtocol } from "../utils";
+import { getOriginNoProtocol, showToast } from "../utils";
 import { navigateTo } from "../micro";
 import { parseHTML } from "../micro";
 
@@ -37,14 +37,22 @@ export default async function PongMatchmake({ dom, stores, node }) {
                 })
             );
         };
+
+        ws.onerror = (event) => {
+            showToast("Cannot connect to game", "bi bi-exclamation-triangle-fill");
+        };
+
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
 
             if (data["type"] == "matchFound") {
-                c.replaceChildren([]);
-                c.appendChild(matchFoundCode);
-
-                setTimeout(() => navigateTo("/play/pong/" + data["id"]), 5000);
+                document.querySelector(".match-found-container").classList.remove("hidden");
+                document.querySelector(".matchmake-container").classList.add("hidden");
+                if (GET["gamemode"].endsWith("local")) {
+                    navigateTo("/play/pong/" + data["id"]);
+                } else {
+                    setTimeout(() => navigateTo("/play/pong/" + data["id"]), 5000);
+                }
             }
         };
 
@@ -56,6 +64,7 @@ export default async function PongMatchmake({ dom, stores, node }) {
     });
 
     return /* HTML */ `<NavBar />
+        <div id="toast-container"></div>
         <div class="matchmake-container">
             <ul>
                 <li>
@@ -70,7 +79,7 @@ export default async function PongMatchmake({ dom, stores, node }) {
                     <Duck />
                 </li>
             </ul>
-            <div class="hidden">
+            <div class="match-found-container hidden">
                 <div class="player-card">
                     <ul>
                         <li>

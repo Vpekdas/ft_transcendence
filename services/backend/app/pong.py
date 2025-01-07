@@ -29,9 +29,6 @@ class Player(Body):
     def move_down(self):
         self.velocity.y -= self.speed
 
-    #def on_collision(self, dir: Vec3, collision: CollisionResult):
-    #    collision.collider.velocity = self._bounce_vec(-collision.normal, dir, collision.collider.bounce) * Ball.speed
-
 class Ball(Body):
     speed = 0.3
 

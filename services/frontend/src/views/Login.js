@@ -1,4 +1,4 @@
-import { fetchApi, getOrigin } from "../utils";
+import { fetchApi, getOrigin, showToast } from "../utils";
 import { sanitizeInput } from "../validateInput";
 import { tr } from "../i18n";
 import { navigateTo } from "../micro";
@@ -13,11 +13,10 @@ export default async function Login({ dom }) {
         const password = data.get("password");
 
         if (!sanitizeInput(username) || !sanitizeInput(password)) {
-            // this.showToast(
-            //     "Invalid input detected. Please fill out all fields correctly.",
-            //     "bi bi-exclamation-triangle-fill"
-            // );
-            // TODO: TOASTS
+            showToast(
+                "Invalid input detected. Please fill out all fields correctly.",
+                "bi bi-exclamation-triangle-fill"
+            );
             return;
         }
 
@@ -30,10 +29,10 @@ export default async function Login({ dom }) {
         })
             .then((res) => res.json())
             .catch((err) => {
-                // this.showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
+                showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
             });
         if (response.error) {
-            // this.showToast(response.error, "bi bi-exclamation-triangle-fill");
+            showToast(response.error, "bi bi-exclamation-triangle-fill");
         } else {
             if (window.location.search.length == 0) {
                 navigateTo("/");

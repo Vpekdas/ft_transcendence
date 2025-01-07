@@ -1,6 +1,6 @@
 import { sanitizeInput } from "../validateInput";
 import { tr } from "../i18n";
-import { api } from "../utils";
+import { api, showToast } from "../utils";
 import { navigateTo } from "../micro";
 
 /** @type {import("../micro").Component} */
@@ -14,11 +14,10 @@ export default async function Registration({ dom }) {
         const password = data.get("password");
 
         if (!sanitizeInput(username) || !sanitizeInput(nickname) || !sanitizeInput(password)) {
-            // this.showToast(
-            //     "Invalid input detected. Please fill out all fields correctly.",
-            //     "bi bi-exclamation-triangle-fill"
-            // );
-            // TODO: TOASTS
+            showToast(
+                "Invalid input detected. Please fill out all fields correctly.",
+                "bi bi-exclamation-triangle-fill"
+            );
             return;
         }
 
@@ -32,10 +31,10 @@ export default async function Registration({ dom }) {
         })
             .then((res) => res.json())
             .catch((err) => {
-                // this.showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
+                showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
             });
         if (response.error) {
-            // this.showToast(response.error, "bi bi-exclamation-triangle-fill");
+            showToast(response.error, "bi bi-exclamation-triangle-fill");
         } else {
             if (window.location.search.length == 0) {
                 navigateTo("/");

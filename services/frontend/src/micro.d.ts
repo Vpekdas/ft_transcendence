@@ -1,9 +1,10 @@
 // Component types
 
+export type EventCallback = ((event: Event) => Promise<void>) | ((event: Event) => void);
 export type DoCallback = ((component: Element) => Promise<void>) | ((component: Element) => void);
 
 export type ComponentDOMElementRef = {
-    on(name: string, callback: any): void;
+    on(name: string, callback: EventCallback): void;
     do(callback: DoCallback): void;
 };
 

@@ -30,13 +30,13 @@ function elementToString(node) {
         s += "]-class[";
 
         for (let index = 0; index < node.classList.length; index++) {
-            s += node.classList.item(index);
+            s += node.classList.item(index) + ",";
         }
 
         s += "]";
         return s;
     } else if (node instanceof Text) {
-        return node.data;
+        return "TEXT-" + node.data;
     }
 }
 
@@ -45,13 +45,22 @@ function elementToString(node) {
  *
  * @param {Element} old
  * @param {Element} element
+ * @param {Element} app
  */
-function applyTreeDifference(old, element) {
+function applyTreeDifference(old, element, app) {
     let index = 0;
 
     // NOTE: When calling `Element.replaceChild` the node is removed from the original tree before
     //       replacing in the new tree, decrementing `element.childNodes.length` in the process.
     //       We need to clone the node before!
+
+    let oldString = elementToString(old);
+    let newString = elementToString(element);
+
+    if (oldString != newString) {
+        app.replaceChild(element, old);
+        return;
+    }
 
     for (; index < old.childNodes.length; index++) {
         if (index >= element.childNodes.length) {
@@ -182,16 +191,15 @@ async function router() {
     if (oldElement == null) {
         app.append(newElement);
     } else {
-        app.replaceChildren([]);
-        app.appendChild(newElement);
-        // applyTreeDifference(oldElement, newElement);
+        // app.replaceChildren([]);
+        // app.appendChild(newElement);
+        applyTreeDifference(oldElement, newElement, app);
     }
 
-    // TODO: Restore the previous behavior with applyTreeDifference and the two following calls inside a if (initialPageLoad)
-    //       But find why elements with the differente class are not replaced correctly in applyTreeDifference
-
-    node.addEventListeners();
-    await node.applyDoCallbacks();
+    if (initialPageLoad) {
+        node.addEventListeners();
+        await node.applyDoCallbacks();
+    }
 
     initialPageLoad = false;
 }
@@ -557,6 +565,21 @@ function isOperator(c) {
 }
 
 /**
+ * @param {string} str
+ * @param {string[]} param
+ * @returns {boolean}
+ */
+function isAll(str, param) {
+    for (let ch of str) {
+        if (!param.includes(ch)) {
+            console.log(param, ch);
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
  * @param {string} source
  * @returns {Token[]}
  */
@@ -688,7 +711,9 @@ function tokenizeHTML(source, parentName) {
                 index++;
             }
 
+            // if (!isAll(s, ["\n"])) {
             tokens.push(new TokenString(s));
+            // }
         }
     }
 

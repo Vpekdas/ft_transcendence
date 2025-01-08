@@ -52,10 +52,8 @@ export default async function PongMatchmake({ dom, stores, node }) {
 
                 // Do not wait if we are playing against ourself.
                 if (GET["gamemode"].endsWith("local")) {
-                    clearInterval(timer);
                     navigateTo("/play/pong/" + data["id"]);
                 } else {
-                    clearInterval(timer);
                     setTimeout(() => navigateTo("/play/pong/" + data["id"]), 5000);
                 }
             }
@@ -66,6 +64,11 @@ export default async function PongMatchmake({ dom, stores, node }) {
         timer = setInterval(() => {
             setTime(time() + 1);
         }, 1000);
+    });
+
+    dom.addEventListener("delete", (event) => {
+        clearInterval(timer);
+        console.log("aaaaaaaaaaaaaaahhhhhhhhhhhhhhhh");
     });
 
     return /* HTML */ `<NavBar />

@@ -8,21 +8,35 @@ export type ComponentDOMElementRef = {
     do(callback: DoCallback): void;
 };
 
+export type ComponentMountEvent = {};
+export type ComponentDeleteEvent = {};
+
+export type ComponentEvent = {
+    // "mount": ComponentMountEvent,
+    "delete": ComponentDeleteEvent
+};
+
+export type ComponentEventCallback<T> = ((event: T) => void) | ((event: T) => Promise<void>);
+
 export type ComponentDOM = {
     querySelector(selector: string): ComponentDOMElementRef;
     querySelectorAll(selector: string): ComponentDOMElementRef;
+
+    addEventListener(event: keyof ComponentEvent, callback: ComponentEventCallback<ComponentEvent[event]>): void;
 };
 
 export type Stores = {
     usePersistent(name: string, defaultValue: any): [() => typeof defaultValue, (value: typeof defaultValue) => void];
 };
 
-export type Component = (_: {
+export type ComponentParams = {
     params: Map<string, string>;
     attributes: Map<string, string>;
     dom: ComponentDOM;
     stores: Stores;
-}) => string;
+};
+
+export type Component = (_: ComponentParams) => string;
 
 // Router types
 

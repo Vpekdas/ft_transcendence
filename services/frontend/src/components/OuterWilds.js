@@ -230,7 +230,7 @@ export default async function OuterWilds({ dom }) {
     // </div>
 
     // ! FIXME: quantum attribute not visible in element inspector ?
-    return /* HTML */ ` 
+    return /* HTML */ `
                 <div class="container-fluid planet-card-container" >
                     <span class="planet-name"></span>
                     <img class="planet-img" src=""> </img>

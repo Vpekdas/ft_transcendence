@@ -40,14 +40,17 @@ function elementToString(node) {
     }
 }
 
+function dispatchDeleteForChildren(element, node) {}
+
 /**
  * Recursively go down through the node tree and replace nodes only when necessary.
  *
  * @param {Element} old
- * @param {Element} element
+ * @param {Element} newElement
  * @param {Element} app
+ * @param {ComponentNode} node
  */
-function applyTreeDifference(old, element, app) {
+function applyTreeDifference(old, newElement, app, node) {
     let index = 0;
 
     // NOTE: When calling `Element.replaceChild` the node is removed from the original tree before
@@ -55,34 +58,63 @@ function applyTreeDifference(old, element, app) {
     //       We need to clone the node before!
 
     let oldString = elementToString(old);
-    let newString = elementToString(element);
+    let newString = elementToString(newElement);
 
     if (oldString != newString) {
-        app.replaceChild(element, old);
+        console.log(old, node.id);
+        const comp = node.getComponentById(old.classList.item(1));
+        comp.dispatchEvent("delete", {});
+
+        app.replaceChild(newElement, old);
+
         return;
     }
 
     for (; index < old.childNodes.length; index++) {
-        if (index >= element.childNodes.length) {
-            old.removeChild(old.childNodes.item(index));
+        if (index >= newElement.childNodes.length) {
+            const element = old.childNodes.item(index);
+
+            if (
+                element instanceof Element &&
+                element.classList.length == 2 &&
+                element.classList.item(0).includes("micro-")
+            ) {
+                // TODO: Better component detection
+                const comp = node.getComponentById(element.classList.item(1)); // TODO: Same here it could be way better
+                comp.dispatchEvent("delete", {});
+            }
+
+            old.removeChild(element);
         } else {
             let oldString = elementToString(old.childNodes.item(index));
-            let newString = elementToString(element.childNodes.item(index));
+            let newString = elementToString(newElement.childNodes.item(index));
 
             if (oldString != newString) {
                 // replace the node
-                old.replaceChild(element.childNodes[index].cloneNode(true), old.childNodes[index]);
+                const element = old.childNodes.item(index);
+
+                if (
+                    element instanceof Element &&
+                    element.classList.length == 2 &&
+                    element.classList.item(0).includes("micro-")
+                ) {
+                    // TODO: Better component detection
+                    const comp = node.getComponentById(element.classList.item(1)); // TODO: Same here it could be way better
+                    comp.dispatchEvent("delete", {});
+                }
+
+                old.replaceChild(newElement.childNodes.item(index).cloneNode(true), element);
             } else {
                 // nothing to do, go down the tree recursively
-                if (old.childNodes[index] instanceof Element) {
-                    applyTreeDifference(old.childNodes[index], element.childNodes[index]);
+                if (old.childNodes.item(index) instanceof Element) {
+                    applyTreeDifference(old.childNodes.item(index), newElement.childNodes.item(index));
                 }
             }
         }
     }
 
-    for (; index < element.childNodes.length; index++) {
-        old.appendChild(element.childNodes.item(index));
+    for (; index < newElement.childNodes.length; index++) {
+        old.appendChild(newElement.childNodes.item(index));
     }
 }
 
@@ -191,9 +223,7 @@ async function router() {
     if (oldElement == null) {
         app.append(newElement);
     } else {
-        // app.replaceChildren([]);
-        // app.appendChild(newElement);
-        applyTreeDifference(oldElement, newElement, app);
+        applyTreeDifference(oldElement, newElement, app, node);
     }
 
     if (initialPageLoad) {
@@ -277,7 +307,7 @@ function hash(str) {
 
 class ComponentNode {
     /**
-     * @param {any} object
+     * @param {import("./micro").ComponentParams} object
      * @param {string} name
      */
     constructor(object, name, parent) {
@@ -286,9 +316,9 @@ class ComponentNode {
         this.object = object;
         this.parent = parent;
         this.name = name;
-
-        // TODO: Id cant be random or reloading the page will not work
         this.id = name + "-" + this.createComponentId();
+
+        // TODO: Add the index of the node to the id.
     }
 
     /**
@@ -296,6 +326,24 @@ class ComponentNode {
      */
     appendChild(node) {
         this.children.push(node);
+    }
+
+    /**
+     * @param {string} id
+     * @returns {ComponentNode | undefined}
+     */
+    getComponentById(id) {
+        for (let child of this.children) {
+            if (child.id == id) {
+                return child;
+            }
+
+            const comp = child.getComponentById(id);
+
+            if (comp != undefined) {
+                return comp;
+            }
+        }
     }
 
     addEventListeners() {
@@ -394,6 +442,25 @@ class ComponentNode {
 
         return hash(parents.reverse().join("-")).toString(32);
     }
+
+    /**
+     * @param {string} name
+     * @param {*} event
+     */
+    dispatchEvent(name, event) {
+        /** @type {Array<import("./micro").ComponentEventCallback>} */
+        let events = this.object.dom.events.get(name);
+
+        if (events != undefined) {
+            for (let callback of events) {
+                callback(event);
+            }
+        }
+
+        for (let child of this.children) {
+            child.dispatchEvent(name, event);
+        }
+    }
 }
 
 /**
@@ -403,6 +470,8 @@ class ComponentDOM {
     constructor() {
         /** @type {Array<ComponentDOMElementRef} */
         this.elements = [];
+        /** @type {Map<string, Array<import("./micro").ComponentEventCallback>>} */
+        this.events = new Map();
     }
 
     /**
@@ -424,6 +493,18 @@ class ComponentDOM {
         const ref = new ComponentDOMElementRef("querySelectorAll", selector);
         this.elements.push(ref);
         return ref;
+    }
+
+    /**
+     * @param {keyof import("./micro").ComponentEvent} event
+     * @param {import("./micro").ComponentEventCallback} callback
+     */
+    addEventListener(event, callback) {
+        if (!this.events.has(event)) {
+            this.events.set(event, []);
+        }
+
+        this.events.get(event).push(callback);
     }
 }
 
@@ -502,6 +583,7 @@ class Stores {
  * @returns {Promise<Element>}
  */
 async function createComponent(comp, attributes, params, parentNode) {
+    /** @type {import("./micro").ComponentParams} */
     let object = {
         params: params,
         dom: new ComponentDOM(),
@@ -653,7 +735,7 @@ function tokenizeHTML(source, parentName) {
                         index++;
                     }
 
-                    if (!isOperator(source[index]) && source[index] != "=") {
+                    if (isOperator(source[index]) && source[index] != "=") {
                         attributes.set(attributeName, "");
                         continue;
                     } else if (source[index] == ">" || (source[index] == "/" && source[index + 1] == ">")) {

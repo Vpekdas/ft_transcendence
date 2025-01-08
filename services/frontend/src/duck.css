@@ -12,3 +12,18 @@
     font-weight: bold;
     font-size: 3em;
 }
+
+.duck-card {
+    display: inline-block;
+}
+
+.duck-upgrade-btn {
+    background-color: #222;
+    color: #eee;
+    border: 1px solid #eee;
+    width: 300%;
+}
+
+.cost-too-high {
+    background-color: red;
+}

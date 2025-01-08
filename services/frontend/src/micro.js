@@ -61,9 +61,9 @@ function applyTreeDifference(old, newElement, app, node) {
     let newString = elementToString(newElement);
 
     if (oldString != newString) {
-        console.log(old, node.id);
-        const comp = node.getComponentById(old.classList.item(1));
-        comp.dispatchEvent("delete", {});
+        // console.log(old, node.id);
+        // const comp = node.getComponentById(old.classList.item(1));
+        // comp.dispatchEvent("delete", {});
 
         app.replaceChild(newElement, old);
 
@@ -80,8 +80,8 @@ function applyTreeDifference(old, newElement, app, node) {
                 element.classList.item(0).includes("micro-")
             ) {
                 // TODO: Better component detection
-                const comp = node.getComponentById(element.classList.item(1)); // TODO: Same here it could be way better
-                comp.dispatchEvent("delete", {});
+                // const comp = node.getComponentById(element.classList.item(1)); // TODO: Same here it could be way better
+                // comp.dispatchEvent("delete", {});
             }
 
             old.removeChild(element);
@@ -99,8 +99,8 @@ function applyTreeDifference(old, newElement, app, node) {
                     element.classList.item(0).includes("micro-")
                 ) {
                     // TODO: Better component detection
-                    const comp = node.getComponentById(element.classList.item(1)); // TODO: Same here it could be way better
-                    comp.dispatchEvent("delete", {});
+                    // const comp = node.getComponentById(element.classList.item(1)); // TODO: Same here it could be way better
+                    // comp.dispatchEvent("delete", {});
                 }
 
                 old.replaceChild(newElement.childNodes.item(index).cloneNode(true), element);
@@ -735,7 +735,7 @@ function tokenizeHTML(source, parentName) {
                         index++;
                     }
 
-                    if (isOperator(source[index]) && source[index] != "=") {
+                    if ((isOperator(source[index]) && source[index] != "=") || !isOperator(source[index])) {
                         attributes.set(attributeName, "");
                         continue;
                     } else if (source[index] == ">" || (source[index] == "/" && source[index + 1] == ">")) {
@@ -800,9 +800,7 @@ function tokenizeHTML(source, parentName) {
                 index++;
             }
 
-            // if (!isAll(s, ["\n"])) {
             tokens.push(new TokenString(s));
-            // }
         }
     }
 

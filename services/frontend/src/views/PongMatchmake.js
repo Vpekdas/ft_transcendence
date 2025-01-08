@@ -61,15 +61,19 @@ export default async function PongMatchmake({ dom, stores, node }) {
 
         setTime(0);
 
-        timer = setInterval(() => {
-            setTime(time() + 1);
-        }, 1000);
+        // timer = setInterval(() => {
+        //     setTime(time() + 1);
+        // }, 1000);
     });
 
     dom.addEventListener("delete", (event) => {
         clearInterval(timer);
         console.log("aaaaaaaaaaaaaaahhhhhhhhhhhhhhhh");
     });
+
+    //     <li>
+    //     <Duck />
+    // </li>
 
     return /* HTML */ `<NavBar />
         <div id="toast-container"></div>
@@ -82,9 +86,6 @@ export default async function PongMatchmake({ dom, stores, node }) {
                     <span>
                         <span class="timer">${timeInMinutes()}</span>
                     </span>
-                </li>
-                <li>
-                    <Duck />
                 </li>
             </ul>
             <div class="match-found-container hidden">

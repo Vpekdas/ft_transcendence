@@ -40,81 +40,96 @@ function elementToString(node) {
     }
 }
 
-function dispatchDeleteForChildren(element, node) {}
-
 /**
  * Recursively go down through the node tree and replace nodes only when necessary.
  *
- * @param {Element} old
+ * @param {Element} oldElement
  * @param {Element} newElement
  * @param {Element} app
- * @param {ComponentNode} node
+ * @param {ComponentNode} oldNode
+ * @param {ComponentNode} newNode
+ * @param {ComponentNode} appNode
  */
-function applyTreeDifference(old, newElement, app, node) {
+function applyTreeDifference(oldElement, newElement, app, oldNode, newNode, appNode) {
     let index = 0;
 
     // NOTE: When calling `Element.replaceChild` the node is removed from the original tree before
     //       replacing in the new tree, decrementing `element.childNodes.length` in the process.
     //       We need to clone the node before!
 
-    let oldString = elementToString(old);
+    let oldString = elementToString(oldElement);
     let newString = elementToString(newElement);
 
     if (oldString != newString) {
-        // console.log(old, node.id);
-        // const comp = node.getComponentById(old.classList.item(1));
-        // comp.dispatchEvent("delete", {});
+        // for (let child of oldNode.childOf(oldElement)) {
+        //     console.log(child);
+        //     child.cleanup();
+        // }
 
-        app.replaceChild(newElement, old);
+        console.log(oldNode.childOf(oldElement));
+
+        app.replaceChild(newElement, oldElement);
+        appNode.replaceChild(newNode, oldNode);
 
         return;
     }
 
-    for (; index < old.childNodes.length; index++) {
+    for (; index < oldElement.childNodes.length; index++) {
         if (index >= newElement.childNodes.length) {
-            const element = old.childNodes.item(index);
+            const element = oldElement.childNodes.item(index);
 
-            if (
-                element instanceof Element &&
-                element.classList.length == 2 &&
-                element.classList.item(0).includes("micro-")
-            ) {
-                // TODO: Better component detection
-                // const comp = node.getComponentById(element.classList.item(1)); // TODO: Same here it could be way better
-                // comp.dispatchEvent("delete", {});
+            for (let child of oldNode.childOf(oldElement)) {
+                child.cleanup();
             }
 
-            old.removeChild(element);
+            oldElement.removeChild(element);
         } else {
-            let oldString = elementToString(old.childNodes.item(index));
+            let oldString = elementToString(oldElement.childNodes.item(index));
             let newString = elementToString(newElement.childNodes.item(index));
 
             if (oldString != newString) {
                 // replace the node
-                const element = old.childNodes.item(index);
+                const element = oldElement.childNodes.item(index);
 
-                if (
-                    element instanceof Element &&
-                    element.classList.length == 2 &&
-                    element.classList.item(0).includes("micro-")
-                ) {
-                    // TODO: Better component detection
-                    // const comp = node.getComponentById(element.classList.item(1)); // TODO: Same here it could be way better
-                    // comp.dispatchEvent("delete", {});
+                for (let child of oldNode.childOf(element)) {
+                    child.cleanup();
                 }
 
-                old.replaceChild(newElement.childNodes.item(index).cloneNode(true), element);
+                oldElement.replaceChild(newElement.childNodes.item(index).cloneNode(true), element);
             } else {
                 // nothing to do, go down the tree recursively
-                if (old.childNodes.item(index) instanceof Element) {
-                    applyTreeDifference(old.childNodes.item(index), newElement.childNodes.item(index));
+                let element = oldElement.childNodes.item(index);
+
+                if (element instanceof Element) {
+                    if (element.classList.length == 2 && element.classList.item(0).includes("micro-")) {
+                        let oldNode2 = oldNode.getComponentById(element.classList.item(1));
+                        let newNode2 = newNode.getComponentById(element.classList.item(1));
+
+                        applyTreeDifference(
+                            oldElement.childNodes.item(index),
+                            newElement.childNodes.item(index),
+                            app,
+                            oldNode2,
+                            newNode2,
+                            appNode
+                        );
+                    } else {
+                        applyTreeDifference(
+                            oldElement.childNodes.item(index),
+                            newElement.childNodes.item(index),
+                            app,
+                            oldNode,
+                            newNode,
+                            appNode
+                        );
+                    }
                 }
             }
         }
     }
 
     for (; index < newElement.childNodes.length; index++) {
-        old.appendChild(newElement.childNodes.item(index));
+        oldElement.appendChild(newElement.childNodes.item(index));
     }
 }
 
@@ -175,9 +190,11 @@ function matchRoute(routes, path) {
     return undefined;
 }
 
+let rootNode;
+
 async function router() {
     let app = document.getElementById("micro-app");
-    let node = new ComponentNode(undefined, "$Root", undefined);
+    let newRootNode = new ComponentNode(undefined, "$Root", undefined);
     let oldElement = app.firstElementChild;
 
     if (routerSettings == undefined) {
@@ -203,17 +220,9 @@ async function router() {
             attributes = new Map(Object.entries(route.route.attributes));
         }
 
-        newElement = await createComponent(route.route.view, attributes, route.params, node);
+        newElement = await createComponent(route.route.view, attributes, route.params, newRootNode, app);
     } else if (routerSettings.notFound != undefined) {
-        newElement = await createComponent(routerSettings.notFound, new Map(), new Map(), node);
-    } else {
-        const element = await parseHTML(
-            "<div style='width: 100%; height: 100%; background-color: white; text-align: center;'><h1>404 - Not Found</h1></div>",
-            undefined,
-            undefined,
-            new ComponentNode({}, "", undefined)
-        );
-        newElement = element;
+        newElement = await createComponent(routerSettings.notFound, new Map(), new Map(), newRootNode, app);
     }
 
     if (newElement == undefined) {
@@ -223,12 +232,17 @@ async function router() {
     if (oldElement == null) {
         app.append(newElement);
     } else {
-        applyTreeDifference(oldElement, newElement, app, node);
+        let oldNode = rootNode.children.at(0);
+        let newNode = newRootNode.children.at(0);
+
+        applyTreeDifference(oldElement, newElement, app, oldNode, newNode, rootNode);
     }
 
+    rootNode = newRootNode;
+
     if (initialPageLoad) {
-        node.addEventListeners();
-        await node.applyDoCallbacks();
+        rootNode.addEventListeners();
+        await rootNode.applyDoCallbacks();
     }
 
     initialPageLoad = false;
@@ -309,14 +323,17 @@ class ComponentNode {
     /**
      * @param {import("./micro").ComponentParams} object
      * @param {string} name
+     * @param {ComponentNode} parent
+     * @param {Element} parentElement
      */
-    constructor(object, name, parent) {
+    constructor(object, name, parent, parentElement) {
         /** @type {Array<ComponentNode>} */
         this.children = [];
         this.object = object;
         this.parent = parent;
+        this.parentElement = parentElement;
         this.name = name;
-        this.id = name + "-" + this.createComponentId();
+        this.id = "id" + this.createComponentId();
 
         // TODO: Add the index of the node to the id.
     }
@@ -344,6 +361,30 @@ class ComponentNode {
                 return comp;
             }
         }
+    }
+
+    /**
+     * Returns the direct children of the component which are a direct or indirect child
+     * of the given element in the DOM.
+     *
+     * @param {Element} element
+     * @returns {ComponentNode[]}
+     */
+    childOf(element) {
+        let array = [];
+
+        for (let child of this.children) {
+            if (child.parentElement.isSameNode(element)) {
+                array.push(child);
+            } else {
+                for (let childElement of element.children) {
+                    let array2 = this.childOf(childElement);
+                    array.push(...array2);
+                }
+            }
+        }
+
+        return array;
     }
 
     addEventListeners() {
@@ -432,7 +473,7 @@ class ComponentNode {
     }
 
     createComponentId() {
-        let parents = [];
+        let parents = [this.name];
         let node = this.parent;
 
         while (node != undefined) {
@@ -451,15 +492,40 @@ class ComponentNode {
         /** @type {Array<import("./micro").ComponentEventCallback>} */
         let events = this.object.dom.events.get(name);
 
+        if (this.name == "Duck") console.log(this.name, this.id, events);
+
         if (events != undefined) {
             for (let callback of events) {
-                callback(event);
+                setTimeout(async () => await callback(event));
             }
         }
 
         for (let child of this.children) {
             child.dispatchEvent(name, event);
         }
+    }
+
+    /**
+     * @param {ComponentNode} child
+     * @param {ComponentNode} prev
+     */
+    replaceChild(child, prev) {
+        for (let index = 0; index < this.children.length; index++) {
+            if (this.children[index].id == prev.id) {
+                this.children[index] = child;
+            }
+        }
+    }
+
+    cleanup() {
+        for (let interval of this.object.dom.intervals) {
+            clearInterval(interval);
+        }
+        for (let timeout of this.object.dom.timeouts) {
+            clearInterval(timeout);
+        }
+
+        this.dispatchEvent("delete", {});
     }
 }
 
@@ -472,6 +538,8 @@ class ComponentDOM {
         this.elements = [];
         /** @type {Map<string, Array<import("./micro").ComponentEventCallback>>} */
         this.events = new Map();
+        this.intervals = [];
+        this.timeouts = [];
     }
 
     /**
@@ -505,6 +573,14 @@ class ComponentDOM {
         }
 
         this.events.get(event).push(callback);
+    }
+
+    createInterval(callback, interval) {
+        this.intervals.push(setInterval(callback, interval));
+    }
+
+    createTimeout(callback, interval) {
+        this.timeouts.push(setTimeout(callback, interval));
     }
 }
 
@@ -580,9 +656,10 @@ class Stores {
  * @param {Map<string, string>} attributes
  * @param {Map<string, string>} params
  * @param {ComponentNode} parentNode
+ * @param {Element} parentElement
  * @returns {Promise<Element>}
  */
-async function createComponent(comp, attributes, params, parentNode) {
+async function createComponent(comp, attributes, params, parentNode, parentElement) {
     /** @type {import("./micro").ComponentParams} */
     let object = {
         params: params,
@@ -591,7 +668,7 @@ async function createComponent(comp, attributes, params, parentNode) {
         stores: new Stores(comp.name),
     };
 
-    const node = new ComponentNode(object, comp.name, parentNode);
+    const node = new ComponentNode(object, comp.name, parentNode, parentElement);
     object.node = node;
 
     const element = await parseHTML(await comp(object), comp.name, params, node);
@@ -915,7 +992,7 @@ async function createElement(name, attributes, parent, params, parentNode) {
             throw new ParseError("Unknown component " + name);
         }
 
-        return await createComponent(component, attributes, params, parentNode);
+        return await createComponent(component, attributes, params, parentNode, parent);
     }
 
     for (let attribute of attributes.keys()) {

@@ -38,18 +38,14 @@ export default async function Duck({ dom, stores }) {
         upgradeHTML += `<li><button class="duck-upgrade-btn" name="${obj.name}">${obj.name} x${value}</button></li>`;
     }
 
-    let timer;
-
     dom.querySelector("#the-duck").do((element) => {
-        timer = setInterval(() => {
-            let _data = data();
-
-            for (let obj of upgrades) {
-                let value = _data[obj.name];
-
-                setCount(count() + obj.mul(value));
-            }
-        }, 1000);
+        // dom.createInterval(() => {
+        //     let _data = data();
+        //     for (let obj of upgrades) {
+        //         let value = _data[obj.name];
+        //         setCount(count() + obj.mul(value));
+        //     }
+        // }, 1000);
     });
 
     dom.querySelector("#the-duck").on("click", (event) => {
@@ -89,10 +85,6 @@ export default async function Duck({ dom, stores }) {
             setCount(count() - cost);
             setData(_data);
         }
-    });
-
-    dom.addEventListener("delete", (event) => {
-        clearInterval(timer);
     });
 
     return /* HTML */ ` <div class="duck-container">

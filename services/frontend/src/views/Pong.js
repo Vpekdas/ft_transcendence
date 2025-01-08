@@ -251,6 +251,13 @@ export default async function Pong({ dom, params }) {
         camera.position.z = 20;
         camera.position.y = -2;
 
+        if (!DEBUG) {
+            controls.enableRotate = false;
+            controls.enablePan = false;
+            controls.enableZoom = false;
+            controls.enableDamping = false;
+        }
+
         renderer.setAnimationLoop(() => {
             for (let [key, value] of boxes) {
                 value.update();

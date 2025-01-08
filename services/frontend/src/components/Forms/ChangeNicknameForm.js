@@ -3,12 +3,10 @@ import { fetchApi, post, showToast } from "../../utils";
 
 /** @type {import("../../micro").Component} */
 export default async function ChangeNicknameForm({ dom }) {
-    const changeLanguage = tr("Change");
-
     const info = await post("/api/player/c/nickname").then((res) => res.json());
 
-    dom.querySelector(".btn.btn-primary.change-nickname-button").on("click", async (el) => {
-        const newNickname = el.querySelector("#new-nickname").value;
+    dom.querySelector(".btn.btn-primary.change-nickname-button").on("click", async (event) => {
+        const newNickname = document.getElementById("new-nickname").value;
 
         const response = await fetchApi("/api/player/c/nickname/update", {
             method: "POST",
@@ -22,7 +20,7 @@ export default async function ChangeNicknameForm({ dom }) {
             });
 
         if (response.error) {
-            showToast(response.error, "bi bi-exclamation-triangle-fill");
+            showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
         }
     });
 
@@ -41,7 +39,7 @@ export default async function ChangeNicknameForm({ dom }) {
                     autocomplete="off"
                     required
                 />
-                <button type="submit" class="btn btn-primary settings">${changeLanguage}</button>
+                <button type="submit" class="btn btn-primary settings change-nickname-button">${tr("Change")}</button>
             </div>
         </div>
     </div>`;

@@ -2111,6 +2111,16 @@ ow-system[labels="false"] ow-name {
     }
 }
 
+#eye-of-the-universe {
+    display: none;
+    height: 100%;
+    width: 100%;
+    background-color: black;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
 /* CREATE TOURNAMENT */
 
 .container-fluid.dashboard-container.create-tournament-container {

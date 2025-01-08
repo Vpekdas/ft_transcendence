@@ -4,5 +4,6 @@ export default async function SolarSystem({}) {
         <NavBar />
         <OuterWilds />
         <Coordinates />
+        <EyeOfTheUniverse />
     </div>`;
 }

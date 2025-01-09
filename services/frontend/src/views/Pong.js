@@ -283,7 +283,7 @@ export default async function Pong({ dom, params }) {
         const spaceTexture = textureLoader.load("/img/space.jpg");
         scene.background = spaceTexture;
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 2);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 25);
         scene.add(ambientLight);
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);

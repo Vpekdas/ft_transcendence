@@ -1449,7 +1449,7 @@ ow-wanderer {
     pointer-events: auto;
     offset-distance: var(--w-offset, 0%);
 }
-
+                                                   
 ow-name {
     position: absolute;
     top: 40%;

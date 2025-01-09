@@ -283,13 +283,15 @@ export default async function Pong({ dom, params }) {
         const spaceTexture = textureLoader.load("/img/space.jpg");
         scene.background = spaceTexture;
 
-        var hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
-        hemiLight.position.set(0, 300, 0);
-        scene.add(hemiLight);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 2);
+        scene.add(ambientLight);
 
-        var dirLight = new THREE.DirectionalLight(0xffffff);
-        dirLight.position.set(75, 300, -75);
-        scene.add(dirLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(0, 0, 20);
+        scene.add(directionalLight);
+
+        const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 5);
+        scene.add(directionalLightHelper);
 
         ws = new WebSocket(`wss://${getOriginNoProtocol()}:8080/ws/pong/${id}`);
         ws.onopen = async (event) => {

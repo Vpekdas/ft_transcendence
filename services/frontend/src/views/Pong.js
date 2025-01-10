@@ -65,6 +65,10 @@ export default async function Pong({ dom, params }) {
 
     const terrain = await modelLoader.loadAsync("/models/BrittleHollow.glb");
 
+    const lava = await modelLoader.loadAsync("/models/Lava.glb");
+
+    scene.add(lava.scene);
+
     textMesh.scale.set(0.01, 0.01, 0.01);
     scene.add(textMesh);
 
@@ -283,7 +287,8 @@ export default async function Pong({ dom, params }) {
         const spaceTexture = textureLoader.load("/img/space.jpg");
         scene.background = spaceTexture;
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 25);
+        // ! For ground, It seems ok but may not be ok for other models.
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1);
         scene.add(ambientLight);
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);

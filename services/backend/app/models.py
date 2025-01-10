@@ -22,7 +22,7 @@ class Player(models.Model):
     icon = JSONField(null=True)
 
     money = IntegerField(default=0)
-    skins = JSONField(default=dict)
+    skins = JSONField(default=lambda: {"terrain": "default-terrain", "ball": "default-ball", "unlocked": []})
 
     pongElo = IntegerField(default=0)
 

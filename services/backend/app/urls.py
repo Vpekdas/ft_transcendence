@@ -38,6 +38,10 @@ urlpatterns = [
     path('api/player/<str:id>/delete', views.deleteProfile), # was api/deleteProfile
     path('api/player/<str:id>/matches', views.getMatch),
 
+    # path('api/player/<str:id>/skins/buy/<str:name>', ...),
+    path('api/player/<str:id>/skins/select-terrain/<str:name>', views.selectTerrainSkin),
+    path('api/player/<str:id>/skins/select-ball/<str:name>', views.selectBallSkin),
+
     path('api/tournament/create', views.tournament_create),
 ]
 

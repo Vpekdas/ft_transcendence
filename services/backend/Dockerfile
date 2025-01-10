@@ -1,14 +1,16 @@
-FROM python:3.12.0
-RUN useradd -ms /bin/sh -u 1001 app
-USER app
+FROM python:3.12.0-alpine3.18
 
 EXPOSE 8000
 
 WORKDIR /app
-COPY --chown=app:app ./requirements.txt /app/requirements.txt
-RUN pip3 install -r requirements.txt
+COPY ./requirements.txt /app/requirements.txt
 
-COPY --chown=app:app . /app
+RUN apk add --no-cache postgresql-libs && \
+    apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev && \
+    pip3 install -r requirements.txt --no-cache-dir && \
+    apk --purge del .build-deps
 
-ENTRYPOINT [ "bash", "entrypoint.sh" ]
+COPY . /app
+
+ENTRYPOINT [ "sh", "entrypoint.sh" ]
 CMD [ "python3", "manage.py", "runserver", "0.0.0.0:8000" ]

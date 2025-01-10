@@ -5,7 +5,35 @@ import { FontLoader } from "three/addons/loaders/FontLoader.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { getOriginNoProtocol, post } from "../utils";
 
-function addCube(scene, x, y, width, height, color) {
+class TerrainSkin {
+    constructor(name, model) {
+        this.name = name;
+        this.model = model;
+    }
+
+    update() {}
+}
+
+class BallSkin {
+    constructor(name, model) {
+        this.name = name;
+        this.model = model;
+    }
+}
+
+/** @type {Map<string, TerrainSkin>} */
+let terrainSkins = new Map();
+/** @type {Map<string, BallSkin>} */
+let ballSkins = new Map();
+
+function registerAllSkins() {
+    // Terrain skins
+    terrainSkins.set("brittle-hollow", new TerrainSkin("brittle-hollow", "/models/BrittleHollow.glb"));
+
+    // Ball skins
+}
+
+function createCube(x, y, width, height, color) {
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     const material = new THREE.MeshBasicMaterial({ color: color });
     const cube = new THREE.Mesh(geometry, material);
@@ -15,7 +43,7 @@ function addCube(scene, x, y, width, height, color) {
     return cube;
 }
 
-function addSphere(scene, x, y, radius, widthSegments, heightSegments, color) {
+function createSphere(x, y, radius, widthSegments, heightSegments, color) {
     const geometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
     const material = new THREE.MeshBasicMaterial({ color: color });
     const sphere = new THREE.Mesh(geometry, material);
@@ -25,7 +53,7 @@ function addSphere(scene, x, y, radius, widthSegments, heightSegments, color) {
     return sphere;
 }
 
-function debuggingBox2(scene, position, width, height) {
+function debuggingBox2(position, width, height) {
     const box = new THREE.BoxHelper(new THREE.Mesh(new THREE.BoxGeometry(width, height, 1)), 0xffff00);
     box.object.position.x = position["x"];
     box.object.position.y = position["y"];
@@ -42,8 +70,6 @@ export function action(subId, actionName, actionType) {
 /** @type {import("../micro").Component} */
 export default async function Pong({ dom, params }) {
     const id = params.get("id");
-
-    let playerProfile = await post("/api/player/c/profile").then((res) => res.json());
 
     /** @type {THREE.Scene} */
     let scene = new THREE.Scene();
@@ -63,7 +89,9 @@ export default async function Pong({ dom, params }) {
     const font = await fontLoader.loadAsync("/fonts/TakaoMincho_Regular.json");
     let textMesh = new THREE.Mesh(undefined);
 
-    const terrain = await modelLoader.loadAsync("/models/BrittleHollow.glb");
+    let skin = terrainSkins.get("brittle-hollow");
+
+    const terrain = await modelLoader.loadAsync(skin.model);
 
     const lava = await modelLoader.loadAsync("/models/Lava.glb");
 
@@ -125,18 +153,17 @@ export default async function Pong({ dom, params }) {
         let body = undefined;
 
         if (type == "Ball") {
-            body = addSphere(scene, position["x"], position["y"], 0.5, 32, 16, "#ffde21");
+            body = createSphere(position["x"], position["y"], 0.5, 32, 16, "#ffde21");
         } else if (type == "Player") {
-            body = addCube(scene, position["x"], position["y"], playerWidth, playerHeight, "#cd1c18");
+            body = createCube(position["x"], position["y"], playerWidth, playerHeight, "#cd1c18");
         } else {
-            body = addCube(scene, 0, 0, 0, 0, "#000000");
+            body = createCube(0, 0, 0, 0, "#000000");
         }
 
         if (DEBUG) {
             let box;
             if (shape["type"] == "Box") {
                 box = debuggingBox2(
-                    scene,
                     position,
                     shape["max"]["x"] - shape["min"]["x"],
                     shape["max"]["y"] - shape["min"]["y"]

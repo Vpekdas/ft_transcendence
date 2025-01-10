@@ -29,7 +29,7 @@ defineRouter({
         { path: "/login", view: Login },
         { path: "/login-external", view: LoginExernal },
         { path: "/logout", view: Logout },
-        { path: "/profile/[tab=match-history,statistics,settings]", view: Profile },
+        { path: "/profile/[tab=match-history,statistics,skins,settings]", view: Profile },
         { path: "/duck", view: Clicker },
         { path: "/solar-system", view: SolarSystem },
         { path: "/play/pong/[id=$[a-zA-Z0-9]+$]", view: Pong },

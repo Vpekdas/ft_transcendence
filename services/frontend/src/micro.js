@@ -125,7 +125,7 @@ class Stores {
      * @returns {[() => typeof defaultValue, (value: typeof defaultValue) => void ]}
      */
     usePersistent(name, defaultValue) {
-        const fullName = this.componentName + "_" + name;
+        const fullName = name;
 
         return [
             () => {
@@ -381,7 +381,7 @@ class VirtualNodeComponent extends VirtualNode {
                     for (let el of query) {
                         for (let elementRef of this.object.dom.elements) {
                             for (let callback of elementRef.doCallbacks) {
-                                await callback(query);
+                                await callback(el);
                             }
                         }
                     }

@@ -10,3 +10,5 @@ INVALID_IMAGE_FORMAT = "Invalid image format"
 INVALID_REQUEST = "Invalid request"
 TOURNAMENT_DOESNT_EXISTS = "Tournament does not exists"
 IMAGE_TOO_BIG = "Profile picture exceed max size"
+
+INVALID_SKIN = "Invalid skin"

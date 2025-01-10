@@ -254,6 +254,47 @@ def deleteProfile(request: HttpRequest, id):
 
     return JsonResponse({})
 
+terrainSkins = [ "default-terrain", "brittle-hollow" ]
+ballSkins = [ "default-ball" ]
+
+@require_POST
+def selectTerrainSkin(request: HttpRequest, id, name):
+    if id == "c" and request.user.is_authenticated:
+        id = int(Player.objects.filter(user=request.user).first().id)
+    else:
+        id = int(id)
+
+    if name not in terrainSkins:
+        return JsonResponse({ "error": INVALID_SKIN })
+
+    player = Player.objects.filter(id=id).first()
+    skins = player.skins
+
+    if "terrain" in skins:
+        skins.insert("terrain", name)
+
+    return JsonResponse({})
+
+@require_POST
+def selectBallSkin(request: HttpRequest, id, name):
+    if id == "c" and request.user.is_authenticated:
+        id = int(Player.objects.filter(user=request.user).first().id)
+    else:
+        id = int(id)
+
+    player = Player.objects.filter(id=id).first()
+
+    if name not in ballSkins:
+        return JsonResponse({ "error": INVALID_SKIN })
+
+    player = Player.objects.filter(id=id).first()
+    skins = player.skins
+
+    if "ball" in skins:
+        skins.insert("ball", name)
+
+    return JsonResponse({})
+
 @require_POST
 def getMatch(request: HttpRequest, id):
     if not request.user.is_authenticated:

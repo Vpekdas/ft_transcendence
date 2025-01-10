@@ -10,6 +10,8 @@ export default async function Profile({ params }) {
         comp = `<Statistics />`;
     } else if (tab == "settings") {
         comp = `<Settings />`;
+    } else if (tab == "skins") {
+        comp = `<Skins />`;
     }
 
     return /* HTML */ `

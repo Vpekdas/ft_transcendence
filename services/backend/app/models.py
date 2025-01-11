@@ -10,6 +10,9 @@ duck = '<svg height="64" preserveAspectRatio="none" viewBox="0 0 64 64" width="6
 def format_player_picture(instance, filename) -> str:
     return 'pictures/{}'.format(instance.id)
 
+def default_skins():
+    return {"terrain": "default-terrain", "ball": "default-ball", "unlocked": []}
+
 # NOTE: models referencing a `Player` should not use foreign key or at least not `on_delete=models.CASCADE`
 #       or else game history would be deleted.
 class Player(models.Model):
@@ -22,7 +25,7 @@ class Player(models.Model):
     icon = JSONField(null=True)
 
     money = IntegerField(default=0)
-    skins = JSONField(default=lambda: {"terrain": "default-terrain", "ball": "default-ball", "unlocked": []})
+    skins = JSONField(default=default_skins)
 
     pongElo = IntegerField(default=0)
 

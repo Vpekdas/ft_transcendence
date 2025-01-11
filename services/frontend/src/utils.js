@@ -1,16 +1,16 @@
 export function getOrigin() {
-    return window.location.origin.substring(0, window.location.origin.lastIndexOf(":"));
+    let origin = window.location.href;
+    let index = origin.startsWith("https://") ? 8 : 7;
+
+    return origin.substring(0, origin.indexOf("/", index));
 }
 
 export function getOriginNoProtocol() {
-    return window.location.origin
-        .substring(0, window.location.origin.lastIndexOf(":"))
-        .replace("http://", "")
-        .replace("https://", "");
+    return getOrigin().replace("http://", "").replace("https://", "");
 }
 
 export function api(route) {
-    return getOrigin() + ":8080" + route;
+    return getOrigin() + route;
 }
 
 export async function fetchApi(url, init) {
@@ -48,6 +48,4 @@ export function showToast(message, iconClass) {
     setTimeout(() => {
         toast.remove();
     }, 5000);
-
-    console.log("hello world!");
 }

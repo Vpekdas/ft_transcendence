@@ -59,7 +59,7 @@ export default async function Login({ dom }) {
 
             if (proxy.location.host == "example.com") {
                 proxy.close();
-                window.location.href = getOrigin() + ":8080/login-external" + proxy.location.search;
+                window.location.href = getOrigin() + "/login-external" + proxy.location.search;
                 proxy = null;
             }
         }, 500);

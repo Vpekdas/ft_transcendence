@@ -32,7 +32,7 @@ export default async function PongMatchmake({ dom, stores }) {
     let timer;
 
     dom.querySelector(".matchmake-container").do(async (c) => {
-        const ws = new WebSocket(`wss://${getOriginNoProtocol()}:8080/ws/matchmake/pong`);
+        const ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/matchmake/pong`);
         ws.onopen = (event) => {
             ws.send(
                 JSON.stringify({
@@ -68,7 +68,6 @@ export default async function PongMatchmake({ dom, stores }) {
 
     dom.addEventListener("delete", (event) => {
         clearInterval(timer);
-        console.log("aaaaaaaaaaaaaaahhhhhhhhhhhhhhhh");
     });
 
     //     <li>

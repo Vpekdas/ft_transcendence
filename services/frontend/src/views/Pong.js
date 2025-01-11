@@ -89,6 +89,8 @@ export default async function Pong({ dom, params }) {
     const font = await fontLoader.loadAsync("/fonts/TakaoMincho_Regular.json");
     let textMesh = new THREE.Mesh(undefined);
 
+    registerAllSkins();
+
     let skin = terrainSkins.get("brittle-hollow");
 
     const terrain = await modelLoader.loadAsync(skin.model);
@@ -325,7 +327,7 @@ export default async function Pong({ dom, params }) {
         const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 5);
         scene.add(directionalLightHelper);
 
-        ws = new WebSocket(`wss://${getOriginNoProtocol()}:8080/ws/pong/${id}`);
+        ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/pong/${id}`);
         ws.onopen = async (event) => {
             await setupGameTerrain();
         };

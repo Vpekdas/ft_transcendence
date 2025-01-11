@@ -115,7 +115,7 @@ export default async function Tournament({ dom, params, node }) {
     let host = undefined;
 
     dom.querySelector("#tournament-container").do(async (el) => {
-        const ws = new WebSocket(`wss://${getOriginNoProtocol()}:8080/ws/tournament/${id}`);
+        const ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/tournament/${id}`);
 
         ws.onopen = (event) => {
             ws.send(JSON.stringify({ type: "join" }));

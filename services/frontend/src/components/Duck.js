@@ -42,7 +42,7 @@ export default async function Duck({ dom, stores }) {
         let interval = setInterval(() => {
             let _data = data();
             for (let obj of upgrades) {
-                let value = _data[obj.name];
+                let value = _data[obj.name] != undefined ? _data[obj.name] : 0;
                 setCount(count() + obj.mul(value));
             }
         }, 1000);

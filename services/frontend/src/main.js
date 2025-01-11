@@ -21,6 +21,7 @@ import NotFound from "./views/NotFound";
 import { isLoggedIn } from "./utils";
 import { navigateTo } from "./micro";
 import Profile from "./views/Profile";
+import Test from "./views/Test";
 
 defineRouter({
     routes: [
@@ -36,6 +37,7 @@ defineRouter({
         { path: "/matchmake/pong", view: PongMatchmake },
         { path: "/tournament/[id=$[a-zA-Z0-9]+$]", view: Tournament },
         { path: "/create-tournament", view: CreateTournament },
+        { path: "/test", view: Test },
     ],
     hook: async (route) => {
         if (!(await isLoggedIn()) && route != "/login" && route != "/register") {

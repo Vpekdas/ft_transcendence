@@ -40,6 +40,11 @@ export default async function NavBar({}) {
                     <span>${tr("Logout")}</span></a
                 >
             </li>
+            <li class="nav-item">
+                <a class="nav-link custom-link ${activeTabClass("/test")}" href="/test">
+                    <span>Test</span></a
+                >
+            </li>
             <div class="language-picker-container">
                 <LanguagePicker />
             </div>

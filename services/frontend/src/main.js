@@ -6,11 +6,8 @@ import { defineRouter } from "./micro";
 import Home from "./views/Home";
 import Registration from "./views/Registration";
 import Login from "./views/Login";
-import LoginExernal from "./views/LoginExternal";
+import SigninExternal from "./views/SigninExternal";
 import Logout from "./views/Logout";
-import MatchHistory from "./views/MatchHistory";
-import Statistics from "./views/Statistics";
-import Settings from "./views/Settings";
 import Clicker from "./views/Clicker";
 import SolarSystem from "./views/SolarSystem";
 import Pong from "./views/Pong";
@@ -22,13 +19,14 @@ import { isLoggedIn } from "./utils";
 import { navigateTo } from "./micro";
 import Profile from "./views/Profile";
 import Test from "./views/Test";
+import Redirected from "./views/Redirected";
 
 defineRouter({
     routes: [
         { path: "/", view: Home },
         { path: "/register", view: Registration },
         { path: "/login", view: Login },
-        { path: "/login-external", view: LoginExernal },
+        { path: "/signin-external", view: SigninExternal },
         { path: "/logout", view: Logout },
         { path: "/profile/[tab=match-history,statistics,skins,settings]", view: Profile },
         { path: "/duck", view: Clicker },
@@ -38,10 +36,21 @@ defineRouter({
         { path: "/tournament/[id=$[a-zA-Z0-9]+$]", view: Tournament },
         { path: "/create-tournament", view: CreateTournament },
         { path: "/test", view: Test },
+        { path: "/redirected", view: Redirected },
     ],
-    hook: async (route) => {
-        if (!(await isLoggedIn()) && route != "/login" && route != "/register") {
-            navigateTo("/login?redirect=" + route);
+    hook: async (route, url) => {
+        if (
+            !(await isLoggedIn()) &&
+            route != "/login" &&
+            route != "/signin-external" &&
+            route != "/register" &&
+            route != "/redirected"
+        ) {
+            if (route == "/") {
+                navigateTo("/login");
+            } else {
+                navigateTo("/login?redirect=" + encodeURIComponent(url));
+            }
         }
     },
     notFound: NotFound,

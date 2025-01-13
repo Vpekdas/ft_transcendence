@@ -37,32 +37,29 @@ export default async function Login({ dom }) {
             if (window.location.search.length == 0) {
                 navigateTo("/");
             } else {
-                const redirect = window.location.search.substring(1).replace("redirect=", "");
+                const redirect = decodeURIComponent(window.location.search.substring(1).replace("redirect=", ""));
                 navigateTo(redirect);
             }
         }
     });
 
     function redirectAuth42() {
-        const clientId = "u-s4t2ud-113d89636c434e478745914966fff13deb2d93ec00210a1f8033f12f8e0d06b2";
-        const redirectUrl = encodeURIComponent("https://example.com");
+        const clientId = "u-s4t2ud-fd6496bf5631feb3051ccd4d5be873a3e47614223c9ebb635abaefda7d894f92";
+        const redirectUrl = encodeURIComponent(getOrigin() + "/redirected");
         const url = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUrl}&response_type=code`;
 
         let proxy = window.open(url, "Auth with 42", "height=700,width=600");
 
-        let timeout = setTimeout(() => {
-            if (proxy) {
-                clearTimeout(timeout);
-            }
-
-            console.log("HEllo world!", proxy.location.href);
-
-            if (proxy.location.host == "example.com") {
-                proxy.close();
-                window.location.href = getOrigin() + "/login-external" + proxy.location.search;
-                proxy = null;
-            }
-        }, 500);
+        let inter = setInterval(() => {
+            try {
+                if (proxy.location.href.startsWith(getOrigin() + "/redirected")) {
+                    proxy.close();
+                    clearInterval(inter);
+                    navigateTo("/signin-external" + proxy.location.search);
+                    proxy = null;
+                }
+            } catch (ex) {}
+        }, 200);
     }
 
     dom.querySelector(".create-account-redirect").on("click", () => navigateTo("register" + window.location.search));

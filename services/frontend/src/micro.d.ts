@@ -47,6 +47,8 @@ export type RouterSettings = {
     notFound: Component;
 };
 
+function navigateTo(url: string): void;
+
 // Parser types
 
 export type Location = {

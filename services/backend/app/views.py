@@ -48,7 +48,7 @@ def signin(request: HttpRequest):
 
     return JsonResponse({})
 
-CLIENT_ID="u-s4t2ud-113d89636c434e478745914966fff13deb2d93ec00210a1f8033f12f8e0d06b2"
+CLIENT_ID="u-s4t2ud-fd6496bf5631feb3051ccd4d5be873a3e47614223c9ebb635abaefda7d894f92"
 
 """
 Create a new user using 42 API
@@ -58,27 +58,43 @@ def signinExternal(request: HttpRequest):
     data = json.loads(request.body)
 
     code = data["code"]
+    redirect_uri = data["redirect_uri"]
 
     # Exchange the code provided by the api for an access token
-    res = requests.post("https://api.intra.42.fr/oauth/token", json={ "grant_type": "authorization_code", "client_id": CLIENT_ID, "client_secret": os.environ.get("API42_SECRET"), "code": code })
+    res = requests.post("https://api.intra.42.fr/oauth/token", json={ "grant_type": "authorization_code", "client_id": CLIENT_ID, "client_secret": os.environ.get("API42_SECRET"), "code": code, "redirect_uri": redirect_uri })
+
+    # print(data, file=sys.stderr)
 
     if res.status_code != 200:
+        print(res.status_code, res.text, redirect_uri, file=sys.stderr)
         return HttpResponseServerError()
 
     response = json.loads(res.content)
-    print(response, file=sys.stderr)
+    access_token = response["access_token"]
+    # print(response, file=sys.stderr)
 
     # One last request to query the login, profile picture and other basic info to fill the database
     # https://api.intra.42.fr/v2/me
 
-    # user = User.objects.create(username=username)
-    # player = Player.objects.create(user=user, nickname=nickname, external=True)
+    res = requests.post("https://api.intra.42.fr/v2/me", json={ "access_token": access_token }).json()
+    user = User.objects.filter(username=res["username"]).first()
 
-    # user.save()
 
-    # login(request, user)
+    if user:
+        player = Player.objects.filter(user=user).first()
+        player.accessToken = access_token
 
-    return JsonResponse({})
+        player.save()
+    else:
+        user = User.objects.create(username=res["username"])
+        player = Player.objects.create(user=user, nickname=res["username"], external=True)
+
+        user.save()
+        player.save()
+
+    login(request, user)
+
+    return JsonResponse({ "access_token": access_token })
 
 """
 Log-in
@@ -99,6 +115,24 @@ def loginRoute(request: HttpRequest):
         return JsonResponse({ })
     else:
         return JsonResponse({ "error": MISMATCH_CREDENTIALS })
+
+"""
+Log-in with 42
+"""
+@require_POST
+def loginExternal(request: HttpRequest):
+    data = json.loads(request.body)
+
+    if not "access_token" in data:
+        return HttpResponseBadRequest()
+
+    access_token = data["access_token"]
+    # TODO: Check if the access token is valid
+
+    player = Player.objects.filter(accessToken=access_token, external=True).first()
+    user = player.user
+
+    login(request, user)
 
 """
 Logout from an account.

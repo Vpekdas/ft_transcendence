@@ -16,6 +16,8 @@ services:
         condition: service_healthy
     container_name: backend
     build: services/backend
+    env_file:
+      - .env
     develop:
       watch:
         - action: sync

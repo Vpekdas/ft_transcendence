@@ -28,7 +28,7 @@ let ballSkins = new Map();
 
 function registerAllSkins() {
     // Terrain skins
-    terrainSkins.set("brittle-hollow", new TerrainSkin("brittle-hollow", "/models/BrittleHollow.glb"));
+    terrainSkins.set("brittle-hollow", new TerrainSkin("brittle-hollow", "/models/test.glb"));
 
     // Ball skins
 }
@@ -109,7 +109,7 @@ export default async function Pong({ dom, params }) {
         scene.add(terrainSceneRight);
 
         const terrainSceneLeft = terrain.scene.clone();
-        terrainSceneLeft.rotation.set(Math.PI / 2, 0, Math.PI);
+        terrainSceneLeft.rotation.set(Math.PI / 2, Math.PI, 0);
         terrainSceneLeft.position.set(-13, 0, -1);
         scene.add(terrainSceneLeft);
 
@@ -282,7 +282,7 @@ export default async function Pong({ dom, params }) {
         const controls = new OrbitControls(camera, c);
 
         camera.position.z = 20;
-        camera.position.y = -2;
+        camera.position.y = -15;
 
         if (!DEBUG) {
             controls.enableRotate = false;
@@ -321,7 +321,7 @@ export default async function Pong({ dom, params }) {
         scene.add(ambientLight);
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(0, 0, 20);
+        directionalLight.position.set(0, -20, 20);
         scene.add(directionalLight);
 
         const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 5);

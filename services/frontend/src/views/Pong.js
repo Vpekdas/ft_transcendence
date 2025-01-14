@@ -317,7 +317,7 @@ export default async function Pong({ dom, params }) {
         scene.background = spaceTexture;
 
         // ! For ground, It seems ok but may not be ok for other models.
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 20);
         scene.add(ambientLight);
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);

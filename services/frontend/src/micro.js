@@ -552,7 +552,6 @@ function isOperator(c) {
 function isAll(str, param) {
     for (let ch of str) {
         if (!param.includes(ch)) {
-            console.log(param, ch);
             return false;
         }
     }
@@ -691,7 +690,9 @@ function tokenizeHTML(source, parentName) {
                 index++;
             }
 
-            tokens.push(new TokenString(s));
+            if (!isAll(s, [" ", "\n"])) {
+                tokens.push(new TokenString(s));
+            }
         }
     }
 
@@ -957,13 +958,15 @@ async function applyTreeDifference(oldNode, newNode, oldElement, newElement, par
 
     let index = 0;
 
-    // if (oldNode != undefined) {
-    //     console.log(
-    //         oldNode.children.length,
-    //         oldElement.childNodes.length,
-    //         oldNode.children.length == oldElement.childNodes.length
-    //     );
-    // }
+    if (oldNode != undefined) {
+        console.log(
+            oldNode.children.length,
+            oldElement.childNodes.length,
+            oldNode.children,
+            oldElement.childNodes,
+            parentElement
+        );
+    }
 
     for (; index < oldNode.children.length; index++) {
         if (index >= newNode.children.length) {
@@ -979,7 +982,7 @@ async function applyTreeDifference(oldNode, newNode, oldElement, newElement, par
             let oldElement2 = oldElement.childNodes.item(index);
             let newElement2 = newElement.childNodes.item(index).cloneNode(true);
 
-            applyTreeDifference(oldNode2, newNode2, oldElement2, newElement2, oldNode, oldElement);
+            await applyTreeDifference(oldNode2, newNode2, oldElement2, newElement2, oldNode, oldElement);
         }
     }
 
@@ -987,7 +990,7 @@ async function applyTreeDifference(oldNode, newNode, oldElement, newElement, par
         let newElement2 = newElement.childNodes.item(index).cloneNode(true);
 
         parentElement.append(newElement2);
-        newElement2.mount();
+        await newElement2.mount();
     }
 }
 
@@ -1083,15 +1086,7 @@ async function router() {
 
     await applyTreeDifference(dom.root, newNode, app.firstElementChild, newNode.build(), undefined, app);
 
-    if (dom.root == undefined || dom.root.id != newNode.id) {
-        dom.root = newNode;
-    }
-
-    // if (initialPageLoad) {
-    //     rootNode.addEventListeners();
-    //     await rootNode.applyDoCallbacks();
-    // }
-
+    dom.root = newNode;
     initialPageLoad = false;
 }
 

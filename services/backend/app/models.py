@@ -53,14 +53,14 @@ class PongGameResult(models.Model):
 
 class Message(models.Model):
     content = TextField()
-    date = DateTimeField()
-    sender = User()
-    receiver = User()
+    #date = DateTimeField()
+    sender = Player()
+    receiver = Player()
 
 class Chat(models.Model):
-    messages = ArrayField(Message())
-    user1 = User()
-    user2 = User()
+    messages = ArrayField(Message(), default=list)
+    player1 = Player()
+    player2 = Player()
 
 # TODO: Maybe store the game data to replay it later ?
 

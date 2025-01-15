@@ -2,7 +2,7 @@ import { tr } from "../i18n";
 import { navigateTo } from "../micro";
 
 /** @type {import("../micro").Component} */
-export default async function Home({ dom }) {
+export default async function Home({ object, dom }) {
     document.title = tr("Home");
 
     dom.querySelector("#play-pong-1v1local").on("click", () => {

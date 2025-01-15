@@ -332,7 +332,7 @@ export default async function Pong({ dom, params }) {
             await setupGameTerrain();
         };
         // ws.onerror = (event) => {
-        //     showToast(tr("Cannot connect to the game"), "bi bi-exclamation-triangle-fill");S
+        //     showToast(tr("Cannot connect to the game"), "bi bi-exclamation-triangle-fill");
         // };
         ws.onmessage = async (event) => {
             const data = JSON.parse(event.data);

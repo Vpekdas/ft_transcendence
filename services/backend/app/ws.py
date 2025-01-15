@@ -22,6 +22,7 @@ class PongMatchmakeConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
+        await pong_manager.on_quit(self.player)
         await self.close()
 
     async def receive(self, text_data):

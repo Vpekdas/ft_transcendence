@@ -1,11 +1,9 @@
 import { getOriginNoProtocol, showToast } from "../utils";
 import { navigateTo } from "../micro";
-import { parseHTML } from "../micro";
-import { dirty } from "../micro";
 import { tr } from "../i18n";
 
 /** @type {import("../micro").Component} */
-export default async function PongMatchmake({ dom, stores }) {
+export default async function PongMatchmake({ object, dom, stores }) {
     const GET = location.search
         .substring(1)
         .split("&")
@@ -29,10 +27,8 @@ export default async function PongMatchmake({ dom, stores }) {
         return minutes + ":" + seconds;
     }
 
-    let timer;
-
     dom.querySelector(".matchmake-container").do(async (c) => {
-        const ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/matchmake/pong`);
+        let ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/matchmake/pong`);
         ws.onopen = (event) => {
             ws.send(
                 JSON.stringify({
@@ -59,15 +55,18 @@ export default async function PongMatchmake({ dom, stores }) {
             }
         };
 
-        setTime(0);
+        // setTime(0);
 
-        // timer = setInterval(() => {
+        // let timer = setInterval(() => {
         //     setTime(time() + 1);
         // }, 1000);
-    });
 
-    dom.addEventListener("delete", (event) => {
-        clearInterval(timer);
+        dom.addEventListener("delete", (event) => {
+            // clearInterval(timer);
+            ws.close();
+
+            console.log("close the websocket");
+        });
     });
 
     //     <li>

@@ -212,7 +212,7 @@ class PongManager(ServerManager):
         try:
             p = next(filter(lambda p: p.player_id == player.id, self.players))
             return
-        except:
+        except StopIteration:
             pass
 
         if gamemode == "1v1local":
@@ -236,3 +236,10 @@ class PongManager(ServerManager):
                 self.players.remove(opponent)
             except StopIteration:
                 self.players.append(MatchmakePlayer(conn=conn, player_id=player.id, gamemode=gamemode))
+
+    async def on_quit(self, player: Player):
+        try:
+            mplayer = next(filter(lambda p: player.id == p.player_id, self.players))
+            self.players.remove(mplayer)
+        except StopIteration:
+            pass

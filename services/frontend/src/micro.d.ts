@@ -13,7 +13,7 @@ export type ComponentDeleteEvent = {};
 
 export type ComponentEvent = {
     // "mount": ComponentMountEvent,
-    "delete": ComponentDeleteEvent
+    delete: ComponentDeleteEvent;
 };
 
 export type ComponentEventCallback<T> = ((event: T) => void) | ((event: T) => Promise<void>);
@@ -29,14 +29,16 @@ export type Stores = {
     usePersistent(name: string, defaultValue: any): [() => typeof defaultValue, (value: typeof defaultValue) => void];
 };
 
-export type ComponentParams = {
+export type ComponentParams<T> = {
+    object: T;
     params: Map<string, string>;
     attributes: Map<string, string>;
     dom: ComponentDOM;
     stores: Stores;
 };
 
-export type Component = (_: ComponentParams) => string;
+export type Component = (_: ComponentParams<any>) => string;
+export type Component<T> = (_: ComponentParams<T>) => string;
 
 // Router types
 

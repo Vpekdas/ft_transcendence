@@ -146,6 +146,32 @@ class Stores {
     }
 }
 
+// class Component {
+//     /**
+//      * Called on initial page load only, not after refresh.
+//      */
+//     async init(params) {
+//         //
+//     }
+
+//     /**
+//      * Call each time the DOM is refreshed.
+//      */
+//     async render() {
+//         //
+//     }
+// }
+
+// class Home extends Component {
+//     async init(params) {
+//         //
+//     }
+
+//     async render() {
+//         return /* HTML */ `<div>Hello world!</div>`;
+//     }
+// }
+
 /**
  * @param {any} comp
  * @param {Map<string, string>} attributes
@@ -154,17 +180,17 @@ class Stores {
  * @param {Element} parentElement
  * @returns {Promise<VirtualNode>}
  */
-async function createComponent(comp, attributes, params, parent) {
+async function createComponent(comp, attributes, _params, parent) {
     /** @type {import("./micro").ComponentParams} */
-    let object = {
-        params: params,
+    let params = {
+        params: _params,
         dom: new ComponentDOM(),
         attributes: attributes,
         stores: new Stores(comp.name),
     };
 
-    const node = new VirtualNodeComponent(object, comp.name, parent, parent);
-    const element = await parseHTML(await comp(object), comp.name, params, node);
+    const node = new VirtualNodeComponent(params, comp.name, parent);
+    const element = await parseHTML(await comp(params), comp.name, params, node);
     node.element = element;
     element.classList.add(node.id);
 
@@ -285,14 +311,14 @@ class VirtualNodeElement extends VirtualNode {
 
 class VirtualNodeComponent extends VirtualNode {
     /**
-     * @param {import("./micro").ComponentParams} object
+     * @param {import("./micro").ComponentParams} params
      * @param {string} name
      * @param {VirtualNode} parent
      * @param {Element} parentElement
      */
-    constructor(object, name, parent) {
+    constructor(params, name, parent) {
         super();
-        this.object = object;
+        this.params = params;
         this.element = undefined;
         this.name = name;
         this.parent = parent;
@@ -308,14 +334,14 @@ class VirtualNodeComponent extends VirtualNode {
             }
         }
 
-        if (this.object != undefined) {
+        if (this.params != undefined) {
             const element = document.querySelector("." + this.id);
 
             if (element == undefined) {
                 throw new Error("no component with id " + this.id);
             }
 
-            for (let elementRef of this.object.dom.elements) {
+            for (let elementRef of this.params.dom.elements) {
                 if (elementRef.type == "querySelector") {
                     /** @type {Element} */
                     let query = element.querySelector(elementRef.selector);
@@ -353,10 +379,10 @@ class VirtualNodeComponent extends VirtualNode {
             }
         }
 
-        if (this.object != undefined) {
+        if (this.params != undefined) {
             const element = document.querySelector("." + this.id);
 
-            for (let elementRef of this.object.dom.elements) {
+            for (let elementRef of this.params.dom.elements) {
                 if (elementRef.type == "querySelector") {
                     let query = element.querySelector(elementRef.selector);
 
@@ -365,7 +391,7 @@ class VirtualNodeComponent extends VirtualNode {
                         continue;
                     }
 
-                    for (let elementRef of this.object.dom.elements) {
+                    for (let elementRef of this.params.dom.elements) {
                         for (let callback of elementRef.doCallbacks) {
                             await callback(query);
                         }
@@ -379,7 +405,7 @@ class VirtualNodeComponent extends VirtualNode {
                     }
 
                     for (let el of query) {
-                        for (let elementRef of this.object.dom.elements) {
+                        for (let elementRef of this.params.dom.elements) {
                             for (let callback of elementRef.doCallbacks) {
                                 await callback(el);
                             }
@@ -414,11 +440,14 @@ class VirtualNodeComponent extends VirtualNode {
      */
     dispatchEvent(name, event) {
         /** @type {Array<import("./micro").ComponentEventCallback>} */
-        let events = this.object.dom.events.get(name);
+        let events = this.params.dom.events.get(name);
 
         if (events != undefined) {
             for (let callback of events) {
-                setTimeout(async () => await callback(event));
+                setTimeout(async () => {
+                    await callback(event);
+                    console.log("event", name, callback);
+                });
             }
         }
 
@@ -447,10 +476,10 @@ class VirtualNodeComponent extends VirtualNode {
     }
 
     clean() {
-        for (let interval of this.object.dom.intervals) {
+        for (let interval of this.params.dom.intervals) {
             clearInterval(interval);
         }
-        for (let timeout of this.object.dom.timeouts) {
+        for (let timeout of this.params.dom.timeouts) {
             clearTimeout(timeout);
         }
 
@@ -958,16 +987,6 @@ async function applyTreeDifference(oldNode, newNode, oldElement, newElement, par
 
     let index = 0;
 
-    if (oldNode != undefined) {
-        console.log(
-            oldNode.children.length,
-            oldElement.childNodes.length,
-            oldNode.children,
-            oldElement.childNodes,
-            parentElement
-        );
-    }
-
     for (; index < oldNode.children.length; index++) {
         if (index >= newNode.children.length) {
             let oldNode2 = oldNode.children.at(index);
@@ -1084,10 +1103,22 @@ async function router() {
         newNode = await createComponent(routerSettings.notFound, new Map(), new Map(), undefined);
     }
 
-    await applyTreeDifference(dom.root, newNode, app.firstElementChild, newNode.build(), undefined, app);
+    if (app.children.length == 0) {
+        app.appendChild(newNode.build());
+        await newNode.mount();
+    } else {
+        dom.root.clean();
+        app.replaceChild(newNode.build(), app.firstElementChild);
+        await newNode.mount();
+    }
+
+    // await applyTreeDifference(dom.root, newNode, app.firstElementChild, newNode.build(), undefined, app);
 
     dom.root = newNode;
     initialPageLoad = false;
+
+    // const test = ComponentObject.build(route.route.view);
+    // console.log(test);
 }
 
 /**

@@ -107,8 +107,7 @@ class ComponentDOMElementRef {
  * An interface to access different types of scores.
  */
 class Stores {
-    constructor(componentName) {
-        this.componentName = componentName;
+    constructor() {
         this.stores = new Map();
     }
 
@@ -146,53 +145,61 @@ class Stores {
     }
 }
 
-// class Component {
-//     /**
-//      * Called on initial page load only, not after refresh.
-//      */
-//     async init(params) {
-//         //
-//     }
+class Component {
+    /**
+     * Called on initial page load.
+     */
+    async init(params) {
+        //
+    }
 
-//     /**
-//      * Call each time the DOM is refreshed.
-//      */
-//     async render() {
-//         //
-//     }
-// }
+    /**
+     * Call each time the DOM is refreshed.
+     */
+    async render() {
+        //
+    }
+}
 
-// class Home extends Component {
-//     async init(params) {
-//         //
-//     }
+class Home extends Component {
+    async init(params) {
+        //
+    }
 
-//     async render() {
-//         return /* HTML */ `<div>Hello world!</div>`;
-//     }
-// }
+    async render() {
+        return /* HTML */ `<div>Hello world!</div>`;
+    }
+}
 
 /**
- * @param {any} comp
+ * @param {Component} comp
  * @param {Map<string, string>} attributes
  * @param {Map<string, string>} params
  * @param {VirtualNode} parent
  * @param {Element} parentElement
  * @returns {Promise<VirtualNode>}
  */
-async function createComponent(comp, attributes, _params, parent) {
+function createComponentNode(comp, attributes, urlParams, parent) {
+    const name = comp.constructor.name;
+
     /** @type {import("./micro").ComponentParams} */
     let params = {
-        params: _params,
+        params: urlParams,
         dom: new ComponentDOM(),
         attributes: attributes,
-        stores: new Stores(comp.name),
+        stores: new Stores(),
     };
 
-    const node = new VirtualNodeComponent(params, comp.name, parent);
-    const element = await parseHTML(await comp(params), comp.name, params, node);
-    node.element = element;
-    element.classList.add(node.id);
+    const node = new VirtualNodeComponent(params, name, parent);
+
+    let rootElement = document.createElement("div");
+    rootElement.classList.add("micro-" + name);
+
+    node.element = rootElement;
+
+    // const element = await parseHTML(await comp(params), name, params, node);
+    // node.element = element;
+    // element.classList.add(node.id);
 
     return node;
 }
@@ -212,6 +219,13 @@ class VirtualNode {
      */
     appendChild(node) {
         this.children.push(node);
+    }
+
+    /**
+     * @returns {VirtualNode}
+     */
+    parseInner() {
+        return undefined;
     }
 
     /**
@@ -312,14 +326,15 @@ class VirtualNodeElement extends VirtualNode {
 class VirtualNodeComponent extends VirtualNode {
     /**
      * @param {import("./micro").ComponentParams} params
+     * @param {Component} component
      * @param {string} name
      * @param {VirtualNode} parent
      * @param {Element} parentElement
      */
-    constructor(params, name, parent) {
+    constructor(params, component, name, parent) {
         super();
         this.params = params;
-        this.element = undefined;
+        this.component = component;
         this.name = name;
         this.parent = parent;
         this.id = "id" + this.createComponentId();
@@ -471,8 +486,8 @@ class VirtualNodeComponent extends VirtualNode {
     }
 
     async mount() {
-        this.addEventListeners();
-        await this.applyDoCallbacks();
+        // TODO:
+        // await this.component.init(this.params);
     }
 
     clean() {
@@ -490,35 +505,16 @@ class VirtualNodeComponent extends VirtualNode {
      * @returns {Element}
      */
     build() {
-        /** @type {Element} */
-        let newElement = this.element.cloneNode(true);
-
-        for (let child of this.children) {
-            if (child instanceof VirtualNodeText) {
-                newElement.append(child.text);
-            } else {
-                newElement.append(child.build());
-            }
-        }
-
-        return newElement;
-    }
-}
-
-class VirtualDOM {
-    constructor() {
-        /** @type {VirtualNode} */
-        this.root = undefined;
-    }
-
-    /**
-     * @returns {Element | undefined}
-     */
-    build() {
-        if (this.root == undefined) {
-            return undefined;
-        }
-        return this.root.build();
+        // /** @type {Element} */
+        // let newElement = this.element.cloneNode(true);
+        // for (let child of this.children) {
+        //     if (child instanceof VirtualNodeText) {
+        //         newElement.append(child.text);
+        //     } else {
+        //         newElement.append(child.build());
+        //     }
+        // }
+        // return newElement;
     }
 }
 
@@ -817,9 +813,9 @@ function isValidSVGTag(name) {
  * @param {Map<string, string>} attributes
  * @param {VirtualNode} parent
  * @param {Map<string, string>} params
- * @returns {Promise<VirtualNode>}
+ * @returns {VirtualNode}
  */
-async function createElement(name, attributes, parent, params) {
+function createElement(name, attributes, parent, params) {
     let element = null;
 
     if (name == "svg" || (isInSvg(parent) && isValidSVGTag(name))) {
@@ -835,7 +831,7 @@ async function createElement(name, attributes, parent, params) {
             throw new ParseError("Unknown component " + name);
         }
 
-        return await createComponent(component, attributes, params, parent);
+        return createComponentNode(component, attributes, params, parent);
     }
 
     for (let attribute of attributes.keys()) {
@@ -850,14 +846,14 @@ async function createElement(name, attributes, parent, params) {
  * @param {VirtualNode} parent
  * @param {Map<string, string>} params
  */
-async function parseHTMLInner(tokens, parent, params) {
+function parseHTMLInner(tokens, parent, params) {
     let index = 0;
 
     while (index < tokens.length) {
         if (tokens[index] instanceof TokenString) {
             parent.appendChild(new VirtualNodeText(tokens[index].text));
         } else if (tokens[index] instanceof TokenTag) {
-            parent.appendChild(await createElement(tokens[index].name, tokens[index].attribs, parent, params));
+            parent.appendChild(createElement(tokens[index].name, tokens[index].attribs, parent, params));
         } else if (tokens[index] instanceof TokenOpenTag) {
             /** @type {TokenOpenTag} */
             let token = tokens[index];
@@ -881,10 +877,10 @@ async function parseHTMLInner(tokens, parent, params) {
             }
 
             if (tokens[index] instanceof TokenCloseTag && tokens[index].name == tagName && openTags == 0) {
-                const element = await createElement(token.name, token.attribs, parent, params);
+                const element = createElement(token.name, token.attribs, parent, params);
                 const innerTokens = tokens.slice(tokenStart + 1, index);
 
-                await parseHTMLInner(innerTokens, element, params);
+                parseHTMLInner(innerTokens, element, params);
                 parent.appendChild(element);
             } else {
                 throw new ParseError("cannot find closing tag");
@@ -904,22 +900,15 @@ async function parseHTMLInner(tokens, parent, params) {
  * @param {VirtualNode} parent
  * @returns {Promise<Element>}
  */
-export async function parseHTML(source, name, params, parent) {
+export function parseHTML(source, name, params, parent) {
     const tokens = tokenizeHTML(source, name);
-    // console.log(...tokens);
-
-    let div = document.createElement("div");
-    div.classList.add("micro-" + name);
-
-    await parseHTMLInner(tokens, parent, params);
+    parseHTMLInner(tokens, parent, params);
     return div;
 }
 
 /*
     ROOTER
  */
-
-let initialPageLoad = true;
 
 window.onpopstate = async () => {
     await router();
@@ -1070,7 +1059,36 @@ function matchRoute(routes, path) {
     return undefined;
 }
 
-let dom = new VirtualDOM();
+/**
+ * @param {VirtualNode} oldNode
+ * @param {VirtualNode} newNode
+ * @param {Element} oldElement
+ * @param {VirtualNode} parentNode
+ * @param {Element} parentElement
+ */
+async function updateDOM(oldNode, newNode, oldElement, parentNode, parentElement) {
+    if (oldNode == undefined) {
+        // first time the DOM is loaded
+        const newElement = newNode.build();
+        parentElement.appendChild(newElement);
+
+        await newNode.mount();
+        return;
+    }
+
+    let oldString = elementToString(oldNode);
+    let newString = elementToString(newNode);
+
+    if (oldString != newString) {
+        oldNode.clean();
+        parentElement.replaceChild(newElement, oldElement);
+        await newNode.mount();
+        return;
+    }
+}
+
+/** @type {VirtualNode} */
+let rootNode;
 
 async function router() {
     let app = document.getElementById("micro-app");
@@ -1085,40 +1103,45 @@ async function router() {
     // This should not be called here, only once during load and after each hot reload
     registerAll();
 
-    if (route != undefined) {
-        if (routerSettings.hook && initialPageLoad) {
-            // We don't want to call the hook every time we refresh the page, only when navigating
-            // between pages.
-            await routerSettings.hook(route.route.path);
-        }
+    // if (route != undefined) {
+    //     if (routerSettings.hook && initialPageLoad) {
+    //         // We don't want to call the hook every time we refresh the page, only when navigating
+    //         // between pages.
+    //         await routerSettings.hook(route.route.path);
+    //     }
 
-        let attributes = new Map();
+    //     let attributes = new Map();
 
-        if (route.route.attributes != undefined) {
-            attributes = new Map(Object.entries(route.route.attributes));
-        }
+    //     if (route.route.attributes != undefined) {
+    //         attributes = new Map(Object.entries(route.route.attributes));
+    //     }
 
-        newNode = await createComponent(route.route.view, attributes, route.params, undefined);
-    } else if (routerSettings.notFound != undefined) {
-        newNode = await createComponent(routerSettings.notFound, new Map(), new Map(), undefined);
-    }
+    //     newNode = await createComponent(route.route.view, attributes, route.params, undefined);
+    // } else if (routerSettings.notFound != undefined) {
+    //     newNode = await createComponent(routerSettings.notFound, new Map(), new Map(), undefined);
+    // }
 
-    if (app.children.length == 0) {
-        app.appendChild(newNode.build());
-        await newNode.mount();
-    } else {
-        dom.root.clean();
-        app.replaceChild(newNode.build(), app.firstElementChild);
-        await newNode.mount();
-    }
+    // if (app.children.length == 0) {
+    //     app.appendChild(newNode.build());
+    //     await newNode.mount();
+    // } else {
+    //     dom.root.clean();
+    //     app.replaceChild(newNode.build(), app.firstElementChild);
+    //     await newNode.mount();
+    // }
 
     // await applyTreeDifference(dom.root, newNode, app.firstElementChild, newNode.build(), undefined, app);
 
-    dom.root = newNode;
-    initialPageLoad = false;
+    // dom.root = newNode;
+    // initialPageLoad = false;
 
-    // const test = ComponentObject.build(route.route.view);
-    // console.log(test);
+    const view = new Home();
+    const node = await createComponentNode(view, new Map(), new Map(), undefined);
+
+    console.log(view);
+
+    updateDOM(rootNode, node, app.firstElementChild, undefined, app);
+    rootNode = node;
 }
 
 /**

@@ -105,12 +105,12 @@ export default async function Pong({ dom, params }) {
     async function setupGameTerrain() {
         const terrainSceneRight = terrain.scene;
         terrainSceneRight.rotation.set(Math.PI / 2, 0, 0);
-        terrainSceneRight.position.set(13, 0, -1);
+        terrainSceneRight.position.set(13, 0, -2);
         scene.add(terrainSceneRight);
 
         const terrainSceneLeft = terrain.scene.clone();
         terrainSceneLeft.rotation.set(Math.PI / 2, Math.PI, 0);
-        terrainSceneLeft.position.set(-13, 0, -1);
+        terrainSceneLeft.position.set(-13, 0, -2);
         scene.add(terrainSceneLeft);
 
         let lastKey;
@@ -317,15 +317,15 @@ export default async function Pong({ dom, params }) {
         scene.background = spaceTexture;
 
         // ! For ground, It seems ok but may not be ok for other models.
-        const ambientLight = new THREE.AmbientLight(0xffffff, 20);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 10);
         scene.add(ambientLight);
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         directionalLight.position.set(0, -20, 20);
         scene.add(directionalLight);
 
-        const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 5);
-        scene.add(directionalLightHelper);
+        // const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 5);
+        // scene.add(directionalLightHelper);
 
         ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/pong/${id}`);
         ws.onopen = async (event) => {

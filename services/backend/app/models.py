@@ -10,8 +10,6 @@ duck = '<svg height="64" preserveAspectRatio="none" viewBox="0 0 64 64" width="6
 def default_skins():
     return {"terrain": "default-terrain", "ball": "default-ball", "unlocked": []}
 
-# NOTE: models referencing a `Player` should not use foreign key or at least not `on_delete=models.CASCADE`
-#       or else game history would be deleted.
 class Player(models.Model):
     user = ForeignKey(User, on_delete=models.CASCADE)
     nickname = CharField(max_length=20)

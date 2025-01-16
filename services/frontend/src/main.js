@@ -21,6 +21,8 @@ import Profile from "./views/Profile";
 import Test from "./views/Test";
 import Redirected from "./views/Redirected";
 
+import { registerAll } from "./micro.generated";
+
 defineRouter({
     routes: [
         { path: "/", view: Home },
@@ -55,3 +57,5 @@ defineRouter({
     },
     notFound: NotFound,
 });
+
+registerAll();

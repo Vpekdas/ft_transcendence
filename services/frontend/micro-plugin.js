@@ -15,7 +15,9 @@ function importAllComponents(currentFolder, currentModuleFolder = ".") {
 
         const path = currentFolder + "/" + file;
 
-        const regexAsync = /export\ default\ async\ function\ ([a-zA-Z0-9]+)\(/gm;
+        // const regexAsync = /export\ default\ async\ function\ ([a-zA-Z0-9]+)\(/gm;
+        const regexAsync =
+            /export[\ \t\n]+default[\ \t\n]+class[\ \t\n]+([a-zA-Z][a-zA-Z0-9]*)[\ \t\n]+extends[\ \t\n]+Component/gm;
         const source = readFileSync(path).toString();
         const resultAsync = regexAsync.exec(source);
 
@@ -26,6 +28,7 @@ function importAllComponents(currentFolder, currentModuleFolder = ".") {
                 name: name,
                 modulePath: module,
             });
+            console.log(name);
         }
     }
 

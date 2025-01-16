@@ -1,22 +1,11 @@
 import { getOriginNoProtocol, showToast } from "../utils";
-import { navigateTo } from "../micro";
+import { Component, navigateTo } from "../micro";
 import { tr } from "../i18n";
 
-/** @type {import("../micro").Component} */
-export default async function PongMatchmake({ object, dom, stores }) {
-    const GET = location.search
-        .substring(1)
-        .split("&")
-        .map((value) => value.split("="))
-        .reduce((obj, item) => ((obj[item[0]] = item[1]), obj), {});
+export default class PongMatchmake extends Component {
+    timeInMinutes() {
+        const [time, setTime] = this.stores.usePersistent("matchmakeTimer", 0);
 
-    if (GET["gamemode"] == undefined) {
-        navigateTo("/");
-    }
-
-    const [time, setTime] = stores.usePersistent("matchmakeTimer", 0); // TODO: No need to store the value in localStorage here.
-
-    function timeInMinutes() {
         const minutes = Math.floor(time() / 60);
         let seconds = Math.floor(time() % 60);
 
@@ -27,17 +16,29 @@ export default async function PongMatchmake({ object, dom, stores }) {
         return minutes + ":" + seconds;
     }
 
-    dom.querySelector(".matchmake-container").do(async (c) => {
-        let ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/matchmake/pong`);
-        ws.onopen = (event) => {
-            ws.send(
+    async init() {
+        const GET = location.search
+            .substring(1)
+            .split("&")
+            .map((value) => value.split("="))
+            .reduce((obj, item) => ((obj[item[0]] = item[1]), obj), {});
+
+        if (GET["gamemode"] == undefined) {
+            navigateTo("/");
+        }
+
+        const [time, setTime] = this.stores.usePersistent("matchmakeTimer", 0); // TODO: No need to store the value in localStorage here.
+
+        this.ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/matchmake/pong`);
+        this.ws.onopen = (event) => {
+            this.ws.send(
                 JSON.stringify({
                     type: "request",
                     gamemode: GET["gamemode"],
                 })
             );
         };
-        ws.onmessage = (event) => {
+        this.ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
 
             console.log(data);
@@ -60,54 +61,49 @@ export default async function PongMatchmake({ object, dom, stores }) {
         // let timer = setInterval(() => {
         //     setTime(time() + 1);
         // }, 1000);
-
-        dom.addEventListener("delete", (event) => {
-            // clearInterval(timer);
-            ws.close();
-
-            console.log("close the websocket");
-        });
-    });
+    }
 
     //     <li>
     //     <Duck />
     // </li>
 
-    return /* HTML */ `<NavBar />
-        <div id="toast-container"></div>
-        <div class="matchmake-container">
-            <ul>
-                <li>
-                    <span class="searching-for-game">${tr("Searching for a game")}</span>
-                </li>
-                <li>
-                    <span>
-                        <span class="timer">${timeInMinutes()}</span>
-                    </span>
-                </li>
-            </ul>
-            <div class="match-found-container hidden">
-                <div class="player-card">
-                    <ul>
-                        <li>
-                            <img src="/favicon.svg" alt="" />
-                        </li>
-                        <li>
-                            <span>test</span>
-                        </li>
-                    </ul>
+    render() {
+        return /* HTML */ `<NavBar />
+            <div id="toast-container"></div>
+            <div class="matchmake-container">
+                <ul>
+                    <li>
+                        <span class="searching-for-game">${tr("Searching for a game")}</span>
+                    </li>
+                    <li>
+                        <span>
+                            <span class="timer">${this.timeInMinutes()}</span>
+                        </span>
+                    </li>
+                </ul>
+                <div class="match-found-container hidden">
+                    <div class="player-card">
+                        <ul>
+                            <li>
+                                <img src="/favicon.svg" alt="" />
+                            </li>
+                            <li>
+                                <span>test</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="vs-card">VS</div>
+                    <div class="player-card">
+                        <ul>
+                            <li>
+                                <img src="/favicon.svg" alt="" />
+                            </li>
+                            <li>
+                                <span>test</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="vs-card">VS</div>
-                <div class="player-card">
-                    <ul>
-                        <li>
-                            <img src="/favicon.svg" alt="" />
-                        </li>
-                        <li>
-                            <span>test</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>`;
+            </div>`;
+    }
 }

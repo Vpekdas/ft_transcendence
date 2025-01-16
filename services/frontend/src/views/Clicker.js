@@ -1,8 +1,12 @@
 import { tr } from "../i18n";
+import { Component } from "../micro";
 
-/** @type {import("../micro").Component}  */
-export default async function Clicker({ dom, stores }) {
-    document.title = tr("Duck");
+export default class Clicker extends Component {
+    async init() {
+        document.title = tr("Duck");
+    }
 
-    return /* HTML */ ` <NavBar /><Duck />`;
+    render() {
+        return /* HTML */ ` <NavBar /><Duck />`;
+    }
 }

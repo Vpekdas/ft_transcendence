@@ -1,9 +1,8 @@
-import { registerAll } from "./micro.generated";
-
-/**
- * @type Map<string, any>
- */
+/** @type {Map<string, Component>} */
 export let components = new Map();
+/** @type {Map<string, string>} */
+export let params = new Map();
+
 let routerSettings = undefined;
 
 /*
@@ -22,85 +21,6 @@ function hash(str) {
         h = 37 * h + str.charCodeAt(index);
     }
     return h;
-}
-
-/**
- * An interface to manipulate the inner DOM of a component.
- */
-class ComponentDOM {
-    constructor() {
-        /** @type {Array<ComponentDOMElementRef} */
-        this.elements = [];
-        /** @type {Map<string, Array<import("./micro").ComponentEventCallback>>} */
-        this.events = new Map();
-        this.intervals = [];
-        this.timeouts = [];
-    }
-
-    /**
-     * @param {string} name
-     * @param {any} callback
-     * @returns {ComponentDOMElementRef}
-     */
-    querySelector(selector) {
-        const ref = new ComponentDOMElementRef("querySelector", selector);
-        this.elements.push(ref);
-        return ref;
-    }
-
-    /**
-     * @param {string} name
-     * @param {any} callback
-     */
-    querySelectorAll(selector) {
-        const ref = new ComponentDOMElementRef("querySelectorAll", selector);
-        this.elements.push(ref);
-        return ref;
-    }
-
-    /**
-     * @param {keyof import("./micro").ComponentEvent} event
-     * @param {import("./micro").ComponentEventCallback} callback
-     */
-    addEventListener(event, callback) {
-        if (!this.events.has(event)) {
-            this.events.set(event, []);
-        }
-
-        this.events.get(event).push(callback);
-    }
-
-    createInterval(callback, interval) {
-        this.intervals.push(setInterval(callback, interval));
-    }
-
-    createTimeout(callback, interval) {
-        this.timeouts.push(setTimeout(callback, interval));
-    }
-}
-
-class ComponentDOMElementRef {
-    constructor(type, selector) {
-        this.type = type;
-        this.selector = selector;
-        this.eventCallbacks = new Map();
-        this.doCallbacks = [];
-    }
-
-    /**
-     * @param {string} name
-     * @param {any} callback
-     */
-    on(name, callback) {
-        this.eventCallbacks.set(name, callback);
-    }
-
-    /**
-     * @param {any} callback
-     */
-    do(callback) {
-        this.doCallbacks.push(callback);
-    }
 }
 
 /**
@@ -145,32 +65,29 @@ class Stores {
     }
 }
 
-class Component {
+export class Component {
+    constructor() {
+        this.stores = new Stores();
+        /** @type {Map<string, string>} */
+        this.attributes = new Map();
+    }
+
     /**
      * Called on initial page load.
+     *
+     * @param {import("./micro").ComponentParams} param0
      */
-    async init() {
-        //
-    }
+    async init() {}
+
+    clean() {}
 
     /**
      * Call each time the DOM is refreshed.
      *
+     * @param {import("./micro").ComponentParams} param0
      * @returns {string}
      */
-    render() {
-        //
-    }
-}
-
-class Home extends Component {
-    async init() {
-        //
-    }
-
-    render() {
-        return /* HTML */ `<div>Hello world!</div>`;
-    }
+    render() {}
 }
 
 /**
@@ -183,15 +100,8 @@ class Home extends Component {
  */
 function createComponentNode(comp, attributes, parent) {
     const name = comp.constructor.name;
-
-    /** @type {import("./micro").ComponentParams} */
-    // let params = {
-    //     dom: new ComponentDOM(),
-    //     attributes: attributes,
-    //     stores: new Stores(),
-    // };
-
-    const node = new VirtualNodeComponent({}, name, parent);
+    const node = new VirtualNodeComponent(comp, parent);
+    node.attributes = attributes;
 
     let rootElement = document.createElement("div");
     rootElement.classList.add("micro-" + name);
@@ -213,20 +123,6 @@ class VirtualNode {
     }
 
     /**
-     * @param {VirtualNode} node
-     */
-    appendChild(node) {
-        this.children.push(node);
-    }
-
-    /**
-     * @returns {VirtualNode}
-     */
-    parseInner() {
-        return undefined;
-    }
-
-    /**
      * @returns {Element | string}
      */
     build() {
@@ -234,13 +130,12 @@ class VirtualNode {
     }
 
     async mount() {
-        if (this.children == undefined) {
-            return;
-        }
-
-        for (let child of this.children) {
-            await child.mount();
-        }
+        // if (this.children == undefined) {
+        //     return;
+        // }
+        // for (let child of this.children) {
+        //     await child.mount();
+        // }
     }
 
     clean() {
@@ -265,7 +160,7 @@ class VirtualNodeText extends VirtualNode {
     }
 
     build() {
-        return this.text;
+        return document.createTextNode(this.text);
     }
 }
 
@@ -276,34 +171,6 @@ class VirtualNodeElement extends VirtualNode {
     constructor(element) {
         super();
         this.element = element;
-    }
-
-    addEventListeners() {
-        for (let child of this.children) {
-            if (child instanceof VirtualNodeComponent || child instanceof VirtualNodeElement) {
-                child.addEventListeners();
-            }
-        }
-    }
-
-    async applyDoCallbacks() {
-        for (let child of this.children) {
-            if (child instanceof VirtualNodeComponent || child instanceof VirtualNodeElement) {
-                await child.applyDoCallbacks();
-            }
-        }
-    }
-
-    /**
-     * @param {string} name
-     * @param {*} event
-     */
-    dispatchEvent(name, event) {
-        for (let child of this.children) {
-            if (child instanceof VirtualNodeComponent || child instanceof VirtualNodeElement) {
-                child.dispatchEvent(name, event);
-            }
-        }
     }
 
     /**
@@ -318,110 +185,19 @@ class VirtualNodeComponent extends VirtualNode {
     /**
      * @param {import("./micro").ComponentParams} params
      * @param {Component} component
-     * @param {string} name
      * @param {VirtualNode} parent
      * @param {Element} parentElement
      */
-    constructor(params, component, name, parent) {
+    constructor(component, parent) {
         super();
-        this.params = params;
         this.component = component;
-        this.name = name;
+        this.name = this.component.constructor.name;
         this.parent = parent;
         /** @type {HTMLElement} */
         this.element = undefined;
         this.id = "id" + this.createComponentId();
 
         // TODO: Add the index of the node to the id.
-    }
-
-    addEventListeners() {
-        for (let child of this.children) {
-            if (child instanceof VirtualNodeComponent || child instanceof VirtualNodeElement) {
-                child.addEventListeners();
-            }
-        }
-
-        if (this.params != undefined) {
-            const element = document.querySelector("." + this.id);
-
-            if (element == undefined) {
-                throw new Error("no component with id " + this.id);
-            }
-
-            for (let elementRef of this.params.dom.elements) {
-                if (elementRef.type == "querySelector") {
-                    /** @type {Element} */
-                    let query = element.querySelector(elementRef.selector);
-
-                    if (query == null) {
-                        console.warn("invalid querySelector string", elementRef.selector);
-                        continue;
-                    }
-
-                    for (let [eventName, callback] of elementRef.eventCallbacks.entries()) {
-                        query.addEventListener(eventName, callback);
-                    }
-                } else if (elementRef.type == "querySelectorAll") {
-                    let query = element.querySelectorAll(elementRef.selector);
-
-                    if (query.length == 0) {
-                        console.warn("invalid querySelectorAll string", elementRef.selector);
-                        continue;
-                    }
-
-                    for (let el of query) {
-                        for (let [eventName, callback] of elementRef.eventCallbacks.entries()) {
-                            el.addEventListener(eventName, callback);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    async applyDoCallbacks() {
-        for (let child of this.children) {
-            if (child instanceof VirtualNodeComponent || child instanceof VirtualNodeElement) {
-                await child.applyDoCallbacks();
-            }
-        }
-
-        if (this.params != undefined) {
-            const element = document.querySelector("." + this.id);
-
-            for (let elementRef of this.params.dom.elements) {
-                if (elementRef.type == "querySelector") {
-                    let query = element.querySelector(elementRef.selector);
-
-                    if (query == null) {
-                        console.warn("invalid querySelector string", elementRef.selector);
-                        continue;
-                    }
-
-                    for (let elementRef of this.params.dom.elements) {
-                        for (let callback of elementRef.doCallbacks) {
-                            await callback(query);
-                        }
-                    }
-                } else if (elementRef.type == "querySelectorAll") {
-                    let query = element.querySelectorAll(elementRef.selector);
-
-                    if (query.length == 0) {
-                        console.warn("invalid querySelectorAll string", elementRef.selector);
-                        continue;
-                    }
-
-                    for (let el of query) {
-                        for (let elementRef of this.params.dom.elements) {
-                            for (let callback of elementRef.doCallbacks) {
-                                await callback(el);
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 
     createComponentId() {
@@ -442,56 +218,12 @@ class VirtualNodeComponent extends VirtualNode {
         return hash(parents.reverse().join("-")).toString(32);
     }
 
-    /**
-     * @param {string} name
-     * @param {*} event
-     */
-    dispatchEvent(name, event) {
-        /** @type {Array<import("./micro").ComponentEventCallback>} */
-        let events = this.params.dom.events.get(name);
-
-        if (events != undefined) {
-            for (let callback of events) {
-                setTimeout(async () => {
-                    await callback(event);
-                    console.log("event", name, callback);
-                });
-            }
-        }
-
-        for (let child of this.children) {
-            if (child instanceof VirtualNodeComponent || child instanceof VirtualNodeElement) {
-                child.dispatchEvent(name, event);
-            }
-        }
-    }
-
-    /**
-     * @param {VirtualNode} child
-     * @param {VirtualNode} prev
-     */
-    replaceChild(child, prev) {
-        for (let index = 0; index < this.children.length; index++) {
-            if (this.children[index].id == prev.id) {
-                this.children[index] = child;
-            }
-        }
-    }
-
     async mount() {
-        // TODO:
-        // await this.component.init(this.params);
+        if (this.component.init) await this.component.init();
     }
 
     clean() {
-        for (let interval of this.params.dom.intervals) {
-            clearInterval(interval);
-        }
-        for (let timeout of this.params.dom.timeouts) {
-            clearTimeout(timeout);
-        }
-
-        this.dispatchEvent("delete", {});
+        this.component.clean();
     }
 
     /**
@@ -841,7 +573,8 @@ function parseHTMLInner(tokens, parent) {
             let element = createElement(tokens[index].name, tokens[index].attribs, parent);
 
             if (element instanceof VirtualNodeComponent) {
-                const innerNodes = parseHTML(element.component.render(), element);
+                // const innerNodes = parseHTML(element.component.render(), element);
+                const innerNodes = parseHTML(element.component.prototype.render(), element);
                 element.children.push(...innerNodes);
             }
 
@@ -941,66 +674,6 @@ function elementToString(node) {
     }
 }
 
-/**
- * Recursively go down through the node tree and replace nodes only when necessary.
- *
- * @param {VirtualNode} oldNode
- * @param {VirtualNode} newNode
- * @param {Element} oldElement
- * @param {Element} newElement
- * @param {VirtualNode} parentNode
- * @param {Element} parentElement
- */
-async function applyTreeDifference(oldNode, newNode, oldElement, newElement, parentNode, parentElement) {
-    if (oldNode == undefined) {
-        parentElement.appendChild(newElement);
-        await newNode.mount();
-        return;
-    }
-
-    let oldString = elementToString(oldNode);
-    let newString = elementToString(newNode);
-
-    if (oldString != newString) {
-        oldNode.clean();
-        parentElement.replaceChild(newElement, oldElement);
-        await newNode.mount();
-        return;
-    }
-
-    if (newNode instanceof VirtualNodeText) {
-        // Text nodes cant have children
-        return;
-    }
-
-    let index = 0;
-
-    for (; index < oldNode.children.length; index++) {
-        if (index >= newNode.children.length) {
-            let oldNode2 = oldNode.children.at(index);
-            let oldElement2 = oldElement.childNodes.item(index);
-
-            oldNode2.clean();
-
-            parentElement.removeChild(oldElement2);
-        } else {
-            let oldNode2 = oldNode.children.at(index);
-            let newNode2 = newNode.children.at(index);
-            let oldElement2 = oldElement.childNodes.item(index);
-            let newElement2 = newElement.childNodes.item(index).cloneNode(true);
-
-            await applyTreeDifference(oldNode2, newNode2, oldElement2, newElement2, oldNode, oldElement);
-        }
-    }
-
-    for (; index < newNode.length; index++) {
-        let newElement2 = newElement.childNodes.item(index).cloneNode(true);
-
-        parentElement.append(newElement2);
-        await newElement2.mount();
-    }
-}
-
 function matchRoute(routes, path) {
     const parts = path.substring(1).split("/");
 
@@ -1069,6 +742,8 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
         let newElement2 = newNode.build();
         parentElement.append(newElement2);
 
+        // console.log(parentElement, newElement2);
+
         if (!(newNode instanceof VirtualNodeText)) {
             for (let child of newNode.children) {
                 await updateDOM(undefined, child, parentElement, newElement2);
@@ -1080,13 +755,29 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
         return;
     }
 
+    // console.log(parentElement, newNode);
+
+    if (parentElement instanceof Text) {
+        return;
+    }
+
     let oldString = elementToString(oldNode);
     let newString = elementToString(newNode);
 
     if (oldString != newString) {
+        let newElement = newNode.build();
+
         oldNode.clean();
         parentElement.replaceChild(newElement, oldElement);
-        await newNode.mount();
+
+        if (!(newNode instanceof VirtualNodeText)) {
+            for (let child of newNode.children) {
+                await updateDOM(undefined, child, parentElement, newElement);
+            }
+
+            await newNode.mount();
+        }
+
         return;
     }
 
@@ -1109,9 +800,8 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
             let oldNode2 = oldNode.children.at(index);
             let newNode2 = newNode.children.at(index);
             let oldElement2 = oldElement.childNodes.item(index);
-            let newElement2 = newNode.children[index].build();
 
-            await updateDOM(oldNode2, newNode2, oldElement2, newElement2, oldNode, oldElement);
+            await updateDOM(oldNode2, newNode2, oldElement2, oldElement);
         }
     }
 
@@ -1125,6 +815,7 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
 
 /** @type {VirtualNode} */
 let rootNode;
+let initialPageLoad = true;
 
 async function router() {
     let app = document.getElementById("micro-app");
@@ -1137,48 +828,38 @@ async function router() {
     let newNode;
 
     // This should not be called here, only once during load and after each hot reload
-    registerAll();
+    // registerAll();
 
-    // if (route != undefined) {
-    //     if (routerSettings.hook && initialPageLoad) {
-    //         // We don't want to call the hook every time we refresh the page, only when navigating
-    //         // between pages.
-    //         await routerSettings.hook(route.route.path);
-    //     }
+    if (route != undefined) {
+        if (routerSettings.hook && initialPageLoad) {
+            // We don't want to call the hook every time we refresh the page, only when navigating
+            // between pages.
+            await routerSettings.hook(route.route.path);
+        }
 
-    //     let attributes = new Map();
+        let attributes;
 
-    //     if (route.route.attributes != undefined) {
-    //         attributes = new Map(Object.entries(route.route.attributes));
-    //     }
+        if (route.route.attributes != undefined) {
+            attributes = new Map(Object.entries(route.route.attributes));
+        }
 
-    //     newNode = await createComponent(route.route.view, attributes, route.params, undefined);
-    // } else if (routerSettings.notFound != undefined) {
-    //     newNode = await createComponent(routerSettings.notFound, new Map(), new Map(), undefined);
-    // }
+        params = route.params;
 
-    // if (app.children.length == 0) {
-    //     app.appendChild(newNode.build());
-    //     await newNode.mount();
-    // } else {
-    //     dom.root.clean();
-    //     app.replaceChild(newNode.build(), app.firstElementChild);
-    //     await newNode.mount();
-    // }
+        let view = new route.route.view();
 
-    // await applyTreeDifference(dom.root, newNode, app.firstElementChild, newNode.build(), undefined, app);
+        newNode = await createComponentNode(view, attributes, undefined);
+        newNode.children.push(...parseHTML(view.render()));
+    } else if (routerSettings.notFound != undefined) {
+        let view = new routerSettings.notFound();
 
-    // dom.root = newNode;
-    // initialPageLoad = false;
+        newNode = await createComponentNode(view, new Map(), undefined);
+        newNode.children.push(...parseHTML(view.render()));
+    }
 
-    const view = new Home();
-    const node = await createComponentNode(view, new Map(), new Map(), undefined);
-    node.children.push(...parseHTML(view.render()));
+    await updateDOM(rootNode, newNode, app.firstElementChild, app);
+    rootNode = newNode;
 
-    console.log(view);
-
-    updateDOM(rootNode, node, app.firstElementChild, app);
-    rootNode = node;
+    initialPageLoad = false;
 }
 
 /**
@@ -1210,7 +891,6 @@ export function defineRouter(settings) {
     // TODO: This only works when saving this file for some reason
     if (import.meta.hot) {
         import.meta.hot.accept(async (newModule) => {
-            registerAll();
             await router();
         });
     }

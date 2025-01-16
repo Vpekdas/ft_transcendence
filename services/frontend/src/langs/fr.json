@@ -47,5 +47,6 @@
     "Duck": "Canard",
     "ducks": "canards",
     "Searching for a game": "Recherche d'une partie",
-    "Cannot connect to the game": "Impossible de se connecter"
+    "Cannot connect to the game": "Impossible de se connecter",
+    "Login with 42": "Se connecter avec 42"
 }

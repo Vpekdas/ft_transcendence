@@ -1,11 +1,10 @@
 import { tr } from "../i18n";
-import { navigateTo } from "../micro";
+import { Component, navigateTo } from "../micro";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
-
 
 // https://www.youtube.com/watch?v=oKbCaj1J6EI
 
@@ -14,9 +13,10 @@ async function loadShaderFile(url) {
     return await response.text();
 }
 
-/** @type {import("../micro").Component} */
-export default async function Test({ dom }) {
-    dom.querySelector("#test").do(async (c) => {
+export default class Test extends Component {
+    async init() {
+        const c = document.getElementById("test");
+
         let scene = new THREE.Scene();
         let ballScene = new THREE.Scene();
         let camera = new THREE.PerspectiveCamera(70, c.clientWidth / c.clientHeight, 0.1, 1000);
@@ -69,7 +69,9 @@ export default async function Test({ dom }) {
             renderer.render(scene, camera);
             ballComposer.render();
         });
-    });
+    }
 
-    return /* HTML */ ` <div id="test"></div> `;
+    render() {
+        return /* HTML */ ` <div id="test"></div> `;
+    }
 }

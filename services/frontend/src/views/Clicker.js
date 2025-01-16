@@ -7,6 +7,6 @@ export default class Clicker extends Component {
     }
 
     render() {
-        return /* HTML */ ` <NavBar /><Duck />`;
+        return /* HTML */ ` <HomeNavBar /><Duck />`;
     }
 }

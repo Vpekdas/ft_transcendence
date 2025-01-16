@@ -1,14 +1,15 @@
 // https://heyoka.medium.com/scratch-made-svg-donut-pie-charts-in-html5-2c587e935d72
+import { Component } from "../../micro";
 
 const r = 15.91549430918954;
-
-export default async function DonutChart({ attributes }) {
+/** @type {import("../../micro").Component} */
+export default class DonutChart extends Component {
     // r = 100/(2π)
 
     // stroke-dashoffset="25" -> stroke-dashoffset moves counter-clockwise.
     // So, we’d need to set this value for 25% in the opposite direction from 3:00 back to 12:00)
 
-    function generateSegment(color, dashArray, dashOffset, textPosition, content) {
+    generateSegment(color, dashArray, dashOffset, textPosition, content) {
         return /* HTML */ `
             <circle
                 class="donut-segment"
@@ -35,7 +36,7 @@ export default async function DonutChart({ attributes }) {
         `;
     }
 
-    function calculateOffset(circles, length) {
+    calculateOffset(circles, length) {
         if (length === 0) {
             return 25;
         }
@@ -48,7 +49,7 @@ export default async function DonutChart({ attributes }) {
         return 100 - precedingSegments + 25;
     }
 
-    function calculateTextPosition(percentageFilled, dashOffset) {
+    calculateTextPosition(percentageFilled, dashOffset) {
         const angle = (dashOffset - percentageFilled / 2) * 3.6;
         const radians = (angle * Math.PI) / 180;
         const x = 21 + r * Math.cos(radians);
@@ -57,49 +58,53 @@ export default async function DonutChart({ attributes }) {
         return { x, y };
     }
 
-    const width = parseInt(attributes.get("width"));
+    async init() {
+        this.width = parseInt(this.attributes.get("width"));
 
-    const colorNumber = parseInt(attributes.get("colorNumber"));
+        const colorNumber = parseInt(this.attributes.get("colorNumber"));
 
-    const circles = [];
+        const circles = [];
 
-    for (let i = 0; i < colorNumber; i++) {
-        const circle = {
-            color: "",
-            fillPercent: "",
-            fillOffset: "",
-            textPosition: { x: 0, y: 0 },
-            content: "",
-        };
-        circle.color = attributes.get("color" + (i + 1));
+        for (let i = 0; i < colorNumber; i++) {
+            const circle = {
+                color: "",
+                fillPercent: "",
+                fillOffset: "",
+                textPosition: { x: 0, y: 0 },
+                content: "",
+            };
+            circle.color = attributes.get("color" + (i + 1));
 
-        const fillingPercent = parseInt(attributes.get("fillPercent" + (i + 1)));
-        const notFilledPercent = 100 - fillingPercent;
+            const fillingPercent = parseInt(attributes.get("fillPercent" + (i + 1)));
+            const notFilledPercent = 100 - fillingPercent;
 
-        circle.fillPercent = attributes.get("fillPercent" + (i + 1)) + " " + notFilledPercent.toString();
-        circle.fillOffset = calculateOffset(circles, i);
-        circle.textPosition = calculateTextPosition(fillingPercent, circle.fillOffset);
-        circle.content = fillingPercent.toString();
+            circle.fillPercent = attributes.get("fillPercent" + (i + 1)) + " " + notFilledPercent.toString();
+            circle.fillOffset = calculateOffset(circles, i);
+            circle.textPosition = calculateTextPosition(fillingPercent, circle.fillOffset);
+            circle.content = fillingPercent.toString();
 
-        circles.push(circle);
+            circles.push(circle);
+        }
+
+        this.segment = "";
+        for (let i = 0; i < circles.length; i++) {
+            segment += generateSegment(
+                circles[i].color,
+                circles[i].fillPercent,
+                circles[i].fillOffset,
+                circles[i].textPosition,
+                circles[i].content
+            );
+        }
     }
 
-    let segment = "";
-    for (let i = 0; i < circles.length; i++) {
-        segment += generateSegment(
-            circles[i].color,
-            circles[i].fillPercent,
-            circles[i].fillOffset,
-            circles[i].textPosition,
-            circles[i].content
-        );
+    render() {
+        return /* HTML */ ` <svg width="${this.width}" height="${this.width * 1.2}" viewBox="0 0 42 42" class="donut">
+            <text x="21" y="0" text-anchor="middle" alignment-baseline="middle" font-size="4" fill="#d2320a">
+                Chart Title
+            </text>
+            <circle class="donut-hole" cx="21" cy="21" r="${r}" fill="transparent"></circle>
+            ${this.segment}
+        </svg>`;
     }
-
-    return /* HTML */ ` <svg width="${width}" height="${width * 1.2}" viewBox="0 0 42 42" class="donut">
-        <text x="21" y="0" text-anchor="middle" alignment-baseline="middle" font-size="4" fill="#d2320a">
-            Chart Title
-        </text>
-        <circle class="donut-hole" cx="21" cy="21" r="${r}" fill="transparent"></circle>
-        ${segment}
-    </svg>`;
 }

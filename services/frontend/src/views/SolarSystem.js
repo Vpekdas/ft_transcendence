@@ -3,7 +3,7 @@ import { Component } from "../micro";
 export default class SolarSystem extends Component {
     render() {
         return /* HTML */ `<div>
-            <NavBar />
+            <HomeNavBar />
             <OuterWilds />
             <Coordinates />
             <EyeOfTheUniverse />

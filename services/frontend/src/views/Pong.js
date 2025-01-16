@@ -343,7 +343,7 @@ export default class Pong extends Component {
     }
 
     render() {
-        return /* HTML */ ` <NavBar />
+        return /* HTML */ ` <HomeNavBar />
             <div id="pong"></div>`;
     }
 }

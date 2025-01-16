@@ -1,7 +1,9 @@
 import { tr } from "../../i18n";
 import { Component } from "../../micro";
 
-export default class NavBar extends Component {
+/** @type {import("../../micro").Component} */
+
+export default class HomeNavBar extends Component {
     activeTabClass(t) {
         return window.location.pathname.startsWith(t) ? "active" : "";
     }

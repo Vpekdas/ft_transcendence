@@ -20,7 +20,7 @@ export default class Home extends Component {
 
     render() {
         return /* HTML */ `
-            <NavBar />
+            <HomeNavBar />
             <div class="container-fluid game-container">
                 <div id="toast-container"></div>
                 <div class="card pong-game">

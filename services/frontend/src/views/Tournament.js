@@ -183,7 +183,7 @@ export default async function Tournament({ dom, params, node }) {
         });
     });
 
-    return /* HTML */ ` <NavBar />
+    return /* HTML */ ` <HomeNavBar />
         <div class="container-fluid dashboard-container tournament-container" id="tournament-container">
             <div class="particle-container"></div>
             <div class="container-fluid dashboard-container match-container" id="match-container"></div>

@@ -1,5 +1,6 @@
 import { tr } from "../i18n";
 import { post } from "../utils";
+import { Component } from "../micro";
 
 /** @type {import("../micro").Component} */
 export default async function Skins({ dom, stores }) {

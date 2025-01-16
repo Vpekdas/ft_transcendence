@@ -149,24 +149,26 @@ class Component {
     /**
      * Called on initial page load.
      */
-    async init(params) {
+    async init() {
         //
     }
 
     /**
      * Call each time the DOM is refreshed.
+     *
+     * @returns {string}
      */
-    async render() {
+    render() {
         //
     }
 }
 
 class Home extends Component {
-    async init(params) {
+    async init() {
         //
     }
 
-    async render() {
+    render() {
         return /* HTML */ `<div>Hello world!</div>`;
     }
 }
@@ -179,27 +181,23 @@ class Home extends Component {
  * @param {Element} parentElement
  * @returns {Promise<VirtualNode>}
  */
-function createComponentNode(comp, attributes, urlParams, parent) {
+function createComponentNode(comp, attributes, parent) {
     const name = comp.constructor.name;
 
     /** @type {import("./micro").ComponentParams} */
-    let params = {
-        params: urlParams,
-        dom: new ComponentDOM(),
-        attributes: attributes,
-        stores: new Stores(),
-    };
+    // let params = {
+    //     dom: new ComponentDOM(),
+    //     attributes: attributes,
+    //     stores: new Stores(),
+    // };
 
-    const node = new VirtualNodeComponent(params, name, parent);
+    const node = new VirtualNodeComponent({}, name, parent);
 
     let rootElement = document.createElement("div");
     rootElement.classList.add("micro-" + name);
+    rootElement.classList.add(node.id);
 
     node.element = rootElement;
-
-    // const element = await parseHTML(await comp(params), name, params, node);
-    // node.element = element;
-    // element.classList.add(node.id);
 
     return node;
 }
@@ -229,7 +227,7 @@ class VirtualNode {
     }
 
     /**
-     * @returns {Element}
+     * @returns {Element | string}
      */
     build() {
         return undefined;
@@ -264,6 +262,10 @@ class VirtualNodeText extends VirtualNode {
         super();
         this.text = text;
         this.children = undefined;
+    }
+
+    build() {
+        return this.text;
     }
 }
 
@@ -308,18 +310,7 @@ class VirtualNodeElement extends VirtualNode {
      * @returns {Element}
      */
     build() {
-        /** @type {Element} */
-        let newElement = this.element.cloneNode(true);
-
-        for (let child of this.children) {
-            if (child instanceof VirtualNodeText) {
-                newElement.append(child.text);
-            } else {
-                newElement.append(child.build());
-            }
-        }
-
-        return newElement;
+        return this.element.cloneNode(true);
     }
 }
 
@@ -337,6 +328,8 @@ class VirtualNodeComponent extends VirtualNode {
         this.component = component;
         this.name = name;
         this.parent = parent;
+        /** @type {HTMLElement} */
+        this.element = undefined;
         this.id = "id" + this.createComponentId();
 
         // TODO: Add the index of the node to the id.
@@ -505,16 +498,7 @@ class VirtualNodeComponent extends VirtualNode {
      * @returns {Element}
      */
     build() {
-        // /** @type {Element} */
-        // let newElement = this.element.cloneNode(true);
-        // for (let child of this.children) {
-        //     if (child instanceof VirtualNodeText) {
-        //         newElement.append(child.text);
-        //     } else {
-        //         newElement.append(child.build());
-        //     }
-        // }
-        // return newElement;
+        return this.element.cloneNode(true);
     }
 }
 
@@ -574,7 +558,7 @@ function isOperator(c) {
  * @param {string[]} param
  * @returns {boolean}
  */
-function isAll(str, param) {
+function containsOnly(str, param) {
     for (let ch of str) {
         if (!param.includes(ch)) {
             return false;
@@ -587,7 +571,7 @@ function isAll(str, param) {
  * @param {string} source
  * @returns {Token[]}
  */
-function tokenizeHTML(source, parentName) {
+function tokenizeHTML(source) {
     /** @type {Token[]} */
     let tokens = [];
     let index = 0;
@@ -656,7 +640,7 @@ function tokenizeHTML(source, parentName) {
                     } else if (source[index] == ">" || (source[index] == "/" && source[index + 1] == ">")) {
                         break;
                     } else if (source[index] != "=") {
-                        throw new ParseError("unexpected character in open tag 2 " + parentName);
+                        throw new ParseError("unexpected character in open tag 2 ");
                     }
 
                     index++; // skip '='
@@ -704,7 +688,7 @@ function tokenizeHTML(source, parentName) {
                     tokens.push(new TokenOpenTag(name, attributes));
                 } else {
                     console.log(source[index]);
-                    throw new ParseError("expected '>' or '/>' to close the tag " + parentName);
+                    throw new ParseError("expected '>' or '/>' to close the tag ");
                 }
             }
         } else {
@@ -715,7 +699,7 @@ function tokenizeHTML(source, parentName) {
                 index++;
             }
 
-            if (!isAll(s, [" ", "\n"])) {
+            if (!containsOnly(s, [" ", "\n"])) {
                 tokens.push(new TokenString(s));
             }
         }
@@ -815,7 +799,7 @@ function isValidSVGTag(name) {
  * @param {Map<string, string>} params
  * @returns {VirtualNode}
  */
-function createElement(name, attributes, parent, params) {
+function createElement(name, attributes, parent) {
     let element = null;
 
     if (name == "svg" || (isInSvg(parent) && isValidSVGTag(name))) {
@@ -831,7 +815,7 @@ function createElement(name, attributes, parent, params) {
             throw new ParseError("Unknown component " + name);
         }
 
-        return createComponentNode(component, attributes, params, parent);
+        return createComponentNode(component, attributes, parent);
     }
 
     for (let attribute of attributes.keys()) {
@@ -844,16 +828,24 @@ function createElement(name, attributes, parent, params) {
 /**
  * @param {Token[]} tokens
  * @param {VirtualNode} parent
- * @param {Map<string, string>} params
+ * @returns {Array<VirtualNode>}
  */
-function parseHTMLInner(tokens, parent, params) {
+function parseHTMLInner(tokens, parent) {
     let index = 0;
+    let nodes = [];
 
     while (index < tokens.length) {
         if (tokens[index] instanceof TokenString) {
-            parent.appendChild(new VirtualNodeText(tokens[index].text));
+            nodes.push(new VirtualNodeText(tokens[index].text));
         } else if (tokens[index] instanceof TokenTag) {
-            parent.appendChild(createElement(tokens[index].name, tokens[index].attribs, parent, params));
+            let element = createElement(tokens[index].name, tokens[index].attribs, parent);
+
+            if (element instanceof VirtualNodeComponent) {
+                const innerNodes = parseHTML(element.component.render(), element);
+                element.children.push(...innerNodes);
+            }
+
+            nodes.push(element);
         } else if (tokens[index] instanceof TokenOpenTag) {
             /** @type {TokenOpenTag} */
             let token = tokens[index];
@@ -877,11 +869,17 @@ function parseHTMLInner(tokens, parent, params) {
             }
 
             if (tokens[index] instanceof TokenCloseTag && tokens[index].name == tagName && openTags == 0) {
-                const element = createElement(token.name, token.attribs, parent, params);
+                const element = createElement(token.name, token.attribs, parent);
                 const innerTokens = tokens.slice(tokenStart + 1, index);
 
-                parseHTMLInner(innerTokens, element, params);
-                parent.appendChild(element);
+                if (element instanceof VirtualNodeComponent) {
+                    throw new ParseError("Components cannot have children");
+                } else {
+                    const children = parseHTMLInner(innerTokens, element);
+                    element.children.push(...children);
+                }
+
+                nodes.push(element);
             } else {
                 throw new ParseError("cannot find closing tag");
             }
@@ -889,21 +887,22 @@ function parseHTMLInner(tokens, parent, params) {
 
         index++;
     }
+
+    return nodes;
 }
 
 /**
  * Parse a component's HTML code into an Element.
  *
  * @param {string} source
- * @param {string} name
- * @param {Map<string, string>} params
  * @param {VirtualNode} parent
- * @returns {Promise<Element>}
+ * @returns {Array<VirtualNode>}
  */
-export function parseHTML(source, name, params, parent) {
-    const tokens = tokenizeHTML(source, name);
-    parseHTMLInner(tokens, parent, params);
-    return div;
+export function parseHTML(source, parent) {
+    const tokens = tokenizeHTML(source);
+    const nodes = parseHTMLInner(tokens, parent);
+
+    return nodes;
 }
 
 /*
@@ -1063,16 +1062,21 @@ function matchRoute(routes, path) {
  * @param {VirtualNode} oldNode
  * @param {VirtualNode} newNode
  * @param {Element} oldElement
- * @param {VirtualNode} parentNode
  * @param {Element} parentElement
  */
-async function updateDOM(oldNode, newNode, oldElement, parentNode, parentElement) {
+async function updateDOM(oldNode, newNode, oldElement, parentElement) {
     if (oldNode == undefined) {
-        // first time the DOM is loaded
-        const newElement = newNode.build();
-        parentElement.appendChild(newElement);
+        let newElement2 = newNode.build();
+        parentElement.append(newElement2);
 
-        await newNode.mount();
+        if (!(newNode instanceof VirtualNodeText)) {
+            for (let child of newNode.children) {
+                await updateDOM(undefined, child, parentElement, newElement2);
+            }
+
+            await newNode.mount();
+        }
+
         return;
     }
 
@@ -1084,6 +1088,38 @@ async function updateDOM(oldNode, newNode, oldElement, parentNode, parentElement
         parentElement.replaceChild(newElement, oldElement);
         await newNode.mount();
         return;
+    }
+
+    if (newNode instanceof VirtualNodeText) {
+        // Text nodes cant have children
+        return;
+    }
+
+    let index = 0;
+
+    for (; index < oldNode.children.length; index++) {
+        if (index >= newNode.children.length) {
+            let oldNode2 = oldNode.children.at(index);
+            let oldElement2 = oldElement.childNodes.item(index);
+
+            oldNode2.clean();
+
+            parentElement.removeChild(oldElement2);
+        } else {
+            let oldNode2 = oldNode.children.at(index);
+            let newNode2 = newNode.children.at(index);
+            let oldElement2 = oldElement.childNodes.item(index);
+            let newElement2 = newNode.children[index].build();
+
+            await updateDOM(oldNode2, newNode2, oldElement2, newElement2, oldNode, oldElement);
+        }
+    }
+
+    for (; index < newNode.length; index++) {
+        let newElement2 = newNode.children[index].build();
+
+        parentElement.append(newElement2);
+        await newElement2.mount();
     }
 }
 
@@ -1137,10 +1173,11 @@ async function router() {
 
     const view = new Home();
     const node = await createComponentNode(view, new Map(), new Map(), undefined);
+    node.children.push(...parseHTML(view.render()));
 
     console.log(view);
 
-    updateDOM(rootNode, node, app.firstElementChild, undefined, app);
+    updateDOM(rootNode, node, app.firstElementChild, app);
     rootNode = node;
 }
 

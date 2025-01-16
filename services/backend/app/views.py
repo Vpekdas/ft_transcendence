@@ -364,55 +364,67 @@ def tournament_create(request: HttpRequest):
     return JsonResponse({ "id": tid })
 
 @require_POST
-def addFriend(request: HttpRequest, newFriend: Player):
+def addFriend(request: HttpRequest, friend_id):
      if not request.user.is_authenticated:
         return JsonResponse({ "error": NOT_AUTHENTICATED })
      data = json.loads(request.body)
      player = Player.objects.filter(user=request.user).first()
      if not player:
         return JsonResponse({ "error": INTERNAL_ERROR })
-     player.friends.insert(newFriend)
+     friend = Player.objects.filter(id=friend_id).first()
+     if not friend:
+         return JsonResponse({ "error": INTERNAL_ERROR })
+     player.friends.insert(friend)
 
      return JsonResponse({})
 
 @require_POST
-def deleteFriend(request: HttpRequest, friend: Player):
+def deleteFriend(request: HttpRequest, friend_id):
      if not request.user.is_authenticated:
         return JsonResponse({ "error": NOT_AUTHENTICATED })
      data = json.loads(request.body)
      player = Player.objects.filter(user=request.user).first()
      if not player:
         return JsonResponse({ "error": INTERNAL_ERROR })
+     friend = Player.objects.filter(id=friend_id).first()
+     if not friend:
+         return JsonResponse({ "error": INTERNAL_ERROR })
      player.friends.remove(friend)
 
      return JsonResponse({})
 
-def sendMessage(request: HttpRequest, p2: Player, contenu: string):
+def sendMessage(request: HttpRequest, id, contenu: string):
      if not request.user.is_authenticated:
         return JsonResponse({ "error": NOT_AUTHENTICATED })
      data = json.loads(request.body)
      player = Player.objects.filter(user=request.user).first()
      if not player:
         return JsonResponse({ "error": INTERNAL_ERROR })
-     
-     chat = Chat.objects.filter(player1 = player, player2=p2)
+     p2 = Player.objects.filter(id=id).first()
+     if not p2:
+         return JsonResponse({ "error": INTERNAL_ERROR })
+     chat, create = Chat.objects.get_or_create(player1=player, player2=p2)
      if not chat:
         return JsonResponse({ "error": INTERNAL_ERROR })
-     message = Message(content=contenu, sender=player, receiver=p2)
+     message = Message.objects.create(content=contenu, sender=player, receiver=p2)
      chat.messages.insert(message)
      return JsonResponse({})
 
-def getMessages(request: HttpRequest, p2: Player):
+def getMessages(request: HttpRequest, id):
      if not request.user.is_authenticated:
         return JsonResponse({ "error": NOT_AUTHENTICATED })
      data = json.loads(request.body)
      player = Player.objects.filter(user=request.user).first()
      if not player:
         return JsonResponse({ "error": INTERNAL_ERROR })
+     p2 = Player.objects.filter(id=id).first()
+     if not p2:
+         return JsonResponse({ "error": INTERNAL_ERROR })
      chat = Chat.objects.filter(player1 = player, player2=p2)
      if not chat:
         return JsonResponse({ "error": INTERNAL_ERROR })
-     return JsonResponse({"messages" : json.loads(m) for m in chat.messages})
+     messages = chat.messages.all().values("content", "sender", "receiver")
+     return JsonResponse({"messages" : list(messages)})
 
 # @require_POST
 # def tournament_info(request: HttpRequest, id: str):

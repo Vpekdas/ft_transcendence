@@ -5,35 +5,38 @@ import { api, fetchApi, post } from "../../utils";
 /** @type {import("../../micro").Component} */
 export default class ChangeProfilePictureForm extends Component {
     async init() {
+        // TODO: fileName could be a local store
+
         this.fileName = tr("No files selected");
         this.playerInfo = await post("/api/player/c/profile").then((res) => res.json());
 
-        document.querySelector("#inputGroupFile04").on("change", async () => {
-            const target = document.getElementById("inputGroupFile04");
+        this.onready = () => {
+            document.querySelector("#inputGroupFile04").addEventListener("change", async () => {
+                const target = document.getElementById("inputGroupFile04");
 
-            this.fileName = target.files[0].name;
-            document.getElementById("file-name").textContent = this.fileName;
-        });
+                document.getElementById("file-name").textContent = target.files[0].name;
+            });
 
-        document.querySelector("#profilePictureUpload").on("click", async () => {
-            const target = document.getElementById("inputGroupFile04");
-            const picture = target.files[0];
+            document.querySelector("#profilePictureUpload").addEventListener("click", async () => {
+                const target = document.getElementById("inputGroupFile04");
+                const picture = target.files[0];
 
-            const reader = new FileReader();
+                const reader = new FileReader();
 
-            reader.onload = async (e) => {
-                const content = e.target.result;
+                reader.onload = async (e) => {
+                    const content = e.target.result;
 
-                const response = await post("/api/player/c/picture/update", {
-                    body: JSON.stringify({ type: picture.type, image: content }),
-                })
-                    .then((res) => res.json())
-                    .catch((err) => {
-                        error: "Bad input";
-                    });
-            };
-            reader.readAsDataURL(picture);
-        });
+                    const response = await post("/api/player/c/picture/update", {
+                        body: JSON.stringify({ type: picture.type, image: content }),
+                    })
+                        .then((res) => res.json())
+                        .catch((err) => {
+                            error: "Bad input";
+                        });
+                };
+                reader.readAsDataURL(picture);
+            });
+        };
     }
 
     render() {
@@ -52,7 +55,7 @@ export default class ChangeProfilePictureForm extends Component {
                             style="display: none;"
                         />
                         <label for="inputGroupFile04" class="btn btn-primary settings">${tr("Browse")} </label>
-                        <span id="file-name" class="file-name">${this.fileName}</span>
+                        <span id="file-name" class="file-name">${tr("No files selected")}</span>
                         <button class="btn btn-primary settings" type="button" id="profilePictureUpload">
                             ${tr("Upload")}
                         </button>

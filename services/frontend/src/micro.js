@@ -70,21 +70,23 @@ export class Component {
         this.stores = new Stores();
         /** @type {Map<string, string>} */
         this.attributes = new Map();
+        /** @type {() => void | (() => Promise<void>)} */
+        this.onready = undefined;
     }
 
     /**
-     * Called on initial page load.
-     *
-     * @param {import("./micro").ComponentParams} param0
+     * Callback called on initial page load.
      */
     async init() {}
 
+    /**
+     * Callback called when the component is removed from the DOM.
+     */
     clean() {}
 
     /**
-     * Call each time the DOM is refreshed.
+     * Callback called each time the DOM is refreshed.
      *
-     * @param {import("./micro").ComponentParams} param0
      * @returns {string}
      */
     render() {}
@@ -129,14 +131,7 @@ class VirtualNode {
         return undefined;
     }
 
-    async mount() {
-        // if (this.children == undefined) {
-        //     return;
-        // }
-        // for (let child of this.children) {
-        //     await child.mount();
-        // }
-    }
+    async mount() {}
 
     clean() {
         if (this.children == undefined) {
@@ -220,10 +215,15 @@ class VirtualNodeComponent extends VirtualNode {
 
     async mount() {
         if (this.component.init) await this.component.init();
+        this.parseInnerHTML();
     }
 
     clean() {
         this.component.clean();
+    }
+
+    parseInnerHTML() {
+        if (this.component.render) this.children.push(...parseHTML(this.component.render(), this));
     }
 
     /**
@@ -541,11 +541,13 @@ function createElement(name, attributes, parent) {
     }
 
     if (element instanceof HTMLUnknownElement) {
-        const component = components.get(name);
+        const construct = components.get(name);
 
-        if (component == undefined) {
+        if (construct == undefined) {
             throw new ParseError("Unknown component " + name);
         }
+
+        const component = new construct();
 
         return createComponentNode(component, attributes, parent);
     }
@@ -571,13 +573,6 @@ function parseHTMLInner(tokens, parent) {
             nodes.push(new VirtualNodeText(tokens[index].text));
         } else if (tokens[index] instanceof TokenTag) {
             let element = createElement(tokens[index].name, tokens[index].attribs, parent);
-
-            if (element instanceof VirtualNodeComponent) {
-                // const innerNodes = parseHTML(element.component.render(), element);
-                const innerNodes = parseHTML(element.component.prototype.render(), element);
-                element.children.push(...innerNodes);
-            }
-
             nodes.push(element);
         } else if (tokens[index] instanceof TokenOpenTag) {
             /** @type {TokenOpenTag} */
@@ -739,23 +734,29 @@ function matchRoute(routes, path) {
  */
 async function updateDOM(oldNode, newNode, oldElement, parentElement) {
     if (oldNode == undefined) {
-        let newElement2 = newNode.build();
-        parentElement.append(newElement2);
+        if (typeof newNode == "string") {
+            throw Error();
+        }
+
+        let newElement = newNode.build();
+        parentElement.append(newElement);
 
         // console.log(parentElement, newElement2);
 
         if (!(newNode instanceof VirtualNodeText)) {
+            await newNode.mount();
+
             for (let child of newNode.children) {
-                await updateDOM(undefined, child, parentElement, newElement2);
+                await updateDOM(undefined, child, parentElement, newElement);
             }
 
-            await newNode.mount();
+            if (newNode instanceof VirtualNodeComponent && newNode.component.onready) {
+                await newNode.component.onready();
+            }
         }
 
         return;
     }
-
-    // console.log(parentElement, newNode);
 
     if (parentElement instanceof Text) {
         return;
@@ -771,11 +772,15 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
         parentElement.replaceChild(newElement, oldElement);
 
         if (!(newNode instanceof VirtualNodeText)) {
+            await newNode.mount();
+
             for (let child of newNode.children) {
                 await updateDOM(undefined, child, parentElement, newElement);
             }
 
-            await newNode.mount();
+            if (newNode instanceof VirtualNodeComponent && newNode.component.onready) {
+                await newNode.component.onready();
+            }
         }
 
         return;
@@ -795,7 +800,7 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
 
             oldNode2.clean();
 
-            parentElement.removeChild(oldElement2);
+            oldElement.removeChild(oldElement2);
         } else {
             let oldNode2 = oldNode.children.at(index);
             let newNode2 = newNode.children.at(index);
@@ -806,10 +811,20 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
     }
 
     for (; index < newNode.length; index++) {
-        let newElement2 = newNode.children[index].build();
+        let newElement = newNode.children[index].build();
 
-        parentElement.append(newElement2);
-        await newElement2.mount();
+        parentElement.append(newElement);
+        await newElement.mount();
+
+        if (!(newNode instanceof VirtualNodeText)) {
+            for (let child of newNode.children) {
+                await updateDOM(undefined, child, parentElement, newElement);
+
+                if (newNode instanceof VirtualNodeComponent && newNode.component.onready) {
+                    await newNode.component.onready();
+                }
+            }
+        }
     }
 }
 
@@ -825,6 +840,7 @@ async function router() {
     }
 
     const route = matchRoute(routerSettings.routes, location.pathname);
+    /** @type {VirtualNodeComponent} */
     let newNode;
 
     // This should not be called here, only once during load and after each hot reload
@@ -848,11 +864,13 @@ async function router() {
         let view = new route.route.view();
 
         newNode = await createComponentNode(view, attributes, undefined);
+        await newNode.mount();
         newNode.children.push(...parseHTML(view.render()));
     } else if (routerSettings.notFound != undefined) {
         let view = new routerSettings.notFound();
 
         newNode = await createComponentNode(view, new Map(), undefined);
+        await newNode.mount();
         newNode.children.push(...parseHTML(view.render()));
     }
 

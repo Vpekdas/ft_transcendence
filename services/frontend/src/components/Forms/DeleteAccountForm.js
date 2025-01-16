@@ -5,25 +5,29 @@ import { post } from "../../utils";
 /** @type {import("../../micro").Component} */
 export default class DeleteAccountForm extends Component {
     async init() {
-        document.querySelectorAll(".btn.btn-primary.settings.delete").on("click", async () => {
-            document.querySelector(".delete-modal-overlay").style.display = "flex";
-        });
+        this.onready = () => {
+            document.querySelectorAll(".btn.btn-primary.settings.delete").forEach((e) =>
+                e.addEventListener("click", async () => {
+                    document.querySelector(".delete-modal-overlay").style.display = "flex";
+                })
+            );
 
-        document.querySelector("#confirm-button").on("click", async () => {
-            const response = await post("/api/player/c/delete", {
-                body: JSON.stringify({}),
-            })
-                .then((res) => res.json())
-                .catch((err) => {
-                    error: "Bad input";
-                });
+            document.querySelector("#confirm-button").addEventListener("click", async () => {
+                const response = await post("/api/player/c/delete", {
+                    body: JSON.stringify({}),
+                })
+                    .then((res) => res.json())
+                    .catch((err) => {
+                        error: "Bad input";
+                    });
 
-            document.querySelector(".delete-modal-overlay").style.display = "none";
-        });
+                document.querySelector(".delete-modal-overlay").style.display = "none";
+            });
 
-        document.querySelector("#cancel-button").on("click", async () => {
-            document.querySelector(".delete-modal-overlay").style.display = "none";
-        });
+            document.querySelector("#cancel-button").addEventListener("click", async () => {
+                document.querySelector(".delete-modal-overlay").style.display = "none";
+            });
+        };
     }
 
     render() {

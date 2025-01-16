@@ -7,24 +7,28 @@ export default class ChangeNicknameForm extends Component {
     async init() {
         this.info = await post("/api/player/c/nickname").then((res) => res.json());
 
-        dom.querySelector(".btn.btn-primary.change-nickname-button").on("click", async (event) => {
-            const newNickname = document.getElementById("new-nickname").value;
+        this.onready = () => {
+            document
+                .querySelector(".btn.btn-primary.change-nickname-button")
+                .addEventListener("click", async (event) => {
+                    const newNickname = document.getElementById("new-nickname").value;
 
-            const response = await fetchApi("/api/player/c/nickname/update", {
-                method: "POST",
-                body: JSON.stringify({
-                    nickname: newNickname,
-                }),
-            })
-                .then((res) => res.json())
-                .catch((err) => {
-                    showToast(tr("An error occurred. Please try again."), "bi bi-exclamation-triangle-fill");
+                    const response = await fetchApi("/api/player/c/nickname/update", {
+                        method: "POST",
+                        body: JSON.stringify({
+                            nickname: newNickname,
+                        }),
+                    })
+                        .then((res) => res.json())
+                        .catch((err) => {
+                            showToast(tr("An error occurred. Please try again."), "bi bi-exclamation-triangle-fill");
+                        });
+
+                    if (response.error) {
+                        showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
+                    }
                 });
-
-            if (response.error) {
-                showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
-            }
-        });
+        };
     }
 
     render() {

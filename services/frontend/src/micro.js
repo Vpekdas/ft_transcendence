@@ -23,19 +23,55 @@ function hash(str) {
     return h;
 }
 
-/**
- * An interface to access different types of scores.
- */
-class Stores {
+export class Component {
     constructor() {
+        /** @type {Map<string, string>} */
+        this.attributes = new Map();
+        /** @type {() => void | (() => Promise<void>)} */
+        this.onready = undefined;
+        /** @type {Map<string, any>} */
         this.stores = new Map();
     }
 
-    // /**
-    //  * @param {string} name
-    //  * @returns {[ value: typeof defaultValue, setValue: (value: typeof defaultValue) => void ]}
-    //  */
-    // use(name, defaultValue) {}
+    /**
+     * Callback called on initial page load.
+     */
+    async init() {}
+
+    /**
+     * Callback called when the component is removed from the DOM.
+     */
+    clean() {}
+
+    /**
+     * Callback called each time the DOM is refreshed.
+     *
+     * @returns {string}
+     */
+    render() {}
+
+    /*
+        STORES
+     */
+
+    /**
+     * @param {string} name
+     * @returns {[ value: typeof defaultValue, setValue: (value: typeof defaultValue) => void ]}
+     */
+    use(name, defaultValue) {
+        return [
+            () => {
+                if (!this.stores.has(name)) {
+                    this.stores.set(name, defaultValue);
+                }
+                return this.stores.get(name);
+            },
+            (value) => {
+                this.stores.set(name, value);
+                setTimeout(async () => await router());
+            },
+        ];
+    }
 
     /**
      * A store which use localStorage to persist its value.
@@ -63,33 +99,6 @@ class Stores {
             },
         ];
     }
-}
-
-export class Component {
-    constructor() {
-        this.stores = new Stores();
-        /** @type {Map<string, string>} */
-        this.attributes = new Map();
-        /** @type {() => void | (() => Promise<void>)} */
-        this.onready = undefined;
-    }
-
-    /**
-     * Callback called on initial page load.
-     */
-    async init() {}
-
-    /**
-     * Callback called when the component is removed from the DOM.
-     */
-    clean() {}
-
-    /**
-     * Callback called each time the DOM is refreshed.
-     *
-     * @returns {string}
-     */
-    render() {}
 }
 
 /**
@@ -768,6 +777,8 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
     if (oldString != newString) {
         let newElement = newNode.build();
 
+        console.log(newElement, oldElement);
+
         oldNode.clean();
         parentElement.replaceChild(newElement, oldElement);
 
@@ -793,6 +804,8 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
 
     let index = 0;
 
+    await newNode.mount(); // what
+
     for (; index < oldNode.children.length; index++) {
         if (index >= newNode.children.length) {
             let oldNode2 = oldNode.children.at(index);
@@ -800,6 +813,7 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
 
             oldNode2.clean();
 
+            console.log(oldNode2, oldElement2);
             oldElement.removeChild(oldElement2);
         } else {
             let oldNode2 = oldNode.children.at(index);

@@ -15,8 +15,8 @@ export default class Duck extends Component {
     }
 
     async init() {
-        const [count, setCount] = this.stores.usePersistent("duckCount", 0);
-        const [data, setData] = this.stores.usePersistent("duckData", {});
+        const [count, setCount] = this.usePersistent("duckCount", 0);
+        const [data, setData] = this.usePersistent("duckData", {});
 
         this.upgrades = [
             {
@@ -30,54 +30,54 @@ export default class Duck extends Component {
             return upgrades.find((value) => value.name == name);
         }
 
-        document.querySelector("#the-duck").do((element) => {
+        this.onready = () => {
             this.interval = setInterval(() => {
                 let _data = data();
-                for (let obj of upgrades) {
+                for (let obj of this.upgrades) {
                     let value = _data[obj.name] != undefined ? _data[obj.name] : 0;
                     setCount(count() + obj.mul(value));
                 }
             }, 1000);
-        });
 
-        document.querySelector("#the-duck").addEventListener("click", (event) => {
-            event.target.animate(
-                [
-                    {
-                        opacity: 0,
-                        easing: "ease-out",
-                    },
-                    {
-                        opacity: 1,
-                        easing: "ease-in",
-                    },
-                ],
-                2000
-            );
+            document.querySelector("#the-duck").addEventListener("click", (event) => {
+                event.target.animate(
+                    [
+                        {
+                            opacity: 0,
+                            easing: "ease-out",
+                        },
+                        {
+                            opacity: 1,
+                            easing: "ease-in",
+                        },
+                    ],
+                    2000
+                );
 
-            setCount(count() + 1);
-        });
+                setCount(count() + 1);
+            });
 
-        document.querySelector(".duck-upgrade-btn").addEventListener("click", (event) => {
-            /** @type {HTMLElement} */
-            let target = event.target;
-            const name = target.getAttribute("name");
+            document.querySelector(".duck-upgrade-btn").addEventListener("click", (event) => {
+                /** @type {HTMLElement} */
+                let target = event.target;
+                const name = target.getAttribute("name");
 
-            let _data = data();
-            let upgrade = getUpgrade(name);
-            let cost = upgrade.cost(_data[name] != undefined ? _data[name] : 0);
+                let _data = data();
+                let upgrade = getUpgrade(name);
+                let cost = upgrade.cost(_data[name] != undefined ? _data[name] : 0);
 
-            if (count() >= cost) {
-                if (_data[name] == undefined) {
-                    _data[name] = 0;
-                } else {
-                    _data[name] += 1;
+                if (count() >= cost) {
+                    if (_data[name] == undefined) {
+                        _data[name] = 0;
+                    } else {
+                        _data[name] += 1;
+                    }
+
+                    setCount(count() - cost);
+                    setData(_data);
                 }
-
-                setCount(count() - cost);
-                setData(_data);
-            }
-        });
+            });
+        };
     }
 
     clean() {
@@ -85,8 +85,8 @@ export default class Duck extends Component {
     }
 
     render() {
-        const [count, setCount] = this.stores.usePersistent("duckCount", 0);
-        const [data, setData] = this.stores.usePersistent("duckData", {});
+        const [count, setCount] = this.usePersistent("duckCount", 0);
+        const [data, setData] = this.usePersistent("duckData", {});
 
         for (let obj of this.upgrades) {
             let _data = data();

@@ -4,7 +4,7 @@ import { tr } from "../i18n";
 
 export default class PongMatchmake extends Component {
     timeInMinutes() {
-        const [time, setTime] = this.stores.usePersistent("matchmakeTimer", 0);
+        const [time, setTime] = this.usePersistent("matchmakeTimer", 0);
 
         const minutes = Math.floor(time() / 60);
         let seconds = Math.floor(time() % 60);
@@ -27,7 +27,7 @@ export default class PongMatchmake extends Component {
             navigateTo("/");
         }
 
-        const [time, setTime] = this.stores.usePersistent("matchmakeTimer", 0); // TODO: No need to store the value in localStorage here.
+        const [time, setTime] = this.usePersistent("matchmakeTimer", 0); // TODO: No need to store the value in localStorage here.
 
         this.ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/matchmake/pong`);
         this.ws.onopen = (event) => {

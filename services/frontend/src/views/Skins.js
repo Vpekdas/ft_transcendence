@@ -6,41 +6,43 @@ export default class Skins extends Component {
     async init() {
         document.title = tr("Skins");
 
-        let [terrainSkin, setTerrainSkin] = stores.usePersistent("terrainSkin", "default-terrain");
-        let [ballSkin, setBallSkin] = stores.usePersistent("ballSkin", "default-ball");
+        let [terrainSkin, setTerrainSkin] = this.usePersistent("terrainSkin", "default-terrain");
+        let [ballSkin, setBallSkin] = this.usePersistent("ballSkin", "default-ball");
 
-        document.querySelector(".skin-item.terrain[skin-name='" + terrainSkin() + "']").classList.add("selected");
-        document.querySelector(".skin-item.ball[skin-name='" + ballSkin() + "']").classList.add("selected");
+        this.onready = () => {
+            document.querySelector(".skin-item.terrain[skin-name='" + terrainSkin() + "']").classList.add("selected");
+            document.querySelector(".skin-item.ball[skin-name='" + ballSkin() + "']").classList.add("selected");
 
-        document.querySelectorAll(".skin-item.terrain").forEach((e) =>
-            e.addEventListener("click", async (event) => {
-                let previousSkin = terrainSkin();
-                let previousSkinEl = document.querySelector("[skin-name=" + previousSkin + "]");
+            document.querySelectorAll(".skin-item.terrain").forEach((e) =>
+                e.addEventListener("click", async (event) => {
+                    let previousSkin = terrainSkin();
+                    let previousSkinEl = document.querySelector("[skin-name=" + previousSkin + "]");
 
-                previousSkinEl.classList.remove("selected");
-                event.target.classList.add("selected");
+                    previousSkinEl.classList.remove("selected");
+                    event.target.classList.add("selected");
 
-                const name = event.target.getAttribute("skin-name");
+                    const name = event.target.getAttribute("skin-name");
 
-                setTerrainSkin(name);
-                await post("/api/player/c/skins/select-terrain/" + name);
-            })
-        );
+                    setTerrainSkin(name);
+                    await post("/api/player/c/skins/select-terrain/" + name);
+                })
+            );
 
-        document.querySelectorAll(".skin-item.ball").forEach((e) =>
-            e.addEventListener("click", async (event) => {
-                let previousSkin = ballSkin();
-                let previousSkinEl = document.querySelector("[skin-name=" + previousSkin + "]");
+            document.querySelectorAll(".skin-item.ball").forEach((e) =>
+                e.addEventListener("click", async (event) => {
+                    let previousSkin = ballSkin();
+                    let previousSkinEl = document.querySelector("[skin-name=" + previousSkin + "]");
 
-                previousSkinEl.classList.remove("selected");
-                event.target.classList.add("selected");
+                    previousSkinEl.classList.remove("selected");
+                    event.target.classList.add("selected");
 
-                const name = event.target.getAttribute("skin-name");
+                    const name = event.target.getAttribute("skin-name");
 
-                setBallSkin(name);
-                await post("/api/player/c/skins/select-ball/" + name);
-            })
-        );
+                    setBallSkin(name);
+                    await post("/api/player/c/skins/select-ball/" + name);
+                })
+            );
+        };
     }
 
     render() {

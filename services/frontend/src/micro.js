@@ -56,7 +56,7 @@ export class Component {
 
     /**
      * @param {string} name
-     * @returns {[ value: typeof defaultValue, setValue: (value: typeof defaultValue) => void ]}
+     * @returns {[() => typeof defaultValue, (value: typeof defaultValue) => void ]}
      */
     use(name, defaultValue) {
         return [
@@ -143,13 +143,22 @@ class VirtualNode {
     async mount() {}
 
     clean() {
-        if (this.children == undefined) {
-            return;
-        }
-
         for (let child of this.children) {
             child.clean();
         }
+    }
+
+    /**
+     * @returns {Element}
+     */
+    buildTree() {
+        let root = this.build();
+
+        for (let child of this.children) {
+            root.append(child.buildTree());
+        }
+
+        return root;
     }
 }
 
@@ -160,7 +169,6 @@ class VirtualNodeText extends VirtualNode {
     constructor(text) {
         super();
         this.text = text;
-        this.children = undefined;
     }
 
     build() {
@@ -939,5 +947,5 @@ export function navigateTo(url) {
  * Force the refresh of the DOM.
  */
 export async function dirty() {
-    setTimeout(async () => await router());
+    await router();
 }

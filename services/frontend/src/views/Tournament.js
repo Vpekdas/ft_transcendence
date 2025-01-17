@@ -1,10 +1,9 @@
 import { getOriginNoProtocol, getNickname, post, api } from "../utils";
 import { tr } from "../i18n";
-import { parseHTML } from "../micro";
+import { Component, params } from "../micro";
 
-/** @type {import("../micro").Component} */
-export default async function Tournament({ dom, params, node }) {
-    function createBracket(games) {
+export default class Tournament extends Component {
+    createBracket(games) {
         const brackets = document.querySelectorAll(".bracket");
 
         if (games.length == 1) {
@@ -51,7 +50,7 @@ export default async function Tournament({ dom, params, node }) {
         }
     }
 
-    function createBinaryParticle(particleNumber) {
+    createBinaryParticle(particleNumber) {
         const container = document.querySelector(".particle-container");
 
         for (let i = 0; i < particleNumber; i++) {
@@ -74,7 +73,7 @@ export default async function Tournament({ dom, params, node }) {
         }
     }
 
-    function createDotParticle(particleNumber) {
+    createDotParticle(particleNumber) {
         const container = document.querySelector(".particle-container");
 
         for (let i = 0; i < particleNumber; i++) {
@@ -91,7 +90,7 @@ export default async function Tournament({ dom, params, node }) {
         }
     }
 
-    function createRoundTier() {
+    createRoundTier() {
         const roundNames = [tr("Quarterfinals"), tr("Semifinals"), tr("Final")];
         const roundTiers = document.querySelectorAll(".round-tier");
         let offset = 0;
@@ -107,95 +106,99 @@ export default async function Tournament({ dom, params, node }) {
         });
     }
 
-    document.title = tr("Tournament");
+    async init() {
+        document.title = tr("Tournament");
 
-    const id = params.get("id");
-    const playerInfo = await post("/api/player/c/profile").then((res) => res.json());
+        this.id = params.get("id");
+        this.playerInfo = await post("/api/player/c/profile").then((res) => res.json());
+        this.host = undefined;
+        this.roundsHtml = "";
 
-    let host = undefined;
+        const [_, setRounds] = this.usePersistent("rounds", []);
 
-    dom.querySelector("#tournament-container").do(async (el) => {
-        const ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/tournament/${id}`);
+        this.onready = () => {
+            this.ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/tournament/${this.id}`);
 
-        ws.onopen = (event) => {
-            ws.send(JSON.stringify({ type: "join" }));
-        };
-        ws.onmessage = async (event) => {
-            const data = JSON.parse(event.data);
+            this.ws.onopen = (event) => {
+                this.ws.send(JSON.stringify({ type: "join" }));
+            };
+            this.ws.onmessage = async (event) => {
+                const data = JSON.parse(event.data);
 
-            if (data["type"] == "players") {
-                let players = "";
-                for (let p of data["players"]) {
-                    let nickname = await getNickname(p);
-                    players += /* HTML */ `<span
-                        ><img src="${api("/api/player/" + p + "/picture")}" alt="" width="40vw" />${nickname}</span
-                    >`;
-                }
-                el.querySelector("#player-list").innerHTML = players;
-                host = data["host"];
-
-                if (host != playerInfo.id) {
-                    const startBtn = el.querySelector("#start-tournament");
-                    startBtn.disabled = true;
-                    startBtn.style.opacity = "0.3";
-                    startBtn.style.pointerEvents = "none";
-                }
-            } else if (data["type"] == "rounds") {
-                let container = el.querySelector("#match-container");
-
-                if (container != null) {
-                    container.replaceChildren([]);
-
-                    for (let round of data["rounds"]) {
-                        let games = round["games"];
-                        container.appendChild(
-                            // TODO: Remove the use of `parseHTML`, it should be an internal fonction only
-                            await parseHTML(
-                                /* HTML */ ` <div class="container-fluid round-container">
-                                    <TournamentRound roundCount="${games.length}" data="${JSON.stringify(games)}" />
-                                    <div class="container-fluid bracket-container">
-                                        <div class="bracket" row="1">
-                                            <div class="dot"></div>
-                                            <div class="dot"></div>
-                                            <div class="dot"></div>
-                                        </div>
-                                        <span class="round-tier"></span>
-                                    </div>
-                                </div>`,
-                                undefined,
-                                undefined,
-                                undefined
-                            )
-                        );
+                if (data["type"] == "players") {
+                    let players = "";
+                    for (let p of data["players"]) {
+                        let nickname = await getNickname(p);
+                        players += /* HTML */ `<span
+                            ><img src="${api("/api/player/" + p + "/picture")}" alt="" width="40vw" />${nickname}</span
+                        >`;
                     }
-                    createBracket(data["rounds"]);
-                    createRoundTier();
+                    document.querySelector("#player-list").innerHTML = players;
+                    this.host = data["host"];
+
+                    if (this.host != this.playerInfo.id) {
+                        const startBtn = document.querySelector("#start-tournament");
+                        startBtn.disabled = true;
+                        startBtn.style.opacity = "0.3";
+                        startBtn.style.pointerEvents = "none";
+                    }
+                } else if (data["type"] == "rounds") {
+                    setRounds(data["rounds"]);
+                    this.createBracket(data["rounds"]);
+                    this.createRoundTier();
                     // createBinaryParticle(15);
                     // createDotParticle(15);
+
+                    document.getElementById("match-container").innerHTML = this.roundsHtml;
+                } else if (data["type"] == "match") {
+                    navigateTo(`/play/pong/${data["id"]}`);
                 }
-            } else if (data["type"] == "match") {
-                navigateTo(`/play/pong/${data["id"]}`);
-            }
+            };
+
+            document.querySelector("#start-tournament").addEventListener("click", () => {
+                this.ws.send(JSON.stringify({ type: "start" }));
+            });
         };
+    }
 
-        dom.querySelector("#start-tournament").on("click", () => {
-            ws.send(JSON.stringify({ type: "start" }));
-        });
-    });
+    render() {
+        const [rounds, _] = this.usePersistent("rounds", []);
 
-    return /* HTML */ ` <HomeNavBar />
-        <div class="container-fluid dashboard-container tournament-container" id="tournament-container">
-            <div class="particle-container"></div>
-            <div class="container-fluid dashboard-container match-container" id="match-container"></div>
-            <div class="container-fluid dashboard-container player-container">
-                <h2 id="tournament-title">
-                    <i class="bi bi-clock"></i>
-                    <span>Tournament Name</span>
-                </h2>
-                <div id="player-list"></div>
-                <button id="start-tournament">
-                    <i class="bi bi-rocket-takeoff"></i> <span>${tr("Start !")}</span>
-                </button>
-            </div>
-        </div>`;
+        let roundsHtml = "";
+
+        for (let round of rounds()) {
+            let games = round["games"];
+            console.log(JSON.stringify(games));
+            // prettier-ignore
+            roundsHtml += /* HTML */ ` <div class="container-fluid round-container">
+                <TournamentRound roundCount="${games.length}" data="[]" />
+                <div class="container-fluid bracket-container">
+                    <div class="bracket" row="1">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                    <span class="round-tier"></span>
+                </div>
+            </div>`;
+        }
+
+        return /* HTML */ ` <HomeNavBar />
+            <div class="container-fluid dashboard-container tournament-container" id="tournament-container">
+                <div class="particle-container"></div>
+                <div class="container-fluid dashboard-container match-container" id="match-container">
+                    ${roundsHtml}
+                </div>
+                <div class="container-fluid dashboard-container player-container">
+                    <h2 id="tournament-title">
+                        <i class="bi bi-clock"></i>
+                        <span>Tournament Name</span>
+                    </h2>
+                    <div id="player-list"></div>
+                    <button id="start-tournament">
+                        <i class="bi bi-rocket-takeoff"></i> <span>${tr("Start !")}</span>
+                    </button>
+                </div>
+            </div>`;
+    }
 }

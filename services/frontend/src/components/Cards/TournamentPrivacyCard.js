@@ -4,18 +4,20 @@ import { Component, navigateTo } from "../../micro";
 /** @type {import("../../micro").Component} */
 export default class TournamentPrivacyCard extends Component {
     async init() {
-        document.querySelector("#btn-open").on("click", async () => {
-            const password = document.querySelector(".container-fluid.settings.tournament-password");
-            password.style.display = "none";
-        });
-        document.querySelector("#btn-password").on("click", async () => {
-            const password = document.querySelector(".container-fluid.settings.tournament-password");
-            password.style.display = "flex";
-        });
-        document.querySelector("#btn-invite-only").on("click", async () => {
-            const password = document.querySelector(".container-fluid.settings.tournament-password");
-            password.style.display = "none";
-        });
+        this.onready = () => {
+            document.querySelector("#btn-open").addEventListener("click", async () => {
+                const password = document.querySelector(".container-fluid.settings.tournament-password");
+                password.style.display = "none";
+            });
+            document.querySelector("#btn-password").addEventListener("click", async () => {
+                const password = document.querySelector(".container-fluid.settings.tournament-password");
+                password.style.display = "flex";
+            });
+            document.querySelector("#btn-invite-only").addEventListener("click", async () => {
+                const password = document.querySelector(".container-fluid.settings.tournament-password");
+                password.style.display = "none";
+            });
+        };
     }
 
     render() {

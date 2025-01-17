@@ -84,7 +84,7 @@ export default class OuterWilds extends Component {
             customElements.define("ow-wanderer", Wanderer);
         }
 
-        document.querySelector("#space").do(async () => {
+        this.onready = () => {
             const music = { audio: Audio, name: "", index: 0 };
             const chronometer = { timerId: 0, seconds: 0 };
             const coordinates = { endGame: false, currentPath: [] };
@@ -220,7 +220,7 @@ export default class OuterWilds extends Component {
                     }
                 });
             });
-        });
+        };
 
         // TODO: Probably will append each line.
         // TODO: Remove the border of previous line so the "cursor" will not be visible.

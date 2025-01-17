@@ -4,7 +4,7 @@ import { Component } from "../micro";
 /** @type {import("../micro").Component}  */
 export default class EyeOfTheUniverse extends Component {
     async init() {
-        dom.querySelector("#eye-of-the-universe").do(() => {
+        this.onready = () => {
             class SVGLightning {
                 constructor(svg) {
                     this.svg = svg;
@@ -123,7 +123,7 @@ export default class EyeOfTheUniverse extends Component {
 
             const svg = document.getElementById("eye-of-the-universe");
             new SVGLightning(svg);
-        });
+        };
     }
 
     render() {

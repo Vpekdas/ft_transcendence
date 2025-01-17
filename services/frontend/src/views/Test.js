@@ -15,60 +15,62 @@ async function loadShaderFile(url) {
 
 export default class Test extends Component {
     async init() {
-        const c = document.getElementById("test");
+        this.onready = async () => {
+            const c = document.getElementById("test");
 
-        let scene = new THREE.Scene();
-        let ballScene = new THREE.Scene();
-        let camera = new THREE.PerspectiveCamera(70, c.clientWidth / c.clientHeight, 0.1, 1000);
-        let renderer = new THREE.WebGLRenderer();
-        const textureLoader = new THREE.TextureLoader();
+            let scene = new THREE.Scene();
+            let ballScene = new THREE.Scene();
+            let camera = new THREE.PerspectiveCamera(70, c.clientWidth / c.clientHeight, 0.1, 1000);
+            let renderer = new THREE.WebGLRenderer();
+            const textureLoader = new THREE.TextureLoader();
 
-        const spaceTexture = textureLoader.load("/img/space.jpg");
-        scene.background = spaceTexture;
+            const spaceTexture = textureLoader.load("/img/space.jpg");
+            scene.background = spaceTexture;
 
-        renderer.setSize(c.clientWidth, c.clientHeight);
+            renderer.setSize(c.clientWidth, c.clientHeight);
 
-        c.appendChild(renderer.domElement);
+            c.appendChild(renderer.domElement);
 
-        const controls = new OrbitControls(camera, c);
+            const controls = new OrbitControls(camera, c);
 
-        camera.position.z = 20;
-        camera.position.y = -2;
+            camera.position.z = 20;
+            camera.position.y = -2;
 
-        const vertexShader = await loadShaderFile("/models/vertexShader.glsl");
-        const fragmentShader = await loadShaderFile("/models/fragmentShader.glsl");
+            const vertexShader = await loadShaderFile("/models/vertexShader.glsl");
+            const fragmentShader = await loadShaderFile("/models/fragmentShader.glsl");
 
-        const customShaderMaterial = new THREE.ShaderMaterial({
-            vertexShader: vertexShader,
-            fragmentShader: fragmentShader,
-            uniforms: {
-                emissiveIntensity: { value: 15.0 },
-            },
-        });
+            const customShaderMaterial = new THREE.ShaderMaterial({
+                vertexShader: vertexShader,
+                fragmentShader: fragmentShader,
+                uniforms: {
+                    emissiveIntensity: { value: 15.0 },
+                },
+            });
 
-        const geometry = new THREE.SphereGeometry(5, 32, 32);
-        const ball = new THREE.Mesh(geometry, customShaderMaterial);
-        ballScene.add(ball);
+            const geometry = new THREE.SphereGeometry(5, 32, 32);
+            const ball = new THREE.Mesh(geometry, customShaderMaterial);
+            ballScene.add(ball);
 
-        // Set up post-processing for the ball scene
-        const ballComposer = new EffectComposer(renderer);
-        const ballRenderPass = new RenderPass(ballScene, camera);
-        ballComposer.addPass(ballRenderPass);
+            // Set up post-processing for the ball scene
+            const ballComposer = new EffectComposer(renderer);
+            const ballRenderPass = new RenderPass(ballScene, camera);
+            ballComposer.addPass(ballRenderPass);
 
-        const bloomPass = new UnrealBloomPass(
-            new THREE.Vector2(c.clientWidth, c.clientHeight),
-            1.5, // strength
-            0.4, // radius
-            0.85 // threshold
-        );
-        ballComposer.addPass(bloomPass);
+            const bloomPass = new UnrealBloomPass(
+                new THREE.Vector2(c.clientWidth, c.clientHeight),
+                1.5, // strength
+                0.4, // radius
+                0.85 // threshold
+            );
+            ballComposer.addPass(bloomPass);
 
-        // Render loop
-        renderer.setAnimationLoop(() => {
-            controls.update();
-            renderer.render(scene, camera);
-            ballComposer.render();
-        });
+            // Render loop
+            renderer.setAnimationLoop(() => {
+                controls.update();
+                renderer.render(scene, camera);
+                ballComposer.render();
+            });
+        };
     }
 
     render() {

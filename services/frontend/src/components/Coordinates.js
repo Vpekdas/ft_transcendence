@@ -26,7 +26,8 @@ export default class Coordinates extends Component {
     }
 
     async init() {
-        document.querySelector(".fluid-container.coordinates-container").do(async (container) => {
+        this.onready = () => {
+            const container = document.querySelector(".coordinates-container");
             const coordinates = container.querySelectorAll(".coordinates");
 
             var click = 0,
@@ -227,7 +228,7 @@ export default class Coordinates extends Component {
                     }
                 });
             });
-        });
+        };
     }
 
     render() {

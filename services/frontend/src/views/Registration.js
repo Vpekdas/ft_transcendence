@@ -6,51 +6,52 @@ import { Component, navigateTo } from "../micro";
 /** @type {import("../micro").Component} */
 export default class Registration extends Component {
     async init() {
-        document.querySelector(".login-form").addEventListener("submit", async (event) => {
-            const form = event.target;
-            const data = new FormData(form);
+        this.onready = () => {
+            document.querySelector(".login-form").addEventListener("submit", async (event) => {
+                const form = event.target;
+                const data = new FormData(form);
 
-            const username = data.get("username");
-            const nickname = data.get("nickname");
-            const password = data.get("password");
+                const username = data.get("username");
+                const nickname = data.get("nickname");
+                const password = data.get("password");
 
-            if (!sanitizeInput(username) || !sanitizeInput(nickname) || !sanitizeInput(password)) {
-                showToast(
-                    "Invalid input detected. Please fill out all fields correctly.",
-                    "bi bi-exclamation-triangle-fill"
-                );
-                return;
-            }
-
-            const response = await fetch(api("/api/signin"), {
-                method: "POST",
-                body: JSON.stringify({
-                    username: username,
-                    nickname: nickname,
-                    password: password,
-                }),
-            })
-                .then((res) => res.json())
-                .catch((err) => {
-                    showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
-                });
-            if (response.error) {
-                showToast(response.error, "bi bi-exclamation-triangle-fill");
-            } else {
-                if (window.location.search.length == 0) {
-                    navigateTo("/");
-                } else {
-                    const redirect = window.location.search.substring(1).replace("redirect=", "");
-                    navigateTo(redirect);
+                if (!sanitizeInput(username) || !sanitizeInput(nickname) || !sanitizeInput(password)) {
+                    showToast(
+                        "Invalid input detected. Please fill out all fields correctly.",
+                        "bi bi-exclamation-triangle-fill"
+                    );
+                    return;
                 }
-            }
-        });
 
-        document
-            .querySelector(".login-redirect")
-            .addEventListener("click", () => navigateTo("login" + window.location.search));
+                const response = await fetch(api("/api/signin"), {
+                    method: "POST",
+                    body: JSON.stringify({
+                        username: username,
+                        nickname: nickname,
+                        password: password,
+                    }),
+                })
+                    .then((res) => res.json())
+                    .catch((err) => {
+                        showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
+                    });
+                if (response.error) {
+                    showToast(response.error, "bi bi-exclamation-triangle-fill");
+                } else {
+                    if (window.location.search.length == 0) {
+                        navigateTo("/");
+                    } else {
+                        const redirect = window.location.search.substring(1).replace("redirect=", "");
+                        navigateTo(redirect);
+                    }
+                }
+            });
+
+            document
+                .querySelector(".login-redirect")
+                .addEventListener("click", () => navigateTo("login" + window.location.search));
+        };
     }
-
     render() {
         return /* HTML */ ` <div>
             <div class="container-fluid login-container">

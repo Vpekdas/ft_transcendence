@@ -29,7 +29,7 @@ let ballSkins = new Map();
 
 function registerAllSkins() {
     // Terrain skins
-    terrainSkins.set("brittle-hollow", new TerrainSkin("brittle-hollow", "/models/test.glb"));
+    terrainSkins.set("brittle-hollow", new TerrainSkin("brittle-hollow", "/models/Test.glb"));
 
     // Ball skins
 }

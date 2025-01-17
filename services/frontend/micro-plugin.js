@@ -28,7 +28,6 @@ function importAllComponents(currentFolder, currentModuleFolder = ".") {
                 name: name,
                 modulePath: module,
             });
-            console.log(name);
         }
     }
 

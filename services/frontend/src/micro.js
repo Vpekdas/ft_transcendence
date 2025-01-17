@@ -810,7 +810,7 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
         }
     }
 
-    for (; index < newNode.length; index++) {
+    for (; index < newNode.children.length; index++) {
         let newElement = newNode.children[index].build();
 
         parentElement.append(newElement);
@@ -864,14 +864,10 @@ async function router() {
         let view = new route.route.view();
 
         newNode = await createComponentNode(view, attributes, undefined);
-        await newNode.mount();
-        newNode.children.push(...parseHTML(view.render()));
     } else if (routerSettings.notFound != undefined) {
         let view = new routerSettings.notFound();
 
         newNode = await createComponentNode(view, new Map(), undefined);
-        await newNode.mount();
-        newNode.children.push(...parseHTML(view.render()));
     }
 
     await updateDOM(rootNode, newNode, app.firstElementChild, app);

@@ -5,17 +5,19 @@ export default class Home extends Component {
     async init() {
         document.title = tr("Home");
 
-        document.querySelector("#play-pong-1v1local").addEventListener("click", () => {
-            navigateTo("/matchmake/pong?gamemode=1v1local");
-        });
+        this.onready = () => {
+            document.querySelector("#play-pong-1v1local").addEventListener("click", () => {
+                navigateTo("/matchmake/pong?gamemode=1v1local");
+            });
 
-        document.querySelector("#play-pong-1v1").addEventListener("click", () => {
-            navigateTo("/matchmake/pong?gamemode=1v1");
-        });
+            document.querySelector("#play-pong-1v1").addEventListener("click", () => {
+                navigateTo("/matchmake/pong?gamemode=1v1");
+            });
 
-        document.querySelector("#play-pong-tournament").addEventListener("click", () => {
-            navigateTo("/create-tournament");
-        });
+            document.querySelector("#play-pong-tournament").addEventListener("click", () => {
+                navigateTo("/create-tournament");
+            });
+        };
     }
 
     render() {

@@ -255,90 +255,91 @@ export default class Pong extends Component {
 
         this.skin = terrainSkins.get("brittle-hollow");
 
-        const lava = await this.modelLoader.loadAsync("/models/Lava.glb");
+        // const lava = await this.modelLoader.loadAsync("/models/Lava.glb");
+        // this.scene.add(lava.scene);
 
-        this.scene.add(lava.scene);
+        this.onready = () => {
+            this.textMesh.scale.set(0.01, 0.01, 0.01);
+            this.scene.add(this.textMesh);
 
-        this.textMesh.scale.set(0.01, 0.01, 0.01);
-        this.scene.add(this.textMesh);
+            const c = document.getElementById("pong");
 
-        const c = document.getElementById("pong");
+            let camera = new THREE.PerspectiveCamera(70, c.clientWidth / c.clientHeight, 0.1, 1000);
+            let renderer = new THREE.WebGLRenderer();
 
-        let camera = new THREE.PerspectiveCamera(70, c.clientWidth / c.clientHeight, 0.1, 1000);
-        let renderer = new THREE.WebGLRenderer();
+            renderer.setSize(c.clientWidth, c.clientHeight);
 
-        renderer.setSize(c.clientWidth, c.clientHeight);
+            window.addEventListener(
+                "resize",
+                () => {
+                    renderer.setSize(c.clientWidth, c.clientHeight);
+                    camera.aspect = c.clientWidth / c.clientHeight;
+                    camera.updateProjectionMatrix();
+                },
+                false
+            );
 
-        window.addEventListener(
-            "resize",
-            () => {
-                renderer.setSize(c.clientWidth, c.clientHeight);
-                camera.aspect = c.clientWidth / c.clientHeight;
-                camera.updateProjectionMatrix();
-            },
-            false
-        );
+            c.appendChild(renderer.domElement);
 
-        c.appendChild(renderer.domElement);
+            const controls = new OrbitControls(camera, c);
 
-        const controls = new OrbitControls(camera, c);
+            camera.position.z = 20;
+            camera.position.y = -15;
 
-        camera.position.z = 20;
-        camera.position.y = -15;
-
-        if (!DEBUG) {
-            controls.enableRotate = false;
-            controls.enablePan = false;
-            controls.enableZoom = false;
-            controls.enableDamping = false;
-        }
-
-        renderer.setAnimationLoop(() => {
-            for (let [key, value] of this.boxes) {
-                value.update();
+            if (!DEBUG) {
+                controls.enableRotate = false;
+                controls.enablePan = false;
+                controls.enableZoom = false;
+                controls.enableDamping = false;
             }
-            controls.update();
-            renderer.render(this.scene, camera);
-        });
 
-        Array(200)
-            .fill()
-            .forEach(() => {
-                const geometry = new THREE.SphereGeometry(0.25, 24, 24);
-                const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-                const star = new THREE.Mesh(geometry, material);
-
-                const [x, y, z] = Array(3)
-                    .fill()
-                    .map(() => THREE.MathUtils.randFloatSpread(100));
-                star.position.set(x, y, z);
-                this.scene.add(star);
+            renderer.setAnimationLoop(() => {
+                for (let [key, value] of this.boxes) {
+                    value.update();
+                }
+                controls.update();
+                renderer.render(this.scene, camera);
             });
 
-        const spaceTexture = this.textureLoader.load("/img/space.jpg");
-        this.scene.background = spaceTexture;
+            Array(200)
+                .fill()
+                .forEach(() => {
+                    const geometry = new THREE.SphereGeometry(0.25, 24, 24);
+                    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                    const star = new THREE.Mesh(geometry, material);
 
-        // ! For ground, It seems ok but may not be ok for other models.
-        const ambientLight = new THREE.AmbientLight(0xffffff, 10);
-        this.scene.add(ambientLight);
+                    const [x, y, z] = Array(3)
+                        .fill()
+                        .map(() => THREE.MathUtils.randFloatSpread(100));
+                    star.position.set(x, y, z);
+                    this.scene.add(star);
+                });
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(0, -20, 20);
-        this.scene.add(directionalLight);
+            const spaceTexture = this.textureLoader.load("/img/space.jpg");
+            this.scene.background = spaceTexture;
 
-        // const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 5);
-        // scene.add(directionalLightHelper);
+            // ! For ground, It seems ok but may not be ok for other models.
+            const ambientLight = new THREE.AmbientLight(0xffffff, 10);
+            this.scene.add(ambientLight);
 
-        this.ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/pong/${id}`);
-        this.ws.onopen = async (event) => {
-            await this.setupGameTerrain();
-        };
-        // ws.onerror = (event) => {
-        //     showToast(tr("Cannot connect to the game"), "bi bi-exclamation-triangle-fill");
-        // };
-        this.ws.onmessage = async (event) => {
-            const data = JSON.parse(event.data);
-            await this.onMessage(data);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(0, -20, 20);
+            this.scene.add(directionalLight);
+
+            // const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 5);
+            // scene.add(directionalLightHelper);
+
+            this.ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/pong/${id}`);
+            this.ws.onopen = async (event) => {
+                await this.setupGameTerrain();
+            };
+            // ws.onerror = (event) => {
+            //     showToast(tr("Cannot connect to the game"), "bi bi-exclamation-triangle-fill");
+            // };
+            this.ws.onmessage = async (event) => {
+                const data = JSON.parse(event.data);
+                await this.onMessage(data);
+            };
         };
     }
 

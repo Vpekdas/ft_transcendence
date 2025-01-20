@@ -145,7 +145,9 @@ def check_collision(a, b) -> bool:
 
 class Scene:
     def __init__(self):
-        self.bodies = []
+        self.bodies: list[Body] = []
+        # Backlog of events to send through the websocket
+        self.backlog: list[str] = []
 
     def add_body(self, body):
         body.scene = self
@@ -174,6 +176,11 @@ class Scene:
             array.append(body.to_dict())
 
         return array
+
+    async def send_backlog(ws):
+        for event in self.backlog:
+            await ws.send(self.backlog)
+        self.backlog = []
 
 """
 Represent a remote client in a game.

@@ -35,10 +35,11 @@ class Ball(Body):
     def __init__(self):
         super().__init__(type="Ball", shape=Sphere(0.5, Vec3()), body_type=BodyType.DYNAMIC, bounce=1.0)
         self.last_collision = None
-        self.velocity = Vec3(1, -1, 0).normalized() * Ball.speed
 
     def process(self):
         self.try_move()
+
+        self.scene.backlog.append(json.dumps({ "type": "bounce", "body": self.to_dict() }))
 
     def on_collision(self, dir: Vec3, collision: CollisionResult):
         if isinstance(collision.collider, Player):
@@ -95,6 +96,7 @@ class Pong(Game):
 
         self.ball = Ball()
         self.ball.pos = Vec3(0, 0, 0)
+        self.ball.velocity = Vec3(1, -1, 0).normalized() * Ball.speed
 
         self.score1 = ScoreArea(player=self.player2, pos=Vec3(-19, 0, 0), game=self)
         self.score2 = ScoreArea(player=self.player1, pos=Vec3(19, 0, 0), game=self)
@@ -143,6 +145,7 @@ class Pong(Game):
                     client.process(self.scene)
 
             await self.broadcast({ "type": "update", "bodies": self.scene.to_dict(), "scores": [ self.player1.score, self.player2.score ] })
+            await self.scene.send_backlog()
         elif self.state == State.ENDED:
             await self.broadcast({ "type": "update", "bodies": self.scene.to_dict(), "scores": [ self.player1.score, self.player2.score ] })
 

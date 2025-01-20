@@ -211,15 +211,7 @@ class ClientAI(Client):
         self.target_y = None
 
     def process(self, scene: Scene):
-        if time_secs() - self.last_update >= 1:
-            self.last_update = time_secs()
-            self.scene = scene
-
-            ball: Body = next(scene.get_bodies("Ball"))
-            ball.velocity.normalized()
-
-        if self.target_y is not None:
-            pass
+        pass
 
 class BodyType(enum.Enum):
     STATIC = 0
@@ -358,6 +350,7 @@ class Game:
         self.tid = tid
         self.gamemode = gamemode
         self.consumers = []
+        self.framerate = 60
 
     def is_tournament_game(self) -> bool:
         return self.tid is not None
@@ -366,9 +359,23 @@ class Game:
         self.task = asyncio.create_task(self.run())
 
     async def run(self):
+        previous_time = time_secs()
+        frame_time = 1.0 / self.framerate
+        
         while self.state != State.DEAD:
+            before_time = time_secs()
+
+            if before_time - previous_time < frame_time:
+                continue
+
+            previous_time = before_time
+
             await self.on_update()
-            await asyncio.sleep(0.010)
+
+            # Sleep the rest of the time
+            after_time = time_secs()
+
+            await asyncio.sleep(frame_time - (after_time - before_time))
 
         log(f"Game with id {self.id} exited")
         self.manager.games.pop(self.id)
@@ -405,7 +412,7 @@ class Game:
     def get_score(self, index: int) -> int:
         return 0
 
-class ServerManager:
+class GameManager:
     def __init__(self, ty):
         self.games = {}
         self.consumers = []
@@ -668,7 +675,7 @@ class Tournament:
         await self.start_games()
 
 class TournamentManager:
-    def __init__(self, *, game: str, manager: ServerManager):
+    def __init__(self, *, game: str, manager: GameManager):
         self.game = game
         self.manager = manager
 

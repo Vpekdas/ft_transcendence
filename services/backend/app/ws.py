@@ -1,6 +1,6 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .gameframework import log, sync, ServerManager, TournamentManager
+from .gameframework import log, sync, GameManager, TournamentManager
 from .pong import PongManager
 from .models import Player, Tournament
 from .utils import hash_weak_password

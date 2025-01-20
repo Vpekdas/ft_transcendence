@@ -3,8 +3,27 @@ import os
 import json
 import math
 
-from .gameframework import log, time_secs, sync, Game, ServerManager, Vec3, Box, Sphere, Body, Scene, Client, BodyType, Area, CollisionResult, State, ClientAI
+from .gameframework import log, time_secs, sync, Game, GameManager, Vec3, Box, Sphere, Body, Scene, Client, BodyType, Area, CollisionResult, State, ClientAI
 from .models import PongGameResult
+
+"""
+This class represent a generic power-up.
+"""
+class PowerUp:
+    def __init__(self):
+        pass
+
+    def when_activated(self, scene: Scene, player):
+        pass
+
+    def when_deactivated(self, scene: Scene, player):
+        pass
+
+    """
+    Called every frame when the power-up is active.
+    """
+    def process(self):
+        pass
 
 class Player(Body):
     speed = 0.2
@@ -28,6 +47,18 @@ class Player(Body):
 
     def move_down(self):
         self.velocity.y -= self.speed
+
+class PongAI(ClientAI):
+    def process(self, scene: Scene):
+        if time_secs() - self.last_update >= 1:
+            self.last_update = time_secs()
+            self.scene = scene
+
+            ball: Body = next(scene.get_bodies("Ball"))
+            ball.velocity.normalized()
+
+        if self.target_y is not None:
+            pass
 
 class Ball(Body):
     speed = 0.3
@@ -141,7 +172,7 @@ class Pong(Game):
 
             # Update all AIs
             for client in self.clients:
-                if isinstance(client, ClientAI):
+                if isinstance(client, PongAI):
                     client.process(self.scene)
 
             await self.broadcast({ "type": "update", "bodies": self.scene.to_dict(), "scores": [ self.player1.score, self.player2.score ] })
@@ -205,7 +236,7 @@ class MatchmakePlayer:
         self.player_id = player_id
         self.gamemode = gamemode
 
-class PongManager(ServerManager):
+class PongManager(GameManager):
     def __init__(self):
         super().__init__(ty=Pong)
 

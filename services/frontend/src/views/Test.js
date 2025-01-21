@@ -9,6 +9,7 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 // https://www.youtube.com/watch?v=oKbCaj1J6EI
 // https://github.com/franky-adl/voronoi-sphere/blob/main/src/shaders/voronoi3d_basic.glsl
+// https://www.clicktorelease.com/blog/vertex-displacement-noise-3d-webgl-glsl-three-js/
 
 // Uniforms are variables that have the same value for all vertices - lighting, fog, and shadow maps are examples of data that would be stored in uniforms.
 // Uniforms can be accessed by both the vertex shader and the fragment shader.

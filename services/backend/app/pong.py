@@ -3,7 +3,7 @@ import os
 import json
 import math
 
-from .gameframework import log, time_secs, sync, Game, GameManager, Vec3, Box, Sphere, Body, Scene, Client, BodyType, Area, CollisionResult, State, ClientAI
+from .gameframework import log, time_secs, sync, Game, GameManager, Vec3, Box, Sphere, Body, Scene, Client, BodyType, Area, CollisionResult, State, ClientAI, Timer
 from .models import PongGameResult
 
 """
@@ -111,14 +111,14 @@ class Settings:
         self.max_score = max_score
 
 class Pong(Game):
-    def __init__(self, *, gamemode: str, tid: str = None, acceptedPlayers: list[int] = None):
+    def __init__(self, *, gamemode: str, tid: str = None, accepted_players: list[int] = None):
         super().__init__(tid=tid, gamemode=gamemode)
 
         self.settings = Settings()
         self.service = 0
         self.players_count = 2
         self.master = None
-        self.acceptedPlayers = acceptedPlayers
+        self.accepted_players = accepted_players
 
         self.player1 = Player("player1")
         self.player1.pos = Vec3(-17, 0, 0)
@@ -145,6 +145,7 @@ class Pong(Game):
         self.scene.add_body(Body(type="Wall", shape=border_box, pos=Vec3(0, 12, 0)))
 
         self.already_send_redirect = False
+        self.countdown_timer = Timer(time=3.0)
 
     def reset(self):
         self.player1.pos.y = 0
@@ -168,18 +169,16 @@ class Pong(Game):
 
     async def on_update(self):
         if self.state == State.STARTED:
-            self.scene.update()
+            if self.countdown_timer.is_done():
+                self.scene.update()
 
-            # Update all AIs
-            for client in self.clients:
-                if isinstance(client, PongAI):
-                    client.process(self.scene)
-
-            await self.broadcast({ "type": "update", "bodies": self.scene.to_dict(), "scores": [ self.player1.score, self.player2.score ] })
-            await self.scene.send_backlog()
+                # Update all AIs
+                for client in self.clients:
+                    if isinstance(client, PongAI):
+                        client.process(self.scene)
+            else:
+                self.countdown_timer.update()
         elif self.state == State.ENDED:
-            await self.broadcast({ "type": "update", "bodies": self.scene.to_dict(), "scores": [ self.player1.score, self.player2.score ] })
-
             winner = self.player1.client.id if self.player1.score > self.player2.score else self.player2.score
             await self.broadcast({ "type": "gameEnded", "winner": winner })
 
@@ -190,20 +189,38 @@ class Pong(Game):
                 self.already_send_redirect = True
             elif not self.is_tournament_game():
                 self.state = State.DEAD
+        elif self.state == State.IN_LOBBY:
+            n = 0
+
+            for client in self.clients:
+                if client.ready:
+                    n += 1
+            
+            if n == len(self.clients):
+                self.state = State.STARTED
+        
+        await self.broadcast({ "type": "update", "bodies": self.scene.to_dict(), "scores": [ self.player1.score, self.player2.score ] })
+
+        for event in self.scene.backlog:
+            await self.broadcast_raw(event)
+        self.scene.backlog = []
 
     async def on_join(self, player_id: int):
-        if self.acceptedPlayers is not None and player_id not in self.acceptedPlayers:
+        if self.accepted_players is not None and player_id not in self.accepted_players:
             return False
 
         if self.gamemode == "1v1local":
-            self.state = State.STARTED
             self.clients.append(Client(id=player_id, subid="player1"))
             self.clients.append(Client(id=player_id, subid="player2"))
 
             self.player1.client = self.clients[0]
             self.player2.client = self.clients[1]
 
-            self.timeStarted = time_secs()
+            # TODO: Remove
+            self.player1.client.ready = True
+            self.player2.client.ready = True
+
+            self.time_started = time_secs()
         elif self.gamemode == "1v1":
             client = Client(id=player_id)
             self.clients.append(client)
@@ -214,12 +231,13 @@ class Pong(Game):
                 self.player2.client = client
 
             if len(self.clients) == 2:
-                self.state = State.STARTED
-
                 # Add an ongoing game to the database
-                self.timeStarted = time_secs()
+                self.time_started = time_secs()
 
         return True
+
+    def on_client_ready(self, client: Client, params):
+        client.ready = True
 
     async def on_unhandled_message(self, msg):
         pass

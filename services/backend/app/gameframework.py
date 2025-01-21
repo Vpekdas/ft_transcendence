@@ -12,7 +12,6 @@ import time
 import threading
 import datetime
 
-from http.server import HTTPServer, BaseHTTPRequestHandler
 from threading import Thread
 from datetime import datetime
 from math import sqrt
@@ -177,11 +176,6 @@ class Scene:
 
         return array
 
-    async def send_backlog(ws):
-        for event in self.backlog:
-            await ws.send(self.backlog)
-        self.backlog = []
-
 """
 Represent a remote client in a game.
 """
@@ -190,6 +184,7 @@ class Client:
         self.id = id
         self.subid = subid
         self.inputs = dict()
+        self.ready = False
 
     def is_pressed(self, name):
         return name in self.inputs and self.inputs[name]
@@ -334,6 +329,28 @@ class Area(Body):
     def body_entered(self, body):
         pass
 
+class Timer:
+    def __init__(self, *, time: float):
+        self.time = time
+
+        self.done = False
+        self.previous_time = -1.0
+    
+    def update(self):
+        if self.done:
+            return
+
+        current_time = time_secs()
+        
+        if self.previous_time < 0:
+            self.previous_time = current_time
+
+        if current_time - self.previous_time >= self.time:
+            self.done = True
+    
+    def is_done(self) -> bool:
+        return self.done
+
 class State(enum.Enum):
     IN_LOBBY = 0
     STARTED = 1
@@ -374,8 +391,9 @@ class Game:
 
             # Sleep the rest of the time
             after_time = time_secs()
+            elapsed = after_time - before_time
 
-            await asyncio.sleep(frame_time - (after_time - before_time))
+            await asyncio.sleep(frame_time - elapsed - 0.005)
 
         log(f"Game with id {self.id} exited")
         self.manager.games.pop(self.id)
@@ -383,6 +401,10 @@ class Game:
     async def broadcast(self, data):
         for consumer in self.consumers:
             await consumer.send(json.dumps(data))
+
+    async def broadcast_raw(self, message):
+        for consumer in self.consumers:
+            await consumer.send(message)
 
     def get_client(self, id: int, subid=None) -> Client:
         try:
@@ -409,6 +431,9 @@ class Game:
     async def on_update(self):
         pass
 
+    def on_client_ready(self, client: Client, params):
+        pass
+
     def get_score(self, index: int) -> int:
         return 0
 
@@ -433,10 +458,10 @@ class GameManager:
     def make_id(self, k=8) -> str:
         return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
 
-    def start_game(self, *, gamemode: str, tid: str=None, acceptedPlayers: list[int]=None):
+    def start_game(self, *, gamemode: str, tid: str=None, accepted_players: list[int]=None):
         id = self.make_id()
 
-        game = self.ty(gamemode=gamemode, tid=tid, acceptedPlayers=acceptedPlayers)
+        game = self.ty(gamemode=gamemode, tid=tid, accepted_players=accepted_players)
         game.id = id
         game.manager = self
 
@@ -614,7 +639,7 @@ class Tournament:
         r = self.rounds[self.currentRound]
 
         for tgame in r.games:
-            game: Game = self.gameManager.start_game(gamemode="1v1", tid=self.tid, acceptedPlayers=[tgame.player1, tgame.player2])
+            game: Game = self.gameManager.start_game(gamemode="1v1", tid=self.tid, accepted_players=[tgame.player1, tgame.player2])
 
             # await game.on_join(tgame.player1)
             # await game.on_join(tgame.player2)

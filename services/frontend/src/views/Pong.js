@@ -3,7 +3,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import { FontLoader } from "three/addons/loaders/FontLoader.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { getOriginNoProtocol, post } from "../utils";
+import { getOriginNoProtocol } from "../utils";
 import { Component, params } from "../micro";
 
 class TerrainSkin {
@@ -229,6 +229,8 @@ export default class Pong extends Component {
             this.scene.add(mesh);
         } else if (data["type"] == "redirectTournament") {
             navigateTo(`/tournament/${data["id"]}`);
+        } else if (data["type"] == "countdown") {
+            console.log("countdown:", data["value"], "...");
         }
     }
 

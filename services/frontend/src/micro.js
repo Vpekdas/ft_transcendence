@@ -785,7 +785,7 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
     if (oldString != newString) {
         let newElement = newNode.build();
 
-        console.log(newElement, oldElement);
+        // console.log(newElement, oldElement);
 
         oldNode.clean();
         parentElement.replaceChild(newElement, oldElement);
@@ -821,7 +821,7 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
 
             oldNode2.clean();
 
-            console.log(oldNode2, oldElement2);
+            // console.log(oldNode2, oldElement2);
             oldElement.removeChild(oldElement2);
         } else {
             let oldNode2 = oldNode.children.at(index);

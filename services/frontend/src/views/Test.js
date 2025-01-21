@@ -205,15 +205,19 @@ export default class Test extends Component {
 
             // ! fire ball
 
-            const fireVertexShader = await loadShaderFile("/models/BrittleHollow/Campfire/fireVertexShader.glsl");
-            const fireFragmentShader = await loadShaderFile("/models/BrittleHollow/Campfire/fireFragmentShader.glsl");
+            const meteoriteVertexShader = await loadShaderFile(
+                "/models/BrittleHollow/Meteorite/meteoriteVertexShader.glsl"
+            );
+            const meteoriteFragmentShader = await loadShaderFile(
+                "/models/BrittleHollow/Meteorite/meteoriteFragmentShader.glsl"
+            );
 
             const textureLoader = new THREE.TextureLoader();
-            const tExplosionTexture = textureLoader.load("/models/BrittleHollow/Campfire/Explosion.png");
+            const tExplosionTexture = textureLoader.load("/models/BrittleHollow/Meteorite/Explosion.png");
 
             const fireCustomShaderMaterial = new THREE.ShaderMaterial({
-                vertexShader: fireVertexShader,
-                fragmentShader: fireFragmentShader,
+                vertexShader: meteoriteVertexShader,
+                fragmentShader: meteoriteFragmentShader,
                 uniforms: {
                     tExplosion: {
                         type: "t",

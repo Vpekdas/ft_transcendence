@@ -1,11 +1,12 @@
-// https://github.com/stegu/webgl-noise
-
 precision mediump float;
+precision highp float;
 
 varying vec3 vNormal;
 varying vec3 vWorldPosition;
+varying vec2 vUv;
+varying float noise;
 
-uniform float emissiveIntensity;
+uniform float time;
 
 vec3 mod289(vec3 x) {
     return x - floor(x * (1.0 / 289.0)) * 289.0;
@@ -88,29 +89,29 @@ float pnoise(vec3 P, vec3 rep) {
     return 2.2 * n_xyz;
 }
 
-float fbm(vec3 p, vec3 rep, float scale, int detail, float roughness) {
-    float value = 0.0;
-    float amplitude = 0.5;
-    float frequency = scale;
-    for(int i = 0; i < detail; i++) {
-        value += amplitude * pnoise(p * frequency, rep);
-        frequency *= 2.0;
-        amplitude *= roughness;
+float turbulence(vec3 p) {
+
+    float w = 100.0;
+    float t = -.5;
+
+    for(float f = 1.0; f <= 10.0; f++) {
+        float power = pow(2.0, f);
+        t += abs(pnoise(vec3(power * p), vec3(10.0, 10.0, 10.0)) / power);
     }
-    return value;
+
+    return t;
+
 }
 
 void main() {
-    // Parameters for FBM noise
-    float scale = 3.0;
-    int detail = 10;
-    float roughness = 0.7;
-    vec3 rep = vec3(10.0, 10.0, 10.0); 
 
-    // Apply FBM noise to the fragment color
-    float noise = fbm(vWorldPosition, rep, scale, detail, roughness);
-    vec3 baseColor = vec3(1.0, 0.5, 0.0) * noise;
-    vec3 emissiveColor = vec3(1.0, 0.2, 0.0) * noise * emissiveIntensity;
+    vUv = uv;
 
-    gl_FragColor = vec4(baseColor + emissiveColor, 1.0);
+    noise = 10.0 * -.10 * turbulence(.5 * normal + time);
+    float b = 5.0 * pnoise(0.05 * position + vec3(2.0 * time), vec3(100.0));
+    float displacement = -noise + b;
+
+    vec3 newPosition = position + normal * displacement;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+
 }

@@ -151,7 +151,7 @@ float pnoise(vec3 P, vec3 rep) {
 
 void main() {
     vec2 res = voronoi(v_pos * u_scale * u_lacunarity, u_time * u_roughness);
-    vec3 mycolor = vec3(0.24, 0.15, 0.07); // Base color #654321
+    vec3 mycolor = vec3(0.0, 0.145, 0.231); // Base color #654321
 
     // Apply Perlin noise
     float perlin = pnoise(v_pos * u_scale, vec3(10.0));
@@ -161,8 +161,8 @@ void main() {
     mycolor.b = blue * (1.0 - smoothstep(0.0, 0.9, res.x)); 
 
     // Optionally adjust the red and green components using pcurve and u_pcurveHandle
-    // mycolor.r = pcurve(mycolor.r, 4.0, u_pcurveHandle) * (1.0 - smoothstep(0.0, 0.1, res.x)); 
-    // mycolor.g = pcurve(mycolor.g, 4.0, u_pcurveHandle) * (1.0 - smoothstep(0.0, 0.1, res.x)); 
+    mycolor.r = pcurve(mycolor.r, 4.0, u_pcurveHandle) * (1.0 - smoothstep(0.0, 0.1, res.x)); 
+    mycolor.g = pcurve(mycolor.g, 4.0, u_pcurveHandle) * (1.0 - smoothstep(0.0, 0.1, res.x)); 
 
     // Apply detail level to modulate the intensity
     float detailFactor = pow(res.x, u_detail);
@@ -170,13 +170,6 @@ void main() {
 
     // Add Perlin noise to the color
     mycolor += perlin * 0.1; // Adjust the intensity of the Perlin noise as needed
-
-    // Add curved vertical lines
-    float lineFrequency = 5.0; // Adjust the frequency of the lines
-    float lineWidth = 0.1; // Adjust the width of the lines
-    float curveAmount = 1.0; // Adjust the amount of curvature
-    float linePattern = abs(sin(v_pos.x * lineFrequency + sin(v_pos.y * curveAmount))) < lineWidth ? 1.0 : 0.0;
-    mycolor = mix(mycolor, vec3(0.0), linePattern); // Mix the lines with the base color
 
     gl_FragColor = vec4(mycolor, 1.0);
 }

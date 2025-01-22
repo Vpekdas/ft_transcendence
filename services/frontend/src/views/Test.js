@@ -1,11 +1,11 @@
-import { tr } from "../i18n";
-import { Component, navigateTo } from "../micro";
+import { Component } from "../micro";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { ParticleSystem } from "../ParticleSystem";
 
 // https://www.youtube.com/watch?v=oKbCaj1J6EI
 // https://github.com/franky-adl/voronoi-sphere/blob/main/src/shaders/voronoi3d_basic.glsl
@@ -19,8 +19,11 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 // Varyings are variables that are passed from the vertex shader to the fragment shader.For each fragment, the value of each varying will be smoothly interpolated from the values of adjacent vertices.
 
-export async function loadShaderFile(url) {
+async function loadShaderFile(url) {
     const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Failed to load shader file: ${url}`);
+    }
     return await response.text();
 }
 
@@ -205,12 +208,8 @@ export default class Test extends Component {
 
             // ! fire ball
 
-            const meteoriteVertexShader = await loadShaderFile(
-                "/models/BrittleHollow/Meteorite/meteoriteVertexShader.glsl"
-            );
-            const meteoriteFragmentShader = await loadShaderFile(
-                "/models/BrittleHollow/Meteorite/meteoriteFragmentShader.glsl"
-            );
+            const meteoriteVertexShader = await loadShaderFile("/models/BrittleHollow/Meteorite/vertexShader.glsl");
+            const meteoriteFragmentShader = await loadShaderFile("/models/BrittleHollow/Meteorite/fragmentShader.glsl");
 
             const textureLoader = new THREE.TextureLoader();
             const tExplosionTexture = textureLoader.load("/models/BrittleHollow/Meteorite/Explosion.png");
@@ -257,6 +256,18 @@ export default class Test extends Component {
             ball.position.set(0, 1.5, 0);
             scene.add(ball);
 
+            const particleVertexShader = await loadShaderFile("/models/BrittleHollow/particlevertexShader.glsl");
+            const particleFragmentShader = await loadShaderFile("/models/BrittleHollow/particlefragmentShader.glsl");
+
+            const particleSystem = new ParticleSystem({
+                parent: scene,
+                vertexShader: particleVertexShader,
+                fragmentShader: particleFragmentShader,
+                texture: "/models/BrittleHollow/Fire.jpg",
+            });
+
+            let previousTime = performance.now();
+
             renderer.toneMapping = THREE.ReinhardToneMapping;
             renderer.toneMappingExposure = 0.3;
 
@@ -271,11 +282,18 @@ export default class Test extends Component {
                 0.4, // radius
                 0.85 // threshold
             );
-            ballComposer.addPass(bloomPass);
+            // ballComposer.addPass(bloomPass);
 
             renderer.setAnimationLoop(() => {
                 controls.update();
                 fireCustomShaderMaterial.uniforms["time"].value = 0.00025 * (Date.now() - start);
+
+                const currentTime = performance.now();
+                const timeElapsed = (currentTime - previousTime) / 1000;
+                previousTime = currentTime;
+
+                particleSystem.step(timeElapsed);
+
                 ballComposer.render(scene, camera);
             });
         };

@@ -29,7 +29,7 @@ class Player(models.Model):
 
     pongElo = IntegerField(default=0)
 
-    friends = ArrayField(IntegerField(), default=list)
+    friends = models.ManyToManyField("self", symmetrical=True, related_name="friend_set")
     blockedUsers = ArrayField(IntegerField(), default=list)
 
 class Tournament(models.Model):
@@ -57,14 +57,15 @@ class PongGameResult(models.Model):
 
 class Message(models.Model):
     content = TextField()
-    #date = DateTimeField()
-    sender = Player()
-    receiver = Player()
+    timestamp = DateTimeField(auto_now_add=True)
+    sender = ForeignKey(Player, on_delete=models.CASCADE, related_name="sent_messages")
+    receiver = ForeignKey(Player, on_delete=models.CASCADE, related_name="received_messages")
 
 class Chat(models.Model):
-    messages = ArrayField(Message(), default=list)
-    player1 = Player()
-    player2 = Player()
+    messages = models.ManyToManyField(Message, related_name="chats")
+    player1 = ForeignKey(Player, on_delete=models.CASCADE, related_name="chats_as_player1")
+    player2 = ForeignKey(Player, on_delete=models.CASCADE, related_name="chats_as_player2")
+    created_at = DateTimeField(auto_now_add=True)
 
 # TODO: Maybe store the game data to replay it later ?
 

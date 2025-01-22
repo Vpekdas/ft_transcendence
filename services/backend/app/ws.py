@@ -1,5 +1,5 @@
 import json
-from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
 from .gameframework import log, sync, GameManager, TournamentManager, Client
 from .pong import PongManager
 from .models import Player, Tournament

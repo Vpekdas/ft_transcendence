@@ -9,7 +9,6 @@ export default class Friends extends Component {
     render() {
         return /* HTML */ ` <div class="container-fluid dashboard-container">
             <ProfileNavBar />
-
             <ul class="nav navbar">
                 <li class="nav-item icon-link">
                     <a

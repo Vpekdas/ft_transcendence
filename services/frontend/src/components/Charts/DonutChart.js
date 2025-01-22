@@ -73,14 +73,14 @@ export default class DonutChart extends Component {
                 textPosition: { x: 0, y: 0 },
                 content: "",
             };
-            circle.color = attributes.get("color" + (i + 1));
+            circle.color = this.attributes.get("color" + (i + 1));
 
-            const fillingPercent = parseInt(attributes.get("fillPercent" + (i + 1)));
+            const fillingPercent = parseInt(this.attributes.get("fillPercent" + (i + 1)));
             const notFilledPercent = 100 - fillingPercent;
 
-            circle.fillPercent = attributes.get("fillPercent" + (i + 1)) + " " + notFilledPercent.toString();
-            circle.fillOffset = calculateOffset(circles, i);
-            circle.textPosition = calculateTextPosition(fillingPercent, circle.fillOffset);
+            circle.fillPercent = this.attributes.get("fillPercent" + (i + 1)) + " " + notFilledPercent.toString();
+            circle.fillOffset = this.calculateOffset(circles, i);
+            circle.textPosition = this.calculateTextPosition(fillingPercent, circle.fillOffset);
             circle.content = fillingPercent.toString();
 
             circles.push(circle);
@@ -88,7 +88,7 @@ export default class DonutChart extends Component {
 
         this.segment = "";
         for (let i = 0; i < circles.length; i++) {
-            segment += generateSegment(
+            this.segment += this.generateSegment(
                 circles[i].color,
                 circles[i].fillPercent,
                 circles[i].fillOffset,

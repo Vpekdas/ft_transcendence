@@ -14,6 +14,15 @@ export default class ProfileNavBar extends Component {
             <ul class="nav flex-column dashboard-tab">
                 <li class="nav-item">
                     <a
+                        class="nav-link custom-link ${this.activeTabClass("/profile/social/friends")}"
+                        href="/profile/social/friends"
+                    >
+                        <i class="bi bi-share"></i>
+                        <span>${tr("Social")}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a
                         class="nav-link custom-link ${this.activeTabClass("/profile/match-history")}"
                         href="/profile/match-history"
                     >

@@ -112,7 +112,7 @@ export class Component {
 function createComponentNode(comp, attributes, parent) {
     const name = comp.constructor.name;
     const node = new VirtualNodeComponent(comp, parent);
-    node.attributes = attributes;
+    comp.attributes = attributes;
 
     let rootElement = document.createElement("div");
     rootElement.classList.add("micro-" + name);

@@ -20,8 +20,8 @@ import { navigateTo } from "./micro";
 import Profile from "./views/Profile";
 import Test from "./views/Test";
 import Redirected from "./views/Redirected";
-
 import { registerAll } from "./micro.generated";
+import Social from "./views/Social";
 
 defineRouter({
     routes: [
@@ -30,6 +30,7 @@ defineRouter({
         { path: "/login", view: Login },
         { path: "/signin-external", view: SigninExternal },
         { path: "/logout", view: Logout },
+        { path: "/profile/social/[tab=friends,blacklist]", view: Social },
         { path: "/profile/[tab=match-history,statistics,skins,settings]", view: Profile },
         { path: "/duck", view: Clicker },
         { path: "/solar-system", view: SolarSystem },

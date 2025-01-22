@@ -12,10 +12,11 @@ import os
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponseServerError
 from django.http.request import HttpRequest
 from django.views.decorators.http import require_POST
-
+from django.db.models import Q
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+
 
 from .models import duck, Player, Tournament, PongGameResult, Chat, Message
 from .errors import *
@@ -287,6 +288,24 @@ def deleteProfile(request: HttpRequest, id):
     user.delete()
 
     return JsonResponse({})
+
+@require_POST
+def getPongStats(request: HttpRequest, id):
+    if id == "c" and request.user.is_authenticated:
+        id = int(Player.objects.filter(user=request.user).first().id)
+    else:
+        id = int(id)
+
+    player = Player.objects.filter(id=id).first()
+    games = PongGameResult.objects.filter(Q(player1=player.id) | Q(player2=player.id))
+
+    return JsonResponse({
+        "matches": {
+            "1v1local": games.filter(gamemode="1v1local").count(),
+            "1v1": games.filter(gamemode="1v1").count(),
+            "total": games.count(),
+        }
+    })
 
 terrainSkins = [ "default-terrain", "brittle-hollow" ]
 ballSkins = [ "default-ball" ]

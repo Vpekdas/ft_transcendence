@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import ForeignKey, CharField, JSONField, TextField, IntegerField, BooleanField, ImageField, DateTimeField
+from django.db.models import ForeignKey, CharField, JSONField, TextField, IntegerField, BooleanField, ImageField, DateTimeField, ManyToManyField
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
 
@@ -44,10 +44,16 @@ class Tournament(models.Model):
 
 class PongGameResult(models.Model):
     gamemode = TextField()
-    players = ArrayField(IntegerField())
-    scores = ArrayField(IntegerField())
+
+    player1 = ManyToManyField(Player, on_delete=models.CASCADE)
+    player2 = ManyToManyField(Player, on_delete=models.CASCADE)
+
+    score1 = IntegerField()
+    score2 = IntegerField()
+
     timeStarted = IntegerField()
     timeEnded = IntegerField()
+
     tid = CharField(max_length=8, null=True)
     stats = JSONField(default=dict)
 

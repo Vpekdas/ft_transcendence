@@ -216,6 +216,30 @@
     background-color: #d89123;
 }
 
+.list-group.match-history .vs {
+    margin: 0px 10px;
+}
+
+.list-group.match-history .score {
+    margin: 0px 10px;
+}
+
+.match-history .history-winner {
+    background-color: green;
+}
+
+.match-history .history-looser {
+    background-color: red;
+}
+
+.match-history .history-time {
+    margin-left: 15px;
+}
+
+.match-history .history-gamemode {
+    margin-left: 15px;
+}
+
 /* STATISTICS */
 
 .list-group.statistics {

@@ -4,7 +4,8 @@ import json
 import math
 
 from .gameframework import log, time_secs, sync, Game, GameManager, Vec3, Box, Sphere, Body, Scene, Client, BodyType, Area, CollisionResult, State, ClientAI, Timer
-from .models import PongGameResult
+from .models import PongGameResult, Player as PlayerModel
+from channels.db import database_sync_to_async
 
 """
 This class represent a generic power-up.
@@ -145,6 +146,7 @@ class Pong(Game):
         self.scene.add_body(Body(type="Wall", shape=border_box, pos=Vec3(0, 12, 0)))
 
         self.already_send_redirect = False
+        self.already_saved = False
         self.countdown_timer = Timer(time=3.0)
 
     def reset(self):
@@ -163,9 +165,7 @@ class Pong(Game):
         if (self.player1.score == self.settings.max_score or self.player2.score == self.settings.max_score) and self.state == State.STARTED:
             self.state = State.ENDED
 
-            # Save the result of the game in the database
-            # result = PongGameResult(scores=[self.score1.score, self.score2.score], timeStarted=self.timeStarted, timeEnded=time_secs(), tid=self.tid)
-            # sync(lambda: result.save())
+            self.time_ended = time_secs()
 
     async def on_update(self):
         if self.state == State.STARTED:
@@ -189,6 +189,10 @@ class Pong(Game):
                 self.already_send_redirect = True
             elif not self.is_tournament_game():
                 self.state = State.DEAD
+            
+            if not self.already_saved:
+                # Save the result of the game in the database
+                await self.save_results()
         elif self.state == State.IN_LOBBY:
             n = 0
 
@@ -204,6 +208,10 @@ class Pong(Game):
         for event in self.scene.backlog:
             await self.broadcast_raw(event)
         self.scene.backlog = []
+
+    @database_sync_to_async
+    def save_results(self):
+        PongGameResult.objects.create(score1=self.player1.score, score2=self.player2.score, player1=self.clients[0].id, player2=self.clients[1].id, tid=self.tid, timeStarted=self.time_started, timeEnded=self.time_ended, gamemode=self.gamemode, stats={})
 
     async def on_join(self, player_id: int):
         if self.accepted_players is not None and player_id not in self.accepted_players:

@@ -45,8 +45,8 @@ class Tournament(models.Model):
 class PongGameResult(models.Model):
     gamemode = TextField()
 
-    player1 = ForeignKey(Player, on_delete=models.CASCADE, related_name="pgames_as_player1")
-    player2 = ForeignKey(Player, on_delete=models.CASCADE, related_name="pgames_as_player2")
+    player1 = IntegerField()
+    player2 = IntegerField()
 
     score1 = IntegerField()
     score2 = IntegerField()

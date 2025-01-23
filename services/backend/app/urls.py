@@ -37,7 +37,7 @@ urlpatterns = [
     path('api/player/<str:id>/picture', views.getProfilePicture), # was api/getProfilePicture
     path('api/player/<str:id>/picture/update', views.updateProfilePicture), # was api/updateProfilePicture
     path('api/player/<str:id>/delete', views.deleteProfile), # was api/deleteProfile
-    path('api/player/<str:id>/matches', views.getMatch),
+    path('api/player/<str:id>/matches', views.getMatches),
     path('api/player/<str:id>/stats/pong', views.getPongStats),
 
     # path('api/player/<str:id>/skins/buy/<str:name>', ...),

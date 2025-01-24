@@ -751,14 +751,12 @@ function matchRoute(routes, path) {
  */
 async function updateDOM(oldNode, newNode, oldElement, parentElement) {
     if (oldNode == undefined) {
-        if (typeof newNode == "string") {
-            throw Error();
-        }
-
         let newElement = newNode.build();
-        parentElement.append(newElement);
+        parentElement.appendChild(newElement);
 
-        // console.log(parentElement, newElement2);
+        // console.log(parentElement, newElement, parentElement.childNodes);
+        // console.log("adding", newElement, "to", parentElement);
+        // console.log(newNode.children);
 
         if (!(newNode instanceof VirtualNodeText)) {
             await newNode.mount();
@@ -789,6 +787,8 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
 
         oldNode.clean();
         parentElement.replaceChild(newElement, oldElement);
+
+        console.log("replacing", oldString, "with", newString);
 
         if (!(newNode instanceof VirtualNodeText)) {
             await newNode.mount();
@@ -821,11 +821,13 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
 
             oldNode2.clean();
 
-            // console.log(oldNode2, oldElement2);
+            console.log("removing ", oldElement2);
             oldElement.removeChild(oldElement2);
         } else {
             let oldNode2 = oldNode.children.at(index);
             let newNode2 = newNode.children.at(index);
+            // console.log(oldNode, oldElement, parentElement);
+            // console.log(oldNode.children.length, newNode.children.length, oldElement.childNodes.length);
             let oldElement2 = oldElement.childNodes.item(index);
 
             await updateDOM(oldNode2, newNode2, oldElement2, oldElement);
@@ -893,6 +895,22 @@ async function router() {
     }
 
     await updateDOM(rootNode, newNode, app.firstElementChild, app);
+    // console.log(document.querySelector(".container-fluid.round-container"));
+
+    // let observer = new MutationObserver((mutationList, observer) => {
+    //     for (let mutation of mutationList) {
+    //         if (mutation.type == "childList") {
+    //             console.log(mutation.removedNodes);
+    //         }
+    //     }
+    // });
+
+    // observer.observe(document.querySelector(".container-fluid.round-container").parentElement, {
+    //     attributes: true,
+    //     childList: true,
+    //     subtree: true,
+    // });
+
     rootNode = newNode;
 
     initialPageLoad = false;

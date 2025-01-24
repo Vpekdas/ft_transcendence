@@ -148,8 +148,6 @@ export default class Tournament extends Component {
                     this.createRoundTier();
                     // createBinaryParticle(15);
                     // createDotParticle(15);
-
-                    document.getElementById("match-container").innerHTML = this.roundsHtml;
                 } else if (data["type"] == "match") {
                     navigateTo(`/play/pong/${data["id"]}`);
                 }
@@ -168,10 +166,9 @@ export default class Tournament extends Component {
 
         for (let round of rounds()) {
             let games = round["games"];
-            console.log(JSON.stringify(games));
             // prettier-ignore
             roundsHtml += /* HTML */ ` <div class="container-fluid round-container">
-                <TournamentRound roundCount="${games.length}" data="[]" />
+                <TournamentRound roundCount="${games.length}" data='${JSON.stringify(games)}' />
                 <div class="container-fluid bracket-container">
                     <div class="bracket" row="1">
                         <div class="dot"></div>

@@ -1,5 +1,5 @@
 import { tr, setLanguage, getLanguage } from "../i18n";
-import { Component } from "../micro";
+import { Component, navigateTo } from "../micro";
 
 export default class LanguagePicker extends Component {
     async init() {

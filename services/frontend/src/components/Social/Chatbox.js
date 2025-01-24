@@ -73,6 +73,29 @@ export default class Chatbox extends Component {
                 const chatbox = document.getElementById("chatbox");
                 chatbox.style.display = "none";
             });
+
+            const sendBtn = document.getElementById("send-btn");
+
+            let msg = "";
+            sendBtn.addEventListener("click", () => {
+                msg = document.getElementById("writeTextArea").value;
+            });
+
+            this.ws = new WebSocket(`ws/chat`);
+
+            this.ws.onopen = async () => {
+                this.ws.send(
+                    JSON.stringify({
+                        type: "message",
+                        content: msg,
+                    })
+                );
+            };
+
+            this.ws.onmessage = async (event) => {
+                const data = JSON.parse(event.data);
+                console.log(data);
+            };
         };
     }
 
@@ -98,7 +121,7 @@ export default class Chatbox extends Component {
                     </div>
                     <div class="container-fluid chat-button-message">
                         <button type="button" class="btn btn-primary invite-button">Invite</button>
-                        <button type="button" class="btn btn-primary send-button">Send</button>
+                        <button type="button" class="btn btn-primary send-button" id="send-btn">Send</button>
                     </div>
                 </div>
             </div>

@@ -28,6 +28,11 @@ export default class MatchHistory extends Component {
         }
     }
 
+    timeAsDate(s) {
+        const date = new Date(s * 1000);
+        return date.getUTCFullYear() + "-" + (date.getUTCMonth() + 1) + "-" + date.getUTCDate();
+    }
+
     gamemodeName(tid, gamemode) {
         if (tid != undefined) {
             return tr("Tournament");
@@ -66,6 +71,7 @@ export default class MatchHistory extends Component {
                     </span>
                     <span class="history-time">${this.timeInMinutes(result["timeEnded"] - result["timeStarted"])}</span>
                     <span class="history-gamemode">${this.gamemodeName(result["tid"], result["gamemode"])}</span>
+                    <span class="history-date">${this.timeAsDate(result["timeEnded"])}</span>
                 </li>`;
             }
         }

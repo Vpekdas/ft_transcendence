@@ -238,6 +238,10 @@
     margin-left: 15px;
 }
 
+.match-history .history-date {
+    margin-left: 15px;
+}
+
 /* STATISTICS */
 
 .list-group.statistics {

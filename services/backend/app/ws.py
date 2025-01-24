@@ -1,7 +1,6 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
-from channels.generic.websocket import WebsocketConsumer
-from .gameframework import log, sync, ServerManager, TournamentManager
+from .gameframework import log, sync, GameManager, TournamentManager, Client
 from .pong import PongManager
 from .models import Player, Tournament
 from .utils import hash_weak_password
@@ -24,6 +23,7 @@ class PongMatchmakeConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
+        await pong_manager.on_quit(self.player)
         await self.close()
 
     async def receive(self, text_data):
@@ -68,6 +68,7 @@ class PongClientConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         try:
             data = json.loads(text_data)
+            client: Client = None
 
             if "type" in data:
                 if data["type"] == "input":
@@ -76,6 +77,12 @@ class PongClientConsumer(AsyncWebsocketConsumer):
                     else:
                         client = self.game.get_client(self.player.id, None)
                     if client is not None: client.on_input(data)
+                elif data["type"] == "ready" and "params" in data:
+                    if self.game.gamemode == "1v1local" and "playerSubId" in data:
+                        client = self.game.get_client(self.player.id, data["playerSubId"])
+                    else:
+                        client = self.game.get_client(self.player.id, None)
+                    if client is not None: self.game.on_client_ready(client, params)
                 else:
                     await self.game.on_unhandled_message(data)
         except json.JSONDecodeError:

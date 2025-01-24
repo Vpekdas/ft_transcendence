@@ -25,6 +25,7 @@ urlpatterns = [
 
     # Account management
     path('api/signin', views.signin),
+    path('api/signin-external', views.signinExternal),
     path('api/login', views.loginRoute),
     path('api/logout', views.logoutRoute),
     path('api/check-logged', views.isLoggedIn), # was api/isLoggedIn

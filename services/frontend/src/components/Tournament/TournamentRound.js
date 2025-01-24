@@ -1,10 +1,30 @@
 import { Component } from "../../micro";
-import NavBar from "../../components/NavBars/HomeNavBar";
 import { getNickname } from "../../utils";
 
 export default class TournamentRound extends Component {
-    constructor() {
-        super();
+    async init() {
+        this.rounds = "";
+
+        let roundCount = parseInt(this.attributes.get("roundCount"));
+        const data = JSON.parse(this.attributes.get("data"));
+
+        for (let i = 0; i < roundCount; i++) {
+            const player1 = data[i]["player1"] ? await getNickname("" + data[i]["player1"]) : "<i>TBD</i>";
+            const player2 = data[i]["player2"] ? await getNickname("" + data[i]["player2"]) : "<i>TBD</i>";
+            const score1 = data[i]["score1"] ? data[i]["score1"] : "0";
+            const score2 = data[i]["score2"] ? data[i]["score2"] : "0";
+            const winner = data[i]["winner"];
+
+            this.rounds += this.createRound(
+                player1,
+                player2,
+                data[i]["player1"],
+                data[i]["player2"],
+                score1,
+                score2,
+                winner
+            );
+        }
     }
 
     createRound(player1, player2, id1, id2, score1, score2, winner) {
@@ -28,29 +48,7 @@ export default class TournamentRound extends Component {
         `;
     }
 
-    async render() {
-        let rounds = "";
-        let roundCount = parseInt(this.attrib("roundCount"));
-        const data = JSON.parse(this.attrib("data"));
-
-        for (let i = 0; i < roundCount; i++) {
-            const player1 = data[i]["player1"] ? await getNickname("" + data[i]["player1"]) : "<i>TBD</i>";
-            const player2 = data[i]["player2"] ? await getNickname("" + data[i]["player2"]) : "<i>TBD</i>";
-            const score1 = data[i]["score1"] ? data[i]["score1"] : "0";
-            const score2 = data[i]["score2"] ? data[i]["score2"] : "0";
-            const winner = data[i]["winner"];
-
-            rounds += this.createRound(
-                player1,
-                player2,
-                data[i]["player1"],
-                data[i]["player2"],
-                score1,
-                score2,
-                winner
-            );
-        }
-
-        return html(/* HTML */ `<div class="tournament-round">${rounds}</div>`);
+    render() {
+        return /* HTML */ `<div class="tournament-round">${this.rounds}</div>`;
     }
 }

@@ -48,7 +48,7 @@ def signin(request: HttpRequest):
 
     return JsonResponse({})
 
-CLIENT_ID="u-s4t2ud-113d89636c434e478745914966fff13deb2d93ec00210a1f8033f12f8e0d06b2"
+CLIENT_ID="u-s4t2ud-fd6496bf5631feb3051ccd4d5be873a3e47614223c9ebb635abaefda7d894f92"
 
 """
 Create a new user using 42 API
@@ -58,27 +58,43 @@ def signinExternal(request: HttpRequest):
     data = json.loads(request.body)
 
     code = data["code"]
+    redirect_uri = data["redirect_uri"]
 
     # Exchange the code provided by the api for an access token
-    res = requests.post("https://api.intra.42.fr/oauth/token", json={ "grant_type": "authorization_code", "client_id": CLIENT_ID, "client_secret": os.environ.get("API42_SECRET"), "code": code })
+    res = requests.post("https://api.intra.42.fr/oauth/token", json={ "grant_type": "authorization_code", "client_id": CLIENT_ID, "client_secret": os.environ.get("API42_SECRET"), "code": code, "redirect_uri": redirect_uri })
+
+    # print(data, file=sys.stderr)
 
     if res.status_code != 200:
+        print(res.status_code, res.text, redirect_uri, file=sys.stderr)
         return HttpResponseServerError()
 
     response = json.loads(res.content)
-    print(response, file=sys.stderr)
+    access_token = response["access_token"]
+    # print(response, file=sys.stderr)
 
     # One last request to query the login, profile picture and other basic info to fill the database
     # https://api.intra.42.fr/v2/me
 
-    # user = User.objects.create(username=username)
-    # player = Player.objects.create(user=user, nickname=nickname, external=True)
+    res = requests.post("https://api.intra.42.fr/v2/me", json={ "access_token": access_token }).json()
+    user = User.objects.filter(username=res["username"]).first()
 
-    # user.save()
 
-    # login(request, user)
+    if user:
+        player = Player.objects.filter(user=user).first()
+        player.accessToken = access_token
 
-    return JsonResponse({})
+        player.save()
+    else:
+        user = User.objects.create(username=res["username"])
+        player = Player.objects.create(user=user, nickname=res["username"], external=True)
+
+        user.save()
+        player.save()
+
+    login(request, user)
+
+    return JsonResponse({ "access_token": access_token })
 
 """
 Log-in
@@ -99,6 +115,24 @@ def loginRoute(request: HttpRequest):
         return JsonResponse({ })
     else:
         return JsonResponse({ "error": MISMATCH_CREDENTIALS })
+
+"""
+Log-in with 42
+"""
+@require_POST
+def loginExternal(request: HttpRequest):
+    data = json.loads(request.body)
+
+    if not "access_token" in data:
+        return HttpResponseBadRequest()
+
+    access_token = data["access_token"]
+    # TODO: Check if the access token is valid
+
+    player = Player.objects.filter(accessToken=access_token, external=True).first()
+    user = player.user
+
+    login(request, user)
 
 """
 Logout from an account.
@@ -429,6 +463,98 @@ def getMessages(request: HttpRequest, id):
         return JsonResponse({"error": CHAT_NOT_FOUND})
 
     # Récupérer les messages du chat
+    messages = chat.messages.all().values("content", "sender__username", "receiver__username", "timestamp")
+
+    return JsonResponse({"messages": list(messages)})
+
+@require_POST
+def addFriend(request: HttpRequest, friend_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "NOT_AUTHENTICATED"})
+
+    player = Player.objects.filter(user=request.user).first()
+    if not player:
+        return JsonResponse({"error": "INTERNAL_ERROR"})
+
+    friend = Player.objects.filter(id=friend_id).first()
+    if not friend:
+        return JsonResponse({"error": "FRIEND_NOT_FOUND"})
+
+    # Ajouter l'ami via la relation ManyToManyField
+    player.friends.add(friend)
+
+    return JsonResponse({"message": "Friend added successfully."})
+
+
+@require_POST
+def deleteFriend(request: HttpRequest, friend_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "NOT_AUTHENTICATED"})
+
+    player = Player.objects.filter(user=request.user).first()
+    if not player:
+        return JsonResponse({"error": "INTERNAL_ERROR"})
+
+    friend = Player.objects.filter(id=friend_id).first()
+    if not friend:
+        return JsonResponse({"error": "FRIEND_NOT_FOUND"})
+
+    # Supprimer l'ami via la relation ManyToManyField
+    player.friends.remove(friend)
+
+    return JsonResponse({"message": "Friend removed successfully."})
+
+
+@require_POST
+def sendMessage(request: HttpRequest, id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "NOT_AUTHENTICATED"})
+
+    player = Player.objects.filter(user=request.user).first()
+    if not player:
+        return JsonResponse({"error": "INTERNAL_ERROR"})
+
+    p2 = Player.objects.filter(id=id).first()
+    if not p2:
+        return JsonResponse({"error": "RECEIVER_NOT_FOUND"})
+
+    # Vérifier si un chat existe déjà entre les deux joueurs (dans n'importe quel ordre)
+    chat, created = Chat.objects.get_or_create(
+        player1=min(player, p2, key=lambda x: x.id),  # Le joueur avec l'id le plus bas est `player1`
+        player2=max(player, p2, key=lambda x: x.id),
+    )
+
+    # Créer le message
+    message = Message.objects.create(content=request.POST['contenu'], sender=player, receiver=p2)
+
+    # Ajouter le message au chat
+    chat.messages.add(message)
+
+    return JsonResponse({"message": "Message sent successfully."})
+
+
+def getMessages(request: HttpRequest, id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "NOT_AUTHENTICATED"})
+
+    player = Player.objects.filter(user=request.user).first()
+    if not player:
+        return JsonResponse({"error": "INTERNAL_ERROR"})
+
+    p2 = Player.objects.filter(id=id).first()
+    if not p2:
+        return JsonResponse({"error": "FRIEND_NOT_FOUND"})
+
+    # Rechercher le chat entre les deux joueurs
+    try:
+        chat = Chat.objects.get(
+            player1=min(player, p2, key=lambda x: x.id),
+            player2=max(player, p2, key=lambda x: x.id),
+        )
+    except Chat.DoesNotExist:
+        return JsonResponse({"error": "CHAT_NOT_FOUND"})
+
+    # Récupérer les messages
     messages = chat.messages.all().values("content", "sender__username", "receiver__username", "timestamp")
 
     return JsonResponse({"messages": list(messages)})

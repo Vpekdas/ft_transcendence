@@ -1,3 +1,4 @@
+import { Component } from "../micro";
 import { PLANETS, END_GAME } from "../constant";
 
 function isRightPath(currentPath) {
@@ -77,159 +78,162 @@ class Wanderer extends HTMLElement {
 }
 
 /** @type {import("../micro").Component} */
-export default async function OuterWilds({ dom }) {
-    if (!customElements.get("ow-wanderer")) {
-        customElements.define("ow-wanderer", Wanderer);
-    }
+export default class OuterWilds extends Component {
+    async init() {
+        if (!customElements.get("ow-wanderer")) {
+            customElements.define("ow-wanderer", Wanderer);
+        }
 
-    dom.querySelector("#space").do(async () => {
-        const music = { audio: Audio, name: "", index: 0 };
-        const chronometer = { timerId: 0, seconds: 0 };
-        const coordinates = { endGame: false, currentPath: [] };
-        let supernova = false;
+        this.onready = () => {
+            const music = { audio: Audio, name: "", index: 0 };
+            const chronometer = { timerId: 0, seconds: 0 };
+            const coordinates = { endGame: false, currentPath: [] };
+            let supernova = false;
 
-        // ! If the user does not interact, a Promise is returned by audio.
-        chronometer.timerId = setInterval(() => {
-            chronometer.seconds++;
-            if (chronometer.seconds === 1200 && !supernova) {
-                supernova = true;
-                if (music.audio.duration > 0 && !music.audio.paused) {
-                    music.audio.pause();
-                }
-                music.audio = new Audio("/music/End Times.mp3");
-                if (music.audio) {
-                    music.audio.play();
-                    clearInterval(chronometer.timerId);
-                }
-            }
-        }, 1000);
-
-        // Make the quantum moon jump around randomly.
-        const quantumMoon = document.querySelector("#quantum-moon");
-
-        const quantumOrbits = Array.from(document.querySelectorAll("[quantum]"));
-
-        quantumMoon.addEventListener("animationiteration", (e) => {
-            if (e.animationName !== "--quantum") {
-                return;
-            }
-            const currOrbit = quantumMoon.closest("[quantum]");
-            const availableOrbits = quantumOrbits.filter((o) => o !== currOrbit);
-            const newOrbit = availableOrbits[Math.floor(Math.random() * availableOrbits.length)];
-            if (newOrbit) {
-                const newWanderer = newOrbit.querySelector(":scope > ow-wanderer");
-                newWanderer.appendChild(quantumMoon);
-            }
-        });
-
-        const orbits = document.querySelectorAll("ow-orbit");
-
-        const ashTwin = document.querySelector("#ash-twin");
-        const emberTwin = document.querySelector("#ember-twin");
-
-        ashTwin.addEventListener("click", () => handlePlanetClick(ashTwin, music, supernova, coordinates));
-        emberTwin.addEventListener("click", () => handlePlanetClick(emberTwin, music, supernova, coordinates));
-
-        orbits.forEach((orbit) => {
-            if (orbit.id === "twins" || orbit.id === "hourglass-twins") {
-                return;
-            }
-            // Ensure that names does not move too.
-            orbit.addEventListener("mouseover", () => {
-                const orbitName = orbit.querySelector("ow-name");
-                orbitName.style.animationPlayState = "paused";
-            });
-            orbit.addEventListener("mouseleave", () => {
-                const orbitName = orbit.querySelector("ow-name");
-                orbitName.style.animationPlayState = "running";
-            });
-
-            orbit.addEventListener("click", (event) => {
-                // Ensure that clicking on a child element does not switch to the main element.
-                // For example, clicking on Attlerock should display Attlerock's details, not Timber Hearth's.
-                event.stopPropagation();
-
-                const planetContainer = document.querySelector(".container-fluid.planet-card-container");
-                const displayedPlanet = document.querySelector(".planet-img");
-                const displayedPlanetName = document.querySelector(".planet-name");
-                const displayedPlanetDescription = document.querySelector(".planet-description");
-
-                // Display the card with a subtle animation and update the border color to match the planet's color.
-                planetContainer.style.display = "flex";
-                planetContainer.style.setProperty(
-                    "--card-color",
-                    orbit.querySelector("ow-wanderer").getAttribute("card-color")
-                );
-
-                // Update the card with the selected planet's name.
-                displayedPlanetName.textContent = orbit.querySelector("ow-name").textContent;
-
-                // Update the card with the selected planet's image.
-                displayedPlanet.setAttribute("src", orbit.querySelector("ow-wanderer").getAttribute("image"));
-
-                // Update the card with the selected planet's description.
-                displayedPlanetDescription.textContent = PLANETS[displayedPlanetName.textContent].Description;
-
-                // Prevent rotation for specific planets.
-                if (
-                    displayedPlanetName.textContent === "White Hole Station" ||
-                    displayedPlanetName.textContent === "The Interloper"
-                ) {
-                    displayedPlanet.style.animationPlayState = "paused";
-                } else {
-                    displayedPlanet.style.animationPlayState = "running";
-                }
-
-                // If there is multiple music, choose one randomly :).
-                if (PLANETS[displayedPlanetName.textContent].Music.length > 1 && !supernova) {
-                    music.index = Math.floor(Math.random() * PLANETS[displayedPlanetName.textContent].Music.length);
-                } else {
-                    music.index = 0;
-                }
-
-                // Ensure that only one music track is played at a time by pausing the current track before playing a new one.
-                if (music.audio.duration > 0 && !music.audio.paused && !supernova) {
-                    music.audio.pause();
-                }
-
-                if (!supernova) {
-                    music.audio = new Audio(
-                        "/music/" + PLANETS[displayedPlanetName.textContent].Music[music.index] + ".mp3"
-                    );
+            // ! If the user does not interact, a Promise is returned by audio.
+            chronometer.timerId = setInterval(() => {
+                chronometer.seconds++;
+                if (chronometer.seconds === 1200 && !supernova) {
+                    supernova = true;
+                    if (music.audio.duration > 0 && !music.audio.paused) {
+                        music.audio.pause();
+                    }
+                    music.audio = new Audio("/music/End Times.mp3");
                     if (music.audio) {
                         music.audio.play();
-                        music.name = PLANETS[displayedPlanetName.textContent].Music[music.index];
+                        clearInterval(chronometer.timerId);
                     }
                 }
+            }, 1000);
 
-                if (!coordinates.endGame) {
-                    if (coordinates.currentPath.length < 3) {
-                        coordinates.currentPath.push(displayedPlanetName.textContent);
-                    }
+            // Make the quantum moon jump around randomly.
+            const quantumMoon = document.querySelector("#quantum-moon");
 
-                    if (coordinates.currentPath.length === 3) {
-                        coordinates.endGame = isRightPath(coordinates.currentPath);
-                        coordinates.currentPath.length = 0;
+            const quantumOrbits = Array.from(document.querySelectorAll("[quantum]"));
 
-                        if (coordinates.endGame) {
-                            document.querySelector(".fluid-container.coordinates-container").style.display = "flex";
-                        }
-                    }
+            quantumMoon.addEventListener("animationiteration", (e) => {
+                if (e.animationName !== "--quantum") {
+                    return;
+                }
+                const currOrbit = quantumMoon.closest("[quantum]");
+                const availableOrbits = quantumOrbits.filter((o) => o !== currOrbit);
+                const newOrbit = availableOrbits[Math.floor(Math.random() * availableOrbits.length)];
+                if (newOrbit) {
+                    const newWanderer = newOrbit.querySelector(":scope > ow-wanderer");
+                    newWanderer.appendChild(quantumMoon);
                 }
             });
-        });
-    });
 
-    // TODO: Probably will append each line.
-    // TODO: Remove the border of previous line so the "cursor" will not be visible.
+            const orbits = document.querySelectorAll("ow-orbit");
 
-    //     <div class="typewriter-wrapper">
-    //     <div>
-    //         <h1 class="typewriter-text line-1">Lorem Ipsum Dolor</h1>
-    //     </div>
-    // </div>
+            const ashTwin = document.querySelector("#ash-twin");
+            const emberTwin = document.querySelector("#ember-twin");
 
-    return /* HTML */ `
+            ashTwin.addEventListener("click", () => handlePlanetClick(ashTwin, music, supernova, coordinates));
+            emberTwin.addEventListener("click", () => handlePlanetClick(emberTwin, music, supernova, coordinates));
+
+            orbits.forEach((orbit) => {
+                if (orbit.id === "twins" || orbit.id === "hourglass-twins") {
+                    return;
+                }
+                // Ensure that names does not move too.
+                orbit.addEventListener("mouseover", () => {
+                    const orbitName = orbit.querySelector("ow-name");
+                    orbitName.style.animationPlayState = "paused";
+                });
+                orbit.addEventListener("mouseleave", () => {
+                    const orbitName = orbit.querySelector("ow-name");
+                    orbitName.style.animationPlayState = "running";
+                });
+
+                orbit.addEventListener("click", (event) => {
+                    // Ensure that clicking on a child element does not switch to the main element.
+                    // For example, clicking on Attlerock should display Attlerock's details, not Timber Hearth's.
+                    event.stopPropagation();
+
+                    const planetContainer = document.querySelector(".container-fluid.planet-card-container");
+                    const displayedPlanet = document.querySelector(".planet-img");
+                    const displayedPlanetName = document.querySelector(".planet-name");
+                    const displayedPlanetDescription = document.querySelector(".planet-description");
+
+                    // Display the card with a subtle animation and update the border color to match the planet's color.
+                    planetContainer.style.display = "flex";
+                    planetContainer.style.setProperty(
+                        "--card-color",
+                        orbit.querySelector("ow-wanderer").getAttribute("card-color")
+                    );
+
+                    // Update the card with the selected planet's name.
+                    displayedPlanetName.textContent = orbit.querySelector("ow-name").textContent;
+
+                    // Update the card with the selected planet's image.
+                    displayedPlanet.setAttribute("src", orbit.querySelector("ow-wanderer").getAttribute("image"));
+
+                    // Update the card with the selected planet's description.
+                    displayedPlanetDescription.textContent = PLANETS[displayedPlanetName.textContent].Description;
+
+                    // Prevent rotation for specific planets.
+                    if (
+                        displayedPlanetName.textContent === "White Hole Station" ||
+                        displayedPlanetName.textContent === "The Interloper"
+                    ) {
+                        displayedPlanet.style.animationPlayState = "paused";
+                    } else {
+                        displayedPlanet.style.animationPlayState = "running";
+                    }
+
+                    // If there is multiple music, choose one randomly :).
+                    if (PLANETS[displayedPlanetName.textContent].Music.length > 1 && !supernova) {
+                        music.index = Math.floor(Math.random() * PLANETS[displayedPlanetName.textContent].Music.length);
+                    } else {
+                        music.index = 0;
+                    }
+
+                    // Ensure that only one music track is played at a time by pausing the current track before playing a new one.
+                    if (music.audio.duration > 0 && !music.audio.paused && !supernova) {
+                        music.audio.pause();
+                    }
+
+                    if (!supernova) {
+                        music.audio = new Audio(
+                            "/music/" + PLANETS[displayedPlanetName.textContent].Music[music.index] + ".mp3"
+                        );
+                        if (music.audio) {
+                            music.audio.play();
+                            music.name = PLANETS[displayedPlanetName.textContent].Music[music.index];
+                        }
+                    }
+
+                    if (!coordinates.endGame) {
+                        if (coordinates.currentPath.length < 3) {
+                            coordinates.currentPath.push(displayedPlanetName.textContent);
+                        }
+
+                        if (coordinates.currentPath.length === 3) {
+                            coordinates.endGame = isRightPath(coordinates.currentPath);
+                            coordinates.currentPath.length = 0;
+
+                            if (coordinates.endGame) {
+                                document.querySelector(".fluid-container.coordinates-container").style.display = "flex";
+                            }
+                        }
+                    }
+                });
+            });
+        };
+
+        // TODO: Probably will append each line.
+        // TODO: Remove the border of previous line so the "cursor" will not be visible.
+
+        //     <div class="typewriter-wrapper">
+        //     <div>
+        //         <h1 class="typewriter-text line-1">Lorem Ipsum Dolor</h1>
+        //     </div>
+        // </div>
+    }
+
+    render() {
+        return /* HTML */ `
                 <div class="container-fluid planet-card-container" >
                     <span class="planet-name"></span>
                     <img class="planet-img" src=""> </img>
@@ -303,4 +307,5 @@ export default async function OuterWilds({ dom }) {
                         </ow-orbit>
                     </ow-system>
                 </div>`;
+    }
 }

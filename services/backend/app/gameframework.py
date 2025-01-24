@@ -12,7 +12,6 @@ import time
 import threading
 import datetime
 
-from http.server import HTTPServer, BaseHTTPRequestHandler
 from threading import Thread
 from datetime import datetime
 from math import sqrt
@@ -145,7 +144,9 @@ def check_collision(a, b) -> bool:
 
 class Scene:
     def __init__(self):
-        self.bodies = []
+        self.bodies: list[Body] = []
+        # Backlog of events to send through the websocket
+        self.backlog: list[str] = []
 
     def add_body(self, body):
         body.scene = self
@@ -183,6 +184,7 @@ class Client:
         self.id = id
         self.subid = subid
         self.inputs = dict()
+        self.ready = False
 
     def is_pressed(self, name):
         return name in self.inputs and self.inputs[name]
@@ -204,15 +206,7 @@ class ClientAI(Client):
         self.target_y = None
 
     def process(self, scene: Scene):
-        if time_secs() - self.last_update >= 1:
-            self.last_update = time_secs()
-            self.scene = scene
-
-            ball: Body = next(scene.get_bodies("Ball"))
-            ball.velocity.normalized()
-
-        if self.target_y is not None:
-            pass
+        pass
 
 class BodyType(enum.Enum):
     STATIC = 0
@@ -335,6 +329,28 @@ class Area(Body):
     def body_entered(self, body):
         pass
 
+class Timer:
+    def __init__(self, *, time: float):
+        self.time = time
+
+        self.done = False
+        self.previous_time = -1.0
+    
+    def update(self):
+        if self.done:
+            return
+
+        current_time = time_secs()
+        
+        if self.previous_time < 0:
+            self.previous_time = current_time
+
+        if current_time - self.previous_time >= self.time:
+            self.done = True
+    
+    def is_done(self) -> bool:
+        return self.done
+
 class State(enum.Enum):
     IN_LOBBY = 0
     STARTED = 1
@@ -351,6 +367,7 @@ class Game:
         self.tid = tid
         self.gamemode = gamemode
         self.consumers = []
+        self.framerate = 60
 
     def is_tournament_game(self) -> bool:
         return self.tid is not None
@@ -359,9 +376,24 @@ class Game:
         self.task = asyncio.create_task(self.run())
 
     async def run(self):
+        previous_time = time_secs()
+        frame_time = 1.0 / self.framerate
+        
         while self.state != State.DEAD:
+            before_time = time_secs()
+
+            if before_time - previous_time < frame_time:
+                continue
+
+            previous_time = before_time
+
             await self.on_update()
-            await asyncio.sleep(0.010)
+
+            # Sleep the rest of the time
+            after_time = time_secs()
+            elapsed = after_time - before_time
+
+            await asyncio.sleep(frame_time - elapsed - 0.005)
 
         log(f"Game with id {self.id} exited")
         self.manager.games.pop(self.id)
@@ -369,6 +401,10 @@ class Game:
     async def broadcast(self, data):
         for consumer in self.consumers:
             await consumer.send(json.dumps(data))
+
+    async def broadcast_raw(self, message):
+        for consumer in self.consumers:
+            await consumer.send(message)
 
     def get_client(self, id: int, subid=None) -> Client:
         try:
@@ -395,10 +431,13 @@ class Game:
     async def on_update(self):
         pass
 
+    def on_client_ready(self, client: Client, params):
+        pass
+
     def get_score(self, index: int) -> int:
         return 0
 
-class ServerManager:
+class GameManager:
     def __init__(self, ty):
         self.games = {}
         self.consumers = []
@@ -419,10 +458,10 @@ class ServerManager:
     def make_id(self, k=8) -> str:
         return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
 
-    def start_game(self, *, gamemode: str, tid: str=None, acceptedPlayers: list[int]=None):
+    def start_game(self, *, gamemode: str, tid: str=None, accepted_players: list[int]=None):
         id = self.make_id()
 
-        game = self.ty(gamemode=gamemode, tid=tid, acceptedPlayers=acceptedPlayers)
+        game = self.ty(gamemode=gamemode, tid=tid, accepted_players=accepted_players)
         game.id = id
         game.manager = self
 
@@ -600,7 +639,7 @@ class Tournament:
         r = self.rounds[self.currentRound]
 
         for tgame in r.games:
-            game: Game = self.gameManager.start_game(gamemode="1v1", tid=self.tid, acceptedPlayers=[tgame.player1, tgame.player2])
+            game: Game = self.gameManager.start_game(gamemode="1v1", tid=self.tid, accepted_players=[tgame.player1, tgame.player2])
 
             # await game.on_join(tgame.player1)
             # await game.on_join(tgame.player2)
@@ -661,7 +700,7 @@ class Tournament:
         await self.start_games()
 
 class TournamentManager:
-    def __init__(self, *, game: str, manager: ServerManager):
+    def __init__(self, *, game: str, manager: GameManager):
         self.game = game
         self.manager = manager
 

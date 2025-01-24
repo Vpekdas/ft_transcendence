@@ -12,3 +12,7 @@ TOURNAMENT_DOESNT_EXISTS = "Tournament does not exists"
 IMAGE_TOO_BIG = "Profile picture exceed max size"
 
 INVALID_SKIN = "Invalid skin"
+FRIEND_NOT_FOUND = "Friend not found."
+CHAT_NOT_FOUND = "Chat not found."
+RECEIVER_NOT_FOUND = "Receiver not found."
+

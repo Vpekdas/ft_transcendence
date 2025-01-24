@@ -129,66 +129,44 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         except json.JSONDecodeError:
             pass
 
-class ChatConsumer(WebsocketConsumer):
-    def connect(self):
-        self.user = self.scope["user"]
+class ChatConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        # Récupération du room_name depuis l'URL
+        self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
+        self.room_group_name = f"chat_{self.room_name}"
 
-        if self.user.is_authenticated:
-            self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
-            self.room_group_name = f"chat_{self.room_name}"
-
-            # Join the room group
-            self.channel_layer.group_add(
-                self.room_group_name,
-                self.channel_name
-            )
-
-            self.accept()
-        else:
-            self.close()
-
-    def disconnect(self, close_code):
-        # Leave the room group
-        self.channel_layer.group_discard(
+        # Ajouter l'utilisateur au groupe
+        await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
         )
 
-    def receive(self, text_data):
-        try:
-            data = json.loads(text_data)
+        await self.accept()
 
-            if "type" in data and data["type"] == "message" and "content" in data:
-                message_content = data["content"]
-                room = ChatRoom.objects.get(name=self.room_name)
+    async def disconnect(self, close_code):
+        # Supprimer l'utilisateur du groupe
+        await self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name
+        )
 
-                # Save the message in the database
-                message = Message.objects.create(
-                    room=room,
-                    user=self.user,
-                    content=message_content
-                )
+    async def receive(self, text_data):
+        data = json.loads(text_data)
+        message = data.get("content")
 
-                # Broadcast the message to the room group
-                self.channel_layer.group_send(
-                    self.room_group_name,
-                    {
-                        "type": "chat_message",
-                        "message": {
-                            "user": self.user.username,
-                            "content": message_content,
-                            "timestamp": str(message.timestamp)
-                        }
-                    }
-                )
-        except json.JSONDecodeError:
-            pass
+        # Envoyer le message à tout le groupe
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "chat_message",
+                "message": message,
+            }
+        )
 
-    def chat_message(self, event):
-        # Send the message to WebSocket
-        self.send(text_data=json.dumps({
-            "type": "message",
-            "user": event["message"]["user"],
-            "content": event["message"]["content"],
-            "timestamp": event["message"]["timestamp"]
+    async def chat_message(self, event):
+        message = event["message"]
+
+        # Envoyer le message au WebSocket client
+        await self.send(text_data=json.dumps({
+            "message": message
         }))

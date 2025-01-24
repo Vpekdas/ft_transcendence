@@ -72,3 +72,4 @@ class Chat(models.Model):
 # TODO: Maybe store the game data to replay it later ?
 
 # TODO: Add statistics
+

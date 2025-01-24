@@ -406,7 +406,111 @@ def tournament_create(request: HttpRequest):
 
     tid = tournaments.create(gameManager=pong_manager, host=player.id, name=data["name"], playerCount=data["playerCount"], privacy=data["openType"], password=data["password"] if "password" in data else None, fillWithAI=bool(data["fillWithAI"]), gameSettings=data["gameSettings"])
 
-    return JsonResponse({ "id": tid })
+    return JsonResponse({ "id": tid })@require_POST
+def addFriend(request: HttpRequest, friend_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": NOT_AUTHENTICATED})
+
+    # Récupérer le joueur actuel
+    player = Player.objects.filter(user=request.user).first()
+    if not player:
+        return JsonResponse({"error": INTERNAL_ERROR})
+
+    # Récupérer le joueur ami
+    friend = Player.objects.filter(id=friend_id).first()
+    if not friend:
+        return JsonResponse({"error": FRIEND_NOT_FOUND})
+
+    # Ajouter l'ami
+    player.friends.add(friend)
+
+    return JsonResponse({"message": "Friend added successfully."})
+
+
+@require_POST
+def deleteFriend(request: HttpRequest, friend_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": NOT_AUTHENTICATED})
+
+    # Récupérer le joueur actuel
+    player = Player.objects.filter(user=request.user).first()
+    if not player:
+        return JsonResponse({"error": INTERNAL_ERROR})
+
+    # Récupérer le joueur ami
+    friend = Player.objects.filter(id=friend_id).first()
+    if not friend:
+        return JsonResponse({"error": FRIEND_NOT_FOUND})
+
+    # Supprimer l'ami
+    player.friends.remove(friend)
+
+    return JsonResponse({"message": "Friend removed successfully."})
+
+
+@require_POST
+def sendMessage(request: HttpRequest, id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": NOT_AUTHENTICATED})
+
+    # Récupérer le joueur actuel
+    player = Player.objects.filter(user=request.user).first()
+    if not player:
+        return JsonResponse({"error": INTERNAL_ERROR})
+
+    # Récupérer le destinataire
+    p2 = Player.objects.filter(id=id).first()
+    if not p2:
+        return JsonResponse({"error": RECEIVER_NOT_FOUND})
+
+    # Vérifier si un chat existe déjà ou en créer un
+    chat, created = Chat.objects.get_or_create(
+        player1=min(player, p2, key=lambda x: x.id),
+        player2=max(player, p2, key=lambda x: x.id),
+    )
+
+    # Récupérer le contenu du message depuis le body de la requête
+    data = json.loads(request.body)
+    contenu = data.get("content")
+    if not contenu:
+        return JsonResponse({"error": "Message content is required."})
+
+    # Créer le message
+    message = Message.objects.create(content=contenu, sender=player, receiver=p2)
+
+    # Ajouter le message au chat
+    chat.messages.add(message)
+
+    return JsonResponse({"message": "Message sent successfully."})
+
+
+def getMessages(request: HttpRequest, id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": NOT_AUTHENTICATED})
+
+    # Récupérer le joueur actuel
+    player = Player.objects.filter(user=request.user).first()
+    if not player:
+        return JsonResponse({"error": INTERNAL_ERROR})
+
+    # Récupérer le destinataire
+    p2 = Player.objects.filter(id=id).first()
+    if not p2:
+        return JsonResponse({"error": FRIEND_NOT_FOUND})
+
+    # Rechercher le chat entre les deux joueurs
+    try:
+        chat = Chat.objects.get(
+            player1=min(player, p2, key=lambda x: x.id),
+            player2=max(player, p2, key=lambda x: x.id),
+        )
+    except Chat.DoesNotExist:
+        return JsonResponse({"error": CHAT_NOT_FOUND})
+
+    # Récupérer les messages du chat
+    messages = chat.messages.all().values("content", "sender__username", "receiver__username", "timestamp")
+
+    return JsonResponse({"messages": list(messages)})
 
 @require_POST
 def addFriend(request: HttpRequest, friend_id):

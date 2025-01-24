@@ -5,3 +5,6 @@ def make_id(k=8) -> str:
 
 def hash_weak_password(s) -> str:
     return hashlib.sha256(("salty$" + s).encode()).hexdigest()
+
+def remove_unwanted_characters(s: str) -> str:
+    return s.replace("<", "")

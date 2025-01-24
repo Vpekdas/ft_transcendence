@@ -17,10 +17,10 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 
-
 from .models import duck, Player, Tournament, PongGameResult, Chat, Message
 from .errors import *
 from .ws import tournaments, pong_manager
+from .utils import remove_unwanted_characters
 
 """
 Create a new user.
@@ -36,11 +36,16 @@ def signin(request: HttpRequest):
     password = data["password"]
     nickname = data["nickname"]
 
+    if remove_unwanted_characters(username) != data["username"]:
+        return JsonResponse({"error": INVALID_USERNAME})
+    elif remove_unwanted_characters(nickname) != data["nickname"]:
+        return JsonResponse({"error": INVALID_NICKNAME})
+
     if User.objects.filter(username=username).count() > 0:
-        return JsonResponse({"error": ALREADY_IN_GAME})
+        return JsonResponse({"error": USERNAME_ALREADY_TAKEN})
 
     user = User.objects.create(username=username)
-    player = Player.objects.create(user=user, nickname=nickname)
+    player = Player.objects.create(user=user, nickname=remove_unwanted_characters(nickname))
 
     user.set_password(password)
     user.save()
@@ -190,6 +195,9 @@ def updateNickname(request: HttpRequest, id):
     data = json.loads(request.body)
 
     newNickname = data["nickname"]
+
+    if remove_unwanted_characters(newNickname) != newNickname:
+        return JsonResponse({ "error": INVALID_NICKNAME })
 
     player = Player.objects.filter(user=request.user).first()
     if not player:
@@ -377,6 +385,9 @@ def tournament_create(request: HttpRequest):
 
     if data["openType"] not in ["open", "invite", "password"] or data["playerCount"] not in [2, 4, 8, 16]:
         return JsonResponse({ "error": INVALID_REQUEST })
+
+    if remove_unwanted_characters(data["name"]) != data["name"]:
+        return JsonResponse({ "error": INVALID_TOURNAMENT_NAME })
 
     game_settings = data["gameSettings"]
     manager = pong_manager # TODO: Modify this with data["game"]

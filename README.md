@@ -7,11 +7,11 @@
 - [ ] User: Standard user (major) by [@FirePh0enix]
 - [ ] User: Remote Authentication (42) (major) by [@FirePh0enix] ([#11])
 
-- [ ] Gameplay: Remote players (major)
+- [x] Gameplay: Remote players (major)
 - [ ] Gameplay: Multiple player (major)
 - [ ] Gameplay: Another game (major)
 - [ ] Gameplay: Game customization (minor) ([#9])
-- [ ] Gameplay: Live Chat (major) by [@Vpekdas] ([#12])
+- [ ] Gameplay: Live Chat (major) by [@Lebronen]
 
 - [ ] AI: AI Opponent (major) ([#13])
 - [ ] AI: User stats (minor)
@@ -19,7 +19,7 @@
 - [ ] Cybersec: GPDR (minor) ?
 - [ ] Cybersec: 2FA (major) by [@Vpekdas]
 
-- [ ] Graphics: ThreeJS (major)
+- [x] Graphics: ThreeJS (major) by [@Vpekdas]
 
 - [ ] Accessibility: Expanding Browser Compatibility (minor) by [@Vpekdas]
 - [ ] Accessibility: Multiple language (minor) by [@Vpekdas]
@@ -43,6 +43,7 @@
 
 [@FirePh0enix]: https://github.com/FirePh0enix
 [@Vpekdas]: https://github.com/Vpekdas
+[@Lebronen]: https://github.com/Lebronen
 
 [#9]: https://github.com/FirePh0enix/ft_transcendence/issues/9
 [#10]: https://github.com/FirePh0enix/ft_transcendence/issues/10

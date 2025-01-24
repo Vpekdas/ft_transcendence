@@ -52,5 +52,8 @@
     "Create Tournament": "Créer un tournoi",
     "Local": "Locale",
     "Remote": "En ligne",
-    "Social": "Sociale"
+    "Social": "Sociale",
+    "Invalid username": "Nom d'utilisateur invalid",
+    "Invalid nickname": "Surnom invalid",
+    "Invalid tournament name": "Nom du tournoi invalid"
 }

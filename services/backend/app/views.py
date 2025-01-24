@@ -96,16 +96,12 @@ def signinExternal(request: HttpRequest):
         # One last request to query the login, profile picture and other basic info to fill the database
         # https://api.intra.42.fr/v2/me
 
-        print(access_token, file=sys.stderr)
-
         res = requests.get("https://api.intra.42.fr/v2/me", headers={ "Authorization": "Bearer " + access_token })
         if res.status_code != 200:
             print("Bad response from /v2/me", file=sys.stderr)
             return HttpResponseServerError()
 
         res = res.json()
-
-        print(res, access_token, file=sys.stderr)
         
         user = User.objects.filter(username=res["login"]).first()
         if not user:

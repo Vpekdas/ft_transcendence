@@ -63,44 +63,58 @@ Create a new user using 42 API
 def signinExternal(request: HttpRequest):
     data = json.loads(request.body)
 
-    code = data["code"]
-    redirect_uri = data["redirect_uri"]
+    if "access_token" in data:
+        res = requests.get("https://api.intra.42.fr/v2/me", headers={ "Authorization": "Bearer " + data["access_token"] })
 
-    # Exchange the code provided by the api for an access token
-    res = requests.post("https://api.intra.42.fr/oauth/token", json={ "grant_type": "authorization_code", "client_id": CLIENT_ID, "client_secret": os.environ.get("API42_SECRET"), "code": code, "redirect_uri": redirect_uri })
+        if res.status_code != 200:
+            return JsonResponse({"error": INVALID_TOKEN})
+        
+        user = User.objects.filter(username=res["login"])
 
-    # print(data, file=sys.stderr)
-
-    if res.status_code != 200:
-        print(res.status_code, res.text, redirect_uri, file=sys.stderr)
-        return HttpResponseServerError()
-
-    response = json.loads(res.content)
-    access_token = response["access_token"]
-    # print(response, file=sys.stderr)
-
-    # One last request to query the login, profile picture and other basic info to fill the database
-    # https://api.intra.42.fr/v2/me
-
-    res = requests.post("https://api.intra.42.fr/v2/me", json={ "access_token": access_token }).json()
-    user = User.objects.filter(username=res["username"]).first()
-
-
-    if user:
-        player = Player.objects.filter(user=user).first()
-        player.accessToken = access_token
-
-        player.save()
+        if not user:
+            return HttpResponseServerError()
+        
+        login(request, user)
     else:
-        user = User.objects.create(username=res["username"])
-        player = Player.objects.create(user=user, nickname=res["username"], external=True)
+        code = data["code"]
+        redirect_uri = data["redirect_uri"]
 
-        user.save()
-        player.save()
+        # TODO: Check if the access token is valid, if yes then skip the authentification
 
-    login(request, user)
+        # Exchange the code provided by the api for an access token
+        res = requests.post("https://api.intra.42.fr/oauth/token", data={"grant_type": "authorization_code", "client_id": CLIENT_ID, "client_secret": os.environ.get("API42_SECRET"), "code": code, "redirect_uri": redirect_uri })
 
-    return JsonResponse({ "access_token": access_token })
+        # print(data, file=sys.stderr)
+
+        if res.status_code != 200:
+            print("Bad response from /oauth/token:", res.text, file=sys.stderr)
+            return HttpResponseServerError()
+
+        response = res.json()
+        access_token = response["access_token"]
+
+        # One last request to query the login, profile picture and other basic info to fill the database
+        # https://api.intra.42.fr/v2/me
+
+        print(access_token, file=sys.stderr)
+
+        res = requests.get("https://api.intra.42.fr/v2/me", headers={ "Authorization": "Bearer " + access_token })
+        if res.status_code != 200:
+            print("Bad response from /v2/me", file=sys.stderr)
+            return HttpResponseServerError()
+
+        res = res.json()
+
+        print(res, access_token, file=sys.stderr)
+        
+        user = User.objects.filter(username=res["login"]).first()
+        if not user:
+            user = User.objects.create(username=res["login"])
+            player = Player.objects.create(user=user, nickname=res["login"], external=True, icon={"external_icon": res["image"]["link"]})
+
+        login(request, user)
+
+        return JsonResponse({ "access_token": access_token })
 
 """
 Log-in
@@ -194,15 +208,14 @@ def updateNickname(request: HttpRequest, id):
 
     data = json.loads(request.body)
 
-    newNickname = data["nickname"]
-
-    if remove_unwanted_characters(newNickname) != newNickname:
-        return JsonResponse({ "error": INVALID_NICKNAME })
-
     player = Player.objects.filter(user=request.user).first()
     if not player:
         return JsonResponse({ "error": INTERNAL_ERROR })
 
+    newNickname = data["nickname"]
+
+    if remove_unwanted_characters(newNickname) != newNickname:
+        return JsonResponse({ "error": INVALID_NICKNAME })
     player.nickname = newNickname
     player.save()
 
@@ -256,13 +269,16 @@ def getProfilePicture(request: HttpRequest, id: str):
     if player.icon is None:
         return HttpResponse(duck, "image/svg+xml")
 
-    icon = player.icon
-    data = str(icon["data"])
-    data = data[data.find(",") + 1:]
+    if player.external:
+        return HttpResponseRedirect(player.icon["external_icon"])
+    else:
+        icon = player.icon
+        data = str(icon["data"])
+        data = data[data.find(",") + 1:]
 
-    bdata = base64.b64decode(data)
+        bdata = base64.b64decode(data)
 
-    return HttpResponse(bdata, icon["type"])
+        return HttpResponse(bdata, icon["type"])
 
 """
 Update profile picture

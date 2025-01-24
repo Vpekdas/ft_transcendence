@@ -4,6 +4,7 @@ USERNAME_ALREADY_TAKEN = "Username is already taken"
 INVALID_USERNAME = "Invalid username"
 INVALID_NICKNAME = "Invalid nickname"
 INVALID_TOURNAMENT_NAME = "Invalid tournament name"
+INVALID_TOKEN = 'Invalid token'
 MISMATCH_CREDENTIALS = "Mismatch username and password"
 NOT_LOGGED_IN = "User is not logged in"
 NOT_AUTHENTICATED = "User is not authenticated"

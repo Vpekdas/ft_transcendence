@@ -788,7 +788,7 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
         oldNode.clean();
         parentElement.replaceChild(newElement, oldElement);
 
-        console.log("replacing", oldString, "with", newString);
+        // console.log("replacing", oldString, "with", newString);
 
         if (!(newNode instanceof VirtualNodeText)) {
             await newNode.mount();
@@ -821,7 +821,7 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
 
             oldNode2.clean();
 
-            console.log("removing ", oldElement2);
+            // console.log("removing ", oldElement2);
             oldElement.removeChild(oldElement2);
         } else {
             let oldNode2 = oldNode.children.at(index);

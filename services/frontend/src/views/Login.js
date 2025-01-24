@@ -5,22 +5,16 @@ import { Component, navigateTo } from "../micro";
 
 export default class Login extends Component {
     redirectAuth42() {
-        const clientId = "u-s4t2ud-fd6496bf5631feb3051ccd4d5be873a3e47614223c9ebb635abaefda7d894f92";
-        const redirectUrl = encodeURIComponent(getOrigin() + "/redirected");
-        const url = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUrl}&response_type=code`;
+        const accessToken = localStorage.getItem("accessToken");
 
-        let proxy = window.open(url, "Auth with 42", "height=700,width=600");
-
-        let inter = setInterval(() => {
-            try {
-                if (proxy.location.href.startsWith(getOrigin() + "/redirected")) {
-                    proxy.close();
-                    clearInterval(inter);
-                    navigateTo("/signin-external" + proxy.location.search);
-                    proxy = null;
-                }
-            } catch (ex) {}
-        }, 200);
+        if (accessToken == undefined) {
+            const clientId = "u-s4t2ud-fd6496bf5631feb3051ccd4d5be873a3e47614223c9ebb635abaefda7d894f92";
+            const redirectUrl = getOrigin() + "/callback";
+            const url = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUrl}&response_type=code`;
+            window.location.href = url;
+        } else {
+            navigateTo("/callback");
+        }
     }
 
     async init() {

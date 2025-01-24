@@ -55,5 +55,6 @@
     "Social": "Sociale",
     "Invalid username": "Nom d'utilisateur invalid",
     "Invalid nickname": "Surnom invalid",
-    "Invalid tournament name": "Nom du tournoi invalid"
+    "Invalid tournament name": "Nom du tournoi invalid",
+    "Invalid token": "Jeton invalid"
 }

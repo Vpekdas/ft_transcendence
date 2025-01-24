@@ -3,15 +3,16 @@ import { Component, navigateTo } from "../micro";
 
 export default class LanguagePicker extends Component {
     async init() {
-        const buttons = document.querySelectorAll(".btn.btn-outline-info.language-picker");
-        buttons.forEach((button) => {
-            button.addEventListener("click", async () => {
-                setLanguage(button.getAttribute("lang"));
-                navigateTo(window.location.pathname);
+        this.onready = () => {
+            const buttons = document.querySelectorAll(".btn.btn-outline-info.language-picker");
+            buttons.forEach((button) => {
+                button.addEventListener("click", async () => {
+                    setLanguage(button.getAttribute("lang"));
+                    navigateTo(window.location.pathname);
+                });
             });
-        });
+        };
     }
-
     render() {
         const actualLanguage = getLanguage();
 
@@ -42,12 +43,6 @@ export default class LanguagePicker extends Component {
                     <button type="button" lang="kr" class="btn btn-outline-info language-picker">
                         <img src="/img/lang/kr.png" />
                         <span>한국어</span>
-                    </button>
-                </li>
-                <li>
-                    <button type="button" lang="jp" class="btn btn-outline-info language-picker">
-                        <img src="/img/lang/jp.png" />
-                        <span>日本語</span>
                     </button>
                 </li>
                 <li>

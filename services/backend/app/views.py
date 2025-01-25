@@ -304,6 +304,15 @@ def deleteProfile(request: HttpRequest, id):
     if not request.user.is_authenticated:
         return JsonResponse({ "error": NOT_AUTHENTICATED })
 
+    player = Player.objects.filter(user=request.user).first()
+    data = json.loads(request.body)
+
+    if player and player.external:
+        if "access_token" in data:
+            res = requests.post("https://api.42.fr/oauth/revoke", headers={ "Authorization": "Bearer " + data["access_token"] })
+        else:
+            return JsonResponse({ "error": INVALID_TOKEN })
+
     user = request.user
     user.delete()
 

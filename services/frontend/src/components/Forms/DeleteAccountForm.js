@@ -14,12 +14,16 @@ export default class DeleteAccountForm extends Component {
 
             document.querySelector("#confirm-button").addEventListener("click", async () => {
                 const response = await post("/api/player/c/delete", {
-                    body: JSON.stringify({}),
+                    body: JSON.stringify({ access_token: localStorage.getItem("accessToken") }),
                 })
                     .then((res) => res.json())
                     .catch((err) => {
-                        error: "Bad input";
+                        error: "Bad input"; // TODO: Toast ?
                     });
+
+                if (response["error"] == undefined) {
+                    localStorage.removeItem("accessToken");
+                }
 
                 document.querySelector(".delete-modal-overlay").style.display = "none";
             });

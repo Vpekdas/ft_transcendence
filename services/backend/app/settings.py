@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'app',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -147,3 +148,11 @@ CSRF_COOKIE_SECURE = True
 
 MEDIA_ROOT = '/var/media'
 MEDIA_URL = '/media/'
+
+# https://channels.readthedocs.io/en/stable/topics/channel_layers.html
+# ! Maybe use Redis for channels layers ?
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}

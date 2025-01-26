@@ -163,37 +163,55 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def create_channel(self, data):
         # Generate a unique channel name.
         new_channel_name = str(uuid.uuid4())
+        userlist = data.get("userlist")
 
-        # Respond with the new channel name.
+        # Broadcast the new channel information to all users in the general channel.
+        await self.channel_layer.group_send(
+            "general",
+            {
+                "type": "channel_created",
+                "channel_name": new_channel_name,
+                "userlist": userlist
+            }
+        )
+
+
+    # Handle channel creation request with a given userlist.
+    async def channel_created(self, event):
+        channel_name = event["channel_name"]
+        userlist = event["userlist"]
+
         await self.send(text_data=json.dumps({
             "type": "channel_created",
-            "channel_name": new_channel_name,
+            "channel_name": channel_name,
+            "userlist": userlist
         }))
 
     async def send_message(self, data):
         message = data.get("content")
         sender = data.get("sender")
+        channel_name = data.get("channel_name")  
 
-        # Send message to room group
+
         await self.channel_layer.group_send(
-            self.room_group_name,
+            channel_name,
             {
                 "type": "chat_message",
                 "message": message,
                 "sender": sender,
-                "timestamp": ""
+                "timestamp": ""  
             }
         )
 
     async def chat_message(self, event):
         message = event["message"]
         sender = event["sender"]
+        timestamp = event["timestamp"]
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
             "type": "chat_message",
             "message": message,
             "sender": sender,
-            "timestamp": ""
-
+            "timestamp": timestamp
         }))

@@ -8,6 +8,8 @@ from .errors import *
 from asgiref.sync import sync_to_async
 from django.contrib.auth.models import User
 
+import uuid
+
 pong_manager = PongManager()
 tournaments = TournamentManager(game="pong", manager=pong_manager)
 
@@ -131,11 +133,10 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        # Récupération du room_name depuis l'URL
-        self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
-        self.room_group_name = f"chat_{self.room_name}"
+        self.room_group_name = self.scope['url_route']['kwargs']['room_name']
+        self.channel_name = self.channel_name
 
-        # Ajouter l'utilisateur au groupe
+        # Join room group
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
@@ -144,7 +145,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
-        # Supprimer l'utilisateur du groupe
+        # Leave room group
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
@@ -152,10 +153,28 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
+        message_type = data.get("type")
+
+        if message_type == "create_channel":
+            await self.create_channel(data)
+        elif message_type == "send_message":
+            await self.send_message(data)
+
+    async def create_channel(self, data):
+        # Generate a unique channel name.
+        new_channel_name = str(uuid.uuid4())
+
+        # Respond with the new channel name.
+        await self.send(text_data=json.dumps({
+            "type": "channel_created",
+            "channel_name": new_channel_name,
+        }))
+
+    async def send_message(self, data):
         message = data.get("content")
         sender = data.get("sender")
 
-        # Envoyer le message à tout le groupe
+        # Send message to room group
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -170,9 +189,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message = event["message"]
         sender = event["sender"]
 
-        # Envoyer le message au WebSocket client
+        # Send message to WebSocket
         await self.send(text_data=json.dumps({
+            "type": "chat_message",
             "message": message,
             "sender": sender,
             "timestamp": ""
+
         }))

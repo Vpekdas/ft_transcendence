@@ -626,3 +626,7 @@ def getMessages(request: HttpRequest, id):
 #         "openType": t.name,
 #         "state": t.state,
 #     })
+
+def getUsersList(request):
+    users = Player.objects.all().values('nickname')
+    return JsonResponse(list(users), safe=False)

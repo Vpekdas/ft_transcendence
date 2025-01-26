@@ -45,6 +45,9 @@ urlpatterns = [
     path('api/player/<str:id>/skins/select-ball/<str:name>', views.selectBallSkin),
 
     path('api/tournament/create', views.tournament_create),
+
+    # Chat
+    path('api/usersList', views.getUsersList)
 ]
 
 websocket_urlpatterns = [

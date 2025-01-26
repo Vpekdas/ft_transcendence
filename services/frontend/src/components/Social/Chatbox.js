@@ -1,5 +1,5 @@
 import { Component } from "../../micro";
-import { getOriginNoProtocol, post } from "/utils";
+import { getOriginNoProtocol, post, fetchApi } from "/utils";
 
 export default class Chatbox extends Component {
     // ! For now, the sender doesn't know who they are talking to x) since they are both entering the test channel.
@@ -46,7 +46,7 @@ export default class Chatbox extends Component {
         return countMap.get(name) !== 0;
     }
 
-    // TODO Add the timestamp :)
+    // TODO: Add the timestamp.
     addNewMessage(discussionContainer, sender, message) {
         const messageContainer = document.createElement("div");
         messageContainer.classList.add("container-fluid-message");
@@ -69,13 +69,27 @@ export default class Chatbox extends Component {
     async init() {
         this.info = await post("/api/player/c/nickname").then((res) => res.json());
 
+        this.usersList = await fetchApi("/api/usersList", {})
+            .then((res) => res.json())
+            .catch((err) => {});
+
         this.onready = () => {
-            const messages = document.querySelectorAll(".container-fluid-message");
-            const discussionContainer = document.getElementById("discussion-container");
+            let message = "";
+            const privateDiscussionContainer = document.getElementById("private-discussion-container");
+            const chatContainer = document.getElementById("chat-container");
             const personContainer = document.getElementById("person-container");
 
+            const persons = document.querySelectorAll(".person");
+            persons.forEach((person) => {
+                person.addEventListener("click", () => {
+                    chatContainer.style.display = "flex";
+                    personContainer.style.display = "none";
+                });
+            });
+
+            // Allow me to align left if you are sender, or right if you are not the sender.
+            const messages = document.querySelectorAll(".container-fluid-message");
             messages.forEach((message) => {
-                message.innerHTML = this.generateRandomText();
                 const sender = message.getAttribute("sender");
 
                 if (sender === "other") {
@@ -85,70 +99,239 @@ export default class Chatbox extends Component {
                 }
             });
 
-            const closeBtn = document.getElementById("close-chat-btn");
+            // Connect to a global WS, everybody is in there, so the message is sent to every user.
+            this.ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/chat/general`);
 
-            closeBtn.addEventListener("click", () => {
-                const chatbox = document.getElementById("chatbox");
-                chatbox.style.display = "none";
-            });
+            // TODO: FInd a way to create and share the channel when sending a message.
+            this.ws.onopen = async () => {
+                // this.ws.send(JSON.stringify({ type: "create_channel" }));
+            };
 
+            this.ws.onmessage = async (event) => {
+                const data = JSON.parse(event.data);
+
+                console.log(data);
+
+                if (data.type === "channel_created") {
+                    for (let i = 0; i < data.userlist.length; i++) {
+                        if (data.userlist[i] === this.info.nickname) {
+                            const newChannelUrl = `wss://${getOriginNoProtocol()}/ws/chat/${data.channel_name}`;
+                            this.ws = new WebSocket(newChannelUrl);
+                            console.log(this.ws);
+                        }
+                    }
+                }
+
+                if (data.type === "chat_message") {
+                    const message = data.message;
+                    const sender = data.sender;
+
+                    if (sender !== this.info.nickname) {
+                        this.addNewPerson(personContainer, sender, "/img/Outer-Wilds/Giants-Deep.png");
+                    }
+
+                    const chatPersonList = document.querySelectorAll(".person");
+
+                    if (!this.isPersonAlreadyInList(chatPersonList, sender)) {
+                        this.addNewPerson(personContainer, sender, "/img/Outer-Wilds/Giants-Deep.png");
+                    }
+
+                    this.addNewMessage(privateDiscussionContainer, sender, message);
+                }
+            };
+
+            // Sending message.
             const sendBtn = document.getElementById("send-btn");
 
             sendBtn.addEventListener("click", () => {
-                const msg = document.getElementById("writeTextArea").value;
-
+                message = document.getElementById("writeTextArea").value;
                 this.ws.send(
                     JSON.stringify({
-                        type: "message",
-                        content: msg,
+                        type: "send_message",
+                        content: message,
                         sender: this.info.nickname,
                         timestamp: "",
                     })
                 );
             });
 
-            // TODO: Create a unique channel.
-            this.ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/chat/test`);
+            const backBtn = document.getElementById("back-btn");
 
-            this.ws.onopen = async () => {};
-
-            this.ws.onmessage = async (event) => {
-                const data = JSON.parse(event.data);
-                const message = data.message;
-                const sender = data.sender;
-
-                const chatPersonList = document.querySelectorAll(".person");
-
-                if (chatPersonList.length === 0 || !this.isPersonAlreadyInList(chatPersonList, sender)) {
-                    this.addNewPerson(personContainer, sender, "/img/Outer-Wilds/Giants-Deep.png");
-                }
-
-                this.addNewMessage(discussionContainer, sender, message);
-            };
+            backBtn.addEventListener("click", () => {
+                chatContainer.style.display = "none";
+                personContainer.style.display = "flex";
+            });
         };
     }
 
     // TODO: Update dynamically the header.
     render() {
-        return /* HTML */ ` <div class="container-fluid chatbox-container" id="chatbox">
-            <ul class="container-fluid person-container" id="person-container"></ul>
-            <div class="container-fluid chat-container">
-                <div class="container-fluid chat-header" id="actual-chat-header">
-                    <button type="button" class="btn btn-danger close-button" id="close-chat-btn">Close</button>
+        return /* HTML */ ` <div id="SG-001">
+            <div id="screen">
+                <ul class="container-fluid person-container" id="person-container">
+                    <textarea class="form-control" id="search-bar" rows="3" placeholder="Search a person..."></textarea>
+                </ul>
+                <div class="container-fluid chat-container" id="chat-container">
+                    <div class="container-fluid chat-header" id="actual-chat-header"></div>
+                    <div class="container-fluid chat-message-container" id="private-discussion-container"></div>
+                    <textarea
+                        class="form-control"
+                        id="writeTextArea"
+                        rows="3"
+                        placeholder="Write your message..."
+                    ></textarea>
                 </div>
-                <div class="container-fluid chat-message-container" id="discussion-container"></div>
-                <div class="container-fluid chat-input-container">
-                    <div class="container-fluid chat-write-message">
-                        <textarea
-                            class="form-control"
-                            id="writeTextArea"
-                            rows="3"
-                            placeholder="Write your message..."
-                        ></textarea>
+            </div>
+            <div id="support"></div>
+            <div id="middle-button"></div>
+            <div id="bottom-button">
+                <div class="numpad-line">
+                    <svg id="up" viewBox="0 0 200 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                        <polygon points="-20,0 220,0 200,80 0,80" style="fill:black;stroke-width:1" />
+                        <line
+                            x1="40%"
+                            y1="60%"
+                            x2="60%"
+                            y2="60%"
+                            style="stroke:white;stroke-width:2; stroke-opacity:1"
+                        />
+                    </svg>
+                </div>
+                <div class="numpad-line arrow">
+                    <svg
+                        id="back-btn"
+                        viewBox="0 0 200 100"
+                        width="100%"
+                        height="100%"
+                        xmlns="http://www.w3.org/2000/svg"
+                        preserveAspectRatio="none"
+                    >
+                        <polygon points="0,-50 150,0 150,100 0,150" style="fill:black;stroke-width:1" />
+                        <line
+                            x1="50%"
+                            y1="50%"
+                            x2="70%"
+                            y2="50%"
+                            style="stroke:white;stroke-width:2; stroke-opacity:1"
+                        />
+                    </svg>
+                    <svg
+                        id="send-btn"
+                        viewBox="0 -10 150 80"
+                        width="100%"
+                        height="100%"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <polygon points="0,0 100,0 100,60 0,60" style="fill:black;stroke-width:1" />
+                    </svg>
+                    <svg
+                        id="right"
+                        viewBox="0 0 200 100"
+                        width="100%"
+                        height="100%"
+                        xmlns="http://www.w3.org/2000/svg"
+                        preserveAspectRatio="none"
+                    >
+                        <polygon points="0,0 150,-50 150,150 0,100" style="fill:black;stroke-width:1" />
+                        <line
+                            x1="5%"
+                            y1="50%"
+                            x2="25%"
+                            y2="50%"
+                            style="stroke:white;stroke-width:2; stroke-opacity:1"
+                        />
+                    </svg>
+                </div>
+                <div class="numpad-line">
+                    <svg id="call" viewBox="0 0 200 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                        <polygon points="0,50 200,0 200,100 0,100" style="fill:black;stroke-width:1" />
+                    </svg>
+                    <svg id="down" viewBox="0 0 200 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                        <polygon points="0,20 200,20 220,100 -20,100" style="fill:black;stroke-width:1" />
+                        <line
+                            x1="40%"
+                            y1="30%"
+                            x2="60%"
+                            y2="30%"
+                            style="stroke:white;stroke-width:2; stroke-opacity:1"
+                        />
+                    </svg>
+                    <svg
+                        id="end-call"
+                        viewBox="0 0 200 100"
+                        width="100%"
+                        height="100%"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <polygon points="0,0 200,50 200,100 0,100" style="fill:black;stroke-width:1" />
+                    </svg>
+                </div>
+                <div class="numpad-line">
+                    <div class="numpad-buttons">
+                        <div class="kana">あ</div>
+                        <div class="number">1</div>
+                        <div class="letter">A<br />B<br />C</div>
                     </div>
-                    <div class="container-fluid chat-button-message">
-                        <button type="button" class="btn btn-primary invite-button">Invite</button>
-                        <button type="button" class="btn btn-primary send-button" id="send-btn">Send</button>
+                    <div class="numpad-buttons">
+                        <div class="kana">か</div>
+                        <div class="number">2</div>
+                        <div class="letter">D<br />E<br />F</div>
+                    </div>
+                    <div class="numpad-buttons">
+                        <div class="kana">さ</div>
+                        <div class="number">3</div>
+                        <div class="letter">G<br />H<br />I</div>
+                    </div>
+                </div>
+                <div class="numpad-line">
+                    <div class="numpad-buttons">
+                        <div class="kana">た</div>
+                        <div class="number">4</div>
+                        <div class="letter">J<br />K<br />L</div>
+                    </div>
+                    <div class="numpad-buttons">
+                        <div class="kana">な</div>
+                        <div class="number">5</div>
+                        <div class="letter">M<br />N<br />O</div>
+                    </div>
+                    <div class="numpad-buttons">
+                        <div class="kana">は</div>
+                        <div class="number">6</div>
+                        <div class="letter">P<br />Q<br />R<br /></div>
+                    </div>
+                </div>
+                <div class="numpad-line">
+                    <div class="numpad-buttons">
+                        <div class="kana">ま</div>
+                        <div class="number">7</div>
+                        <div class="letter">S<br />T<br />U</div>
+                    </div>
+                    <div class="numpad-buttons">
+                        <div class="kana">や</div>
+                        <div class="number">8</div>
+                        <div class="letter">V<br />W<br />X</div>
+                    </div>
+                    <div class="numpad-buttons">
+                        <div class="kana">こ</div>
+                        <div class="number">9</div>
+                        <div class="letter">Y<br />Z</div>
+                    </div>
+                </div>
+                <div class="numpad-line">
+                    <div class="numpad-buttons">
+                        <div class="kana">゛</div>
+                        <div class="number">*</div>
+                        <div class="letter">記<br />号</div>
+                    </div>
+                    <div class="numpad-buttons">
+                        <div class="kana">わ</div>
+                        <div class="number">0</div>
+                        <div class="letter">\\<br />°<br />-</div>
+                    </div>
+                    <div class="numpad-buttons">
+                        <div class="kana">←</div>
+                        <div class="number">#</div>
+                        <div class="letter">マ<br />ナ<br />|</div>
                     </div>
                 </div>
             </div>

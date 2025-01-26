@@ -217,18 +217,18 @@ def updateNickname(request: HttpRequest, id):
 
     return JsonResponse({})
 
-def invalid_user_id():
-    return JsonResponse({ "error": INVALID_USER_ID })
-
 @require_POST
 def getNickname(request: HttpRequest, id):
-    if id == "c" and request.user.is_authenticated:
+    if not request.user.is_authenticated:
+        return JsonResponse({ "error": NOT_AUTHENTICATED })
+
+    if id == "c":
         return JsonResponse({ "nickname": Player.objects.filter(user=request.user).first().nickname })
     else:
         p = Player.objects.filter(id=int(id)).first()
 
         if p is None:
-            return invalid_user_id()
+            return JsonResponse({ "error": INVALID_USER_ID })
 
         return JsonResponse({ "nickname": p.nickname })
 

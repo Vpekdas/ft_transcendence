@@ -225,8 +225,8 @@ class Pong(Game):
             self.player2.client = self.clients[1]
 
             # TODO: Remove
-            self.player1.client.ready = True
-            self.player2.client.ready = True
+            # self.player1.client.ready = True
+            # self.player2.client.ready = True
 
             self.time_started = time_secs()
         elif self.gamemode == "1v1":
@@ -246,6 +246,10 @@ class Pong(Game):
 
     def on_client_ready(self, client: Client, params):
         client.ready = True
+
+        if self.gamemode == "1v1local":
+            for client in self.clients:
+                client.ready = True
 
     async def on_unhandled_message(self, msg):
         pass

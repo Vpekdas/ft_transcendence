@@ -1093,18 +1093,49 @@ body::before {
     padding-top: 15px;
 }
 
-#test {
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    left: 0;
-    top: 0;
-}
-
 canvas {
     border: 1px solid red;
     height: 100%;
     width: 100%;
+}
+
+#pong-overlay {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+#pong-overlay .ui {
+    position: relative;
+    width: 60%;
+    
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    top: 50%;
+
+    text-align: center;
+    background-color: rgb(64 173 70 / 0.2);
+}
+
+#pong-overlay .ui.pre-game {
+    position: relative;
+    width: 60%;
+    
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    top: 50%;
+
+    text-align: center;
+    background-color: rgba(56, 56, 56, 0.2);
+    border-radius: .7em;
+}
+
+#pong-overlay .ui.pre-game ul {
+    list-style-type: none;
+}
+
+#pong-overlay .ui.pre-game .power-up {
+    display: inline-block;
 }
 
 /* DELETE ACCOUNT */

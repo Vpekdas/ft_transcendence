@@ -659,7 +659,7 @@ window.onpopstate = async () => {
 };
 
 /**
- * @param {Node} node
+ * @param {VirtualNode} node
  * @returns {string}
  */
 function elementToString(node) {

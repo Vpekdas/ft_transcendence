@@ -4,11 +4,10 @@
 - [x] Web: Bootstrap (minor) by [@Vpekdas]
 - [x] Web: PostgreSQL (minor) by [@FirePh0enix]
 
-- [ ] User: Standard user (major) by [@FirePh0enix]
-- [ ] User: Remote Authentication (42) (major) by [@FirePh0enix] ([#11])
+- [x] User: Standard user (major) by [@FirePh0enix]
+- [x] User: Remote Authentication (42) (major) by [@FirePh0enix] ([#11])
 
 - [x] Gameplay: Remote players (major)
-- [ ] Gameplay: Multiple player (major)
 - [ ] Gameplay: Another game (major)
 - [ ] Gameplay: Game customization (minor) ([#9])
 - [ ] Gameplay: Live Chat (major) by [@Lebronen]
@@ -24,12 +23,11 @@
 - [ ] Accessibility: Expanding Browser Compatibility (minor) by [@Vpekdas]
 - [ ] Accessibility: Multiple language (minor) by [@Vpekdas]
 
-- [ ] Server-Side Pong: API (major) by [@FirePh0enix] ([#10])
-- [ ] Server-Side Pong: CLI (major) by [@FirePh0enix] ([#10])
-
 ## Missing modules
 
 - Web: Blockchain (major)
+
+- Gameplay: Multiple player (major)
 
 - Cybersec: Implement WAF/ModSecurity with Hardened Configuration and HashiCorp Vault for Secrets Management (major)
 
@@ -40,6 +38,9 @@
 - Accessibility: Support on all device (minor)
 - Accessibility: Visually Impaired Users (minor)
 - Accessibility: Server-side rendering (minor)
+
+- Server-Side Pong: API (major)
+- Server-Side Pong: CLI (major)
 
 [@FirePh0enix]: https://github.com/FirePh0enix
 [@Vpekdas]: https://github.com/Vpekdas

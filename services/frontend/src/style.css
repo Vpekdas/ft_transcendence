@@ -1138,6 +1138,14 @@ canvas {
     display: inline-block;
 }
 
+/* CHESS GAME */
+
+#chess {
+    height: 90vh;
+    width: 100vw;
+    padding-top: 15px;
+}
+
 /* DELETE ACCOUNT */
 
 .delete-modal-overlay {

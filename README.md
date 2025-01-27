@@ -12,7 +12,6 @@
 - [ ] Gameplay: Game customization (minor) ([#9])
 - [ ] Gameplay: Live Chat (major) by [@Lebronen]
 
-- [ ] AI: AI Opponent (major) ([#13])
 - [ ] AI: User stats (minor)
 
 - [ ] Cybersec: GPDR (minor) ?
@@ -28,6 +27,8 @@
 - Web: Blockchain (major)
 
 - Gameplay: Multiple player (major)
+
+- AI: AI Opponent (major)
 
 - Cybersec: Implement WAF/ModSecurity with Hardened Configuration and HashiCorp Vault for Secrets Management (major)
 

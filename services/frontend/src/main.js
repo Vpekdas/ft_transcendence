@@ -21,6 +21,7 @@ import Test from "./views/Test";
 import { registerAll } from "./micro.generated";
 import Social from "./views/Social";
 import Callback from "./views/Callback";
+import Chess from "./views/Chess";
 
 defineRouter({
     routes: [
@@ -33,6 +34,7 @@ defineRouter({
         { path: "/duck", view: Clicker },
         { path: "/solar-system", view: SolarSystem },
         { path: "/play/pong/[id=$[a-zA-Z0-9]+$]", view: Pong },
+        { path: "/play/chess/[id=$[a-zA-Z0-9]+$]", view: Chess },
         { path: "/matchmake/pong", view: PongMatchmake },
         { path: "/tournament/[id=$[a-zA-Z0-9]+$]", view: Tournament },
         { path: "/create-tournament", view: CreateTournament },

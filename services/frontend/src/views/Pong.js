@@ -238,49 +238,8 @@ export default class Pong extends Component {
 
     /* UI */
 
-    preGameMenu() {
-        const [ready, _] = this.use("ready", false);
-
-        return /* HTML */ `
-            <div class="ui pre-game">
-                <ul>
-                    <li><span>Choose your power-ups</span></li>
-                    <li>
-                        <div class="power-up"><button class="power-up-select" name="a">A</button></div>
-                        <div class="power-up"><button class="power-up-select" name="b">B</button></div>
-                        <div class="power-up"><button class="power-up-select" name="c">C</button></div>
-                    </li>
-                    <li>
-                        <button ${ready() ? "disabled" : ""} class="ready-btn">Ready</button>
-                    </li>
-                </ul>
-            </div>
-        `;
-    }
-
-    preMenuHooks() {
-        const overlay = document.getElementById("pong-overlay");
-        const [_, setReady] = this.usePersistent("ready", false);
-        const [powerUps, setPowerUps] = this.usePersistent("powerUps", []);
-
-        overlay.querySelector(".ready-btn").addEventListener("click", async (event) => {
-            setReady(true);
-            this.ws.send(JSON.stringify({ type: "ready", params: { power_ups: powerUps() } }));
-        });
-
-        overlay.querySelectorAll(".power-up-select").forEach((c) =>
-            c.addEventListener("click", (event) => {
-                console.log(event.target.getAttribute("name"));
-            })
-        );
-    }
-
     async init() {
         const id = params.get("id");
-
-        const [_, setReady] = this.usePersistent("ready", false);
-
-        setReady(false);
 
         /** @type {THREE.Scene} */
         this.scene = new THREE.Scene();
@@ -308,8 +267,6 @@ export default class Pong extends Component {
         // this.scene.add(lava.scene);
 
         this.onready = () => {
-            this.preMenuHooks();
-
             this.textMesh.scale.set(0.01, 0.01, 0.01);
             this.scene.add(this.textMesh);
 
@@ -337,12 +294,12 @@ export default class Pong extends Component {
             camera.position.z = 20;
             camera.position.y = -15;
 
-            // if (!DEBUG) {
-            controls.enableRotate = false;
-            controls.enablePan = false;
-            controls.enableZoom = false;
-            controls.enableDamping = false;
-            // }
+            if (!DEBUG) {
+                controls.enableRotate = false;
+                controls.enablePan = false;
+                controls.enableZoom = false;
+                controls.enableDamping = false;
+            }
 
             renderer.setAnimationLoop(() => {
                 for (let [key, value] of this.boxes) {
@@ -396,10 +353,6 @@ export default class Pong extends Component {
 
     render() {
         let ui = "";
-
-        if (!this.gameStarted) {
-            ui = this.preGameMenu();
-        }
 
         return /* HTML */ ` <HomeNavBar />
             <div id="pong">

@@ -64,10 +64,18 @@ export default class Chatbox extends Component {
         return /* HTML */ ` <circle r="5" cx="22" cy="18" fill="${color}" /> `;
     }
 
+    findSender(userlist, actualName) {
+        for (let i = 0; i < userlist.length; i++) {
+            if (userlist[i] !== actualName) {
+                return userlist[i];
+            }
+        }
+    }
+
     async init() {
         // Each user will add different channels to their map if they are included in the userlist.
         this.wsChannelMap = new Map();
-
+        this.chattingWith = "";
         this.info = await post("/api/player/c/nickname").then((res) => res.json());
 
         this.usersList = await fetchApi("/api/usersList", {})
@@ -79,11 +87,25 @@ export default class Chatbox extends Component {
             const chatContainer = document.getElementById("chat-container");
             const personContainer = document.getElementById("person-container");
 
+            // Load all registered user on phone.
+            for (let i = 0; i < this.usersList.length; i++) {
+                if (this.usersList[i].nickname !== this.info.nickname) {
+                    this.addNewPerson(personContainer, this.usersList[i].nickname, "/img/Outer-Wilds/Giants-Deep.png");
+                }
+            }
+
             const persons = document.querySelectorAll(".person");
             persons.forEach((person) => {
                 person.addEventListener("click", () => {
                     chatContainer.style.display = "flex";
                     personContainer.style.display = "none";
+                    this.chattingWith = person.querySelector(".chat-profile-name").innerHTML;
+
+                    // TODO: Load discussion history.
+                    // TODO: Create a channel only if 2 person are not linked by a channel yet.
+                    this.generalWs.send(
+                        JSON.stringify({ type: "create_channel", userlist: [this.info.nickname, this.chattingWith] })
+                    );
                 });
             });
 
@@ -102,97 +124,81 @@ export default class Chatbox extends Component {
             // Connect to a global WS, everybody is in there. For now there should be only channel creation type event.
             // So all channel requests are sent in general, each user listens to the general channel and checks if he is in the userlist.
             // If it's the case, then he will add the dedicated WS with the URL and listen to it too.
+            const channelInfo = { channelUrl: "general", personName: "" };
+            this.generalWs = new WebSocket(`wss://${getOriginNoProtocol()}/ws/chat/general`);
+            this.wsChannelMap.set(this.generalWs, channelInfo);
 
             // TODO (1): Since everybody checks the list, I must code a security in the backend to ensure that
             // TODO (1): If the person is not in the list, he should not be connected to the WS channel.
             // TODO (1): The function will probably take an user ID and channel name in the backend.
-            const generalWs = new WebSocket(`wss://${getOriginNoProtocol()}/ws/chat/general`);
-            this.wsChannelMap.set(generalWs, "general");
-
             // This is a sort of main loop, creation of channels comes here. Of course, messages are sent in the generated channel.
-            generalWs.onmessage = async (event) => {
+            this.generalWs.onmessage = async (event) => {
                 const data = JSON.parse(event.data);
 
                 if (data.type === "channel_created") {
                     for (let i = 0; i < data.userlist.length; i++) {
                         // Check if the user is in the list. If it's the case, then add to his channel map.
+
                         if (data.userlist[i] === this.info.nickname) {
                             const newChannelUrl = `wss://${getOriginNoProtocol()}/ws/chat/${data.channel_name}`;
                             const newWs = new WebSocket(newChannelUrl);
-                            this.wsChannelMap.set(newWs, data.channel_name);
 
-                            // Simulating the first person.
-                            if (this.info.nickname === "plouf") {
-                                newWs.onopen = async () => {
-                                    newWs.send(
-                                        JSON.stringify({
-                                            type: "send_message",
-                                            content: "hello, my name is " + this.info.nickname,
-                                            sender: this.info.nickname,
-                                            channel_name: data.channel_name,
-                                            timestamp: "",
-                                        })
-                                    );
-                                };
-                            }
+                            const sender = this.findSender(data.userlist, this.info.nickname);
+                            const channelInfo = { channelUrl: data.channel_name, personName: sender };
+                            this.wsChannelMap.set(newWs, channelInfo);
+
+                            newWs.onopen = async () => {};
                         }
                     }
                 }
 
                 // Iterating through all listening channels.
-                for (const [ws, channelName] of this.wsChannelMap.entries()) {
+                for (const [ws, channelInfo] of this.wsChannelMap.entries()) {
                     ws.onmessage = (event) => {
                         const data = JSON.parse(event.data);
-
-                        console.log(data);
 
                         if (data.type === "chat_message") {
                             const message = data.message;
                             const sender = data.sender;
 
-                            if (sender !== this.info.nickname) {
-                                this.addNewPerson(personContainer, sender, "/img/Outer-Wilds/Giants-Deep.png");
-                            }
-
-                            const chatPersonList = document.querySelectorAll(".person");
-                            if (!this.isPersonAlreadyInList(chatPersonList, sender)) {
-                                this.addNewPerson(personContainer, sender, "/img/Outer-Wilds/Giants-Deep.png");
-                            }
-
                             this.addNewMessage(privateDiscussionContainer, sender, message);
                         }
                     };
-
-                    // Simulating the second person.
-                    if (channelName !== "general" && this.info.nickname !== "plouf") {
-                        ws.onopen = async () => {
-                            ws.send(
-                                JSON.stringify({
-                                    type: "send_message",
-                                    content: "oh hello i m ploufy",
-                                    sender: this.info.nickname,
-                                    channel_name: data.channel_name,
-                                    timestamp: "",
-                                })
-                            );
-                        };
-                    }
                 }
             };
 
             const sendBtn = document.getElementById("send-btn");
 
-            // For testing purposes, when I click, I send a channel creation with a userlist.
             sendBtn.addEventListener("click", () => {
-                const generalWs = Array.from(this.wsChannelMap.keys()).find(
-                    (ws) => this.wsChannelMap.get(ws) === "general"
-                );
-                generalWs.send(
-                    JSON.stringify({
-                        type: "create_channel",
-                        userlist: [this.info.nickname, "ploufy"],
-                    })
-                );
+                const msg = document.getElementById("writeTextArea").value;
+
+                let ws = null;
+                let channelName = null;
+
+                // FInd the ws and channel_name for specified person.
+                for (const [key, channelInfo] of this.wsChannelMap.entries()) {
+                    if (channelInfo.personName === this.chattingWith) {
+                        ws = key;
+                        channelName = channelInfo.channelUrl;
+                        break;
+                    }
+                }
+
+                if (ws) {
+                    ws.send(
+                        JSON.stringify({
+                            type: "send_message",
+                            content: msg,
+                            sender: this.info.nickname,
+                            channel_name: channelName,
+                            timestamp: "",
+                        })
+                    );
+                }
+                // TODO: warning if ws not found.
+
+                // Clear the input area.
+                document.getElementById("writeTextArea").value = "";
             });
 
             const backBtn = document.getElementById("back-btn");

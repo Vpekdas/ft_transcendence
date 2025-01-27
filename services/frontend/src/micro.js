@@ -31,6 +31,7 @@ export class Component {
         this.onready = undefined;
         /** @type {Map<string, any>} */
         this.stores = new Map();
+        this.deferedCallbacks = [];
     }
 
     /**
@@ -99,6 +100,10 @@ export class Component {
             },
         ];
     }
+
+    defer(callback) {
+        this.deferedCallbacks.push(callback);
+    }
 }
 
 /**
@@ -142,9 +147,9 @@ class VirtualNode {
 
     async mount() {}
 
-    clean() {
+    async unmount() {
         for (let child of this.children) {
-            child.clean();
+            await child.unmount();
         }
     }
 
@@ -235,7 +240,15 @@ class VirtualNodeComponent extends VirtualNode {
         this.parseInnerHTML();
     }
 
-    clean() {
+    async unmount() {
+        for (let child of this.children) {
+            await child.unmount();
+        }
+
+        for (let deferedCallback of this.component.deferedCallbacks) {
+            await deferedCallback();
+        }
+
         this.component.clean();
     }
 
@@ -785,7 +798,7 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
 
         // console.log(newElement, oldElement);
 
-        oldNode.clean();
+        await oldNode.unmount();
         parentElement.replaceChild(newElement, oldElement);
 
         // console.log("replacing", oldString, "with", newString);
@@ -819,7 +832,7 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
             let oldNode2 = oldNode.children.at(index);
             let oldElement2 = oldElement.childNodes.item(index);
 
-            oldNode2.clean();
+            await oldNode2.unmount();
 
             // console.log("removing ", oldElement2);
             oldElement.removeChild(oldElement2);

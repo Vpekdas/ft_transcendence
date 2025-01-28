@@ -72,6 +72,81 @@ export default class Chatbox extends Component {
         }
     }
 
+    // Ensure that a request of channel creation is done only if there is no common channel between 2 person.
+    doesHaveCommonChannel() {
+        for (const [key, channelInfo] of this.wsChannelMap.entries()) {
+            if (channelInfo.personName === this.chattingWith) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Event listener for each WS.
+    listenToWebSocketChannels() {
+        for (const [ws, channelInfo] of this.wsChannelMap.entries()) {
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+
+                console.log(data);
+
+                if (data.type === "channel_created") {
+                    for (let i = 0; i < data.userlist.length; i++) {
+                        // Check if the user is in the list. If it's the case, then add to his channel map.
+                        if (data.userlist[i] === this.info.nickname) {
+                            const newChannelUrl = `wss://${getOriginNoProtocol()}/ws/chat/${data.channel_name}`;
+                            const newWs = new WebSocket(newChannelUrl);
+
+                            const sender = this.findSender(data.userlist, this.info.nickname);
+                            this.chattingWith = sender;
+
+                            const channelInfo = { channelUrl: data.channel_name, personName: sender };
+                            this.wsChannelMap.set(newWs, channelInfo);
+
+                            newWs.onopen = () => {
+                                // Ensure that connection is established before listening for an event.
+                                // If I don't wait onopen, message cannot be sent.
+                                this.listenToWebSocketChannels();
+                            };
+                        }
+                    }
+                }
+
+                if (data.type === "chat_message") {
+                    const message = data.message;
+                    const sender = data.sender;
+
+                    let discussion = document.getElementById("private-discussion-" + this.chattingWith);
+
+                    this.addNewMessage(discussion, sender, message);
+                }
+            };
+        }
+    }
+
+    createDiscussionContainer(chattingWith) {
+        const discussionContainer = document.createElement("div");
+        discussionContainer.className = "container-fluid chat-message-container";
+        discussionContainer.id = "private-discussion-" + chattingWith;
+
+        this.chatContainer.insertBefore(discussionContainer, this.writeArea);
+
+        discussionContainer.style.display = "none";
+    }
+
+    // Hide all discussions except the one that the user is actually on.
+    showDiscussion() {
+        const discussions = document.querySelectorAll(".container-fluid.chat-message-container");
+
+        discussions.forEach((discussion) => {
+            discussion.style.display = "none";
+        });
+
+        const discussionToShow = document.getElementById("private-discussion-" + this.chattingWith);
+
+        discussionToShow.style.display = "flex";
+    }
+
     async init() {
         // Each user will add different channels to their map if they are included in the userlist.
         this.wsChannelMap = new Map();
@@ -82,30 +157,38 @@ export default class Chatbox extends Component {
             .then((res) => res.json())
             .catch((err) => {});
 
-        this.onready = () => {
-            const privateDiscussionContainer = document.getElementById("private-discussion-container");
-            const chatContainer = document.getElementById("chat-container");
+        this.onready = async () => {
+            this.chatContainer = document.getElementById("chat-container");
+            this.writeArea = document.getElementById("writeTextArea");
             const personContainer = document.getElementById("person-container");
 
             // Load all registered user on phone.
+            // TODO: Load discussion history.
+
             for (let i = 0; i < this.usersList.length; i++) {
                 if (this.usersList[i].nickname !== this.info.nickname) {
                     this.addNewPerson(personContainer, this.usersList[i].nickname, "/img/Outer-Wilds/Giants-Deep.png");
+                    this.createDiscussionContainer(this.usersList[i].nickname);
                 }
             }
 
             const persons = document.querySelectorAll(".person");
             persons.forEach((person) => {
                 person.addEventListener("click", () => {
-                    chatContainer.style.display = "flex";
+                    this.chatContainer.style.display = "flex";
                     personContainer.style.display = "none";
                     this.chattingWith = person.querySelector(".chat-profile-name").innerHTML;
 
-                    // TODO: Load discussion history.
-                    // TODO: Create a channel only if 2 person are not linked by a channel yet.
-                    this.generalWs.send(
-                        JSON.stringify({ type: "create_channel", userlist: [this.info.nickname, this.chattingWith] })
-                    );
+                    this.showDiscussion();
+
+                    if (!this.doesHaveCommonChannel()) {
+                        this.generalWs.send(
+                            JSON.stringify({
+                                type: "create_channel",
+                                userlist: [this.info.nickname, this.chattingWith],
+                            })
+                        );
+                    }
                 });
             });
 
@@ -132,59 +215,28 @@ export default class Chatbox extends Component {
             // TODO (1): If the person is not in the list, he should not be connected to the WS channel.
             // TODO (1): The function will probably take an user ID and channel name in the backend.
             // This is a sort of main loop, creation of channels comes here. Of course, messages are sent in the generated channel.
-            this.generalWs.onmessage = async (event) => {
-                const data = JSON.parse(event.data);
-
-                if (data.type === "channel_created") {
-                    for (let i = 0; i < data.userlist.length; i++) {
-                        // Check if the user is in the list. If it's the case, then add to his channel map.
-
-                        if (data.userlist[i] === this.info.nickname) {
-                            const newChannelUrl = `wss://${getOriginNoProtocol()}/ws/chat/${data.channel_name}`;
-                            const newWs = new WebSocket(newChannelUrl);
-
-                            const sender = this.findSender(data.userlist, this.info.nickname);
-                            const channelInfo = { channelUrl: data.channel_name, personName: sender };
-                            this.wsChannelMap.set(newWs, channelInfo);
-
-                            newWs.onopen = async () => {};
-                        }
-                    }
-                }
-
-                // Iterating through all listening channels.
-                for (const [ws, channelInfo] of this.wsChannelMap.entries()) {
-                    ws.onmessage = (event) => {
-                        const data = JSON.parse(event.data);
-
-                        if (data.type === "chat_message") {
-                            const message = data.message;
-                            const sender = data.sender;
-
-                            this.addNewMessage(privateDiscussionContainer, sender, message);
-                        }
-                    };
-                }
+            this.generalWs.onopen = () => {
+                this.listenToWebSocketChannels();
             };
 
             const sendBtn = document.getElementById("send-btn");
 
             sendBtn.addEventListener("click", () => {
-                const msg = document.getElementById("writeTextArea").value;
+                const msg = this.writeArea.value;
 
                 let ws = null;
                 let channelName = null;
 
                 // FInd the ws and channel_name for specified person.
                 for (const [key, channelInfo] of this.wsChannelMap.entries()) {
-                    if (channelInfo.personName === this.chattingWith) {
+                    if (channelInfo.personName === this.chattingWith && channelInfo.personName) {
                         ws = key;
                         channelName = channelInfo.channelUrl;
                         break;
                     }
                 }
 
-                if (ws) {
+                if (ws && channelName) {
                     ws.send(
                         JSON.stringify({
                             type: "send_message",
@@ -194,17 +246,18 @@ export default class Chatbox extends Component {
                             timestamp: "",
                         })
                     );
+                } else {
+                    console.warn("cannot send message, ws and channel name not found.");
                 }
-                // TODO: warning if ws not found.
 
                 // Clear the input area.
-                document.getElementById("writeTextArea").value = "";
+                this.writeArea.value = "";
             });
 
             const backBtn = document.getElementById("back-btn");
 
             backBtn.addEventListener("click", () => {
-                chatContainer.style.display = "none";
+                this.chatContainer.style.display = "none";
                 personContainer.style.display = "flex";
             });
         };
@@ -219,7 +272,6 @@ export default class Chatbox extends Component {
                 </ul>
                 <div class="container-fluid chat-container" id="chat-container">
                     <div class="container-fluid chat-header" id="actual-chat-header"></div>
-                    <div class="container-fluid chat-message-container" id="private-discussion-container"></div>
                     <textarea
                         class="form-control"
                         id="writeTextArea"

@@ -80,38 +80,67 @@ const validPositions = [
     "H8",
 ];
 
+const tileSize = 3.95;
+
+/**
+ * Shorthand position (e. "A1") to world position { x, y, z }.
+ *
+ * @returns {{x: number, y: number, z: number}}
+ */
+function shorthandToWorld(pos) {
+    /** @type {number} */
+    const letter = pos.toUpperCase().charCodeAt(0);
+    /** @type {number} */
+    const num = parseInt(pos[1]);
+
+    // -2.0 + -4.0 * 3
+
+    const c = (x) => -tileSize / 2 + -tileSize * 3 + tileSize * x;
+
+    let x = c(letter - "A".charCodeAt(0));
+    let y = 0;
+    let z = c(8 - num);
+
+    return { x: x, y: y, z: z };
+}
+
+/**
+ * @returns {{x: number, z: number}}
+ */
+function worldToCoords(pos) {
+    const c = (x) => Math.floor(x / tileSize) + 4;
+    const coords = { x: c(pos.x), z: 7 - c(pos.z) };
+
+    if (coords.x < 0 || coords.x > 7 || coords.z < 0 || coords.z > 7) {
+        return null;
+    }
+
+    return coords;
+}
+
+function worldToShorthand(pos) {
+    const coords = worldToCoords(pos);
+
+    if (!coords) {
+        return null;
+    }
+
+    return String.fromCharCode(coords.x + "A".charCodeAt(0)) + (coords.z + 1);
+}
+
+function shorthandToIndex(pos) {
+    /** @type {number} */
+    const letter = pos.toUpperCase().charCodeAt(0);
+    /** @type {number} */
+    const num = parseInt(pos[1]);
+
+    let x = letter - "A".charCodeAt(0);
+    let y = 8 - num;
+
+    return x + y * 8;
+}
+
 export default class Chess extends Component {
-    convertPos(pos) {
-        /** @type {number} */
-        const letter = pos.toUpperCase().charCodeAt(0);
-        /** @type {number} */
-        const num = parseInt(pos[1]);
-
-        const tileSize = 3.95;
-
-        // -2.0 + -4.0 * 3
-
-        const c = (x) => -tileSize / 2 + -tileSize * 3 + tileSize * x;
-
-        let x = c(letter - "A".charCodeAt(0));
-        let y = 0;
-        let z = c(8 - num);
-
-        return { x: x, y: y, z: z };
-    }
-
-    convertPosToIndex(pos) {
-        /** @type {number} */
-        const letter = pos.toUpperCase().charCodeAt(0);
-        /** @type {number} */
-        const num = parseInt(pos[1]);
-
-        let x = letter - "A".charCodeAt(0);
-        let y = 8 - num;
-
-        return x + y * 8;
-    }
-
     placePiece(type, pos, color) {
         const model = this.models.get(type).clone(true);
 
@@ -125,7 +154,7 @@ export default class Chess extends Component {
             offsetZ: model.position.z,
         };
 
-        const coords = this.convertPos(pos);
+        const coords = shorthandToWorld(pos);
         model.position.x = model.userData.offsetX + coords.x;
         model.position.y = model.userData.offsetY + coords.y;
         model.position.z = model.userData.offsetZ + coords.z;
@@ -139,7 +168,7 @@ export default class Chess extends Component {
 
         this.scene.add(model);
 
-        this.board[this.convertPosToIndex(pos)] = model;
+        this.board[shorthandToIndex(pos)] = model;
     }
 
     placeBoard() {
@@ -182,21 +211,21 @@ export default class Chess extends Component {
         this.placePiece("rook", "H8", "black");
 
         // Place debug boxes to each tiles
-        for (let pos of validPositions) {
-            const box = this.debuggingBox(this.convertPos(pos), 3.95, 0.5, 3.95);
+        // for (let pos of validPositions) {
+        //     const box = this.debuggingBox(this.convertPos(pos), 3.95, 0.5, 3.95);
 
-            box.name = "Tile-" + pos;
-            box.object.position.y = -3.4;
+        //     box.name = "Tile-" + pos;
+        //     box.object.position.y = -3.4;
 
-            box.userData = { pos: pos };
+        //     box.userData = { pos: pos };
 
-            this.scene.add(box);
-            this.boxes.push(box);
-        }
+        //     this.scene.add(box);
+        //     this.boxes.push(box);
+        // }
     }
 
     moveTo(piece, pos) {
-        const coords = this.convertPos(pos);
+        const coords = shorthandToWorld(pos);
         piece.position.x = piece.userData.offsetX + coords.x;
         piece.position.y = piece.userData.offsetY + coords.y;
         piece.position.z = piece.userData.offsetZ + coords.z;
@@ -227,7 +256,6 @@ export default class Chess extends Component {
 
         this.fbxLoader = new FBXLoader();
 
-        this.boxes = [];
         /** @type {Map<string, THREE.Object3D>} */
         this.models = new Map();
 
@@ -309,27 +337,30 @@ export default class Chess extends Component {
                 this.raycaster.setFromCamera(new THREE.Vector2(x, y), camera);
                 const objects = this.raycaster.intersectObjects(this.scene.children);
 
-                const tile = objects.find((value) => value.object.name.startsWith("Tile-"));
-                const pieceMesh = objects.find((value) => value.object.parent.name.startsWith("Piece-"));
+                const piece = objects.find((value) => value.object.parent.name.startsWith("Piece"));
+                const chessBoard = objects.find((value) => value.object.name == "Chess_Board");
+
+                // console.log(objects);
 
                 let pos = undefined;
 
-                if (pieceMesh) {
-                    pos = pieceMesh.object.parent.userData.pos;
-                } else if (tile) {
-                    pos = tile.object.userData.pos;
+                if (piece && piece != this.pieceInMove) {
+                    pos = piece.object.parent.userData.pos;
+                } else if (chessBoard) {
+                    pos = worldToShorthand({ x: chessBoard.point.x, z: chessBoard.point.z });
                 }
 
-                console.log(objects);
-                console.log(pos);
+                // console.log(objects);
+                // console.log(pos);
 
                 if (pos) {
-                    const index = this.convertPosToIndex(pos);
+                    const index = shorthandToIndex(pos);
                     const pieceAtPos = this.board[index];
 
                     if (this.pieceInMove == null) {
                         if (pieceAtPos != null && pieceAtPos.userData.owned) {
                             this.pieceInMove = pieceAtPos;
+                            console.log("moving piece", pieceAtPos.name);
                         }
                     } else {
                         // TODO: Check if the move is valid, ...
@@ -337,7 +368,7 @@ export default class Chess extends Component {
                         if (pieceAtPos == null) {
                             const piece = this.pieceInMove;
 
-                            this.board[this.convertPosToIndex(this.pieceInMove.userData.pos)] = undefined;
+                            this.board[shorthandToIndex(this.pieceInMove.userData.pos)] = undefined;
                             this.board[index] = piece;
 
                             this.pieceInMove = null;
@@ -346,10 +377,39 @@ export default class Chess extends Component {
                             this.moveTo(piece, pos);
                         } else if (pieceAtPos != null && pieceAtPos.userData.owned) {
                             this.pieceInMove = pieceAtPos;
+                            console.log("moving piece", pieceAtPos.name);
                         }
                     }
+                }
+            });
+
+            c.addEventListener("pointermove", (event) => {
+                const x = (event.clientX / window.innerWidth) * 2 - 1;
+                const y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+                this.raycaster.setFromCamera(new THREE.Vector2(x, y), camera);
+                const objects = this.raycaster.intersectObjects(this.scene.children);
+
+                const piece = objects.find((value) => value.object.parent.name.startsWith("Piece"));
+                const chessBoard = objects.find((value) => value.object.name == "Chess_Board");
+
+                // console.log(objects);
+
+                let pos = undefined;
+
+                if (piece && piece != this.pieceInMove) {
+                    pos = piece.object.parent.userData.pos;
+                } else if (chessBoard) {
+                    pos = worldToShorthand({ x: chessBoard.point.x, z: chessBoard.point.z });
+                }
+
+                if (pos) {
+                    const worldPos = shorthandToWorld(pos);
+                    this.box.object.position.x = worldPos.x;
+                    this.box.object.position.z = worldPos.z;
+                    this.box.visible = true;
                 } else {
-                    console.log("outside the board");
+                    this.box.visible = false;
                 }
             });
 
@@ -375,10 +435,15 @@ export default class Chess extends Component {
 
             this.placeBoard();
 
+            // Place a box which will be use to highlight the current tile
+            {
+                this.box = this.debuggingBox(shorthandToWorld("D4"), 3.95, 6.0, 3.95);
+                this.box.object.position.y = -0.595;
+                this.scene.add(this.box);
+            }
+
             renderer.setAnimationLoop(() => {
-                for (let box of this.boxes) {
-                    box.update();
-                }
+                this.box.update();
 
                 controls.update();
                 renderer.render(this.scene, camera);

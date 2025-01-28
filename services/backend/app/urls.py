@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path
 
 from app import views
-from .ws import PongClientConsumer, TournamentConsumer, PongMatchmakeConsumer, ChatConsumer
+from .ws import PongClientConsumer, ChessClientConsumer, TournamentConsumer, PongMatchmakeConsumer, ChatConsumer
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -52,6 +52,7 @@ urlpatterns = [
 
 websocket_urlpatterns = [
     path('ws/pong/<str:id>', PongClientConsumer.as_asgi()),
+    path('ws/chess/<str:id>', ChessClientConsumer.as_asgi()),
     path('ws/matchmake/pong', PongMatchmakeConsumer.as_asgi()),
     path('ws/tournament/<str:id>', TournamentConsumer.as_asgi()),
     path('ws/chat/<str:room_name>', ChatConsumer.as_asgi())

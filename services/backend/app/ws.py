@@ -2,6 +2,7 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
 from .gameframework import log, sync, GameManager, TournamentManager, Client
 from .pong import PongManager
+from .chess import ChessGame
 from .models import Player, Tournament
 from .utils import hash_weak_password
 from .errors import *
@@ -87,6 +88,26 @@ class PongClientConsumer(AsyncWebsocketConsumer):
                     if client is not None: self.game.on_client_ready(client, data["params"])
                 else:
                     await self.game.on_unhandled_message(data)
+        except json.JSONDecodeError:
+            pass
+
+chess_game = ChessGame()
+
+class ChessClientConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        pass
+
+    async def receive(self, text_data):
+        try:
+            data = json.loads(text_data)
+
+            if "type" not in data:
+                return
+            
+            await chess_game.on_message(self, data)
         except json.JSONDecodeError:
             pass
 

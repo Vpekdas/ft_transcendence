@@ -201,20 +201,31 @@ export default class Chatbox extends Component {
         // Each user will add different channels to their map if they are included in the userlist.
         this.wsChannelMap = new Map();
         this.chattingWith = "";
-        this.info = await post("/api/player/c/nickname").then((res) => res.json());
-
-        this.usersList = await fetchApi("/api/usersList", {})
-            .then((res) => res.json())
-            .catch((err) => {});
 
         this.onready = async () => {
+            this.info = await post("/api/player/c/nickname").then((res) => res.json());
+
+            // Load userlist.
+            this.usersList = await fetchApi("/api/usersList", {})
+                .then((res) => res.json())
+                .catch((err) => {});
+
+            // ! Testing purpose for now. 
+            this.history = await fetchApi("/api/chat/ec8c5869-e1d4-4595-9263-bba2e6e62901", {})
+                .then((res) => {
+                    console.log("Fetched history data:", res.json());
+                    return res;
+                })
+                .catch((err) => {
+                    console.error("Error fetching history:", err);
+                });
+
             this.chatContainer = document.getElementById("chat-container");
             this.writeArea = document.getElementById("writeTextArea");
             const personContainer = document.getElementById("person-container");
 
             // Load all registered user on phone.
             // TODO: Load discussion history.
-
             for (let i = 0; i < this.usersList.length; i++) {
                 if (this.usersList[i].nickname !== this.info.nickname) {
                     this.addNewPerson(personContainer, this.usersList[i].nickname, "/img/Outer-Wilds/Giants-Deep.png");
@@ -298,6 +309,7 @@ export default class Chatbox extends Component {
                             type: "send_message",
                             content: msg,
                             sender: this.info.nickname,
+                            receiver: this.chattingWith,
                             channel_name: channelName,
                             timestamp: "",
                         })

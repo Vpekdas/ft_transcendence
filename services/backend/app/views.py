@@ -16,6 +16,7 @@ from django.db.models import Q
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import duck, Player, Tournament, PongGameResult, Chat, Message
 from .errors import *
@@ -630,3 +631,28 @@ def getMessages(request: HttpRequest, id):
 def getUsersList(request):
     users = Player.objects.all().values('nickname')
     return JsonResponse(list(users), safe=False)
+
+@csrf_exempt
+def get_chat_messages_by_channel_name(request, channel_name):
+    if request.method == 'GET':
+        try:
+            chat = Chat.objects.filter(channel_name=channel_name).first()
+            if not chat:
+                return JsonResponse({"error": "Chat not found"}, status=404)
+            print(f"Retrieved chat: {chat}")
+            messages = chat.messages.all().order_by('timestamp')
+            messages_data = [
+                {
+                    "content": message.content,
+                    "sender": message.sender.user.username,
+                    "receiver": message.receiver.user.username,
+                    "timestamp": message.timestamp
+                }
+                for message in messages
+            ]
+            print(f"Retrieved messages: {messages_data}")
+            return JsonResponse({"messages": messages_data}, safe=False)
+        except Chat.DoesNotExist:
+            print(f"Chat with channel_name {channel_name} not found")
+            return JsonResponse({"error": "Chat not found"}, status=404)
+    return JsonResponse({"error": "Invalid request method"}, status=400)

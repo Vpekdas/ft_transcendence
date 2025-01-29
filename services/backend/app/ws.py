@@ -3,7 +3,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
 from .gameframework import log, sync, GameManager, TournamentManager, Client
 from .pong import PongManager
 from .chess import ChessGame
-from .models import Player, Tournament
+from .models import Player, Tournament, Chat, Message
 from .utils import hash_weak_password
 from .errors import *
 from asgiref.sync import sync_to_async
@@ -158,7 +158,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.room_group_name = self.scope['url_route']['kwargs']['room_name']
         self.channel_name = self.channel_name
 
-        # Join room group
+        # Join room group.
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
@@ -166,11 +166,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
-        # Retrieve the Player instance
+        # Retrieve the Player instance.
         user = self.scope["user"]
         player = await sync_to_async(Player.objects.get)(user=user)
 
-        # Send the channelList to the frontend
+        # Send the channelList to the frontend.
         await self.send(text_data=json.dumps({
             'type': 'channel_list',
             'channelList': player.channelList,
@@ -179,20 +179,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
     async def disconnect(self, close_code):
-        # Log the disconnection
+        # Log the disconnection.
         print(f"User {self.scope['user']} disconnected from {self.room_group_name}")
 
-        # Leave room group
+        # Leave room group.
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
         )
 
-        # Retrieve the Player instance
+        # Retrieve the Player instance.
         user = self.scope["user"]
         player = await sync_to_async(Player.objects.get)(user=user)
 
-        # Notify other clients about the disconnection
+        # Notify other clients about the disconnection.
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -201,7 +201,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
         )
 
-        # Save the updated Player instance
+        # Save the updated Player instance.
         await sync_to_async(player.save)()
 
     async def user_disconnected(self, event):
@@ -235,54 +235,80 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
         )
 
-        # Update the Player instance for each user in the userlist
+        # Update the Player instance for each user in the userlist.
         for username in userlist:
             user = await sync_to_async(get_user_model().objects.get)(username=username)
             player = await sync_to_async(Player.objects.get)(user=user)
     
-            # Find the other user in the userlist
+            # Find the other user in the userlist.
             other_user = next(u for u in userlist if u != username)
             other_user_instance = await sync_to_async(get_user_model().objects.get)(username=other_user)
             other_player = await sync_to_async(Player.objects.get)(user=other_user_instance)
     
-            # Append the new channel URL and the other user's nickname to the respective lists
+            # Append the new channel URL and the other user's nickname to the respective lists.
             player.channelList.append(new_channel_name)
             player.discussingWith.append(other_player.nickname)
     
-            # Save the updated Player instance
+            # Save the updated Player instance.
             await sync_to_async(player.save)()
 
 
-    # Handle channel creation request with a given userlist.
     async def channel_created(self, event):
         channel_name = event["channel_name"]
-        userlist = event["userlist"]
+        userlist = event["userlist"]    
+
+        # Retrieve the Player instances.
+        player1 = await sync_to_async(Player.objects.get)(nickname=userlist[0])
+        player2 = await sync_to_async(Player.objects.get)(nickname=userlist[1])
+
+        # Retrieve or create the chat instance.
+        chat, created = await sync_to_async(Chat.objects.get_or_create)(
+            player1=player1, player2=player2, channel_name=channel_name
+        )
 
         await self.send(text_data=json.dumps({
             "type": "channel_created",
             "channel_name": channel_name,
             "userlist": userlist
         }))
-
+    
     async def send_message(self, data):
-        message = data.get("content")
-        sender = data.get("sender")
-        channel_name = data.get("channel_name")  
-
-
+        message_text = data.get("content")
+        sender_username = data.get("sender")
+        receiver_username = data.get("receiver") 
+        channel_name = data.get("channel_name")
+    
+        # Retrieve the sender and receiver instances.
+        sender = await sync_to_async(Player.objects.get)(user__username=sender_username)
+        receiver = await sync_to_async(Player.objects.get)(user__username=receiver_username)
+    
+        # Retrieve or create the chat instance.
+        chat, created = await sync_to_async(Chat.objects.get_or_create)(
+            player1=sender, player2=receiver, channel_name=channel_name
+        )
+    
+        # Create a new Message instance.
+        message = await sync_to_async(Message.objects.create)(content=message_text, sender=sender, receiver=receiver)
+    
+        # Add the message to the chat.
+        await sync_to_async(chat.messages.add)(message)
+    
+        # Broadcast the message to the channel.
         await self.channel_layer.group_send(
             channel_name,
             {
                 "type": "chat_message",
-                "message": message,
-                "sender": sender,
-                "timestamp": ""  
+                "message": message_text,
+                "sender": sender_username,
+                "receiver": receiver_username,
+                "timestamp": "" 
             }
         )
 
     async def chat_message(self, event):
         message = event["message"]
         sender = event["sender"]
+        receiver = event["receiver"]
         timestamp = event["timestamp"]
 
         # Send message to WebSocket
@@ -290,5 +316,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             "type": "chat_message",
             "message": message,
             "sender": sender,
+            "receiver": receiver,
             "timestamp": timestamp
         }))

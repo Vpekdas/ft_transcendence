@@ -72,6 +72,11 @@ class Chat(models.Model):
     player1 = ForeignKey(Player, on_delete=models.CASCADE, related_name="chats_as_player1")
     player2 = ForeignKey(Player, on_delete=models.CASCADE, related_name="chats_as_player2")
     created_at = DateTimeField(auto_now_add=True)
+    channel_name = CharField(max_length=255, null=True, blank=True) 
+        
+    class Meta:
+        unique_together = ('player1', 'player2', 'channel_name')
+    
 
 # TODO: Maybe store the game data to replay it later ?
 

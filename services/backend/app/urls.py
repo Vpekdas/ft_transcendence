@@ -47,7 +47,8 @@ urlpatterns = [
     path('api/tournament/create', views.tournament_create),
 
     # Chat
-    path('api/usersList', views.getUsersList)
+    path('api/usersList', views.getUsersList),
+    path('api/chat/<str:channel_name>/', views.get_chat_messages_by_channel_name, name='get_chat_messages_by_channel_name'),
 ]
 
 websocket_urlpatterns = [

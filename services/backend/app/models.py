@@ -27,6 +27,10 @@ class Player(models.Model):
     friends = models.ManyToManyField("self", symmetrical=True, related_name="friend_set")
     blockedUsers = ArrayField(IntegerField(), default=list)
 
+    channelList = ArrayField(models.CharField(max_length=255), default=list)
+    discussingWith = ArrayField(models.CharField(max_length=255), default=list)
+
+
 class Tournament(models.Model):
     name = TextField()
     playerCount = IntegerField()

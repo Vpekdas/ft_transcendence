@@ -8,6 +8,7 @@ from .utils import hash_weak_password
 from .errors import *
 from asgiref.sync import sync_to_async
 from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 import uuid
 
@@ -165,12 +166,50 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
+        # Retrieve the Player instance
+        user = self.scope["user"]
+        player = await sync_to_async(Player.objects.get)(user=user)
+
+        # Send the channelList to the frontend
+        await self.send(text_data=json.dumps({
+            'type': 'channel_list',
+            'channelList': player.channelList,
+            'discussingWith': player.discussingWith
+            
+        }))
+
     async def disconnect(self, close_code):
+        # Log the disconnection
+        print(f"User {self.scope['user']} disconnected from {self.room_group_name}")
+
         # Leave room group
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
         )
+
+        # Retrieve the Player instance
+        user = self.scope["user"]
+        player = await sync_to_async(Player.objects.get)(user=user)
+
+        # Notify other clients about the disconnection
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'user_disconnected',
+                'message': f'User {user.username} has disconnected.'
+            }
+        )
+
+        # Save the updated Player instance
+        await sync_to_async(player.save)()
+
+    async def user_disconnected(self, event):
+        message = event['message']
+        await self.send(text_data=json.dumps({
+            'type': 'user_disconnected',
+            'message': message
+        }))
 
     async def receive(self, text_data):
         data = json.loads(text_data)
@@ -195,6 +234,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "userlist": userlist
             }
         )
+
+        # Update the Player instance for each user in the userlist
+        for username in userlist:
+            user = await sync_to_async(get_user_model().objects.get)(username=username)
+            player = await sync_to_async(Player.objects.get)(user=user)
+    
+            # Find the other user in the userlist
+            other_user = next(u for u in userlist if u != username)
+            other_user_instance = await sync_to_async(get_user_model().objects.get)(username=other_user)
+            other_player = await sync_to_async(Player.objects.get)(user=other_user_instance)
+    
+            # Append the new channel URL and the other user's nickname to the respective lists
+            player.channelList.append(new_channel_name)
+            player.discussingWith.append(other_player.nickname)
+    
+            # Save the updated Player instance
+            await sync_to_async(player.save)()
 
 
     # Handle channel creation request with a given userlist.

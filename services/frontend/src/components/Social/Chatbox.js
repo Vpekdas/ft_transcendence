@@ -88,7 +88,47 @@ export default class Chatbox extends Component {
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
 
-                console.log(data);
+                if (data.type === "channel_list") {
+                    for (let i = 0; i < data.channelList.length; i++) {
+                        const channelInfo = { channelUrl: data.channelList[i], personName: data.discussingWith[i] };
+
+                        const newChannelUrl = `wss://${getOriginNoProtocol()}/ws/chat/${data.channelList[i]}`;
+                        const newWs = new WebSocket(newChannelUrl);
+
+                        // Set event handlers for the new WebSocket
+                        newWs.onopen = () => {};
+
+                        newWs.onmessage = (event) => {
+                            const messageData = JSON.parse(event.data);
+                            console.log("channel_list | New WebSocket message received: ", messageData);
+
+                            if (messageData.type === "chat_message") {
+                                const message = messageData.message;
+                                const sender = messageData.sender;
+
+                                if (this.info.nickname !== sender) {
+                                    this.chattingWith = sender;
+                                }
+
+                                let discussion = document.getElementById("private-discussion-" + this.chattingWith);
+                                this.addNewMessage(discussion, sender, message);
+                            }
+                        };
+
+                        newWs.onerror = (event) => {
+                            console.error(`channel_list | WebSocket error for channel: ${data.channel_name}`, event);
+                        };
+
+                        newWs.onclose = (event) => {
+                            console.log(
+                                `channel_list | WebSocket connection closed for channel: ${data.channel_name}`,
+                                event
+                            );
+                        };
+
+                        this.wsChannelMap.set(newWs, channelInfo);
+                    }
+                }
 
                 if (data.type === "channel_created") {
                     for (let i = 0; i < data.userlist.length; i++) {
@@ -101,24 +141,34 @@ export default class Chatbox extends Component {
                             this.chattingWith = sender;
 
                             const channelInfo = { channelUrl: data.channel_name, personName: sender };
-                            this.wsChannelMap.set(newWs, channelInfo);
 
-                            newWs.onopen = () => {
-                                // Ensure that connection is established before listening for an event.
-                                // If I don't wait onopen, message cannot be sent.
-                                this.listenToWebSocketChannels();
+                            // Set event handlers for the new WebSocket
+                            newWs.onopen = () => {};
+
+                            newWs.onmessage = (event) => {
+                                const messageData = JSON.parse(event.data);
+                                console.log("channel_created | New WebSocket message received: ", messageData);
+
+                                if (messageData.type === "chat_message") {
+                                    const message = messageData.message;
+                                    const sender = messageData.sender;
+
+                                    let discussion = document.getElementById("private-discussion-" + this.chattingWith);
+                                    this.addNewMessage(discussion, sender, message);
+                                }
                             };
+
+                            newWs.onerror = (event) => {
+                                console.error(`WebSocket error for channel: ${data.channel_name}`, event);
+                            };
+
+                            newWs.onclose = (event) => {
+                                console.log(`WebSocket connection closed for channel: ${data.channel_name}`, event);
+                            };
+
+                            this.wsChannelMap.set(newWs, channelInfo);
                         }
                     }
-                }
-
-                if (data.type === "chat_message") {
-                    const message = data.message;
-                    const sender = data.sender;
-
-                    let discussion = document.getElementById("private-discussion-" + this.chattingWith);
-
-                    this.addNewMessage(discussion, sender, message);
                 }
             };
         }
@@ -207,7 +257,7 @@ export default class Chatbox extends Component {
             // Connect to a global WS, everybody is in there. For now there should be only channel creation type event.
             // So all channel requests are sent in general, each user listens to the general channel and checks if he is in the userlist.
             // If it's the case, then he will add the dedicated WS with the URL and listen to it too.
-            const channelInfo = { channelUrl: "general", personName: "" };
+            const channelInfo = { channelUrl: "general", personName: "general" };
             this.generalWs = new WebSocket(`wss://${getOriginNoProtocol()}/ws/chat/general`);
             this.wsChannelMap.set(this.generalWs, channelInfo);
 
@@ -215,8 +265,14 @@ export default class Chatbox extends Component {
             // TODO (1): If the person is not in the list, he should not be connected to the WS channel.
             // TODO (1): The function will probably take an user ID and channel name in the backend.
             // This is a sort of main loop, creation of channels comes here. Of course, messages are sent in the generated channel.
-            this.generalWs.onopen = () => {
+            this.generalWs.onopen = (event) => {
                 this.listenToWebSocketChannels();
+            };
+
+            this.generalWs.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+
+                console.log("generalWs: ", data);
             };
 
             const sendBtn = document.getElementById("send-btn");

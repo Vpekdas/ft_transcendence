@@ -7,80 +7,6 @@ import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
 import { Component } from "../micro";
 import { getOriginNoProtocol } from "../utils";
 
-const validPositions = [
-    "A1",
-    "A2",
-    "A3",
-    "A4",
-    "A5",
-    "A6",
-    "A7",
-    "A8",
-
-    "B1",
-    "B2",
-    "B3",
-    "B4",
-    "B5",
-    "B6",
-    "B7",
-    "B8",
-
-    "C1",
-    "C2",
-    "C3",
-    "C4",
-    "C5",
-    "C6",
-    "C7",
-    "C8",
-
-    "D1",
-    "D2",
-    "D3",
-    "D4",
-    "D5",
-    "D6",
-    "D7",
-    "D8",
-
-    "E1",
-    "E2",
-    "E3",
-    "E4",
-    "E5",
-    "E6",
-    "E7",
-    "E8",
-
-    "F1",
-    "F2",
-    "F3",
-    "F4",
-    "F5",
-    "F6",
-    "F7",
-    "F8",
-
-    "G1",
-    "G2",
-    "G3",
-    "G4",
-    "G5",
-    "G6",
-    "G7",
-    "G8",
-
-    "H1",
-    "H2",
-    "H3",
-    "H4",
-    "H5",
-    "H6",
-    "H7",
-    "H8",
-];
-
 const tileSize = 3.95;
 
 class Coords {
@@ -152,6 +78,7 @@ export default class Chess extends Component {
             offsetY: model.position.y,
             offsetZ: model.position.z,
             hasMoved: false,
+            availableMoves: [],
         };
 
         const worldPos = coords.toWorldPos();
@@ -162,7 +89,8 @@ export default class Chess extends Component {
         model.traverse((obj) => {
             if (obj.isMesh) {
                 /** @type {THREE.Mesh} */
-                obj.material = new THREE.MeshPhongMaterial({ color: color });
+                // obj.material = new THREE.MeshPhongMaterial({ color: color });
+                obj.material = new THREE.MeshToonMaterial({ color: color });
             }
         });
 
@@ -242,90 +170,7 @@ export default class Chess extends Component {
     }
 
     canMove(piece, pos) {
-        return this.getAvailableMoves(piece).includes(pos.toShorthand());
-    }
-
-    getAvailableMoves(piece) {
-        const type = piece.userData.type;
-        const color = piece.userData.color;
-        const hasMoved = piece.userData.hasMoved;
-        const coords = piece.userData.pos;
-
-        let moves = [];
-
-        if (type == "pawn") {
-            let sign;
-
-            if (color == "white") {
-                sign = 1;
-            } else if (color == "black") {
-                sign = -1;
-            }
-
-            if (
-                Coords.from(coords.x, coords.y - sign * 1).isValid() &&
-                this.get(coords.x, coords.y + sign * 1) == undefined
-            ) {
-                moves.push(Coords.from(coords.x, coords.y + sign * 1).toShorthand());
-            }
-
-            if (
-                !hasMoved &&
-                Coords.from(coords.x, coords.y - sign * 1).isValid() &&
-                Coords.from(coords.x, coords.y - sign * 2).isValid() &&
-                this.get(coords.x, coords.y + sign * 1) == undefined &&
-                this.get(coords.x, coords.y + sign * 2) == undefined
-            ) {
-                moves.push(Coords.from(coords.x, coords.y + sign * 2).toShorthand());
-            }
-
-            if (
-                Coords.from(coords.x - 1, coords.y + sign * 1).isValid() &&
-                this.get(coords.x + 1, coords.y + sign * 1) != undefined &&
-                !this.get(coords.x + 1, coords.y + sign * 1).userData.owned &&
-                this.get(coords.x + 1, coords.y + sign * 1).userData.type != "king"
-            ) {
-                moves.push(Coords.from(coords.x + 1, coords + sign * 1).toShorthand());
-            }
-
-            if (
-                Coords.from(coords.x - 1, coords.y - sign * 1).isValid() &&
-                this.get(coords.x - 1, coords.y - sign * 1) != undefined &&
-                !this.get(coords.x - 1, coords.y - sign * 1).userData.owned &&
-                this.get(coords.x + 1, coords.y - sign * 1).userData.type != "king"
-            ) {
-                moves.push(Coords.from(coords.x + 1, coords + sign * 1).toShorthand());
-            }
-        } else if (type == "knight") {
-            const possibleMoves = [
-                [-1, -2], // 1
-                [1, -2], // 2
-                [-1, 2], // 3
-                [1, 2], // 4
-                [-2, -1], // 5
-                [-2, 1], // 6
-                [2, -1], // 7
-                [2, 1], // 8
-            ];
-
-            for (let move of possibleMoves) {
-                const moveCoords = Coords.from(coords.x + move[0], coords.y + move[1]);
-
-                if (
-                    moveCoords.isValid() &&
-                    (this.get(moveCoords.x, moveCoords.y) == undefined ||
-                        (this.get(moveCoords.x, moveCoords.y) != undefined &&
-                            !this.get(moveCoords.x, moveCoords.y).userData.owned &&
-                            this.get(moveCoords.x, moveCoords.y).userData.type != "king"))
-                ) {
-                    moves.push(moveCoords.toShorthand());
-                }
-            }
-        }
-
-        console.log(moves);
-
-        return moves;
+        return piece.userData.availableMoves.includes(pos.toShorthand());
     }
 
     get(x, y) {
@@ -402,12 +247,6 @@ export default class Chess extends Component {
          */
         this.pieceInMove = null;
 
-        this.ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/chess/1`);
-
-        this.ws.onopen = () => {};
-
-        this.ws.onmessage = () => {};
-
         this.onready = async () => {
             const c = document.getElementById("chess");
 
@@ -481,7 +320,11 @@ export default class Chess extends Component {
                             piece.userData.pos = coords;
                             piece.userData.hasMoved = true;
                             this.moveTo(piece, coords);
-                        } else if (pieceAtPos != null && !pieceAtPos.userData.owned) {
+                        } else if (
+                            pieceAtPos != null &&
+                            !pieceAtPos.userData.owned &&
+                            this.canMove(this.pieceInMove, coords)
+                        ) {
                             const piece = this.pieceInMove;
                             const opponentPiece = pieceAtPos;
 
@@ -545,7 +388,7 @@ export default class Chess extends Component {
             camera.position.z = -25;
             camera.position.y = 20;
 
-            const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             this.scene.add(ambientLight);
 
             const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -574,6 +417,23 @@ export default class Chess extends Component {
                 controls.update();
                 renderer.render(this.scene, camera);
             });
+
+            // Open the websocket and do stuff with it.
+            this.ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/chess/1`);
+
+            this.ws.onopen = () => {};
+
+            this.ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                console.log(data);
+
+                if (data.type == "info" || data.type == "move" || data.type == "take") {
+                    for (let pieceData of data.info.pieces) {
+                        const coords = Coords.fromShorthand(pieceData.pos);
+                        this.board[coords.toIndex()].userData.availableMoves = pieceData.moves ? pieceData.moves : [];
+                    }
+                }
+            };
         };
     }
 

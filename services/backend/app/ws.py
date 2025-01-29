@@ -97,9 +97,10 @@ chess_game = ChessGame()
 class ChessClientConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.accept()
+        await chess_game.on_join(self)
 
     async def disconnect(self, close_code):
-        pass
+        await chess_game.on_quit(self)
 
     async def receive(self, text_data):
         try:
@@ -107,7 +108,7 @@ class ChessClientConsumer(AsyncWebsocketConsumer):
 
             if "type" not in data:
                 return
-            
+
             await chess_game.on_message(self, data)
         except json.JSONDecodeError:
             pass
@@ -175,7 +176,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'type': 'channel_list',
             'channelList': player.channelList,
             'discussingWith': player.discussingWith
-            
+
         }))
 
     async def disconnect(self, close_code):
@@ -239,23 +240,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
         for username in userlist:
             user = await sync_to_async(get_user_model().objects.get)(username=username)
             player = await sync_to_async(Player.objects.get)(user=user)
-    
+
             # Find the other user in the userlist.
             other_user = next(u for u in userlist if u != username)
             other_user_instance = await sync_to_async(get_user_model().objects.get)(username=other_user)
             other_player = await sync_to_async(Player.objects.get)(user=other_user_instance)
-    
+
             # Append the new channel URL and the other user's nickname to the respective lists.
             player.channelList.append(new_channel_name)
             player.discussingWith.append(other_player.nickname)
-    
+
             # Save the updated Player instance.
             await sync_to_async(player.save)()
 
 
     async def channel_created(self, event):
         channel_name = event["channel_name"]
-        userlist = event["userlist"]    
+        userlist = event["userlist"]
 
         # Retrieve the Player instances.
         player1 = await sync_to_async(Player.objects.get)(nickname=userlist[0])
@@ -271,28 +272,28 @@ class ChatConsumer(AsyncWebsocketConsumer):
             "channel_name": channel_name,
             "userlist": userlist
         }))
-    
+
     async def send_message(self, data):
         message_text = data.get("content")
         sender_username = data.get("sender")
-        receiver_username = data.get("receiver") 
+        receiver_username = data.get("receiver")
         channel_name = data.get("channel_name")
-    
+
         # Retrieve the sender and receiver instances.
         sender = await sync_to_async(Player.objects.get)(user__username=sender_username)
         receiver = await sync_to_async(Player.objects.get)(user__username=receiver_username)
-    
+
         # Retrieve or create the chat instance.
         chat, created = await sync_to_async(Chat.objects.get_or_create)(
             player1=sender, player2=receiver, channel_name=channel_name
         )
-    
+
         # Create a new Message instance.
         message = await sync_to_async(Message.objects.create)(content=message_text, sender=sender, receiver=receiver)
-    
+
         # Add the message to the chat.
         await sync_to_async(chat.messages.add)(message)
-    
+
         # Broadcast the message to the channel.
         await self.channel_layer.group_send(
             channel_name,
@@ -301,7 +302,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "message": message_text,
                 "sender": sender_username,
                 "receiver": receiver_username,
-                "timestamp": "" 
+                "timestamp": ""
             }
         )
 

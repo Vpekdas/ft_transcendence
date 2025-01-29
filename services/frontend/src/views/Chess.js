@@ -4,6 +4,12 @@ import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import { FontLoader } from "three/addons/loaders/FontLoader.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+import { OutlinePass } from "three/addons/postprocessing/OutlinePass.js";
+import { FXAAShader } from "three/addons/shaders/FXAAShader.js";
 import { Component } from "../micro";
 import { getOriginNoProtocol } from "../utils";
 
@@ -98,46 +104,6 @@ export default class Chess extends Component {
         this.board[coords.toIndex()] = model;
     }
 
-    placeBoard() {
-        // white pieces
-        this.placePiece("pawn", "A2", "white");
-        this.placePiece("pawn", "B2", "white");
-        this.placePiece("pawn", "C2", "white");
-        this.placePiece("pawn", "D2", "white");
-        this.placePiece("pawn", "E2", "white");
-        this.placePiece("pawn", "F2", "white");
-        this.placePiece("pawn", "G2", "white");
-        this.placePiece("pawn", "H2", "white");
-
-        this.placePiece("rook", "A1", "white");
-        this.placePiece("knight", "B1", "white");
-        this.placePiece("bishop", "C1", "white");
-        this.placePiece("king", "D1", "white");
-        this.placePiece("queen", "E1", "white");
-        this.placePiece("bishop", "F1", "white");
-        this.placePiece("knight", "G1", "white");
-        this.placePiece("rook", "H1", "white");
-
-        // black pieces
-        this.placePiece("pawn", "A7", "black");
-        this.placePiece("pawn", "B7", "black");
-        this.placePiece("pawn", "C7", "black");
-        this.placePiece("pawn", "D7", "black");
-        this.placePiece("pawn", "E7", "black");
-        this.placePiece("pawn", "F7", "black");
-        this.placePiece("pawn", "G7", "black");
-        this.placePiece("pawn", "H7", "black");
-
-        this.placePiece("rook", "A8", "black");
-        this.placePiece("knight", "B8", "black");
-        this.placePiece("bishop", "C8", "black");
-        this.placePiece("king", "D8", "black");
-        this.placePiece("queen", "E8", "black");
-        this.placePiece("bishop", "F8", "black");
-        this.placePiece("knight", "G8", "black");
-        this.placePiece("rook", "H8", "black");
-    }
-
     /**
      * @param {THREE.Object3D} piece
      * @param {Coords} coords
@@ -190,51 +156,215 @@ export default class Chess extends Component {
         this.ws.send(JSON.stringify({ type: "move", from: piece.userData.pos.toShorthand(), to: pos }));
     }
 
+    onClick(event) {
+        const x = (event.clientX / window.innerWidth) * 2 - 1;
+        const y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        this.raycaster.setFromCamera(new THREE.Vector2(x, y), this.camera);
+        const objects = this.raycaster.intersectObjects(this.scene.children);
+
+        const piece = objects.find((value) => value.object.parent.name.startsWith("Piece"));
+        const chessBoard = objects.find((value) => value.object.name == "Chess_Board");
+
+        // console.log(objects);
+
+        /** @type {Coords} */
+        let coords = undefined;
+
+        if (piece && piece != this.pieceInMove) {
+            coords = piece.object.parent.userData.pos;
+            console.log(coords);
+        } else if (chessBoard) {
+            coords = Coords.fromWorldPos({ x: chessBoard.point.x, z: chessBoard.point.z });
+            console.log(coords);
+        }
+
+        if (coords) {
+            const index = coords.toIndex();
+            const pieceAtPos = this.board[index];
+
+            if (this.pieceInMove == null) {
+                if (pieceAtPos != null && pieceAtPos.userData.owned) {
+                    const availableMoveIndices = pieceAtPos.userData.availableMoves.map((value) =>
+                        Coords.fromShorthand(value).toIndex()
+                    );
+
+                    this.pieceInMove = pieceAtPos;
+
+                    this.selectionOutlinePass.selectedObjects = [this.pieceInMove];
+                    this.hoverOutlinePass.selectedObjects = [];
+                    this.moveOutlinePass.selectedObjects = this.tiles.filter((value, index) =>
+                        availableMoveIndices.includes(index)
+                    );
+                }
+            } else {
+                if (pieceAtPos == null && this.canMove(this.pieceInMove, coords)) {
+                    const piece = this.pieceInMove;
+
+                    this.board[this.pieceInMove.userData.pos.toIndex()] = undefined;
+                    this.board[index] = piece;
+
+                    this.pieceInMove = null;
+
+                    this.move(piece, coords.toShorthand());
+
+                    piece.userData.pos = coords;
+                    piece.userData.hasMoved = true;
+                    this.moveTo(piece, coords);
+
+                    this.selectionOutlinePass.selectedObjects = [];
+                    this.moveOutlinePass.selectedObjects = [];
+                } else if (pieceAtPos != null && !pieceAtPos.userData.owned && this.canMove(this.pieceInMove, coords)) {
+                    const piece = this.pieceInMove;
+                    const opponentPiece = pieceAtPos;
+
+                    this.board[this.pieceInMove.userData.pos.toIndex()] = undefined;
+                    this.board[index] = piece;
+
+                    this.pieceInMove = null;
+
+                    this.move(piece, coords.toShorthand());
+
+                    piece.userData.pos = coords;
+                    piece.userData.hasMoved = true;
+                    this.moveTo(piece, coords);
+
+                    this.scene.remove(opponentPiece);
+
+                    this.selectionOutlinePass.selectedObjects = [];
+                    this.moveOutlinePass.selectedObjects = [];
+                } else if (pieceAtPos != null && pieceAtPos.userData.owned) {
+                    this.pieceInMove = pieceAtPos;
+                    this.selectionOutlinePass.selectedObjects = [this.pieceInMove];
+
+                    const availableMoveIndices = pieceAtPos.userData.availableMoves.map((value) =>
+                        Coords.fromShorthand(value).toIndex()
+                    );
+
+                    this.moveOutlinePass.selectedObjects = this.tiles.filter((value, index) =>
+                        availableMoveIndices.includes(index)
+                    );
+                }
+            }
+        }
+    }
+
+    onPointerMove(event) {
+        const x = (event.clientX / window.innerWidth) * 2 - 1;
+        const y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        this.raycaster.setFromCamera(new THREE.Vector2(x, y), this.camera);
+        const objects = this.raycaster.intersectObjects(this.scene.children);
+
+        const piece = objects.find((value) => value.object.parent.name.startsWith("Piece"));
+        const chessBoard = objects.find((value) => value.object.name == "Chess_Board");
+
+        if (this.box == null) {
+            return;
+        }
+
+        /** @type {Coords} */
+        let coords = undefined;
+
+        if (piece && piece != this.pieceInMove) {
+            coords = piece.object.parent.userData.pos;
+        } else if (chessBoard) {
+            coords = Coords.fromWorldPos({ x: chessBoard.point.x, z: chessBoard.point.z });
+        }
+
+        if (coords) {
+            const piece = this.get(coords.x, coords.y);
+
+            if (piece && this.pieceInMove != piece) {
+                this.hoverOutlinePass.selectedObjects = [piece];
+            } else {
+                this.hoverOutlinePass.selectedObjects = [];
+            }
+        } else {
+            this.box.visible = false;
+        }
+    }
+
     async init() {
         this.scene = new THREE.Scene();
 
+        {
+            /** @type {Array<THREE.Object3D>} */
+            this.tiles = new Array(8 * 8);
+            const material = new THREE.MeshBasicMaterial({ color: "#ffffff" });
+
+            for (var x = 0; x < 8; x++) {
+                for (var y = 0; y < 8; y++) {
+                    const tile = new THREE.Mesh(new THREE.PlaneGeometry(tileSize, tileSize, 1, 1));
+                    const worldPos = Coords.from(x, y).toWorldPos();
+
+                    tile.position.x = worldPos.x;
+                    tile.position.y = -3.5;
+                    tile.position.z = worldPos.z;
+
+                    tile.rotation.x = -Math.PI / 2;
+
+                    tile.material = material;
+
+                    this.scene.add(tile);
+                    this.tiles[x + y * 8] = tile;
+                }
+            }
+        }
+
         this.fbxLoader = new FBXLoader();
 
-        /** @type {Map<string, THREE.Object3D>} */
-        this.models = new Map();
+        // Load models
+        {
+            /** @type {Map<string, THREE.Object3D>} */
+            this.models = new Map();
 
-        this.models.set("pawn", await this.loadModelWithParams("/models/chess/PawnMesh.fbx", 0.01, { y: -2.2, z: 0 }));
-        this.models.set(
-            "rook",
-            await this.loadModelWithParams("/models/chess/RookMesh.fbx", 0.02, { y: 0.0, z: -5.45 })
-        );
+            this.models.set(
+                "pawn",
+                await this.loadModelWithParams("/models/chess/PawnMesh.fbx", 0.01, { y: -2.2, z: 0 })
+            );
+            this.models.set(
+                "rook",
+                await this.loadModelWithParams("/models/chess/RookMesh.fbx", 0.02, { y: 0.0, z: -5.45 })
+            );
 
-        this.models.set(
-            "knight",
-            await this.loadModelWithParams(
-                "/models/chess/KnightMesh.fbx",
-                0.012,
-                { y: -1.4, z: 0 },
-                { x: Math.PI / 2, y: 0, z: Math.PI / 2 }
-            )
-        );
-        this.models.set(
-            "bishop",
-            await this.loadModelWithParams(
-                "/models/chess/BishopMesh.fbx",
-                0.012,
-                { y: -1.0, z: 0 },
-                { x: Math.PI / 2, y: 0, z: Math.PI / 2 }
-            )
-        );
-        this.models.set(
-            "king",
-            await this.loadModelWithParams("/models/chess/KingMesh.fbx", 0.015, { y: -0.5, z: 0 }, { y: Math.PI / 2 })
-        );
-        this.models.set(
-            "queen",
-            await this.loadModelWithParams(
-                "/models/chess/QueenMesh.fbx",
-                0.015,
-                { y: -1.0, z: 0 },
-                { x: Math.PI / 2, y: 0, z: Math.PI / 2 }
-            )
-        );
+            this.models.set(
+                "knight",
+                await this.loadModelWithParams(
+                    "/models/chess/KnightMesh.fbx",
+                    0.012,
+                    { y: -1.4, z: 0 },
+                    { x: Math.PI / 2, y: 0, z: Math.PI / 2 }
+                )
+            );
+            this.models.set(
+                "bishop",
+                await this.loadModelWithParams(
+                    "/models/chess/BishopMesh.fbx",
+                    0.012,
+                    { y: -1.0, z: 0 },
+                    { x: Math.PI / 2, y: 0, z: Math.PI / 2 }
+                )
+            );
+            this.models.set(
+                "king",
+                await this.loadModelWithParams(
+                    "/models/chess/KingMesh.fbx",
+                    0.015,
+                    { y: -0.5, z: 0 },
+                    { y: Math.PI / 2 }
+                )
+            );
+            this.models.set(
+                "queen",
+                await this.loadModelWithParams(
+                    "/models/chess/QueenMesh.fbx",
+                    0.015,
+                    { y: -1.0, z: 0 },
+                    { x: Math.PI / 2, y: 0, z: Math.PI / 2 }
+                )
+            );
+        }
 
         this.raycaster = new THREE.Raycaster();
 
@@ -250,7 +380,7 @@ export default class Chess extends Component {
         this.onready = async () => {
             const c = document.getElementById("chess");
 
-            let camera = new THREE.PerspectiveCamera(70, c.clientWidth / c.clientHeight, 0.1, 1000);
+            this.camera = new THREE.PerspectiveCamera(70, c.clientWidth / c.clientHeight, 0.1, 1000);
             let renderer = new THREE.WebGLRenderer();
 
             renderer.setSize(c.clientWidth, c.clientHeight);
@@ -260,133 +390,25 @@ export default class Chess extends Component {
             window.addEventListener(
                 "resize",
                 () => {
+                    this.camera.aspect = c.clientWidth / c.clientHeight;
+                    this.camera.updateProjectionMatrix();
+
                     renderer.setSize(c.clientWidth, c.clientHeight);
-                    camera.aspect = c.clientWidth / c.clientHeight;
-                    camera.updateProjectionMatrix();
+                    this.composer.setSize(c.clientWidth, c.clientHeight);
+
+                    this.fxaaPass.uniforms["resolution"].value.set(1 / window.innerWidth, 1 / window.innerHeight);
                 },
                 false
             );
 
             c.appendChild(renderer.domElement);
 
-            c.addEventListener("click", (event) => {
-                const x = (event.clientX / window.innerWidth) * 2 - 1;
-                const y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-                this.raycaster.setFromCamera(new THREE.Vector2(x, y), camera);
-                const objects = this.raycaster.intersectObjects(this.scene.children);
-
-                const piece = objects.find((value) => value.object.parent.name.startsWith("Piece"));
-                const chessBoard = objects.find((value) => value.object.name == "Chess_Board");
-
-                // console.log(objects);
-
-                /** @type {Coords} */
-                let coords = undefined;
-
-                if (piece && piece != this.pieceInMove) {
-                    coords = piece.object.parent.userData.pos;
-                    console.log(coords);
-                } else if (chessBoard) {
-                    coords = Coords.fromWorldPos({ x: chessBoard.point.x, z: chessBoard.point.z });
-                    console.log(coords);
-                }
-
-                // console.log(objects);
-                // console.log(pos);
-
-                if (coords) {
-                    const index = coords.toIndex();
-                    const pieceAtPos = this.board[index];
-
-                    if (this.pieceInMove == null) {
-                        if (pieceAtPos != null && pieceAtPos.userData.owned) {
-                            this.pieceInMove = pieceAtPos;
-                            console.log("moving piece", pieceAtPos.name);
-                        }
-                    } else {
-                        // TODO: Check if the move is valid, ...
-
-                        if (pieceAtPos == null && this.canMove(this.pieceInMove, coords)) {
-                            const piece = this.pieceInMove;
-
-                            this.board[this.pieceInMove.userData.pos.toIndex()] = undefined;
-                            this.board[index] = piece;
-
-                            this.pieceInMove = null;
-
-                            this.move(piece, coords.toShorthand());
-
-                            piece.userData.pos = coords;
-                            piece.userData.hasMoved = true;
-                            this.moveTo(piece, coords);
-                        } else if (
-                            pieceAtPos != null &&
-                            !pieceAtPos.userData.owned &&
-                            this.canMove(this.pieceInMove, coords)
-                        ) {
-                            const piece = this.pieceInMove;
-                            const opponentPiece = pieceAtPos;
-
-                            this.board[this.pieceInMove.userData.pos.toIndex()] = undefined;
-                            this.board[index] = piece;
-
-                            this.pieceInMove = null;
-
-                            this.move(piece, coords);
-
-                            piece.userData.pos = coords;
-                            piece.userData.hasMoved = true;
-                            this.moveTo(piece, coords);
-
-                            this.scene.remove(opponentPiece);
-                        } else if (pieceAtPos != null && pieceAtPos.userData.owned) {
-                            this.pieceInMove = pieceAtPos;
-                            console.log("moving piece", pieceAtPos.name);
-                        }
-                    }
-                }
-            });
-
-            c.addEventListener("pointermove", (event) => {
-                const x = (event.clientX / window.innerWidth) * 2 - 1;
-                const y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-                this.raycaster.setFromCamera(new THREE.Vector2(x, y), camera);
-                const objects = this.raycaster.intersectObjects(this.scene.children);
-
-                const piece = objects.find((value) => value.object.parent.name.startsWith("Piece"));
-                const chessBoard = objects.find((value) => value.object.name == "Chess_Board");
-
-                if (this.box == null) {
-                    return;
-                }
-
-                /** @type {Coords} */
-                let coords = undefined;
-
-                if (piece && piece != this.pieceInMove) {
-                    coords = piece.object.parent.userData.pos;
-                } else if (chessBoard) {
-                    coords = Coords.fromWorldPos({ x: chessBoard.point.x, z: chessBoard.point.z });
-                }
-
-                if (coords) {
-                    const worldPos = coords.toWorldPos();
-                    this.box.object.position.x = worldPos.x;
-                    this.box.object.position.z = worldPos.z;
-                    this.box.visible = true;
-                } else {
-                    this.box.visible = false;
-                }
-            });
-
             renderer.setClearColor("blue");
 
-            const controls = new OrbitControls(camera, c);
+            const controls = new OrbitControls(this.camera, c);
 
-            camera.position.z = -25;
-            camera.position.y = 20;
+            this.camera.position.z = -25;
+            this.camera.position.y = 20;
 
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             this.scene.add(ambientLight);
@@ -401,8 +423,6 @@ export default class Chess extends Component {
             board.receiveShadow = true;
             this.scene.add(board);
 
-            this.placeBoard();
-
             // Place a box which will be use to highlight the current tile
             {
                 this.box = this.debuggingBox(Coords.fromShorthand("D4").toWorldPos(), 3.95, 6.0, 3.95);
@@ -411,12 +431,73 @@ export default class Chess extends Component {
                 this.scene.add(this.box);
             }
 
+            // Add an outline pass
+            {
+                this.composer = new EffectComposer(renderer);
+
+                const renderPass = new RenderPass(this.scene, this.camera);
+                this.composer.addPass(renderPass);
+
+                // Outline when a piece is hovered
+                this.hoverOutlinePass = new OutlinePass(
+                    new THREE.Vector2(c.clientWidth, c.clientHeight),
+                    this.scene,
+                    this.camera
+                );
+                this.hoverOutlinePass.visibleEdgeColor.set("orange");
+                this.hoverOutlinePass.hiddenEdgeColor.set("orange");
+                this.hoverOutlinePass.edgeThickness = 1.0;
+                this.hoverOutlinePass.edgeGlow = 0.0;
+                this.hoverOutlinePass.edgeStrength = 10.0;
+                this.hoverOutlinePass.overlayMaterial.blending = THREE.CustomBlending;
+                this.composer.addPass(this.hoverOutlinePass);
+
+                // Outline when a piece is selected
+                this.selectionOutlinePass = new OutlinePass(
+                    new THREE.Vector2(c.clientWidth, c.clientHeight),
+                    this.scene,
+                    this.camera
+                );
+                this.selectionOutlinePass.visibleEdgeColor.set("orange");
+                this.selectionOutlinePass.hiddenEdgeColor.set("orange");
+                this.selectionOutlinePass.edgeThickness = 1.0;
+                this.selectionOutlinePass.edgeGlow = 0.0;
+                this.selectionOutlinePass.edgeStrength = 10.0;
+                this.selectionOutlinePass.overlayMaterial.blending = THREE.CustomBlending;
+                this.composer.addPass(this.selectionOutlinePass);
+
+                // Outline for available moves
+                this.moveOutlinePass = new OutlinePass(
+                    new THREE.Vector2(c.clientWidth, c.clientHeight),
+                    this.scene,
+                    this.camera
+                );
+                this.moveOutlinePass.visibleEdgeColor.set("green");
+                this.moveOutlinePass.hiddenEdgeColor.set("green");
+                this.moveOutlinePass.edgeThickness = 1.0;
+                this.moveOutlinePass.edgeGlow = 0.0;
+                this.moveOutlinePass.edgeStrength = 10.0;
+                this.moveOutlinePass.overlayMaterial.blending = THREE.CustomBlending;
+                this.composer.addPass(this.moveOutlinePass);
+
+                const outputPass = new OutputPass();
+                this.composer.addPass(outputPass);
+
+                this.fxaaPass = new ShaderPass(FXAAShader);
+                this.fxaaPass.uniforms["resolution"].value.set(1 / c.clientWidth, 1 / c.clientHeight);
+                this.composer.addPass(this.fxaaPass);
+            }
+
             renderer.setAnimationLoop(() => {
                 this.box.update();
 
                 controls.update();
-                renderer.render(this.scene, camera);
+                renderer.render(this.scene, this.camera);
+                this.composer.render();
             });
+
+            c.addEventListener("click", (event) => this.onClick(event));
+            c.addEventListener("pointermove", (event) => this.onPointerMove(event));
 
             // Open the websocket and do stuff with it.
             this.ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/chess/1`);
@@ -427,7 +508,14 @@ export default class Chess extends Component {
                 const data = JSON.parse(event.data);
                 console.log(data);
 
-                if (data.type == "info" || data.type == "move" || data.type == "take") {
+                if (data.type == "info") {
+                    for (let pieceData of data.info.pieces) {
+                        this.placePiece(pieceData.type, pieceData.pos, pieceData.color);
+
+                        const coords = Coords.fromShorthand(pieceData.pos);
+                        this.board[coords.toIndex()].userData.availableMoves = pieceData.moves ? pieceData.moves : [];
+                    }
+                } else if (data.type == "move" || data.type == "take") {
                     for (let pieceData of data.info.pieces) {
                         const coords = Coords.fromShorthand(pieceData.pos);
                         this.board[coords.toIndex()].userData.availableMoves = pieceData.moves ? pieceData.moves : [];

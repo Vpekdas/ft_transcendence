@@ -95,6 +95,15 @@ export default class Chatbox extends Component {
                         const newChannelUrl = `wss://${getOriginNoProtocol()}/ws/chat/${data.channelList[i]}`;
                         const newWs = new WebSocket(newChannelUrl);
 
+                        this.history = fetchApi("/api/chat/" + data.channelList[i], {})
+                            .then((res) => {
+                                console.log("Fetched history data:", res.json());
+                                return res;
+                            })
+                            .catch((err) => {
+                                console.error("Error fetching history:", err);
+                            });
+
                         // Set event handlers for the new WebSocket
                         newWs.onopen = () => {};
 
@@ -210,15 +219,7 @@ export default class Chatbox extends Component {
                 .then((res) => res.json())
                 .catch((err) => {});
 
-            // ! Testing purpose for now. 
-            this.history = await fetchApi("/api/chat/ec8c5869-e1d4-4595-9263-bba2e6e62901", {})
-                .then((res) => {
-                    console.log("Fetched history data:", res.json());
-                    return res;
-                })
-                .catch((err) => {
-                    console.error("Error fetching history:", err);
-                });
+            // ! Testing purpose for now.
 
             this.chatContainer = document.getElementById("chat-container");
             this.writeArea = document.getElementById("writeTextArea");

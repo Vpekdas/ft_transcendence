@@ -282,7 +282,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Retrieve the sender and receiver instances.
         sender = await sync_to_async(Player.objects.get)(user__username=sender_username)
         receiver = await sync_to_async(Player.objects.get)(user__username=receiver_username)
-
+    
+    # ! Create a chat with channel_name only !!! Sender and receiver can switch depending.
         # Retrieve or create the chat instance.
         chat, created = await sync_to_async(Chat.objects.get_or_create)(
             player1=sender, player2=receiver, channel_name=channel_name

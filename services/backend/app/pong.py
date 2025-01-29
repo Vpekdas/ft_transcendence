@@ -194,15 +194,7 @@ class Pong(Game):
                 # Save the result of the game in the database
                 await self.save_results()
         elif self.state == State.IN_LOBBY:
-            n = 0
-
-            for client in self.clients:
-                if client.ready:
-                    n += 1
-            
-            if n == len(self.clients):
-                self.state = State.STARTED
-        
+            self.state = State.STARTED
         await self.broadcast({ "type": "update", "bodies": self.scene.to_dict(), "scores": [ self.player1.score, self.player2.score ] })
 
         for event in self.scene.backlog:

@@ -264,7 +264,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         # Retrieve or create the chat instance.
         chat, created = await sync_to_async(Chat.objects.get_or_create)(
-            player1=player1, player2=player2, channel_name=channel_name
+            channel_name=channel_name
         )
 
         await self.send(text_data=json.dumps({
@@ -286,11 +286,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
     # ! Create a chat with channel_name only !!! Sender and receiver can switch depending.
         # Retrieve or create the chat instance.
         chat, created = await sync_to_async(Chat.objects.get_or_create)(
-            player1=sender, player2=receiver, channel_name=channel_name
+            channel_name=channel_name
         )
 
         # Create a new Message instance.
-        message = await sync_to_async(Message.objects.create)(content=message_text, sender=sender, receiver=receiver)
+        message = await sync_to_async(Message.objects.create)(content=message_text, timestamp="", sender=sender, receiver=receiver)
 
         # Add the message to the chat.
         await sync_to_async(chat.messages.add)(message)

@@ -1108,7 +1108,7 @@ canvas {
 #pong-overlay .ui {
     position: relative;
     width: 60%;
-    
+
     left: 50%;
     transform: translateX(-50%) translateY(-50%);
     top: 50%;
@@ -1120,14 +1120,14 @@ canvas {
 #pong-overlay .ui.pre-game {
     position: relative;
     width: 60%;
-    
+
     left: 50%;
     transform: translateX(-50%) translateY(-50%);
     top: 50%;
 
     text-align: center;
     background-color: rgba(56, 56, 56, 0.2);
-    border-radius: .7em;
+    border-radius: 0.7em;
 }
 
 #pong-overlay .ui.pre-game ul {
@@ -2802,7 +2802,9 @@ ow-system[labels="false"] ow-name {
     margin-left: auto;
 }
 
-.status {
+.circle-status {
+    display: flex;
+    position: relative;
     height: 100%;
     width: 100%;
 }

@@ -18,17 +18,29 @@ export default class Chatbox extends Component {
         statusContainer.classList.add("status-container");
 
         const svg = document.createElement("svg");
-        svg.classList.add("status");
-        svg.setAttribute("height", "100");
-        svg.setAttribute("width", "100");
         svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        svg.setAttribute("viewBox", "0 0 40 40");
+        svg.setAttribute("width", "40");
+        svg.setAttribute("height", "40");
+
         svg.innerHTML = this.createStatus(true);
 
         statusContainer.appendChild(svg);
         li.appendChild(img);
         li.appendChild(span);
         li.appendChild(statusContainer);
+
         personContainer.appendChild(li);
+    }
+
+    // TODO: Backend should update online / offline status.
+    createStatus(isOnline) {
+        const color = isOnline ? "green" : "red";
+        return /* HTML */ `
+            <svg class="circle-status" xmlns="http://www.w3.org/2000/svg">
+                <circle r="10" cx="50%" cy="50%" fill=${color} />
+            </svg>
+        `;
     }
 
     isPersonAlreadyInList(chatPersonList, name) {
@@ -56,12 +68,6 @@ export default class Chatbox extends Component {
         messageContainer.appendChild(messageContent);
 
         discussionContainer.appendChild(messageContainer);
-    }
-
-    // ! Try to make the circle responsive by adapting cx and cy.
-    createStatus(isOnline) {
-        const color = isOnline ? "green" : "red";
-        return /* HTML */ ` <circle r="5" cx="22" cy="18" fill="${color}" /> `;
     }
 
     findSender(userlist, actualName) {
@@ -96,9 +102,16 @@ export default class Chatbox extends Component {
                         const newWs = new WebSocket(newChannelUrl);
 
                         this.history = fetchApi("/api/chat/" + data.channelList[i], {})
+                            .then((res) => res.json())
                             .then((res) => {
-                                console.log("Fetched history data:", res.json());
-                                return res;
+                                res.messages.forEach((message) => {
+                                    let sender =
+                                        this.info.nickname === message.sender ? message.receiver : message.sender;
+
+                                    const discussion = document.getElementById("private-discussion-" + sender);
+
+                                    this.addNewMessage(discussion, message.sender, message.content);
+                                });
                             })
                             .catch((err) => {
                                 console.error("Error fetching history:", err);
@@ -109,7 +122,6 @@ export default class Chatbox extends Component {
 
                         newWs.onmessage = (event) => {
                             const messageData = JSON.parse(event.data);
-                            console.log("channel_list | New WebSocket message received: ", messageData);
 
                             if (messageData.type === "chat_message") {
                                 const message = messageData.message;
@@ -124,16 +136,9 @@ export default class Chatbox extends Component {
                             }
                         };
 
-                        newWs.onerror = (event) => {
-                            console.error(`channel_list | WebSocket error for channel: ${data.channel_name}`, event);
-                        };
+                        newWs.onerror = (event) => {};
 
-                        newWs.onclose = (event) => {
-                            console.log(
-                                `channel_list | WebSocket connection closed for channel: ${data.channel_name}`,
-                                event
-                            );
-                        };
+                        newWs.onclose = (event) => {};
 
                         this.wsChannelMap.set(newWs, channelInfo);
                     }
@@ -156,7 +161,6 @@ export default class Chatbox extends Component {
 
                             newWs.onmessage = (event) => {
                                 const messageData = JSON.parse(event.data);
-                                console.log("channel_created | New WebSocket message received: ", messageData);
 
                                 if (messageData.type === "chat_message") {
                                     const message = messageData.message;
@@ -167,13 +171,9 @@ export default class Chatbox extends Component {
                                 }
                             };
 
-                            newWs.onerror = (event) => {
-                                console.error(`WebSocket error for channel: ${data.channel_name}`, event);
-                            };
+                            newWs.onerror = (event) => {};
 
-                            newWs.onclose = (event) => {
-                                console.log(`WebSocket connection closed for channel: ${data.channel_name}`, event);
-                            };
+                            newWs.onclose = (event) => {};
 
                             this.wsChannelMap.set(newWs, channelInfo);
                         }
@@ -283,8 +283,6 @@ export default class Chatbox extends Component {
 
             this.generalWs.onmessage = (event) => {
                 const data = JSON.parse(event.data);
-
-                console.log("generalWs: ", data);
             };
 
             const sendBtn = document.getElementById("send-btn");

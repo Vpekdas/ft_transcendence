@@ -177,10 +177,8 @@ export default class Chess extends Component {
 
         if (piece && piece != this.pieceInMove) {
             coords = piece.object.parent.userData.pos;
-            console.log(coords);
         } else if (chessBoard) {
             coords = Coords.fromWorldPos({ x: chessBoard.point.x, z: chessBoard.point.z });
-            console.log(coords);
         }
 
         if (coords) {
@@ -447,7 +445,7 @@ export default class Chess extends Component {
                 this.scene.add(this.box);
             }
 
-            // Add an outline pass
+            // Add outline passes
             {
                 this.composer = new EffectComposer(renderer);
 
@@ -494,6 +492,7 @@ export default class Chess extends Component {
                 this.moveOutlinePass.edgeGlow = 0.0;
                 this.moveOutlinePass.edgeStrength = 10.0;
                 this.moveOutlinePass.overlayMaterial.blending = THREE.CustomBlending;
+                // this.moveOutlinePass.pulsePeriod = 15.0;
                 this.composer.addPass(this.moveOutlinePass);
 
                 const outputPass = new OutputPass();

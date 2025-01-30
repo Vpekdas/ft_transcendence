@@ -314,7 +314,7 @@ class Board:
     def is_check_after_move(self, color: Color, pos: (int, int), to: (int, int)) -> bool:
         board2: Board = self.copy()
         board2.move(coords_to_shorthand(pos), coords_to_shorthand(to))
-        board2.compute_all_available_moves(color=color.other(), check=False)
+        board2.compute_all_available_moves(check=False)
 
         return board2.is_in_check(color)
 
@@ -424,6 +424,13 @@ class ChessGame:
                 if piece is None:
                     continue
 
+                for move in piece.available_moves:
+                    piece2 = self.board.tiles[shorthand_to_index(move)]
+
+                    # if piece2 is not None and piece2.type == PieceType.KING:
+                    #     piece.available_moves.remove(move)
+                    #     break
+
                 pieces.append({ "pos": sh, "type": self.serialize_piece_type(piece.type), "color": self.serialize_color(piece.color), "moves": piece.available_moves })
 
         return {
@@ -460,6 +467,11 @@ class ChessGame:
             return
 
         if data["to"] in piece.available_moves:
+            piece2 = self.board.tiles[shorthand_to_index(data["to"])]
+
+            if piece2 is not None and piece2.type == PieceType.KING:
+                return
+
             move = self.move(data["from"], data["to"])
             piece.has_moved = True
             self.board.compute_all_available_moves()
@@ -469,10 +481,17 @@ class ChessGame:
 
             message = {}
 
+            check: str = None
+
+            if self.board.is_in_check(Color.BLACK):
+                check = self.serialize_color(Color.BLACK)
+            elif self.board.is_in_check(Color.WHITE):
+                check = self.serialize_color(Color.WHITE)
+
             if move == "move":
-                message = { "type": "move", "from": data["from"], "to": data["to"], "info": board_serialized, "turn": self.serialize_color(self.turn) }
+                message = { "type": "move", "from": data["from"], "to": data["to"], "info": board_serialized, "turn": self.serialize_color(self.turn), "check": check }
             elif move == "take":
-                message = { "type": "take", "from": data["from"], "to": data["to"], "info": board_serialized, "turn": self.serialize_color(self.turn) }
+                message = { "type": "take", "from": data["from"], "to": data["to"], "info": board_serialized, "turn": self.serialize_color(self.turn), "check": check }
 
             if self.white: await self.white.consumer.send(json.dumps(message))
             if self.black: await self.black.consumer.send(json.dumps(message))

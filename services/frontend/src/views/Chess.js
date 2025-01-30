@@ -1,8 +1,5 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
-import { FontLoader } from "three/addons/loaders/FontLoader.js";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
@@ -139,6 +136,13 @@ export default class Chess extends Component {
         return piece.userData.availableMoves.includes(pos.toShorthand());
     }
 
+    allowedToMove(piece) {
+        return (
+            (this.gamemode == "local" && piece.userData.color == this.turn) ||
+            (this.gamemode == "remote" && piece.userData.color == this.my)
+        );
+    }
+
     get(x, y) {
         if (x < 0 || x > 7 || y < 0 || y > 7) {
             return undefined;
@@ -184,7 +188,7 @@ export default class Chess extends Component {
             const pieceAtPos = this.board[index];
 
             if (this.pieceInMove == null) {
-                if (pieceAtPos != null && pieceAtPos.userData.owned) {
+                if (pieceAtPos != null && this.allowedToMove(pieceAtPos)) {
                     const availableMoveIndices = pieceAtPos.userData.availableMoves.map((value) =>
                         Coords.fromShorthand(value).toIndex()
                     );
@@ -214,7 +218,11 @@ export default class Chess extends Component {
 
                     this.selectionOutlinePass.selectedObjects = [];
                     this.moveOutlinePass.selectedObjects = [];
-                } else if (pieceAtPos != null && !pieceAtPos.userData.owned && this.canMove(this.pieceInMove, coords)) {
+                } else if (
+                    pieceAtPos != null &&
+                    !this.allowedToMove(pieceAtPos) &&
+                    this.canMove(this.pieceInMove, coords)
+                ) {
                     const piece = this.pieceInMove;
                     const opponentPiece = pieceAtPos;
 
@@ -233,7 +241,7 @@ export default class Chess extends Component {
 
                     this.selectionOutlinePass.selectedObjects = [];
                     this.moveOutlinePass.selectedObjects = [];
-                } else if (pieceAtPos != null && pieceAtPos.userData.owned) {
+                } else if (pieceAtPos != null && this.allowedToMove(pieceAtPos)) {
                     this.pieceInMove = pieceAtPos;
                     this.selectionOutlinePass.selectedObjects = [this.pieceInMove];
 
@@ -288,6 +296,7 @@ export default class Chess extends Component {
     async init() {
         this.scene = new THREE.Scene();
 
+        // Add tiles highlight
         {
             /** @type {Array<THREE.Object3D>} */
             this.tiles = new Array(8 * 8);
@@ -377,6 +386,10 @@ export default class Chess extends Component {
          */
         this.pieceInMove = null;
 
+        this.turn = "white";
+        /** @type {string} */
+        this.color = undefined;
+
         this.onready = async () => {
             const c = document.getElementById("chess");
 
@@ -410,12 +423,15 @@ export default class Chess extends Component {
             this.camera.position.z = -25;
             this.camera.position.y = 20;
 
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-            this.scene.add(ambientLight);
+            // Add lighting to the scene
+            {
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+                this.scene.add(ambientLight);
 
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-            directionalLight.position.set(0, 20, 0);
-            this.scene.add(directionalLight);
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                directionalLight.position.set(0, 20, 0);
+                this.scene.add(directionalLight);
+            }
 
             // Add the board
             const board = await this.fbxLoader.loadAsync("/models/chess/Chess Board.fbx");
@@ -515,11 +531,17 @@ export default class Chess extends Component {
                         const coords = Coords.fromShorthand(pieceData.pos);
                         this.board[coords.toIndex()].userData.availableMoves = pieceData.moves ? pieceData.moves : [];
                     }
+
+                    this.gamemode = data.gamemode;
+                    this.color = data.color;
+                    this.turn = data.turn;
                 } else if (data.type == "move" || data.type == "take") {
                     for (let pieceData of data.info.pieces) {
                         const coords = Coords.fromShorthand(pieceData.pos);
                         this.board[coords.toIndex()].userData.availableMoves = pieceData.moves ? pieceData.moves : [];
                     }
+
+                    this.turn = data.turn;
                 }
             };
         };

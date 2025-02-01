@@ -85,12 +85,13 @@ class Board:
     def get_available_rook_moves(self, coords: (int, int), piece: Piece, check: bool) -> list[str]:
         moves = []
         
+        # Y
         for y in range(coords[1] + 1, 8):
             coords2 = (coords[0], y)
             piece2 = self.get(coords[0], y)
 
-            if piece2 is None or piece2.color != piece.color and not self.check_check(check, piece.color, coords, coords2):
-                moves.append(coords_to_shorthand((coords[0], y)))
+            if (piece2 is None or piece2.color != piece.color) and not self.check_check(check, piece.color, coords, coords2):
+                moves.append(coords_to_shorthand(coords2))
 
                 if piece2 is not None:
                     break
@@ -101,32 +102,36 @@ class Board:
             coords2 = (coords[0], y)
             piece2 = self.get(coords[0], y)
 
-            if piece2 is None or piece2.color != piece.color and not self.check_check(check, piece.color, coords, coords2):
-                moves.append(coords_to_shorthand((coords[0], y)))
+            if (piece2 is None or piece2.color != piece.color) and not self.check_check(check, piece.color, coords, coords2):
+                moves.append(coords_to_shorthand(coords2))
 
                 if piece2 is not None:
                     break
             elif piece2 is not None and piece2.color == piece.color:
                 break
-        
+
+        # X
         for x in range(coords[0] + 1, 8):
             coords2 = (x, coords[1])
             piece2 = self.get(x, coords[1])
 
-            if piece2 is None or piece2.color != piece.color and not self.check_check(check, piece.color, coords, coords2):
-                moves.append(coords_to_shorthand((x, coords[1])))
+            if check:
+                print(self.check_check(check, piece.color, coords, coords), file=sys.stderr)
+
+            if (piece2 is None or piece2.color != piece.color) and not self.check_check(check, piece.color, coords, coords2):
+                moves.append(coords_to_shorthand(coords2))
 
                 if piece2 is not None:
                     break
             elif piece2 is not None and piece2.color == piece.color:
                 break
-        
+
         for x in range(coords[0] - 1, -1, -1):
             coords2 = (x, coords[1])
             piece2 = self.get(x, coords[1])
 
-            if piece2 is None or piece2.color != piece.color and not self.check_check(check, piece.color, coords, coords2):
-                moves.append(coords_to_shorthand((x, coords[1])))
+            if (piece2 is None or piece2.color != piece.color) and not self.check_check(check, piece.color, coords, coords2):
+                moves.append(coords_to_shorthand(coords2))
 
                 if piece2 is not None:
                     break
@@ -143,7 +148,7 @@ class Board:
         while is_valid(coords2[0], coords2[1]):
             piece2 = self.get(coords2[0], coords2[1])
 
-            if piece2 is None or piece2.color != piece.color and not self.check_check(check, piece.color, coords, coords2):
+            if (piece2 is None or piece2.color != piece.color) and not self.check_check(check, piece.color, coords, coords2):
                 moves.append(coords_to_shorthand((coords2[0], coords2[1])))
 
                 if piece2 is not None:
@@ -158,7 +163,7 @@ class Board:
         while is_valid(coords2[0], coords2[1]):
             piece2 = self.get(coords2[0], coords2[1])
 
-            if piece2 is None or piece2.color != piece.color and not self.check_check(check, piece.color, coords, coords2):
+            if (piece2 is None or piece2.color != piece.color) and not self.check_check(check, piece.color, coords, coords2):
                 moves.append(coords_to_shorthand((coords2[0], coords2[1])))
 
                 if piece2 is not None:
@@ -173,7 +178,7 @@ class Board:
         while is_valid(coords2[0], coords2[1]):
             piece2 = self.get(coords2[0], coords2[1])
 
-            if piece2 is None or piece2.color != piece.color:
+            if (piece2 is None or piece2.color != piece.color) and not self.check_check(check, piece.color, coords, coords2):
                 moves.append(coords_to_shorthand((coords2[0], coords2[1])))
 
                 if piece2 is not None:
@@ -188,7 +193,7 @@ class Board:
         while is_valid(coords2[0], coords2[1]):
             piece2 = self.get(coords2[0], coords2[1])
 
-            if piece2 is None or piece2.color != piece.color and not self.check_check(check, piece.color, coords, coords2):
+            if (piece2 is None or piece2.color != piece.color) and not self.check_check(check, piece.color, coords, coords2):
                 moves.append(coords_to_shorthand((coords2[0], coords2[1])))
 
                 if piece2 is not None:
@@ -246,25 +251,12 @@ class Board:
 
                 piece2 = self.get(coords2[0], coords2[1])
 
-                if (piece2 is None or (piece2.color != piece.color and not self.near_other_king(coords2, piece.color))) and not self.check_check(check, piece.color, coords, coords2):
+                # The "near other king" condition does not need to be separate since the opposite king would put him in check.
+
+                if (piece2 is None or piece2.color != piece.color) and not self.check_check(check, piece.color, coords, coords2):
                     moves.append(coords_to_shorthand(coords2))
 
         return moves
-
-    def near_other_king(self, coords: (int, int), color: Color) -> bool:
-        other_color = Color.WHITE if color == Color.BLACK else Color.BLACK
-        king: Piece = None
-        king_coords: (int, int)
-
-        for x in range(8):
-            for y in range(8):
-                piece = self.get(x, y)
-
-                if piece is not None and piece.type == PieceType.KING and piece.color == other_color:
-                    king = piece
-                    king_coords = (x, y)
-        
-        return coords[0] == king_coords[0] + 1 or coords[0] == king_coords[0] - 1 or coords[1] == king_coords[1] + 1 or coords[1] == king_coords[1] - 1
 
     def check_check(self, needs_recursive_checking: bool, color: Color, pos: (int, int), to: (int, int)) -> bool:
         """
@@ -290,7 +282,7 @@ class Board:
                     coords = (x, y)
         
         if coords is None:
-            return False
+            return True
 
         for piece in self.tiles:
             if piece is not None and piece.color != color and coords_to_shorthand(coords) in piece.available_moves:
@@ -311,12 +303,43 @@ class Board:
         
         return True
 
-    def is_check_after_move(self, color: Color, pos: (int, int), to: (int, int)) -> bool:
+    def new_board_after_move(self, color: Color, pos: (int, int), to: (int, int)):
         board2: Board = self.copy()
         board2.move(coords_to_shorthand(pos), coords_to_shorthand(to))
         board2.compute_all_available_moves(check=False)
 
+        return board2
+
+    def is_check_after_move(self, color: Color, pos: (int, int), to: (int, int)) -> bool:
+        board2: Board = self.copy()
+        board2.move(coords_to_shorthand(pos), coords_to_shorthand(to))
+        board2.compute_all_available_moves(color=color.other(), check=False)
+
         return board2.is_in_check(color)
+
+    def dump(self):
+        for y in range(8):
+            s = ""
+
+            for x in range(8):
+                piece = self.get(x, 7 - y)
+
+                if piece is None:
+                    s += "."
+                elif piece.type == PieceType.ROOK:
+                    s += "R"
+                elif piece.type == PieceType.BISHOP:
+                    s += "B"
+                elif piece.type == PieceType.KNIGHT:
+                    s += "K"
+                elif piece.type == PieceType.KING:
+                    s += "X"
+                elif piece.type == PieceType.QUEEN:
+                    s += "Q"
+                elif piece.type == PieceType.PAWN:
+                    s += "P"
+                
+            print(s, file=sys.stderr)
 
 class Side:
     def __init__(self, consumer):
@@ -345,14 +368,14 @@ class ChessGame:
         # self.place_piece(PieceType.PAWN, "G2", Color.WHITE)
         # self.place_piece(PieceType.PAWN, "H2", Color.WHITE)
 
-        self.place_piece(PieceType.ROOK, "A1", Color.WHITE)
-        self.place_piece(PieceType.KNIGHT, "B1", Color.WHITE)
-        self.place_piece(PieceType.BISHOP, "C1", Color.WHITE)
-        self.place_piece(PieceType.KING, "D1", Color.WHITE)
-        self.place_piece(PieceType.QUEEN, "E1", Color.WHITE)
-        self.place_piece(PieceType.BISHOP, "F1", Color.WHITE)
-        self.place_piece(PieceType.KNIGHT, "G1", Color.WHITE)
-        self.place_piece(PieceType.ROOK, "H1", Color.WHITE)
+        # self.place_piece(PieceType.ROOK, "A1", Color.WHITE)
+        # self.place_piece(PieceType.KNIGHT, "B1", Color.WHITE)
+        # self.place_piece(PieceType.BISHOP, "C1", Color.WHITE)
+        # self.place_piece(PieceType.KING, "D1", Color.WHITE)
+        # self.place_piece(PieceType.QUEEN, "E1", Color.WHITE)
+        # self.place_piece(PieceType.BISHOP, "F1", Color.WHITE)
+        # self.place_piece(PieceType.KNIGHT, "G1", Color.WHITE)
+        # self.place_piece(PieceType.ROOK, "H1", Color.WHITE)
 
         # black pieces
         # self.place_piece(PieceType.PAWN, "A7", Color.BLACK)
@@ -364,14 +387,26 @@ class ChessGame:
         # self.place_piece(PieceType.PAWN, "G7", Color.BLACK)
         # self.place_piece(PieceType.PAWN, "H7", Color.BLACK)
 
-        self.place_piece(PieceType.ROOK, "A8", Color.BLACK)
-        self.place_piece(PieceType.KNIGHT, "B8", Color.BLACK)
-        self.place_piece(PieceType.BISHOP, "C8", Color.BLACK)
-        self.place_piece(PieceType.KING, "D8", Color.BLACK)
-        self.place_piece(PieceType.QUEEN, "E8", Color.BLACK)
-        self.place_piece(PieceType.BISHOP, "F8", Color.BLACK)
-        self.place_piece(PieceType.KNIGHT, "G8", Color.BLACK)
-        self.place_piece(PieceType.ROOK, "H8", Color.BLACK)
+        # self.place_piece(PieceType.ROOK, "A8", Color.BLACK)
+        # self.place_piece(PieceType.KNIGHT, "B8", Color.BLACK)
+        # self.place_piece(PieceType.BISHOP, "C8", Color.BLACK)
+        # self.place_piece(PieceType.KING, "D8", Color.BLACK)
+        # self.place_piece(PieceType.QUEEN, "E8", Color.BLACK)
+        # self.place_piece(PieceType.BISHOP, "F8", Color.BLACK)
+        # self.place_piece(PieceType.KNIGHT, "G8", Color.BLACK)
+        # self.place_piece(PieceType.ROOK, "H8", Color.BLACK)
+
+        # -----------------------------------------------------
+        # TEST BOARDS
+
+        # 1.
+        self.place_piece(PieceType.KING, "H8", Color.BLACK)
+        self.place_piece(PieceType.ROOK, "E3", Color.BLACK)
+        self.place_piece(PieceType.ROOK, "F3", Color.BLACK)
+        self.place_piece(PieceType.PAWN, "H1", Color.BLACK)
+
+        self.place_piece(PieceType.KING, "C3", Color.WHITE)
+        self.place_piece(PieceType.ROOK, "D1", Color.WHITE)
 
         self.board.compute_all_available_moves()
 
@@ -449,7 +484,14 @@ class ChessGame:
             self.black = Side(consumer)
             color = "black"
 
-        await consumer.send(json.dumps({ "type": "info", "info": self.serialize_board(), "gamemode": "local", "color": color, "turn": self.serialize_color(self.turn) }))
+        check_info = None
+
+        if self.board.is_in_check(Color.BLACK):
+            check_info = { "color": self.serialize_color(Color.BLACK), "is_checkmate": self.board.check_checkmate(Color.BLACK) }
+        elif self.board.is_in_check(Color.WHITE):
+            check_info = { "color": self.serialize_color(Color.WHITE), "is_checkmate": self.board.check_checkmate(Color.WHITE) }
+
+        await consumer.send(json.dumps({ "type": "info", "info": self.serialize_board(), "gamemode": "local", "color": color, "turn": self.serialize_color(self.turn), "check": check_info }))
 
     async def on_quit(self, consumer):
         if self.white and self.white.consumer == consumer:
@@ -481,17 +523,24 @@ class ChessGame:
 
             message = {}
 
-            check: str = None
+            # check: str = None
+
+            # if self.board.is_in_check(Color.BLACK):
+            #     check = self.serialize_color(Color.BLACK)
+            # elif self.board.is_in_check(Color.WHITE):
+            #     check = self.serialize_color(Color.WHITE)
+
+            check_info = None
 
             if self.board.is_in_check(Color.BLACK):
-                check = self.serialize_color(Color.BLACK)
+                check_info = { "color": self.serialize_color(Color.BLACK), "is_checkmate": self.board.check_checkmate(Color.BLACK) }
             elif self.board.is_in_check(Color.WHITE):
-                check = self.serialize_color(Color.WHITE)
+                check_info = { "color": self.serialize_color(Color.WHITE), "is_checkmate": self.board.check_checkmate(Color.WHITE) }
 
             if move == "move":
-                message = { "type": "move", "from": data["from"], "to": data["to"], "info": board_serialized, "turn": self.serialize_color(self.turn), "check": check }
+                message = { "type": "move", "from": data["from"], "to": data["to"], "info": board_serialized, "turn": self.serialize_color(self.turn), "check": check_info }
             elif move == "take":
-                message = { "type": "take", "from": data["from"], "to": data["to"], "info": board_serialized, "turn": self.serialize_color(self.turn), "check": check }
+                message = { "type": "take", "from": data["from"], "to": data["to"], "info": board_serialized, "turn": self.serialize_color(self.turn), "check": check_info }
 
             if self.white: await self.white.consumer.send(json.dumps(message))
             if self.black: await self.black.consumer.send(json.dumps(message))

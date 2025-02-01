@@ -132,7 +132,7 @@ export default class Chess extends Component {
         return box;
     }
 
-    canMove(piece, pos) {
+    canMoveTo(piece, pos) {
         return piece.userData.availableMoves.includes(pos.toShorthand());
     }
 
@@ -195,12 +195,14 @@ export default class Chess extends Component {
 
                     this.selectionOutlinePass.selectedObjects = [this.pieceInMove];
                     this.hoverOutlinePass.selectedObjects = [];
-                    this.moveOutlinePass.selectedObjects = this.tiles.filter((value, index) =>
-                        availableMoveIndices.includes(index)
+                    this.moveOutlinePass.selectedObjects = this.tiles.filter(
+                        (value, index) =>
+                            availableMoveIndices.includes(index) &&
+                            (this.board[index] == undefined || this.board[index].userData.type != "king")
                     );
                 }
             } else {
-                if (pieceAtPos == null && this.canMove(this.pieceInMove, coords)) {
+                if (pieceAtPos == null && this.canMoveTo(this.pieceInMove, coords)) {
                     const piece = this.pieceInMove;
 
                     this.board[this.pieceInMove.userData.pos.toIndex()] = undefined;
@@ -219,7 +221,8 @@ export default class Chess extends Component {
                 } else if (
                     pieceAtPos != null &&
                     !this.allowedToMove(pieceAtPos) &&
-                    this.canMove(this.pieceInMove, coords)
+                    this.canMoveTo(this.pieceInMove, coords) &&
+                    pieceAtPos.userData.type != "king"
                 ) {
                     const piece = this.pieceInMove;
                     const opponentPiece = pieceAtPos;
@@ -298,7 +301,8 @@ export default class Chess extends Component {
         {
             /** @type {Array<THREE.Object3D>} */
             this.tiles = new Array(8 * 8);
-            const material = new THREE.MeshBasicMaterial({ color: "#ffffff" });
+            const whiteMaterial = new THREE.MeshBasicMaterial({ color: "#ffffff" });
+            const blackMaterial = new THREE.MeshBasicMaterial({ color: "#1a1a1a" });
 
             for (var x = 0; x < 8; x++) {
                 for (var y = 0; y < 8; y++) {
@@ -306,12 +310,16 @@ export default class Chess extends Component {
                     const worldPos = Coords.from(x, y).toWorldPos();
 
                     tile.position.x = worldPos.x;
-                    tile.position.y = -3.5;
+                    tile.position.y = -3.64;
                     tile.position.z = worldPos.z;
 
                     tile.rotation.x = -Math.PI / 2;
 
-                    tile.material = material;
+                    if ((x % 2 == 0 && y % 2 == 0) || (x % 2 == 1 && y % 2 == 1)) {
+                        tile.material = whiteMaterial;
+                    } else {
+                        tile.material = blackMaterial;
+                    }
 
                     this.scene.add(tile);
                     this.tiles[x + y * 8] = tile;
@@ -541,6 +549,12 @@ export default class Chess extends Component {
                     }
 
                     this.turn = data.turn;
+                }
+
+                if (data.check && !data.check.is_checkmate) {
+                    console.log(data.check.color, "king is in check");
+                } else if (data.check && data.check.is_checkmate) {
+                    console.log(data.check.color, "king is in checkmate");
                 }
             };
         };

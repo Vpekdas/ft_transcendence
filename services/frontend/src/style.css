@@ -1146,6 +1146,23 @@ canvas {
     padding-top: 15px;
 }
 
+.game-overlay {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 10;
+}
+
+.game-overlay .ui {
+    position: relative;
+    width: 60%;
+
+    left: 0%;
+    top: 0%;
+
+    transform: translateX(-10%);
+}
+
 /* DELETE ACCOUNT */
 
 .delete-modal-overlay {

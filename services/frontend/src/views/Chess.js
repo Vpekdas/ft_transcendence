@@ -68,28 +68,28 @@ export default class Chess extends Component {
      * @param {string} color
      */
     placePiece(type, pos, color) {
-        const model = this.models.get(type).clone(true);
+        const piece = this.models.get(type).clone(true);
         const coords = Coords.fromShorthand(pos);
 
-        model.name = "Piece-" + type + "-" + color;
-        model.userData = {
+        piece.name = "Piece-" + type + "-" + color;
+        piece.userData = {
             type: type,
             owned: color == "white",
             color: color,
             pos: coords,
-            offsetX: model.position.x,
-            offsetY: model.position.y,
-            offsetZ: model.position.z,
+            offsetX: piece.position.x,
+            offsetY: piece.position.y,
+            offsetZ: piece.position.z,
             hasMoved: false,
             availableMoves: [],
         };
 
         const worldPos = coords.toWorldPos();
-        model.position.x = model.userData.offsetX + worldPos.x;
-        model.position.y = model.userData.offsetY + worldPos.y;
-        model.position.z = model.userData.offsetZ + worldPos.z;
+        piece.position.x = piece.userData.offsetX + worldPos.x;
+        piece.position.y = piece.userData.offsetY + worldPos.y;
+        piece.position.z = piece.userData.offsetZ + worldPos.z;
 
-        model.traverse((obj) => {
+        piece.traverse((obj) => {
             if (obj.isMesh) {
                 /** @type {THREE.Mesh} */
                 // obj.material = new THREE.MeshPhongMaterial({ color: color });
@@ -97,8 +97,8 @@ export default class Chess extends Component {
             }
         });
 
-        this.scene.add(model);
-        this.board[coords.toIndex()] = model;
+        this.scene.add(piece);
+        this.board.push(piece);
     }
 
     /**
@@ -144,10 +144,7 @@ export default class Chess extends Component {
     }
 
     get(x, y) {
-        if (x < 0 || x > 7 || y < 0 || y > 7) {
-            return undefined;
-        }
-        return this.board[x + y * 8];
+        return this.board.find((value) => value.userData.pos.toShorthand() == Coords.from(x, y).toShorthand());
     }
 
     /**
@@ -158,6 +155,19 @@ export default class Chess extends Component {
      */
     move(piece, pos) {
         this.ws.send(JSON.stringify({ type: "move", from: piece.userData.pos.toShorthand(), to: pos }));
+    }
+
+    /**
+     * Promote a pawn to a `type`.
+     *
+     * @param {THREE.Object3D} piece
+     * @param {string} pos
+     * @param {string} type
+     */
+    promote(piece, pos, type) {
+        this.ws.send(
+            JSON.stringify({ type: "move", from: piece.userData.pos.toShorthand(), to: pos, promotion: type })
+        );
     }
 
     onClick(event) {
@@ -182,8 +192,7 @@ export default class Chess extends Component {
         }
 
         if (coords) {
-            const index = coords.toIndex();
-            const pieceAtPos = this.board[index];
+            const pieceAtPos = this.get(coords.x, coords.y);
 
             if (this.pieceInMove == null) {
                 if (pieceAtPos != null && this.allowedToMove(pieceAtPos)) {
@@ -195,54 +204,21 @@ export default class Chess extends Component {
 
                     this.selectionOutlinePass.selectedObjects = [this.pieceInMove];
                     this.hoverOutlinePass.selectedObjects = [];
-                    this.moveOutlinePass.selectedObjects = this.tiles.filter(
-                        (value, index) =>
+                    this.moveOutlinePass.selectedObjects = this.tiles.filter((value, index) => {
+                        const y = Math.floor(index / 8);
+                        const x = index % 8;
+
+                        const piece = this.get(x, y);
+
+                        return (
                             availableMoveIndices.includes(index) &&
-                            (this.board[index] == undefined || this.board[index].userData.type != "king")
-                    );
+                            (piece == undefined || piece.userData.type != "king")
+                        );
+                    });
                 }
             } else {
-                if (pieceAtPos == null && this.canMoveTo(this.pieceInMove, coords)) {
-                    const piece = this.pieceInMove;
-
-                    this.board[this.pieceInMove.userData.pos.toIndex()] = undefined;
-                    this.board[index] = piece;
-
-                    this.pieceInMove = null;
-
-                    this.move(piece, coords.toShorthand());
-
-                    piece.userData.pos = coords;
-                    piece.userData.hasMoved = true;
-                    this.moveTo(piece, coords);
-
-                    this.selectionOutlinePass.selectedObjects = [];
-                    this.moveOutlinePass.selectedObjects = [];
-                } else if (
-                    pieceAtPos != null &&
-                    !this.allowedToMove(pieceAtPos) &&
-                    this.canMoveTo(this.pieceInMove, coords) &&
-                    pieceAtPos.userData.type != "king"
-                ) {
-                    const piece = this.pieceInMove;
-                    const opponentPiece = pieceAtPos;
-
-                    this.board[this.pieceInMove.userData.pos.toIndex()] = undefined;
-                    this.board[index] = piece;
-
-                    this.pieceInMove = null;
-
-                    this.move(piece, coords.toShorthand());
-
-                    piece.userData.pos = coords;
-                    piece.userData.hasMoved = true;
-                    this.moveTo(piece, coords);
-
-                    this.scene.remove(opponentPiece);
-
-                    this.selectionOutlinePass.selectedObjects = [];
-                    this.moveOutlinePass.selectedObjects = [];
-                } else if (pieceAtPos != null && this.allowedToMove(pieceAtPos)) {
+                // switch the piece to move
+                if (pieceAtPos != null && this.allowedToMove(pieceAtPos)) {
                     this.pieceInMove = pieceAtPos;
                     this.selectionOutlinePass.selectedObjects = [this.pieceInMove];
 
@@ -253,7 +229,50 @@ export default class Chess extends Component {
                     this.moveOutlinePass.selectedObjects = this.tiles.filter((value, index) =>
                         availableMoveIndices.includes(index)
                     );
+
+                    return;
                 }
+
+                // can we move to a specific tile ? is the piece is we can take a king ?
+                // in all those case the move is illegal.
+                if (
+                    !this.canMoveTo(this.pieceInMove, coords) ||
+                    (pieceAtPos != null && pieceAtPos.userData.type == "king")
+                ) {
+                    return;
+                }
+
+                // remove the piece that was taken
+                if (pieceAtPos != null) {
+                    this.scene.remove(pieceAtPos);
+                }
+
+                // if the piece moving is a pawn and will move on the promotion line:
+                if (
+                    this.pieceInMove.userData.type == "pawn" &&
+                    ((this.pieceInMove.userData.color == "white" && coords.y == 7) ||
+                        (this.pieceInMove.userData.color == "black" && coords.y == 0))
+                ) {
+                    const promotionType = "queen";
+
+                    this.promote(this.pieceInMove, coords.toShorthand(), promotionType);
+
+                    this.scene.remove(this.pieceInMove);
+
+                    this.placePiece(promotionType, coords.toShorthand(), this.pieceInMove.userData.color);
+                } else {
+                    // or else we visually move the piece
+                    this.move(this.pieceInMove, coords.toShorthand());
+
+                    this.pieceInMove.userData.pos = coords;
+                    this.pieceInMove.userData.hasMoved = true;
+                    this.moveTo(this.pieceInMove, coords);
+                }
+
+                // then we reset selection related stuff
+                this.pieceInMove = null;
+                this.selectionOutlinePass.selectedObjects = [];
+                this.moveOutlinePass.selectedObjects = [];
             }
         }
     }
@@ -267,10 +286,6 @@ export default class Chess extends Component {
 
         const piece = objects.find((value) => value.object.parent.name.startsWith("Piece"));
         const chessBoard = objects.find((value) => value.object.name == "Chess_Board");
-
-        if (this.box == null) {
-            return;
-        }
 
         /** @type {Coords} */
         let coords = undefined;
@@ -289,8 +304,41 @@ export default class Chess extends Component {
             } else {
                 this.hoverOutlinePass.selectedObjects = [];
             }
-        } else {
-            this.box.visible = false;
+        }
+    }
+
+    onMessage(event) {
+        const data = JSON.parse(event.data);
+        console.log(data);
+
+        if (data.type == "info") {
+            for (let pieceData of data.info.pieces) {
+                this.placePiece(pieceData.type, pieceData.pos, pieceData.color);
+
+                const coords = Coords.fromShorthand(pieceData.pos);
+                const piece = this.get(coords.x, coords.y);
+                piece.userData.availableMoves = pieceData.moves ? pieceData.moves : [];
+            }
+
+            this.gamemode = data.gamemode;
+            this.color = data.color;
+            this.turn = data.turn;
+        } else if (data.type == "move") {
+            for (let pieceData of data.info.pieces) {
+                const coords = Coords.fromShorthand(pieceData.pos);
+                const piece = this.get(coords.x, coords.y);
+                piece.userData.availableMoves = pieceData.moves ? pieceData.moves : [];
+            }
+
+            this.turn = data.turn;
+        }
+
+        if (data.side_effect && data.side_effect.check && !data.side_effect.check.is_checkmate) {
+            console.log(data.side_effect.check.color, "king is in check");
+        } else if (data.side_effect && data.side_effect.check && data.side_effect.check.is_checkmate) {
+            console.log(data.side_effect.check.color, "king is in checkmate");
+        } else if (data.side_effect && data.side_effect.draw && data.side_effect.draw.cause == "stalemate") {
+            console.log("game ended in a draw");
         }
     }
 
@@ -383,8 +431,12 @@ export default class Chess extends Component {
 
         this.raycaster = new THREE.Raycaster();
 
-        /** @type {Array<THREE.Object3D>} */
-        this.board = new Array(8 * 8);
+        /**
+         * An array of all pieces.
+         *
+         * @type {Array<THREE.Object3D>}
+         */
+        this.board = [];
 
         /**
          * The piece currently being moved if any.
@@ -445,14 +497,6 @@ export default class Chess extends Component {
             board.receiveShadow = true;
             this.scene.add(board);
 
-            // Place a box which will be use to highlight the current tile
-            {
-                this.box = this.debuggingBox(Coords.fromShorthand("D4").toWorldPos(), 3.95, 6.0, 3.95);
-                this.box.object.position.y = -0.595;
-                this.box.visible = false;
-                this.scene.add(this.box);
-            }
-
             // Add outline passes
             {
                 this.composer = new EffectComposer(renderer);
@@ -512,8 +556,6 @@ export default class Chess extends Component {
             }
 
             renderer.setAnimationLoop(() => {
-                this.box.update();
-
                 controls.update();
                 renderer.render(this.scene, this.camera);
                 this.composer.render();
@@ -527,41 +569,23 @@ export default class Chess extends Component {
 
             this.ws.onopen = () => {};
 
-            this.ws.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                console.log(data);
-
-                if (data.type == "info") {
-                    for (let pieceData of data.info.pieces) {
-                        this.placePiece(pieceData.type, pieceData.pos, pieceData.color);
-
-                        const coords = Coords.fromShorthand(pieceData.pos);
-                        this.board[coords.toIndex()].userData.availableMoves = pieceData.moves ? pieceData.moves : [];
-                    }
-
-                    this.gamemode = data.gamemode;
-                    this.color = data.color;
-                    this.turn = data.turn;
-                } else if (data.type == "move" || data.type == "take") {
-                    for (let pieceData of data.info.pieces) {
-                        const coords = Coords.fromShorthand(pieceData.pos);
-                        this.board[coords.toIndex()].userData.availableMoves = pieceData.moves ? pieceData.moves : [];
-                    }
-
-                    this.turn = data.turn;
-                }
-
-                if (data.check && !data.check.is_checkmate) {
-                    console.log(data.check.color, "king is in check");
-                } else if (data.check && data.check.is_checkmate) {
-                    console.log(data.check.color, "king is in checkmate");
-                }
-            };
+            this.ws.onmessage = (event) => this.onMessage(event);
         };
     }
 
     render() {
         return /* HTML */ `<HomeNavBar />
-            <div id="chess"></div>`;
+            <div id="chess">
+                <div class="game-overlay">
+                    <div class="ui">
+                        <ul class="menu">
+                            <li>
+                                <button><i class="bi bi-stars"></i></button>
+                            </li>
+                        </ul>
+                        <div class="ui-container"></div>
+                    </div>
+                </div>
+            </div>`;
     }
 }

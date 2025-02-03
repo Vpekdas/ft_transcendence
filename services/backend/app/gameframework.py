@@ -485,7 +485,7 @@ class GameManager:
     # Callbacks
     #
 
-    async def do_matchmaking(self) -> Game:
+    async def do_matchmaking(self, conn, gamemode: str, player: Player, opponent: int=None) -> Game:
         return None
 
     async def on_join(self, conn) -> bool:

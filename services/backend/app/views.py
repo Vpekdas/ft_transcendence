@@ -414,8 +414,9 @@ def tournament_create(request: HttpRequest):
 
     tid = tournaments.create(gameManager=pong_manager, host=player.id, name=data["name"], playerCount=data["playerCount"], privacy=data["openType"], password=None, fillWithAI=False, gameSettings=data["gameSettings"])
 
-    return JsonResponse({ "id": tid })@require_POST
+    return JsonResponse({ "id": tid })
 
+@require_POST
 def tournamentInvite(request: HttpRequest, tid):
     if not request.user.is_authenticated:
         return JsonResponse({ "error": NOT_AUTHENTICATED })

@@ -194,7 +194,9 @@ class Pong(Game):
                 # Save the result of the game in the database
                 await self.save_results()
         elif self.state == State.IN_LOBBY:
-            self.state = State.STARTED
+            if len(self.clients) == 2:
+                self.state = State.STARTED
+                
         await self.broadcast({ "type": "update", "bodies": self.scene.to_dict(), "scores": [ self.player1.score, self.player2.score ] })
 
         for event in self.scene.backlog:
@@ -264,7 +266,7 @@ class PongManager(GameManager):
 
         self.players = []
 
-    async def do_matchmaking(self, conn, gamemode: str, player: Player):
+    async def do_matchmaking(self, conn, gamemode: str, player: Player, opponent: int=None):
         try:
             p = next(filter(lambda p: p.player_id == player.id, self.players))
             return
@@ -292,6 +294,12 @@ class PongManager(GameManager):
                 self.players.remove(opponent)
             except StopIteration:
                 self.players.append(MatchmakePlayer(conn=conn, player_id=player.id, gamemode=gamemode))
+        elif gamemode == "1v1invite" and opponent is not None:
+            game = self.start_game(gamemode=gamemode)
+            game.accepted_players = [player.id, opponent]
+
+            await conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": gamemode }))
+            await game.on_join(player.id)
 
     async def on_quit(self, player: Player):
         try:

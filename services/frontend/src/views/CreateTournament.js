@@ -2,7 +2,6 @@ import { post } from "../utils";
 import { tr } from "../i18n";
 import { navigateTo, Component } from "../micro";
 
-/** @type {import("../micro").Component} */
 export default class CreateTournament extends Component {
     async init() {
         document.title = tr("Create Tournament");

@@ -28,19 +28,18 @@ urlpatterns = [
     path('api/signin-external', views.signinExternal),
     path('api/login', views.loginRoute),
     path('api/logout', views.logoutRoute),
-    path('api/check-logged', views.isLoggedIn), # was api/isLoggedIn
+    path('api/check-logged', views.isLoggedIn),
 
-    path('api/player/<str:id>/password/update', views.updatePassword), # was api/updatePassword
+    path('api/player/<str:id>/password/update', views.updatePassword),
     path('api/player/<str:id>/nickname', views.getNickname),
-    path('api/player/<str:id>/nickname/update', views.updateNickname), # was api/updateNickname
-    path('api/player/<str:id>/profile', views.getPlayerProfile), # was api/getPlayerProfile
-    path('api/player/<str:id>/picture', views.getProfilePicture), # was api/getProfilePicture
-    path('api/player/<str:id>/picture/update', views.updateProfilePicture), # was api/updateProfilePicture
-    path('api/player/<str:id>/delete', views.deleteProfile), # was api/deleteProfile
+    path('api/player/<str:id>/nickname/update', views.updateNickname),
+    path('api/player/<str:id>/profile', views.getPlayerProfile),
+    path('api/player/<str:id>/picture', views.getProfilePicture),
+    path('api/player/<str:id>/picture/update', views.updateProfilePicture),
+    path('api/player/<str:id>/delete', views.deleteProfile),
     path('api/player/<str:id>/matches', views.getMatches),
     path('api/player/<str:id>/stats/pong', views.getPongStats),
 
-    # path('api/player/<str:id>/skins/buy/<str:name>', ...),
     path('api/player/<str:id>/skins/select-terrain/<str:name>', views.selectTerrainSkin),
     path('api/player/<str:id>/skins/select-ball/<str:name>', views.selectBallSkin),
 

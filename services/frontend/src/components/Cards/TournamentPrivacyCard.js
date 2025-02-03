@@ -1,7 +1,6 @@
 import { tr } from "../../i18n";
 import { Component, navigateTo } from "../../micro";
 
-/** @type {import("../../micro").Component} */
 export default class TournamentPrivacyCard extends Component {
     async init() {
         this.onready = () => {

@@ -1,10 +1,13 @@
 import { Component } from "../../micro";
-import { getOriginNoProtocol, post, fetchApi } from "/utils";
+import { getOriginNoProtocol, post, fetchApi, showToast } from "/utils";
 
 export default class Chatbox extends Component {
     addNewPerson(personContainer, fullname, picture) {
         const li = document.createElement("li");
         li.classList.add("person");
+
+        // Can identify quickly the sender, I can maybe optimize some part of code with that.
+        li.setAttribute("data-sender", fullname);
 
         const img = document.createElement("img");
         img.classList.add("chat-profile-picture");
@@ -23,22 +26,30 @@ export default class Chatbox extends Component {
         svg.setAttribute("width", "40");
         svg.setAttribute("height", "40");
 
-        svg.innerHTML = this.createStatus(true);
+        svg.innerHTML = this.createStatus();
 
         statusContainer.appendChild(svg);
         li.appendChild(img);
         li.appendChild(span);
         li.appendChild(statusContainer);
 
-        personContainer.appendChild(li);
-    }
+        const notificationIndicator = document.createElement("div");
+        notificationIndicator.classList.add("notification-indicator");
 
-    // TODO: Backend should update online / offline status.
-    createStatus(isOnline) {
-        const color = isOnline ? "green" : "red";
+        li.appendChild(notificationIndicator);
+
+        li.addEventListener("click", () => {
+            li.classList.remove("new-message");
+        });
+
+        personContainer.appendChild(li);
+
+        return li;
+    }
+    createStatus() {
         return /* HTML */ `
             <svg class="circle-status" xmlns="http://www.w3.org/2000/svg">
-                <circle r="10" cx="50%" cy="50%" fill=${color} />
+                <circle class="circle-color" r="10" cx="50%" cy="50%" fill="red" />
             </svg>
         `;
     }
@@ -129,6 +140,12 @@ export default class Chatbox extends Component {
 
                                 if (this.info.nickname !== sender) {
                                     this.chattingWith = sender;
+                                    showToast("You received a message from " + sender, "bi bi-bell");
+                                    const senderLi = document.querySelector(`.person[data-sender="${sender}"]`);
+                                    if (senderLi) {
+                                        senderLi.classList.add("new-message");
+                                    }
+                                    this.notification.play();
                                 }
 
                                 let discussion = document.getElementById("private-discussion-" + this.chattingWith);
@@ -166,6 +183,16 @@ export default class Chatbox extends Component {
                                     const message = messageData.message;
                                     const sender = messageData.sender;
 
+                                    if (this.info.nickname !== sender) {
+                                        this.chattingWith = sender;
+                                        showToast("You received a message from " + sender, "bi bi-bell");
+                                        const senderLi = document.querySelector(`.person[data-sender="${sender}"]`);
+                                        if (senderLi) {
+                                            senderLi.classList.add("new-message");
+                                        }
+                                        this.notification.play();
+                                    }
+
                                     let discussion = document.getElementById("private-discussion-" + this.chattingWith);
                                     this.addNewMessage(discussion, sender, message);
                                 }
@@ -177,6 +204,49 @@ export default class Chatbox extends Component {
 
                             this.wsChannelMap.set(newWs, channelInfo);
                         }
+                    }
+                }
+
+                if (data.type === "online_users") {
+                    const persons = document.querySelectorAll(".person");
+                    for (let i = 0; i < data.online_users.length; i++) {
+                        persons.forEach((person) => {
+                            const name = person.querySelector(".chat-profile-name").innerHTML;
+                            if (data.online_users[i] === name && name !== this.info.nickname) {
+                                const status = person.querySelector(".circle-color").setAttribute("fill", "green");
+                            }
+                        });
+                    }
+                }
+
+                if (data.type === "user_status") {
+                    const persons = document.querySelectorAll(".person");
+
+                    let find = false;
+                    persons.forEach((person) => {
+                        const status = person.querySelector(".circle-color");
+                        const name = person.querySelector(".chat-profile-name").innerHTML;
+
+                        if (data.user !== this.info.nickname && data.user === name) {
+                            find = true;
+                            if (data.status === "online") {
+                                status.setAttribute("fill", "green");
+                            } else {
+                                status.setAttribute("fill", "red");
+                            }
+                        }
+                    });
+
+                    // Ensure that If a new person register, I also add him in list since the userlist is not updated yet.
+                    if (!find && data.user !== this.info.nickname) {
+                        const personContainer = document.getElementById("person-container");
+
+                        // this.wsChannelMap.set(this.generalWs, channelInfo);
+
+                        this.personMap.set(
+                            data.user,
+                            this.addNewPerson(personContainer, data.user, "/img/Outer-Wilds/Giants-Deep.png")
+                        );
                     }
                 }
             };
@@ -206,10 +276,74 @@ export default class Chatbox extends Component {
         discussionToShow.style.display = "flex";
     }
 
+    showSearchBarResult() {
+        this.searchingArray.length = 0;
+
+        for (const [key, element] of this.personMap.entries()) {
+            if (this.searching === key.substring(0, this.searching.length)) {
+                this.searchingArray.push(key);
+            }
+        }
+
+        const personContainer = document.getElementById("person-container");
+        const persons = document.querySelectorAll(".person");
+
+        persons.forEach((person) => {
+            person.remove();
+        });
+
+        for (const [key, element] of this.personMap.entries()) {
+            for (let i = 0; i < this.searchingArray.length; i++) {
+                if (this.searchingArray[i] === key) {
+                    this.addNewPerson(personContainer, this.searchingArray[i], "/img/Outer-Wilds/Giants-Deep.png");
+                }
+            }
+        }
+
+        const newPersons = document.querySelectorAll(".person");
+
+        newPersons.forEach((person) => {
+            person.addEventListener("click", () => {
+                this.chatContainer.style.display = "flex";
+                personContainer.style.display = "none";
+                this.chattingWith = person.querySelector(".chat-profile-name").innerHTML;
+
+                this.showDiscussion();
+
+                if (!this.doesHaveCommonChannel()) {
+                    this.generalWs.send(
+                        JSON.stringify({
+                            type: "create_channel",
+                            userlist: [this.info.nickname, this.chattingWith],
+                        })
+                    );
+                }
+            });
+        });
+    }
+
+    updateChatHeader(fullname, picture) {
+        this.chatHeader.innerHTML = "";
+
+        const img = document.createElement("img");
+        img.classList.add("chat-profile-picture");
+        img.src = picture;
+
+        const span = document.createElement("span");
+        span.classList.add("chat-profile-name");
+        span.textContent = fullname;
+
+        this.chatHeader.appendChild(img);
+        this.chatHeader.appendChild(span);
+    }
+
     async init() {
         // Each user will add different channels to their map if they are included in the userlist.
         this.wsChannelMap = new Map();
+        this.personMap = new Map();
+        this.searchingArray = [];
         this.chattingWith = "";
+        this.searching = "";
 
         this.onready = async () => {
             this.info = await post("/api/player/c/nickname").then((res) => res.json());
@@ -219,17 +353,25 @@ export default class Chatbox extends Component {
                 .then((res) => res.json())
                 .catch((err) => {});
 
-            // ! Testing purpose for now.
-
             this.chatContainer = document.getElementById("chat-container");
-            this.writeArea = document.getElementById("writeTextArea");
+            this.writeArea = document.getElementById("messageArea");
+            this.chatHeader = document.getElementById("actual-chat-header");
+            this.phone = document.getElementById("SG-001");
+            this.notification = document.getElementById("notification-sound");
+
             const personContainer = document.getElementById("person-container");
 
             // Load all registered user on phone.
-            // TODO: Load discussion history.
             for (let i = 0; i < this.usersList.length; i++) {
                 if (this.usersList[i].nickname !== this.info.nickname) {
-                    this.addNewPerson(personContainer, this.usersList[i].nickname, "/img/Outer-Wilds/Giants-Deep.png");
+                    this.personMap.set(
+                        this.usersList[i].nickname,
+                        this.addNewPerson(
+                            personContainer,
+                            this.usersList[i].nickname,
+                            "/img/Outer-Wilds/Giants-Deep.png"
+                        )
+                    );
                     this.createDiscussionContainer(this.usersList[i].nickname);
                 }
             }
@@ -240,6 +382,8 @@ export default class Chatbox extends Component {
                     this.chatContainer.style.display = "flex";
                     personContainer.style.display = "none";
                     this.chattingWith = person.querySelector(".chat-profile-name").innerHTML;
+
+                    this.updateChatHeader(this.chattingWith, "/img/Outer-Wilds/Giants-Deep.png");
 
                     this.showDiscussion();
 
@@ -327,179 +471,371 @@ export default class Chatbox extends Component {
                 this.chatContainer.style.display = "none";
                 personContainer.style.display = "flex";
             });
+
+            const searchingInput = document.getElementById("search-bar");
+
+            searchingInput.addEventListener("input", () => {
+                this.searching = searchingInput.value;
+
+                this.showSearchBarResult();
+            });
+
+            const closeBtn = document.getElementById("end-call");
+
+            closeBtn.addEventListener("click", () => {
+                this.phone.classList.add("hide");
+            });
+
+            const dMailButton = document.getElementById("d-mail-button");
+
+            dMailButton.addEventListener("click", () => {
+                this.phone.classList.remove("hide");
+                this.phone.style.display = "flex";
+            });
         };
     }
 
-    // TODO: Update dynamically the header.
+    // TODO: Add the antenna.
+
     render() {
-        return /* HTML */ ` <div id="SG-001">
-            <div id="screen">
-                <ul class="container-fluid person-container" id="person-container">
-                    <textarea class="form-control" id="search-bar" rows="3" placeholder="Search a person..."></textarea>
-                </ul>
-                <div class="container-fluid chat-container" id="chat-container">
-                    <div class="container-fluid chat-header" id="actual-chat-header"></div>
-                    <textarea
-                        class="form-control"
-                        id="writeTextArea"
-                        rows="3"
-                        placeholder="Write your message..."
-                    ></textarea>
+        return /* HTML */ `
+            <div id="SG-001">
+                <div id="screen">
+                    <div class="container-fluid status-bar" id="status-bar">
+                        <img id="bar-signal-icon" src="/img/SG-001/bar-signal.png" />
+                        <img id="email-icon-status" src="/img/SG-001/email-icon-status.png" />
+                        <img id="battery-icon" src="/img/SG-001/battery-icon.png" />
+                    </div>
+                    <ul class="container-fluid person-container" id="person-container">
+                        <textarea
+                            class="form-control"
+                            id="search-bar"
+                            rows="3"
+                            placeholder="Search a person..."
+                        ></textarea>
+                    </ul>
+                    <div class="container-fluid chat-container" id="chat-container">
+                        <div class="container-fluid chat-header" id="actual-chat-header"></div>
+                        <textarea
+                            class="form-control"
+                            id="messageArea"
+                            rows="3"
+                            placeholder="Write your message..."
+                        ></textarea>
+                    </div>
+                </div>
+                <div id="support">
+                    <div class="decorative-line"></div>
+                    <div class="decorative-line"></div>
+                    <div class="decorative-dot"></div>
+                    <div class="decorative-line"></div>
+                    <div class="decorative-line"></div>
+                </div>
+                <div id="decorative-strip">
+                    <div class="decorative-block-element">
+                        <div class="decorative-shadow-top"></div>
+                        <div class="decorative-shadow-bot"></div>
+                    </div>
+                    <div class="decorative-element">
+                        <div class="decorative-shadow-top"></div>
+                        <img src="/img/SG-001/email-icon.png" />
+                        <div class="decorative-shadow-bot"></div>
+                    </div>
+                    <div class="decorative-separate-element">
+                        <div class="decorative-shadow-top"></div>
+                        <div class="decorative-shadow-bot"></div>
+                    </div>
+                    <div class="decorative-element">
+                        <div class="decorative-shadow-top"></div>
+                        <img src="/img/SG-001/information-icon.png" />
+                        <div class="decorative-shadow-bot"></div>
+                    </div>
+                    <div class="decorative-separate-element">
+                        <div class="decorative-shadow-top"></div>
+                        <div class="decorative-shadow-bot"></div>
+                    </div>
+                    <div class="decorative-element">
+                        <div class="decorative-shadow-top"></div>
+                        <img src="/img/SG-001/book-icon.png" />
+                        <div class="decorative-shadow-bot"></div>
+                    </div>
+                    <div class="decorative-separate-element">
+                        <div class="decorative-shadow-top"></div>
+                        <div class="decorative-shadow-bot"></div>
+                    </div>
+                    <div class="decorative-element">
+                        <div class="decorative-shadow-top"></div>
+                        <img src="/img/SG-001/camera-icon.png" />
+                        <div class="decorative-shadow-bot"></div>
+                    </div>
+                    <div class="decorative-block-element">
+                        <div class="decorative-shadow-top"></div>
+                        <div class="decorative-shadow-bot"></div>
+                    </div>
+                </div>
+                <div id="bottom-button">
+                    <div class="numpad-line">
+                        <svg
+                            id="up"
+                            viewBox="0 0 200 100"
+                            width="100%"
+                            height="100%"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <polygon points="-20,0 220,0 200,80 0,80" style="fill:black;stroke:black;stroke-width:25" />
+                            <polygon
+                                points="-20,0 220,0 200,80 0,80"
+                                style="fill:silver; transform: scale(1.05); transform-origin: center;"
+                            />
+                            <polygon
+                                points="-20,0 220,0 200,80 0,80"
+                                style="fill:#1e1e1e;stroke-width:1 transform: scale(0.1); transform-origin: center;"
+                            />
+                            <line
+                                x1="40%"
+                                y1="60%"
+                                x2="60%"
+                                y2="60%"
+                                style="stroke:white;stroke-width:2; stroke-opacity:1"
+                            />
+                        </svg>
+                    </div>
+                    <div class="numpad-line arrow">
+                        <svg
+                            id="back-btn"
+                            viewBox="0 0 200 100"
+                            width="100%"
+                            height="100%"
+                            xmlns="http://www.w3.org/2000/svg"
+                            preserveAspectRatio="none"
+                        >
+                            <polygon
+                                points="0,-50 150,0 150,100 0,150"
+                                style="fill:black;stroke:black;stroke-width:25"
+                            />
+                            <polygon
+                                points="0,-50 150,0 150,100 0,150"
+                                style="fill:silver; transform: scale(1.05); transform-origin: center;"
+                            />
+                            <polygon
+                                points="0,-50 150,0 150,100 0,150"
+                                style="fill:#1e1e1e;stroke-width:1 transform: scale(0.1); transform-origin: center;"
+                            />
+                            <line
+                                x1="50%"
+                                y1="50%"
+                                x2="70%"
+                                y2="50%"
+                                style="stroke:white;stroke-width:2; stroke-opacity:1"
+                            />
+                        </svg>
+                        <svg
+                            id="send-btn"
+                            viewBox="0 -10 150 80"
+                            width="100%"
+                            height="100%"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <polygon points="0,0 100,0 100,60 0,60" style="fill:black;stroke:black;stroke-width:25" />
+                            <polygon
+                                points="0,0 100,0 100,60 0,60"
+                                style="fill:silver; transform: scale(1.05); transform-origin: center;"
+                            />
+                            <polygon
+                                points="0,0 100,0 100,60 0,60"
+                                style="fill:#1e1e1e;stroke-width:1 transform: scale(0.1); transform-origin: center;"
+                            />
+                        </svg>
+                        <svg
+                            id="right"
+                            viewBox="0 0 200 100"
+                            width="100%"
+                            height="100%"
+                            xmlns="http://www.w3.org/2000/svg"
+                            preserveAspectRatio="none"
+                        >
+                            <polygon
+                                points="0,0 150,-50 150,150 0,100"
+                                style="fill:black;stroke:black;stroke-width:25"
+                            />
+                            <polygon
+                                points="0,0 150,-50 150,150 0,100"
+                                style="fill:silver; transform: scale(1.05); transform-origin: center;"
+                            />
+                            <polygon
+                                points="0,0 150,-50 150,150 0,100"
+                                style="fill:#1e1e1e;stroke-width:1 transform: scale(0.1); transform-origin: center;"
+                            />
+                            <line
+                                x1="5%"
+                                y1="50%"
+                                x2="25%"
+                                y2="50%"
+                                style="stroke:white;stroke-width:2; stroke-opacity:1"
+                            />
+                        </svg>
+                    </div>
+                    <div class="numpad-line">
+                        <svg
+                            id="call"
+                            viewBox="0 0 200 100"
+                            width="100%"
+                            height="100%"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <polygon
+                                points="0,50 200,0 200,100 0,100"
+                                style="fill:black;stroke:black;stroke-width:25"
+                            />
+                            <polygon
+                                points="0,50 200,0 200,100 0,100"
+                                style="fill:silver; transform: scale(1.05); transform-origin: center;"
+                            />
+                            <polygon
+                                points="0,50 200,0 200,100 0,100"
+                                style="fill:#1e1e1e;stroke-width:1 transform: scale(0.1); transform-origin: center;"
+                            />
+                            <image
+                                href="/img/SG-001/call-icon.png"
+                                x="70"
+                                y="20"
+                                width="80"
+                                height="80"
+                                preserveAspectRatio="xMidYMid slice"
+                            />
+                        </svg>
+                        <svg
+                            id="down"
+                            viewBox="0 0 200 100"
+                            width="100%"
+                            height="100%"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <polygon
+                                points="0,20 200,20 220,100 -20,100"
+                                style="fill:black;stroke:black;stroke-width:25"
+                            />
+                            <polygon
+                                points="0,20 200,20 220,100 -20,100"
+                                style="fill:silver; transform: scale(1.05); transform-origin: center;"
+                            />
+                            <polygon
+                                points="0,20 200,20 220,100 -20,100"
+                                style="fill:#1e1e1e;stroke-width:1 transform: scale(0.1); transform-origin: center;"
+                            />
+                            <line
+                                x1="40%"
+                                y1="30%"
+                                x2="60%"
+                                y2="30%"
+                                style="stroke:white;stroke-width:2; stroke-opacity:1"
+                            />
+                        </svg>
+                        <svg
+                            id="end-call"
+                            viewBox="0 0 200 100"
+                            width="100%"
+                            height="100%"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <polygon
+                                points="0,0 200,50 200,100 0,100"
+                                style="fill:black;stroke:black;stroke-width:25"
+                            />
+                            <polygon
+                                points="0,0 200,50 200,100 0,100"
+                                style="fill:silver; transform: scale(1.05); transform-origin: center;"
+                            />
+                            <polygon
+                                points="0,0 200,50 200,100 0,100"
+                                style="fill:#1e1e1e;stroke-width:1 transform: scale(0.1); transform-origin: center;"
+                            />
+                            <image
+                                href="/img/SG-001/end-call-icon.png"
+                                x="50"
+                                y="10"
+                                width="80"
+                                height="80"
+                                preserveAspectRatio="xMidYMid slice"
+                            />
+                        </svg>
+                    </div>
+                    <div class="numpad-line">
+                        <div class="numpad-buttons">
+                            <div class="kana">あ</div>
+                            <div class="number">1</div>
+                            <div class="letter">A<br />B<br />C</div>
+                        </div>
+                        <div class="numpad-buttons">
+                            <div class="kana">か</div>
+                            <div class="number">2</div>
+                            <div class="letter">D<br />E<br />F</div>
+                        </div>
+                        <div class="numpad-buttons">
+                            <div class="kana">さ</div>
+                            <div class="number">3</div>
+                            <div class="letter">G<br />H<br />I</div>
+                        </div>
+                    </div>
+                    <div class="numpad-line">
+                        <div class="numpad-buttons">
+                            <div class="kana">た</div>
+                            <div class="number">4</div>
+                            <div class="letter">J<br />K<br />L</div>
+                        </div>
+                        <div class="numpad-buttons">
+                            <div class="kana">な</div>
+                            <div class="number">5</div>
+                            <div class="letter">M<br />N<br />O</div>
+                        </div>
+                        <div class="numpad-buttons">
+                            <div class="kana">は</div>
+                            <div class="number">6</div>
+                            <div class="letter">P<br />Q<br />R<br /></div>
+                        </div>
+                    </div>
+                    <div class="numpad-line">
+                        <div class="numpad-buttons">
+                            <div class="kana">ま</div>
+                            <div class="number">7</div>
+                            <div class="letter">S<br />T<br />U</div>
+                        </div>
+                        <div class="numpad-buttons">
+                            <div class="kana">や</div>
+                            <div class="number">8</div>
+                            <div class="letter">V<br />W<br />X</div>
+                        </div>
+                        <div class="numpad-buttons">
+                            <div class="kana">こ</div>
+                            <div class="number">9</div>
+                            <div class="letter">Y<br />Z</div>
+                        </div>
+                    </div>
+                    <div class="numpad-line">
+                        <div class="numpad-buttons">
+                            <div class="kana">゛</div>
+                            <div class="number">*</div>
+                            <div class="letter">記<br />号</div>
+                        </div>
+                        <div class="numpad-buttons">
+                            <div class="kana">わ</div>
+                            <div class="number">0</div>
+                            <div class="letter">\\<br />°<br />-</div>
+                        </div>
+                        <div class="numpad-buttons">
+                            <div class="kana">←</div>
+                            <div class="number">#</div>
+                            <div class="letter">マ<br />ナ<br />|</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div id="support"></div>
-            <div id="middle-button"></div>
-            <div id="bottom-button">
-                <div class="numpad-line">
-                    <svg id="up" viewBox="0 0 200 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                        <polygon points="-20,0 220,0 200,80 0,80" style="fill:black;stroke-width:1" />
-                        <line
-                            x1="40%"
-                            y1="60%"
-                            x2="60%"
-                            y2="60%"
-                            style="stroke:white;stroke-width:2; stroke-opacity:1"
-                        />
-                    </svg>
-                </div>
-                <div class="numpad-line arrow">
-                    <svg
-                        id="back-btn"
-                        viewBox="0 0 200 100"
-                        width="100%"
-                        height="100%"
-                        xmlns="http://www.w3.org/2000/svg"
-                        preserveAspectRatio="none"
-                    >
-                        <polygon points="0,-50 150,0 150,100 0,150" style="fill:black;stroke-width:1" />
-                        <line
-                            x1="50%"
-                            y1="50%"
-                            x2="70%"
-                            y2="50%"
-                            style="stroke:white;stroke-width:2; stroke-opacity:1"
-                        />
-                    </svg>
-                    <svg
-                        id="send-btn"
-                        viewBox="0 -10 150 80"
-                        width="100%"
-                        height="100%"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <polygon points="0,0 100,0 100,60 0,60" style="fill:black;stroke-width:1" />
-                    </svg>
-                    <svg
-                        id="right"
-                        viewBox="0 0 200 100"
-                        width="100%"
-                        height="100%"
-                        xmlns="http://www.w3.org/2000/svg"
-                        preserveAspectRatio="none"
-                    >
-                        <polygon points="0,0 150,-50 150,150 0,100" style="fill:black;stroke-width:1" />
-                        <line
-                            x1="5%"
-                            y1="50%"
-                            x2="25%"
-                            y2="50%"
-                            style="stroke:white;stroke-width:2; stroke-opacity:1"
-                        />
-                    </svg>
-                </div>
-                <div class="numpad-line">
-                    <svg id="call" viewBox="0 0 200 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                        <polygon points="0,50 200,0 200,100 0,100" style="fill:black;stroke-width:1" />
-                    </svg>
-                    <svg id="down" viewBox="0 0 200 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                        <polygon points="0,20 200,20 220,100 -20,100" style="fill:black;stroke-width:1" />
-                        <line
-                            x1="40%"
-                            y1="30%"
-                            x2="60%"
-                            y2="30%"
-                            style="stroke:white;stroke-width:2; stroke-opacity:1"
-                        />
-                    </svg>
-                    <svg
-                        id="end-call"
-                        viewBox="0 0 200 100"
-                        width="100%"
-                        height="100%"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <polygon points="0,0 200,50 200,100 0,100" style="fill:black;stroke-width:1" />
-                    </svg>
-                </div>
-                <div class="numpad-line">
-                    <div class="numpad-buttons">
-                        <div class="kana">あ</div>
-                        <div class="number">1</div>
-                        <div class="letter">A<br />B<br />C</div>
-                    </div>
-                    <div class="numpad-buttons">
-                        <div class="kana">か</div>
-                        <div class="number">2</div>
-                        <div class="letter">D<br />E<br />F</div>
-                    </div>
-                    <div class="numpad-buttons">
-                        <div class="kana">さ</div>
-                        <div class="number">3</div>
-                        <div class="letter">G<br />H<br />I</div>
-                    </div>
-                </div>
-                <div class="numpad-line">
-                    <div class="numpad-buttons">
-                        <div class="kana">た</div>
-                        <div class="number">4</div>
-                        <div class="letter">J<br />K<br />L</div>
-                    </div>
-                    <div class="numpad-buttons">
-                        <div class="kana">な</div>
-                        <div class="number">5</div>
-                        <div class="letter">M<br />N<br />O</div>
-                    </div>
-                    <div class="numpad-buttons">
-                        <div class="kana">は</div>
-                        <div class="number">6</div>
-                        <div class="letter">P<br />Q<br />R<br /></div>
-                    </div>
-                </div>
-                <div class="numpad-line">
-                    <div class="numpad-buttons">
-                        <div class="kana">ま</div>
-                        <div class="number">7</div>
-                        <div class="letter">S<br />T<br />U</div>
-                    </div>
-                    <div class="numpad-buttons">
-                        <div class="kana">や</div>
-                        <div class="number">8</div>
-                        <div class="letter">V<br />W<br />X</div>
-                    </div>
-                    <div class="numpad-buttons">
-                        <div class="kana">こ</div>
-                        <div class="number">9</div>
-                        <div class="letter">Y<br />Z</div>
-                    </div>
-                </div>
-                <div class="numpad-line">
-                    <div class="numpad-buttons">
-                        <div class="kana">゛</div>
-                        <div class="number">*</div>
-                        <div class="letter">記<br />号</div>
-                    </div>
-                    <div class="numpad-buttons">
-                        <div class="kana">わ</div>
-                        <div class="number">0</div>
-                        <div class="letter">\\<br />°<br />-</div>
-                    </div>
-                    <div class="numpad-buttons">
-                        <div class="kana">←</div>
-                        <div class="number">#</div>
-                        <div class="letter">マ<br />ナ<br />|</div>
-                    </div>
-                </div>
+            <div id="d-mail-button">
+                <img src="/img/SG-001/phonewave.png" alt="D-Mail Icon" />
+                <span>Send a d-mail here !</span>
             </div>
-        </div>`;
+            <audio id="notification-sound" src="/music/Tuturu.mp3"></audio>
+            <div id="toast-container"></div>
+        `;
     }
 }

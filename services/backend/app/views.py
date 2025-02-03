@@ -639,7 +639,6 @@ def get_chat_messages_by_channel_name(request, channel_name):
             chat = Chat.objects.filter(channel_name=channel_name).first()
             if not chat:
                 return JsonResponse({"error": "Chat not found"}, status=404)
-            print(f"Retrieved chat: {chat}")
             messages = chat.messages.all().order_by('timestamp')
             messages_data = [
                 {
@@ -650,9 +649,7 @@ def get_chat_messages_by_channel_name(request, channel_name):
                 }
                 for message in messages
             ]
-            print(f"Retrieved messages: {messages_data}")
             return JsonResponse({"messages": messages_data}, safe=False)
         except Chat.DoesNotExist:
-            print(f"Chat with channel_name {channel_name} not found")
             return JsonResponse({"error": "Chat not found"}, status=404)
     return JsonResponse({"error": "Invalid request method"}, status=400)

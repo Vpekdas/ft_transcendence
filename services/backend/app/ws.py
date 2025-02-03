@@ -9,6 +9,7 @@ from .errors import *
 from asgiref.sync import sync_to_async
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
+from channels.db import database_sync_to_async
 
 import uuid
 
@@ -158,6 +159,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_group_name = self.scope['url_route']['kwargs']['room_name']
         self.channel_name = self.channel_name
+        self.user = self.scope['user']
+
+        self.nickname = self.user.username
+
+        await self.set_player_online(self.nickname)
 
         # Join room group.
         await self.channel_layer.group_add(
@@ -179,9 +185,25 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         }))
 
+        # Broadcast player online status
+        await self.channel_layer.group_send(
+            "general",
+            {
+                'type': 'user_status',
+                'user': self.nickname,
+                'status': 'online'
+            }
+        )
+
+        online_users = await self.get_online_users()
+        await self.send(text_data=json.dumps({
+            'type': 'online_users',
+            'online_users': online_users
+        }))
+
     async def disconnect(self, close_code):
-        # Log the disconnection.
-        print(f"User {self.scope['user']} disconnected from {self.room_group_name}")
+
+        await self.set_player_offline(self.nickname)
 
         # Leave room group.
         await self.channel_layer.group_discard(
@@ -195,10 +217,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         # Notify other clients about the disconnection.
         await self.channel_layer.group_send(
-            self.room_group_name,
+            "general",
             {
-                'type': 'user_disconnected',
-                'message': f'User {user.username} has disconnected.'
+                'type': 'user_status',
+                'user': self.nickname,
+                'status': 'offline'
             }
         )
 
@@ -283,7 +306,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         sender = await sync_to_async(Player.objects.get)(user__username=sender_username)
         receiver = await sync_to_async(Player.objects.get)(user__username=receiver_username)
     
-    # ! Create a chat with channel_name only !!! Sender and receiver can switch depending.
         # Retrieve or create the chat instance.
         chat, created = await sync_to_async(Chat.objects.get_or_create)(
             channel_name=channel_name
@@ -321,3 +343,31 @@ class ChatConsumer(AsyncWebsocketConsumer):
             "receiver": receiver,
             "timestamp": timestamp
         }))
+
+    async def user_status(self, event):
+        # Handle user status change
+        user = event['user']
+        status = event['status']
+
+        # Send status update to WebSocket
+        await self.send(text_data=json.dumps({
+            'type': 'user_status',
+            'user': user,
+            'status': status
+        }))
+
+    @database_sync_to_async
+    def set_player_online(self, nickname):
+        player, created = Player.objects.get_or_create(nickname=nickname)
+        player.is_online = True
+        player.save()
+
+    @database_sync_to_async
+    def set_player_offline(self, nickname):
+        player = Player.objects.get(nickname=nickname)
+        player.is_online = False
+        player.save()
+        
+    @database_sync_to_async
+    def get_online_users(self):
+        return list(Player.objects.filter(is_online=True).values_list('nickname', flat=True))

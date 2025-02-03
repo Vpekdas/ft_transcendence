@@ -29,6 +29,8 @@ class Player(models.Model):
 
     channelList = ArrayField(models.CharField(max_length=255), default=list)
     discussingWith = ArrayField(models.CharField(max_length=255), default=list)
+    is_online = models.BooleanField(default=False)
+
 
 
 class Tournament(models.Model):

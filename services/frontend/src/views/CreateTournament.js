@@ -24,9 +24,6 @@ export default class CreateTournament extends Component {
             document.querySelector("#btn-open").addEventListener("change", async () => {
                 openType = "open";
             });
-            document.querySelector("#btn-password").addEventListener("change", async () => {
-                openType = "password";
-            });
             document.querySelector("#btn-invite-only").addEventListener("change", async () => {
                 openType = "invite";
             });

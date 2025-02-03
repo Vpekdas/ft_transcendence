@@ -541,6 +541,8 @@ class Tournament:
         self.gameSettings = gameSettings
         self.fillWithAI = fillWithAI
 
+        self.invited: list[int] = []
+
         self.players = []
         self.rounds: list[TournamentRound] = []
         self.currentRound = 0
@@ -596,8 +598,6 @@ class Tournament:
                     self.state = TournamentState.LOBBY
                     await self.next_round()
             elif self.state == TournamentState.LOBBY:
-                log("hello world@")
-
                 if time_secs() - self.timer >= 3.0:
                     for tgame in self.currentGames:
                         if tgame.has_started: continue
@@ -704,7 +704,7 @@ class TournamentManager:
         self.game = game
         self.manager = manager
 
-        self.tournaments: list[Tournament] = {}
+        self.tournaments: dict[str, Tournament] = {}
         self.consumers = []
 
     def create(self, *, gameManager, name: str, playerCount: int, privacy: str, password: str = None, fillWithAI: bool, host: int, gameSettings) -> str:
@@ -713,12 +713,11 @@ class TournamentManager:
         """
 
         tid = make_id()
-        hashed_password = hash_weak_password(password) if password is not None else None
 
         # t = sync(lambda: Tournament(name=name, tid=tid, playerCount=playerCount, openType=privacy, password=hashed_password, game=self.game, gameSettings=gameSettings, fillWithAI=fillWithAI, state="lobby"))
         # sync(lambda: t.save())
 
-        t2 = Tournament(gameManager=gameManager, manager=self, tid=tid, playerCount=playerCount, privacy=privacy, password=hashed_password, game=self.game, host=host, gameSettings=gameSettings, fillWithAI=fillWithAI)
+        t2 = Tournament(gameManager=gameManager, manager=self, tid=tid, playerCount=playerCount, privacy=privacy, password=None, game=self.game, host=host, gameSettings=gameSettings, fillWithAI=fillWithAI)
         self.tournaments[tid] = t2
 
         return tid
@@ -729,15 +728,12 @@ class TournamentManager:
 
         t = self.tournaments[tid]
 
-        if t.privacy == "password" and (password is None or hash_weak_password(password) != t.password):
-            return False
-
-        if t.privacy == "invite":
-            # TODO: Check if the player has been invited to the tournament
-            return False
-
-        await t.on_join(player)
-        return True
+        if t.privacy == "invite" and player.id in t.invited:
+            await t.on_join(player)
+            return True
+        elif t.privacy == "open":
+            await t.on_join(player)
+            return True
 
     async def connect(self, consumer):
         self.consumers.append(consumer)

@@ -9,10 +9,6 @@ export default class TournamentPrivacyCard extends Component {
                 const password = document.querySelector(".container-fluid.settings.tournament-password");
                 password.style.display = "none";
             });
-            document.querySelector("#btn-password").addEventListener("click", async () => {
-                const password = document.querySelector(".container-fluid.settings.tournament-password");
-                password.style.display = "flex";
-            });
             document.querySelector("#btn-invite-only").addEventListener("click", async () => {
                 const password = document.querySelector(".container-fluid.settings.tournament-password");
                 password.style.display = "none";
@@ -27,9 +23,6 @@ export default class TournamentPrivacyCard extends Component {
                 <div class="btn-group tournament-privacy" role="group" aria-label="Basic radio toggle button group">
                     <input type="radio" class="btn-check" name="privacy" id="btn-open" autocomplete="off" checked />
                     <label class="btn btn-outline-primary" for="btn-open">${tr("Open")}</label>
-
-                    <input type="radio" class="btn-check" name="privacy" id="btn-password" autocomplete="off" />
-                    <label class="btn btn-outline-primary" for="btn-password">${tr("Password")}</label>
 
                     <input type="radio" class="btn-check" name="privacy" id="btn-invite-only" autocomplete="off" />
                     <label class="btn btn-outline-primary" for="btn-invite-only">${tr("Invite-Only Access")}</label>

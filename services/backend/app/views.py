@@ -80,8 +80,6 @@ def signinExternal(request: HttpRequest):
         code = data["code"]
         redirect_uri = data["redirect_uri"]
 
-        # TODO: Check if the access token is valid, if yes then skip the authentification
-
         # Exchange the code provided by the api for an access token
         res = requests.post("https://api.intra.42.fr/oauth/token", data={"grant_type": "authorization_code", "client_id": CLIENT_ID, "client_secret": os.environ.get("API42_SECRET"), "code": code, "redirect_uri": redirect_uri })
 
@@ -405,18 +403,32 @@ def tournament_create(request: HttpRequest):
         print(data, file=sys.stderr)
         return JsonResponse({ "error": INVALID_REQUEST })
 
-    if data["openType"] not in ["open", "invite", "password"] or data["playerCount"] not in [2, 4, 8, 16]:
+    if data["openType"] not in ["open", "invite"] or data["playerCount"] not in [2, 4, 8]:
         return JsonResponse({ "error": INVALID_REQUEST })
 
     if remove_unwanted_characters(data["name"]) != data["name"]:
         return JsonResponse({ "error": INVALID_TOURNAMENT_NAME })
 
     game_settings = data["gameSettings"]
-    manager = pong_manager # TODO: Modify this with data["game"]
+    manager = pong_manager
 
-    tid = tournaments.create(gameManager=pong_manager, host=player.id, name=data["name"], playerCount=data["playerCount"], privacy=data["openType"], password=data["password"] if "password" in data else None, fillWithAI=bool(data["fillWithAI"]), gameSettings=data["gameSettings"])
+    tid = tournaments.create(gameManager=pong_manager, host=player.id, name=data["name"], playerCount=data["playerCount"], privacy=data["openType"], password=None, fillWithAI=False, gameSettings=data["gameSettings"])
 
     return JsonResponse({ "id": tid })@require_POST
+
+def tournamentInvite(request: HttpRequest, tid):
+    if not request.user.is_authenticated:
+        return JsonResponse({ "error": NOT_AUTHENTICATED })
+
+    data = json.loads(request.body)
+    player = Player.objects.filter(user=request.user).first()\
+    
+    if not "pid" in data:
+        return HttpResponseServerError()
+
+    t = tournaments.tournaments[tid]
+    t.invited.append(data["pid"])
+
 def addFriend(request: HttpRequest, friend_id):
     if not request.user.is_authenticated:
         return JsonResponse({"error": NOT_AUTHENTICATED})

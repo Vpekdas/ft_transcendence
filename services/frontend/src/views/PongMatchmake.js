@@ -35,6 +35,7 @@ export default class PongMatchmake extends Component {
                 JSON.stringify({
                     type: "request",
                     gamemode: GET["gamemode"],
+                    opponent: GET["opponent"],
                 })
             );
         };

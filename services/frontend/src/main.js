@@ -42,8 +42,14 @@ defineRouter({
         { path: "/callback", view: Callback },
     ],
     hook: async (route, url) => {
-        if (!(await isLoggedIn()) && route != "/login" && route != "/register" && route != "/redirected") {
-            if (route == "/") {
+        if (
+            !(await isLoggedIn()) &&
+            route != "/login" &&
+            route != "/register" &&
+            route != "/redirected" &&
+            route != "/callback"
+        ) {
+            if (route == undefined || route == "/") {
                 navigateTo("/login");
             } else {
                 navigateTo("/login?redirect=" + encodeURIComponent(url));

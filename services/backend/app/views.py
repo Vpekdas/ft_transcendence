@@ -70,12 +70,15 @@ def signinExternal(request: HttpRequest):
         if res.status_code != 200:
             return JsonResponse({"error": INVALID_TOKEN})
         
-        user = User.objects.filter(username=res["login"])
+        res = res.json()
+        user = User.objects.filter(username=res["login"]).first()
 
         if not user:
             return HttpResponseServerError()
         
         login(request, user)
+
+        return JsonResponse({ "access_token": data["access_token"] })
     else:
         code = data["code"]
         redirect_uri = data["redirect_uri"]

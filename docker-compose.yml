@@ -12,8 +12,9 @@ services:
             - Dockerfile
   backend:
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
+      # postgres:
+      #   condition: service_healthy
     container_name: backend
     build: services/backend
     env_file:
@@ -30,14 +31,11 @@ services:
     container_name: database
     volumes:
       - ./.data/postgres:/var/lib/postgresql/data
-    #   - type: volume
-    #     source: postgres_data
-    #     target: /var/lib/postgresql/data
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
-      interval: 0.2s
+    # healthcheck:
+    #   test: ["CMD-SHELL", "pg_isready -U postgres -d postgres -p 6431"]
+    #   interval: 0.2s
   proxy:
     depends_on:
       - frontend
@@ -46,6 +44,3 @@ services:
     build: services/proxy
     ports:
       - 8080:443
-# volumes:
-#   postgres_data:
-#     driver: local

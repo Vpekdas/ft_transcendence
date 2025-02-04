@@ -5,17 +5,16 @@
 - [x] Web: PostgreSQL (minor) by [@FirePh0enix]
 
 - [x] User: Standard user (major) by [@FirePh0enix]
-- [x] User: Remote Authentication (42) (major) by [@FirePh0enix] ([#11])
+- [x] User: Remote Authentication (42) (major) by [@FirePh0enix]
 
-- [x] Gameplay: Remote players (major)
-- [ ] Gameplay: Another game (major)
-- [ ] Gameplay: Game customization (minor) ([#9])
+- [x] Gameplay: Remote players (major) [@FirePh0enix]
+- [ ] Gameplay: Game customization (minor)
 - [ ] Gameplay: Live Chat (major) by [@Lebronen]
 
 - [ ] AI: User stats (minor)
 
-- [ ] Cybersec: GPDR (minor) ?
-- [ ] Cybersec: 2FA (major) by [@Vpekdas]
+- [ ] Cybersec: GPDR (minor)
+- [ ] Cybersec: 2FA (major) by [@Lebronen]
 
 - [x] Graphics: ThreeJS (major) by [@Vpekdas]
 
@@ -27,6 +26,7 @@
 - Web: Blockchain (major)
 
 - Gameplay: Multiple player (major)
+- Gameplay: Another game (major)
 
 - AI: AI Opponent (major)
 

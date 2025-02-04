@@ -969,7 +969,10 @@ export function defineRouter(settings) {
  * @param {string} url
  */
 export function navigateTo(url) {
-    history.pushState(null, null, url);
+    try {
+        history.pushState({}, "", url);
+    } catch (ex) {}
+
     initialPageLoad = true;
     setTimeout(async () => await router());
 }

@@ -74,7 +74,8 @@ def signinExternal(request: HttpRequest):
         user = User.objects.filter(username=res["login"]).first()
 
         if not user:
-            return HttpResponseServerError()
+            # The access token is valid but the account does not exists, probably due to a database wipe
+            return JsonResponse({"error": INVALID_TOKEN})
         
         login(request, user)
 

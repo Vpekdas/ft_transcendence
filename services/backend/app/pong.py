@@ -2,6 +2,10 @@ import sys
 import os
 import json
 import math
+import asyncio
+import time
+
+from threading import Thread
 
 from .gameframework import log, time_secs, sync, Game, GameManager, Vec3, Box, Sphere, Body, Scene, Client, BodyType, Area, CollisionResult, State, ClientAI, Timer
 from .models import PongGameResult, Player as PlayerModel
@@ -221,6 +225,8 @@ class Pong(Game):
                 gain = base / 2
             elif looser.pongElo == 0:
                 gain = (1 / winner.pongElo / 2) * base
+            else:
+                gain = looser.pongElo / winner.pongElo / 2 * base
             
             winner.pongElo += gain
             looser.pongElo -= gain
@@ -283,12 +289,53 @@ class MatchmakePlayer:
         self.player_id = player_id
         self.gamemode = gamemode
         self.elo = elo
+    
+    def __lt__(self, other):
+        return self.elo < other.elo
 
 class PongManager(GameManager):
     def __init__(self):
         super().__init__(ty=Pong)
 
         self.players = []
+
+        self.loop_running = False
+
+    def start_watcher(self):
+        self.loop_running = True
+
+        self.thread = Thread(target=self.thread_runner)
+        self.thread.start()
+
+    def has_watcher_started(self) -> bool:
+        return self.loop_running
+
+    def thread_runner(self):
+        self.event_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.event_loop)
+        self.event_loop.create_task(self.matchmake_loop())
+        self.event_loop.run_forever()
+    
+    async def matchmake_loop(self):
+        while self.loop_running:
+            if len(self.players) >= 2:
+                players = sorted(self.players, reverse=True)
+
+                p1 = players[0]
+                p2 = players[1]
+
+                self.players.remove(p1)
+                self.players.remove(p2)
+
+                game = self.start_game(gamemode="1v1")
+
+                await game.on_join(p1.player_id)
+                await game.on_join(p2.player_id)
+
+                await p1.conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": "1v1" }))
+                await p2.conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": "1v1" }))
+            
+            await asyncio.sleep(1.0)
 
     async def do_matchmaking(self, conn, gamemode: str, player: Player, opponent: int=None):
         try:
@@ -304,20 +351,22 @@ class PongManager(GameManager):
             await conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": gamemode }))
             await game.on_join(player.id)
         elif gamemode == "1v1":
-            try:
-                opponent = next(filter(lambda p: p.gamemode == gamemode, self.players))
+            self.players.append(MatchmakePlayer(conn=conn, player_id=player.id, gamemode=gamemode, elo=player.pongElo))
+            
+            # try:
+            #     opponent = next(filter(lambda p: p.gamemode == gamemode, self.players))
 
-                game = self.start_game(gamemode=gamemode)
+            #     game = self.start_game(gamemode=gamemode)
 
-                await game.on_join(opponent.player_id)
-                await game.on_join(player.id)
+            #     await game.on_join(opponent.player_id)
+            #     await game.on_join(player.id)
 
-                await conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": gamemode }))
-                await opponent.conn.send(json.dumps({ "type": "matchFound", "id": game.id }))
+            #     await conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": gamemode }))
+            #     await opponent.conn.send(json.dumps({ "type": "matchFound", "id": game.id }))
 
-                self.players.remove(opponent)
-            except StopIteration:
-                self.players.append(MatchmakePlayer(conn=conn, player_id=player.id, gamemode=gamemode, elo=player.pongElo))
+            #     self.players.remove(opponent)
+            # except StopIteration:
+            #     self.players.append(MatchmakePlayer(conn=conn, player_id=player.id, gamemode=gamemode, elo=player.pongElo))
         elif gamemode == "1v1invite" and opponent is not None:
             game = self.start_game(gamemode=gamemode)
             game.accepted_players = [player.id, opponent]

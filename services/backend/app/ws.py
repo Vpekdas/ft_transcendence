@@ -39,6 +39,8 @@ class PongMatchmakeConsumer(AsyncWebsocketConsumer):
                 return
 
             if data["type"] == "request" and "gamemode" in data:
+                if not pong_manager.has_watcher_started(): pong_manager.start_watcher()
+
                 await pong_manager.do_matchmaking(self, data["gamemode"], self.player, opponent=data["opponent"] if "opponent" in data else None)
         except json.JSONDecodeError:
             pass

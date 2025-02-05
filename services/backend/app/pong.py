@@ -328,9 +328,10 @@ class PongManager(GameManager):
                 self.players.remove(p2)
 
                 game = self.start_game(gamemode="1v1")
+                game.accepted_players = [p1.player_id, p2.player_id]
 
-                await game.on_join(p1.player_id)
-                await game.on_join(p2.player_id)
+                # await game.on_join(p1.player_id)
+                # await game.on_join(p2.player_id)
 
                 await p1.conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": "1v1" }))
                 await p2.conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": "1v1" }))

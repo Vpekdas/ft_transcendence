@@ -207,6 +207,29 @@ class Pong(Game):
     def save_results(self):
         PongGameResult.objects.create(score1=self.player1.score, score2=self.player2.score, player1=self.clients[0].id, player2=self.clients[1].id, tid=self.tid, timeStarted=self.time_started, timeEnded=self.time_ended, gamemode=self.gamemode, stats={})
 
+        if self.gamemode == "1v1":
+            p1 = PlayerModel.objects.filter(id=self.clients[0].id).first()
+            p2 = PlayerModel.objects.filter(id=self.clients[1].id).first()
+
+            winner = p1 if self.player1.score > self.player2.score else p2
+            looser = p2 if self.player1.score > self.player2.score else p1
+
+            base = 50
+            gain: int = 1
+
+            if winner.pongElo == 0 and looser.pongElo == 0:
+                gain = base / 2
+            elif looser.pongElo == 0:
+                gain = (1 / winner.pongElo / 2) * base
+            
+            winner.pongElo += gain
+            looser.pongElo -= gain
+
+            if looser.pongElo < 0: looser.pongElo = 0
+
+            winner.save()
+            looser.save()
+
     async def on_join(self, player_id: int):
         if self.accepted_players is not None and player_id not in self.accepted_players:
             return False
@@ -255,10 +278,11 @@ class Pong(Game):
             return self.player2.score
 
 class MatchmakePlayer:
-    def __init__(self, *, conn, player_id: str, gamemode: str):
+    def __init__(self, *, conn, player_id: str, gamemode: str, elo: int):
         self.conn = conn
         self.player_id = player_id
         self.gamemode = gamemode
+        self.elo = elo
 
 class PongManager(GameManager):
     def __init__(self):
@@ -293,7 +317,7 @@ class PongManager(GameManager):
 
                 self.players.remove(opponent)
             except StopIteration:
-                self.players.append(MatchmakePlayer(conn=conn, player_id=player.id, gamemode=gamemode))
+                self.players.append(MatchmakePlayer(conn=conn, player_id=player.id, gamemode=gamemode, elo=player.pongElo))
         elif gamemode == "1v1invite" and opponent is not None:
             game = self.start_game(gamemode=gamemode)
             game.accepted_players = [player.id, opponent]

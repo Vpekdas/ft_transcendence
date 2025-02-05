@@ -384,12 +384,8 @@ def selectBallSkin(request: HttpRequest, id, name):
 def getMatches(request: HttpRequest, id):
     if not request.user.is_authenticated:
         return JsonResponse({ "error": NOT_AUTHENTICATED })
-    
-    id = request.user.id
 
-    player = player = Player.objects.filter(id=id).first()
-
-    # data = json.loads(request.body)
+    player = Player.objects.filter(id=request.user.id).first()
     results = PongGameResult.objects.filter(Q(player1=player.id) | Q(player2=player.id))
 
     return JsonResponse({ "results": [{ "gamemode": r.gamemode, "player1": r.player1, "player2": r.player2, "score1": r.score1, "score2": r.score2, "timeStarted": r.timeStarted, "timeEnded": r.timeEnded, "stats": r.stats, "tid": r.tid } for r in results] })

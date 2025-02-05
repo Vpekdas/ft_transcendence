@@ -24,7 +24,7 @@ class Player(models.Model):
 
     pongElo = IntegerField(default=0)
 
-    friends = models.ManyToManyField("self", symmetrical=True, related_name="friend_set")
+    friends = models.ManyToManyField("self", symmetrical=True, related_name="friend_set", default=list)
     blockedUsers = ArrayField(IntegerField(), default=list)
 
     channelList = ArrayField(models.CharField(max_length=255), default=list)

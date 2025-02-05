@@ -1,11 +1,14 @@
 import { tr } from "../../i18n";
 import { Component } from "../../micro";
-
-/** @type {import("../../micro").Component} */
+import { post } from "../../utils";
 
 export default class HomeNavBar extends Component {
     activeTabClass(t) {
         return window.location.pathname.startsWith(t) ? "active" : "";
+    }
+
+    async init() {
+        this.results = await post("/api/player/c/profile").then((res) => res.json());
     }
 
     render() {
@@ -47,6 +50,9 @@ export default class HomeNavBar extends Component {
                 <li class="nav-item">
                     <a class="nav-link custom-link ${this.activeTabClass("/test")}" href="/test"> <span>Test</span></a>
                 </li>
+                <div class="language-picker-container">
+                    <div class="elo-container">Elo: ${this.results.pongElo}</div>
+                </div>
                 <div class="language-picker-container">
                     <LanguagePicker />
                 </div>

@@ -173,6 +173,9 @@ export default class Pong extends Component {
         let score1 = data["scores"][0];
         let score2 = data["scores"][1];
 
+        document.getElementById("score1").textContent = score1;
+        document.getElementById("score2").textContent = score2;
+
         const geometry = new TextGeometry(score1 + " - " + score2, {
             font: this.font,
             size: 80,
@@ -352,7 +355,11 @@ export default class Pong extends Component {
     }
 
     render() {
-        let ui = "";
+        let ui = /* HTML */ `<div class="ui">
+            <span class="score" id="score1">0</span>
+            <span class="vs"> - </span>
+            <span class="score" id="score2">0</span>
+        </div>`;
 
         return /* HTML */ ` <HomeNavBar />
             <div id="pong">

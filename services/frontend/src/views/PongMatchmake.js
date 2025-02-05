@@ -45,13 +45,13 @@ export default class PongMatchmake extends Component {
             console.log(data);
 
             if (data["type"] == "matchFound") {
-                document.querySelector(".match-found-container").classList.remove("hidden");
-                document.querySelector(".matchmake-container").classList.add("hidden");
-
                 // Do not wait if we are playing against ourself.
                 if (GET["gamemode"].endsWith("local")) {
                     navigateTo("/play/pong/" + data["id"]);
                 } else {
+                    document.querySelector(".match-found-container").classList.remove("hidden");
+                    document.querySelector(".matchmake-container").classList.add("hidden");
+
                     setTimeout(() => navigateTo("/play/pong/" + data["id"]), 5000);
                 }
             }

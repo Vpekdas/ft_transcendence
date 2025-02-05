@@ -956,11 +956,11 @@ export function defineRouter(settings) {
     });
 
     // TODO: This only works when saving this file for some reason
-    if (import.meta.hot) {
-        import.meta.hot.accept(async (newModule) => {
-            await router();
-        });
-    }
+    // if (import.meta.hot) {
+    //     import.meta.hot.accept(async (newModule) => {
+    //         await router();
+    //     });
+    // }
 }
 
 /**

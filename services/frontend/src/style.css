@@ -192,6 +192,10 @@
     width: 15%;
 }
 
+.elo-container {
+    background-color: red;
+}
+
 /* SOCIAL */
 
 /* MATCH HISTORY */
@@ -1107,34 +1111,25 @@ canvas {
 
 #pong-overlay .ui {
     position: relative;
-    width: 60%;
+    width: 10%;
 
     left: 50%;
     transform: translateX(-50%) translateY(-50%);
-    top: 50%;
+    top: 6%;
 
     text-align: center;
     background-color: rgb(64 173 70 / 0.2);
 }
 
-#pong-overlay .ui.pre-game {
-    position: relative;
-    width: 60%;
-
-    left: 50%;
-    transform: translateX(-50%) translateY(-50%);
-    top: 50%;
-
-    text-align: center;
-    background-color: rgba(56, 56, 56, 0.2);
-    border-radius: 0.7em;
+#pong-overlay .score {
+    font-size: 2em;
 }
 
-#pong-overlay .ui.pre-game ul {
-    list-style-type: none;
+#pong-overlay .vs {
+    font-size: 2em;
 }
 
-#pong-overlay .ui.pre-game .power-up {
+#pong-overlay > div {
     display: inline-block;
 }
 

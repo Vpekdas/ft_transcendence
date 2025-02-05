@@ -56,5 +56,9 @@
     "Invalid username": "Nom d'utilisateur invalid",
     "Invalid nickname": "Surnom invalid",
     "Invalid tournament name": "Nom du tournoi invalid",
-    "Invalid token": "Jeton invalid"
+    "Invalid token": "Jeton invalid",
+    "Confirm Action": "Confirmer l'action",
+    "Are you sure you want to delete your account?": "Etes-vous sure de supprimer votre compte?",
+    "Confirm": "Confirmer",
+    "Cancel": "Annuler"
 }

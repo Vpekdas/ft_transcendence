@@ -3281,3 +3281,46 @@ ow-system[labels="false"] ow-name {
     background-color: #006400;
     transform: scale(0.95);
 }
+
+.container-fluid.dashboard-container.other-profile {
+    display: flex;
+    position: absolute;
+    height: 75%;
+    width: 50%;
+    top: 10%;
+    left: 25%;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+}
+
+.container-fluid.dashboard-navbar.other-profile {
+    display: flex;
+    position: relative;
+    height: 100%;
+    width: 25%;
+    padding: 0;
+    margin: 0;
+}
+
+.nav.flex-column.dashboard-tab.other-profile {
+    display: flex;
+    position: relative;
+    justify-content: space-around;
+    height: 100%;
+    width: 30%;
+}
+
+.list-group.settings.other-profile {
+    display: flex;
+    position: relative;
+    height: 100%;
+    width: 100%;
+    background-color: #001f3f;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.card-body.settings.other-profile {
+    align-items: center;
+}

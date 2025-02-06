@@ -27,7 +27,6 @@ export default class Statistics extends Component {
 }
 
 // TODO Win/Loss Ratio Chart: Donut Chart.
-// TODO Most Used Skins: Donut Chart.
 // TODO Game Duration Chart: Line Chart.
 // TODO Points per Game Chart: Bar Chart.
 // TODO Heatmap of Ball Hits: Heatmap

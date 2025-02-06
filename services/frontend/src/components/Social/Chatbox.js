@@ -96,8 +96,6 @@ export default class Chatbox extends Component {
                 const data = JSON.parse(event.data);
                 const messageData = JSON.parse(event.data);
 
-                console.log(data);
-
                 if (data.type === "channel_list") {
                     for (let i = 0; i < data.channelList.length; i++) {
                         const channelInfo = { channelUrl: data.channelList[i], personId: data.discussingWith[i] };
@@ -334,7 +332,6 @@ export default class Chatbox extends Component {
         discussionToShow.style.display = "flex";
     }
 
-    // ! WORKING HERE, I MUST SAVE THE PREVIOUS COLOR STATUS SO WHEN SEARCHING ITS THE SANE.
     async showSearchBarResult() {
         this.searchingArray.length = 0;
         let idToNickname = "";
@@ -950,6 +947,7 @@ export default class Chatbox extends Component {
             </div>
             <audio id="notification-sound" src="/music/Tuturu.mp3"></audio>
             <div id="toast-container"></div>
+            <OtherProfile />
         `;
     }
 }

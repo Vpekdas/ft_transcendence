@@ -16,7 +16,7 @@ import uuid
 import logging
 
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
 pong_manager = PongManager()
@@ -461,6 +461,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'status': status
         }))
 
+    # Maybe code the online_users here for more consistency.
+    async def online_users(self, event):
+        pass
+
+
     @database_sync_to_async
     def set_player_online(self, user_id):
         player, created = Player.objects.get_or_create(user_id=user_id)
@@ -476,3 +481,4 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_online_users(self):
         return list(Player.objects.filter(is_online=True).values_list('user_id', flat=True))
+    

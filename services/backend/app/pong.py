@@ -7,28 +7,9 @@ import time
 
 from threading import Thread
 
-from .gameframework import log, time_secs, sync, Game, GameManager, Vec3, Box, Sphere, Body, Scene, Client, BodyType, Area, CollisionResult, State, ClientAI, Timer
+from .gameframework import log, time_secs, sync, Game, GameManager, Vec3, Box, Sphere, Body, Scene, Client, BodyType, Area, CollisionResult, State, Timer
 from .models import PongGameResult, Player as PlayerModel
 from channels.db import database_sync_to_async
-
-"""
-This class represent a generic power-up.
-"""
-class PowerUp:
-    def __init__(self):
-        pass
-
-    def when_activated(self, scene: Scene, player):
-        pass
-
-    def when_deactivated(self, scene: Scene, player):
-        pass
-
-    """
-    Called every frame when the power-up is active.
-    """
-    def process(self):
-        pass
 
 class Player(Body):
     speed = 0.2
@@ -52,18 +33,6 @@ class Player(Body):
 
     def move_down(self):
         self.velocity.y -= self.speed
-
-class PongAI(ClientAI):
-    def process(self, scene: Scene):
-        if time_secs() - self.last_update >= 1:
-            self.last_update = time_secs()
-            self.scene = scene
-
-            ball: Body = next(scene.get_bodies("Ball"))
-            ball.velocity.normalized()
-
-        if self.target_y is not None:
-            pass
 
 class Ball(Body):
     speed = 0.3
@@ -98,6 +67,9 @@ class Ball(Body):
 
             factor = abs(y_diff) / 2.5 * 0.5
             self.velocity = (dir + normal * (1.0 - factor)).normalized() * self.speed
+
+            player: Player = collision.collider
+            player.client.hits.append({ "x": self.pos.x, "y": self.pos.y })
         else:
             self.velocity = self._bounce_vec(collision.normal, dir, self.bounce) * self.speed
 
@@ -209,7 +181,17 @@ class Pong(Game):
 
     @database_sync_to_async
     def save_results(self):
-        PongGameResult.objects.create(score1=self.player1.score, score2=self.player2.score, player1=self.clients[0].id, player2=self.clients[1].id, tid=self.tid, timeStarted=self.time_started, timeEnded=self.time_ended, gamemode=self.gamemode, stats={})
+        PongGameResult.objects.create(
+            score1=self.player1.score,
+            score2=self.player2.score,
+            player1=self.clients[0].id,
+            player2=self.clients[1].id,
+            tid=self.tid,
+            timeStarted=self.time_started,
+            timeEnded=self.time_ended,
+            gamemode=self.gamemode,
+            stats={ "p1": { "hits": self.clients[0].hits, "up_count": self.clients[0].up_count, "down_count": self.clients[1].down_count }, "p2": { "hits": self.clients[1].hits, "up_count": self.clients[1].up_count, "down_count": self.clients[1].down_count } }
+        )
 
         if self.gamemode == "1v1":
             p1 = PlayerModel.objects.filter(id=self.clients[0].id).first()

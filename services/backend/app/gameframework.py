@@ -186,6 +186,11 @@ class Client:
         self.inputs = dict()
         self.ready = False
 
+        # Random stats
+        self.hits = []
+        self.up_count = 0
+        self.down_count = 0
+
     def is_pressed(self, name):
         return name in self.inputs and self.inputs[name]
 
@@ -195,18 +200,13 @@ class Client:
 
         if action_type == "press":
             self.inputs[action_name] = True
+            
+            if action_name == "up":
+                self.up_count += 1
+            elif action_name == "down":
+                self.down_count += 1
         elif action_type == "release":
             self.inputs[action_name] = False
-
-class ClientAI(Client):
-    def __init__(self):
-        super().__init__(id=-1,subid="ai")
-
-        self.last_update = 0
-        self.target_y = None
-
-    def process(self, scene: Scene):
-        pass
 
 class BodyType(enum.Enum):
     STATIC = 0
@@ -217,7 +217,7 @@ def make_id(k=8) -> str:
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
 
 class Body:
-    def __init__(self, *, type="Body", scene: Scene=None, shape=None, body_type=BodyType.STATIC, client=None, pos=Vec3(), bounce: float=0.0):
+    def __init__(self, *, type="Body", scene: Scene=None, shape=None, body_type=BodyType.STATIC, client: Client=None, pos=Vec3(), bounce: float=0.0):
         self.type = type
         self.scene = scene
         self.pos = pos

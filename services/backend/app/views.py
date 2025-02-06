@@ -46,6 +46,9 @@ def signin(request: HttpRequest):
     if User.objects.filter(username=username).count() > 0:
         return JsonResponse({"error": USERNAME_ALREADY_TAKEN})
 
+    if Player.objects.filter(nickname=nickname).count() > 0:
+        return JsonResponse({ "error": NICKNAME_ALREADY_USED })
+
     user = User.objects.create(username=username)
     player = Player.objects.create(user=user, nickname=remove_unwanted_characters(nickname))
 
@@ -57,6 +60,11 @@ def signin(request: HttpRequest):
     return JsonResponse({})
 
 CLIENT_ID="u-s4t2ud-fd6496bf5631feb3051ccd4d5be873a3e47614223c9ebb635abaefda7d894f92"
+
+def get_valid_login(s: str):
+    while Player.objects.filter(nickname=s).count() > 0:
+        s += "-"
+    return s
 
 """
 Create a new user using 42 API
@@ -106,11 +114,12 @@ def signinExternal(request: HttpRequest):
             return HttpResponseServerError()
 
         res = res.json()
-        
+        nickname = get_valid_login(res["login"])
+
         user = User.objects.filter(username=res["login"]).first()
         if not user:
             user = User.objects.create(username=res["login"])
-            player = Player.objects.create(user=user, nickname=res["login"], external=True, icon={"external_icon": res["image"]["link"]})
+            player = Player.objects.create(user=user, nickname=nickname, external=True, icon={"external_icon": res["image"]["link"]})
 
         login(request, user)
 
@@ -212,11 +221,17 @@ def updateNickname(request: HttpRequest, id):
     if not player:
         return JsonResponse({ "error": INTERNAL_ERROR })
 
-    newNickname = data["nickname"]
+    new_nickname = data["nickname"]
 
-    if remove_unwanted_characters(newNickname) != newNickname:
+    if remove_unwanted_characters(new_nickname) != new_nickname:
         return JsonResponse({ "error": INVALID_NICKNAME })
-    player.nickname = newNickname
+
+    p2 = Player.objects.filter(nickname=new_nickname).first()
+
+    if p2:
+        return JsonResponse({ "error": NICKNAME_ALREADY_USED })
+
+    player.nickname = new_nickname
     player.save()
 
     return JsonResponse({})

@@ -11,12 +11,13 @@ import os
 
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponseServerError
 from django.http.request import HttpRequest
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.db.models import Q
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 
 from .models import duck, Player, Tournament, PongGameResult, Chat, Message
 from .errors import *
@@ -472,70 +473,6 @@ def deleteFriend(request: HttpRequest, friend_id):
 
 
 @require_POST
-def sendMessage(request: HttpRequest, id):
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": NOT_AUTHENTICATED})
-
-    # Récupérer le joueur actuel
-    player = Player.objects.filter(user=request.user).first()
-    if not player:
-        return JsonResponse({"error": INTERNAL_ERROR})
-
-    # Récupérer le destinataire
-    p2 = Player.objects.filter(id=id).first()
-    if not p2:
-        return JsonResponse({"error": RECEIVER_NOT_FOUND})
-
-    # Vérifier si un chat existe déjà ou en créer un
-    chat, created = Chat.objects.get_or_create(
-        player1=min(player, p2, key=lambda x: x.id),
-        player2=max(player, p2, key=lambda x: x.id),
-    )
-
-    # Récupérer le contenu du message depuis le body de la requête
-    data = json.loads(request.body)
-    contenu = data.get("content")
-    if not contenu:
-        return JsonResponse({"error": "Message content is required."})
-
-    # Créer le message
-    message = Message.objects.create(content=contenu, sender=player, receiver=p2)
-
-    # Ajouter le message au chat
-    chat.messages.add(message)
-
-    return JsonResponse({"message": "Message sent successfully."})
-
-
-def getMessages(request: HttpRequest, id):
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": NOT_AUTHENTICATED})
-
-    # Récupérer le joueur actuel
-    player = Player.objects.filter(user=request.user).first()
-    if not player:
-        return JsonResponse({"error": INTERNAL_ERROR})
-
-    # Récupérer le destinataire
-    p2 = Player.objects.filter(id=id).first()
-    if not p2:
-        return JsonResponse({"error": FRIEND_NOT_FOUND})
-
-    # Rechercher le chat entre les deux joueurs
-    try:
-        chat = Chat.objects.get(
-            player1=min(player, p2, key=lambda x: x.id),
-            player2=max(player, p2, key=lambda x: x.id),
-        )
-    except Chat.DoesNotExist:
-        return JsonResponse({"error": CHAT_NOT_FOUND})
-
-    # Récupérer les messages du chat
-    messages = chat.messages.all().values("content", "sender__username", "receiver__username", "timestamp")
-
-    return JsonResponse({"messages": list(messages)})
-
-@require_POST
 def addFriend(request: HttpRequest, friend_id):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "NOT_AUTHENTICATED"})
@@ -572,61 +509,6 @@ def deleteFriend(request: HttpRequest, friend_id):
 
     return JsonResponse({"message": "Friend removed successfully."})
 
-
-@require_POST
-def sendMessage(request: HttpRequest, id):
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": "NOT_AUTHENTICATED"})
-
-    player = Player.objects.filter(user=request.user).first()
-    if not player:
-        return JsonResponse({"error": "INTERNAL_ERROR"})
-
-    p2 = Player.objects.filter(id=id).first()
-    if not p2:
-        return JsonResponse({"error": "RECEIVER_NOT_FOUND"})
-
-    # Vérifier si un chat existe déjà entre les deux joueurs (dans n'importe quel ordre)
-    chat, created = Chat.objects.get_or_create(
-        player1=min(player, p2, key=lambda x: x.id),  # Le joueur avec l'id le plus bas est `player1`
-        player2=max(player, p2, key=lambda x: x.id),
-    )
-
-    # Créer le message
-    message = Message.objects.create(content=request.POST['contenu'], sender=player, receiver=p2)
-
-    # Ajouter le message au chat
-    chat.messages.add(message)
-
-    return JsonResponse({"message": "Message sent successfully."})
-
-
-def getMessages(request: HttpRequest, id):
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": "NOT_AUTHENTICATED"})
-
-    player = Player.objects.filter(user=request.user).first()
-    if not player:
-        return JsonResponse({"error": "INTERNAL_ERROR"})
-
-    p2 = Player.objects.filter(id=id).first()
-    if not p2:
-        return JsonResponse({"error": "FRIEND_NOT_FOUND"})
-
-    # Rechercher le chat entre les deux joueurs
-    try:
-        chat = Chat.objects.get(
-            player1=min(player, p2, key=lambda x: x.id),
-            player2=max(player, p2, key=lambda x: x.id),
-        )
-    except Chat.DoesNotExist:
-        return JsonResponse({"error": "CHAT_NOT_FOUND"})
-
-    # Récupérer les messages
-    messages = chat.messages.all().values("content", "sender__username", "receiver__username", "timestamp")
-
-    return JsonResponse({"messages": list(messages)})
-
 # @require_POST
 # def tournament_info(request: HttpRequest, id: str):
 #     t = Tournament.objects.filter(tid=id).first()
@@ -642,7 +524,7 @@ def getMessages(request: HttpRequest, id):
 #     })
 
 def getUsersList(request):
-    users = Player.objects.all().values('nickname')
+    users = Player.objects.all().values('user_id')
     return JsonResponse(list(users), safe=False)
 
 @csrf_exempt
@@ -656,8 +538,8 @@ def get_chat_messages_by_channel_name(request, channel_name):
             messages_data = [
                 {
                     "content": message.content,
-                    "sender": message.sender.user.username,
-                    "receiver": message.receiver.user.username,
+                    "sender": message.sender.user.id,
+                    "receiver": message.receiver.user.id,
                     "timestamp": message.timestamp
                 }
                 for message in messages
@@ -666,3 +548,16 @@ def get_chat_messages_by_channel_name(request, channel_name):
         except Chat.DoesNotExist:
             return JsonResponse({"error": "Chat not found"}, status=404)
     return JsonResponse({"error": "Invalid request method"}, status=400)
+
+@require_GET
+@login_required
+def get_user_id_by_nickname(request: HttpRequest):
+    nickname = request.GET.get('nickname')
+    if not nickname:
+        return JsonResponse({"error": "Nickname parameter is required"}, status=400)
+    
+    try:
+        user = User.objects.get(username=nickname)
+        return JsonResponse({"user_id": user.id})
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User not found"}, status=404)

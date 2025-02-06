@@ -1,10 +1,12 @@
 import { Component } from "../../micro";
-import { getOriginNoProtocol, post, fetchApi, showToast } from "/utils";
+import { getOriginNoProtocol, post, fetchApi, showToast, getNickname, getUserIdByNickname } from "/utils";
 
 export default class Chatbox extends Component {
-    addNewPerson(personContainer, fullname, picture) {
+    async addNewPerson(personContainer, fullname, picture, colorStatus) {
         const li = document.createElement("li");
         li.classList.add("person");
+
+        const idToNickname = await getNickname(fullname);
 
         // Can identify quickly the sender, I can maybe optimize some part of code with that.
         li.setAttribute("data-sender", fullname);
@@ -15,7 +17,7 @@ export default class Chatbox extends Component {
 
         const span = document.createElement("span");
         span.classList.add("chat-profile-name");
-        span.textContent = fullname;
+        span.textContent = idToNickname;
 
         const statusContainer = document.createElement("div");
         statusContainer.classList.add("status-container");
@@ -26,7 +28,7 @@ export default class Chatbox extends Component {
         svg.setAttribute("width", "40");
         svg.setAttribute("height", "40");
 
-        svg.innerHTML = this.createStatus();
+        svg.innerHTML = this.createStatus(colorStatus);
 
         statusContainer.appendChild(svg);
         li.appendChild(img);
@@ -46,32 +48,20 @@ export default class Chatbox extends Component {
 
         return li;
     }
-    createStatus() {
+
+    createStatus(colorStatus) {
         return /* HTML */ `
             <svg class="circle-status" xmlns="http://www.w3.org/2000/svg">
-                <circle class="circle-color" r="10" cx="50%" cy="50%" fill="red" />
+                <circle class="circle-color" r="10" cx="50%" cy="50%" fill=${colorStatus} />
             </svg>
         `;
-    }
-
-    isPersonAlreadyInList(chatPersonList, name) {
-        const countMap = new Map();
-
-        chatPersonList.forEach((person) => {
-            const key = person.textContent;
-            // If the key is already there (meaning the person was already counted), increment the value.
-            // The value represents the number of occurrences of the name.
-            countMap.set(key, (countMap.get(key) || 0) + 1);
-        });
-
-        return countMap.get(name) !== 0;
     }
 
     // TODO: Add the timestamp.
     addNewMessage(discussionContainer, sender, message) {
         const messageContainer = document.createElement("div");
         messageContainer.classList.add("container-fluid-message");
-        messageContainer.classList.add("sender", sender !== this.info.nickname ? "sender-other" : "sender-me");
+        messageContainer.classList.add("sender", sender != this.id ? "sender-other" : "sender-me");
 
         const messageContent = document.createElement("p");
         messageContent.textContent = message;
@@ -81,9 +71,9 @@ export default class Chatbox extends Component {
         discussionContainer.appendChild(messageContainer);
     }
 
-    findSender(userlist, actualName) {
+    findSender(userlist, actualId) {
         for (let i = 0; i < userlist.length; i++) {
-            if (userlist[i] !== actualName) {
+            if (userlist[i] != actualId) {
                 return userlist[i];
             }
         }
@@ -92,7 +82,7 @@ export default class Chatbox extends Component {
     // Ensure that a request of channel creation is done only if there is no common channel between 2 person.
     doesHaveCommonChannel() {
         for (const [key, channelInfo] of this.wsChannelMap.entries()) {
-            if (channelInfo.personName === this.chattingWith) {
+            if (channelInfo.personId == this.chattingWithId) {
                 return true;
             }
         }
@@ -100,14 +90,17 @@ export default class Chatbox extends Component {
     }
 
     // Event listener for each WS.
-    listenToWebSocketChannels() {
+    async listenToWebSocketChannels() {
         for (const [ws, channelInfo] of this.wsChannelMap.entries()) {
-            ws.onmessage = (event) => {
+            ws.onmessage = async (event) => {
                 const data = JSON.parse(event.data);
+                const messageData = JSON.parse(event.data);
+
+                console.log(data);
 
                 if (data.type === "channel_list") {
                     for (let i = 0; i < data.channelList.length; i++) {
-                        const channelInfo = { channelUrl: data.channelList[i], personName: data.discussingWith[i] };
+                        const channelInfo = { channelUrl: data.channelList[i], personId: data.discussingWith[i] };
 
                         const newChannelUrl = `wss://${getOriginNoProtocol()}/ws/chat/${data.channelList[i]}`;
                         const newWs = new WebSocket(newChannelUrl);
@@ -116,8 +109,7 @@ export default class Chatbox extends Component {
                             .then((res) => res.json())
                             .then((res) => {
                                 res.messages.forEach((message) => {
-                                    let sender =
-                                        this.info.nickname === message.sender ? message.receiver : message.sender;
+                                    let sender = this.id == message.sender ? message.receiver : message.sender;
 
                                     const discussion = document.getElementById("private-discussion-" + sender);
 
@@ -131,16 +123,17 @@ export default class Chatbox extends Component {
                         // Set event handlers for the new WebSocket
                         newWs.onopen = () => {};
 
-                        newWs.onmessage = (event) => {
+                        newWs.onmessage = async (event) => {
                             const messageData = JSON.parse(event.data);
 
                             if (messageData.type === "chat_message") {
                                 const message = messageData.message;
                                 const sender = messageData.sender;
+                                const idToNickname = await getNickname(sender);
 
-                                if (this.info.nickname !== sender) {
-                                    this.chattingWith = sender;
-                                    showToast("You received a message from " + sender, "bi bi-bell");
+                                if (this.id != sender) {
+                                    this.chattingWithId = sender;
+                                    showToast("You received a message from " + idToNickname, "bi bi-bell");
                                     const senderLi = document.querySelector(`.person[data-sender="${sender}"]`);
                                     if (senderLi) {
                                         senderLi.classList.add("new-message");
@@ -148,7 +141,7 @@ export default class Chatbox extends Component {
                                     this.notification.play();
                                 }
 
-                                let discussion = document.getElementById("private-discussion-" + this.chattingWith);
+                                let discussion = document.getElementById("private-discussion-" + this.chattingWithId);
                                 this.addNewMessage(discussion, sender, message);
                             }
                         };
@@ -164,28 +157,29 @@ export default class Chatbox extends Component {
                 if (data.type === "channel_created") {
                     for (let i = 0; i < data.userlist.length; i++) {
                         // Check if the user is in the list. If it's the case, then add to his channel map.
-                        if (data.userlist[i] === this.info.nickname) {
+                        if (data.userlist[i] == this.id) {
                             const newChannelUrl = `wss://${getOriginNoProtocol()}/ws/chat/${data.channel_name}`;
                             const newWs = new WebSocket(newChannelUrl);
 
-                            const sender = this.findSender(data.userlist, this.info.nickname);
-                            this.chattingWith = sender;
+                            const sender = this.findSender(data.userlist, this.id);
+                            this.chattingWithId = sender;
 
-                            const channelInfo = { channelUrl: data.channel_name, personName: sender };
+                            const channelInfo = { channelUrl: data.channel_name, personId: sender };
 
                             // Set event handlers for the new WebSocket
                             newWs.onopen = () => {};
 
-                            newWs.onmessage = (event) => {
+                            newWs.onmessage = async (event) => {
                                 const messageData = JSON.parse(event.data);
 
                                 if (messageData.type === "chat_message") {
                                     const message = messageData.message;
                                     const sender = messageData.sender;
+                                    const idToNickname = await getNickname(sender);
 
-                                    if (this.info.nickname !== sender) {
-                                        this.chattingWith = sender;
-                                        showToast("You received a message from " + sender, "bi bi-bell");
+                                    if (this.id != sender) {
+                                        this.chattingWithId = sender;
+                                        showToast("You received a message from " + idToNickname, "bi bi-bell");
                                         const senderLi = document.querySelector(`.person[data-sender="${sender}"]`);
                                         if (senderLi) {
                                             senderLi.classList.add("new-message");
@@ -193,7 +187,9 @@ export default class Chatbox extends Component {
                                         this.notification.play();
                                     }
 
-                                    let discussion = document.getElementById("private-discussion-" + this.chattingWith);
+                                    let discussion = document.getElementById(
+                                        "private-discussion-" + this.chattingWithId
+                                    );
                                     this.addNewMessage(discussion, sender, message);
                                 }
                             };
@@ -211,8 +207,8 @@ export default class Chatbox extends Component {
                     const persons = document.querySelectorAll(".person");
                     for (let i = 0; i < data.online_users.length; i++) {
                         persons.forEach((person) => {
-                            const name = person.querySelector(".chat-profile-name").innerHTML;
-                            if (data.online_users[i] === name && name !== this.info.nickname) {
+                            const id = person.getAttribute("data-sender");
+                            if (data.online_users[i] == id && id != this.id) {
                                 const status = person.querySelector(".circle-color").setAttribute("fill", "green");
                             }
                         });
@@ -225,9 +221,9 @@ export default class Chatbox extends Component {
                     let find = false;
                     persons.forEach((person) => {
                         const status = person.querySelector(".circle-color");
-                        const name = person.querySelector(".chat-profile-name").innerHTML;
+                        const id = person.getAttribute("data-sender");
 
-                        if (data.user !== this.info.nickname && data.user === name) {
+                        if (data.user != this.id && data.user == id) {
                             find = true;
                             if (data.status === "online") {
                                 status.setAttribute("fill", "green");
@@ -238,25 +234,87 @@ export default class Chatbox extends Component {
                     });
 
                     // Ensure that If a new person register, I also add him in list since the userlist is not updated yet.
-                    if (!find && data.user !== this.info.nickname) {
+                    if (!find && data.user != this.id) {
                         const personContainer = document.getElementById("person-container");
 
-                        // this.wsChannelMap.set(this.generalWs, channelInfo);
-
-                        this.personMap.set(
+                        const newPersonElement = await this.addNewPerson(
+                            personContainer,
                             data.user,
-                            this.addNewPerson(personContainer, data.user, "/img/Outer-Wilds/Giants-Deep.png")
+                            "/img/Outer-Wilds/Giants-Deep.png",
+                            "green"
                         );
+
+                        // Ensure that you can directly speak with new registered user.
+                        newPersonElement.addEventListener("click", async () => {
+                            this.chatContainer.style.display = "flex";
+                            personContainer.style.display = "none";
+                            this.chattingWithId = newPersonElement.getAttribute("data-sender");
+                            this.createDiscussionContainer(this.chattingWithId);
+
+                            await this.updateChatHeader(this.chattingWithId, "/img/Outer-Wilds/Giants-Deep.png");
+
+                            this.showDiscussion();
+
+                            if (!this.doesHaveCommonChannel()) {
+                                this.generalWs.send(
+                                    JSON.stringify({
+                                        type: "create_channel",
+                                        userlist: [this.id, this.chattingWithId],
+                                    })
+                                );
+                            }
+                        });
+
+                        this.personMap.set(data.user, newPersonElement);
+
+                        const status = newPersonElement.querySelector(".circle-color");
+
+                        status.setAttribute("fill", "green");
                     }
+                }
+
+                if (messageData.type === "chat_message") {
+                    const message = messageData.message;
+                    const sender = messageData.sender;
+
+                    if (this.id != sender) {
+                        this.chattingWithId = sender;
+                        const idToNickname = await getNickname(sender);
+                        showToast("You received a message from " + idToNickname, "bi bi-bell");
+                        const senderLi = document.querySelector(`.person[data-sender="${sender}"]`);
+                        if (senderLi) {
+                            senderLi.classList.add("new-message");
+                        }
+                        this.notification.play();
+                    }
+
+                    let discussion = document.getElementById("private-discussion-" + this.chattingWithId);
+                    this.addNewMessage(discussion, sender, message);
+                }
+
+                if (messageData.type === "block") {
+                    if (messageData.status === "success") {
+                        showToast(this.chattingWithId + " successfully been blocked !", "bi bi-check-circle-fill");
+                    } else {
+                        showToast(this.chattingWithId + " is already blocked !", "bi bi-bell");
+                    }
+                } else if (messageData.type === "unblock") {
+                    if (messageData.status === "success") {
+                        showToast(this.chattingWithId + " successfully been unblocked !", "bi bi-check-circle-fill");
+                    } else {
+                        showToast(this.chattingWithId + " is already been unblocked !", "bi bi-bell");
+                    }
+                } else if (messageData.type === "error") {
+                    showToast(messageData.message, "bi bi-ban");
                 }
             };
         }
     }
 
-    createDiscussionContainer(chattingWith) {
+    createDiscussionContainer(chattingWithId) {
         const discussionContainer = document.createElement("div");
         discussionContainer.className = "container-fluid chat-message-container";
-        discussionContainer.id = "private-discussion-" + chattingWith;
+        discussionContainer.id = "private-discussion-" + chattingWithId;
 
         this.chatContainer.insertBefore(discussionContainer, this.writeArea);
 
@@ -271,17 +329,24 @@ export default class Chatbox extends Component {
             discussion.style.display = "none";
         });
 
-        const discussionToShow = document.getElementById("private-discussion-" + this.chattingWith);
+        const discussionToShow = document.getElementById("private-discussion-" + this.chattingWithId);
 
         discussionToShow.style.display = "flex";
     }
 
-    showSearchBarResult() {
+    // ! WORKING HERE, I MUST SAVE THE PREVIOUS COLOR STATUS SO WHEN SEARCHING ITS THE SANE.
+    async showSearchBarResult() {
         this.searchingArray.length = 0;
+        let idToNickname = "";
+        let fillColor = "";
 
         for (const [key, element] of this.personMap.entries()) {
-            if (this.searching === key.substring(0, this.searching.length)) {
-                this.searchingArray.push(key);
+            idToNickname = await getNickname(key);
+            fillColor = element.querySelector(".status-container .circle-status .circle-color").getAttribute("fill");
+
+            if (this.searching == idToNickname.substring(0, this.searching.length)) {
+                const matching = { key: key, colorStatus: fillColor };
+                this.searchingArray.push(matching);
             }
         }
 
@@ -294,8 +359,13 @@ export default class Chatbox extends Component {
 
         for (const [key, element] of this.personMap.entries()) {
             for (let i = 0; i < this.searchingArray.length; i++) {
-                if (this.searchingArray[i] === key) {
-                    this.addNewPerson(personContainer, this.searchingArray[i], "/img/Outer-Wilds/Giants-Deep.png");
+                if (this.searchingArray[i].key == key) {
+                    await this.addNewPerson(
+                        personContainer,
+                        this.searchingArray[i].key,
+                        "/img/Outer-Wilds/Giants-Deep.png",
+                        this.searchingArray[i].colorStatus
+                    );
                 }
             }
         }
@@ -303,10 +373,12 @@ export default class Chatbox extends Component {
         const newPersons = document.querySelectorAll(".person");
 
         newPersons.forEach((person) => {
-            person.addEventListener("click", () => {
+            person.addEventListener("click", async () => {
                 this.chatContainer.style.display = "flex";
                 personContainer.style.display = "none";
-                this.chattingWith = person.querySelector(".chat-profile-name").innerHTML;
+                this.chattingWithId = person.getAttribute("data-sender");
+
+                await this.updateChatHeader(this.chattingWithId, "/img/Outer-Wilds/Giants-Deep.png");
 
                 this.showDiscussion();
 
@@ -314,7 +386,7 @@ export default class Chatbox extends Component {
                     this.generalWs.send(
                         JSON.stringify({
                             type: "create_channel",
-                            userlist: [this.info.nickname, this.chattingWith],
+                            userlist: [this.id, this.chattingWithId],
                         })
                     );
                 }
@@ -322,19 +394,59 @@ export default class Chatbox extends Component {
         });
     }
 
-    updateChatHeader(fullname, picture) {
+    async updateChatHeader(fullname, picture) {
         this.chatHeader.innerHTML = "";
 
         const img = document.createElement("img");
         img.classList.add("chat-profile-picture");
         img.src = picture;
 
+        const idToNickname = await getNickname(fullname);
+
         const span = document.createElement("span");
         span.classList.add("chat-profile-name");
-        span.textContent = fullname;
+        span.textContent = idToNickname;
+
+        const blockBtn = document.createElement("button");
+        blockBtn.classList.add("btn", "btn-danger", "block");
+        blockBtn.innerHTML = "BLOCK";
+
+        blockBtn.addEventListener("click", async () => {
+            for (const [key, channelInfo] of this.wsChannelMap.entries()) {
+                if (channelInfo.personId == this.chattingWithId) {
+                    if (blockBtn.innerHTML === "BLOCK") {
+                        key.send(
+                            JSON.stringify({
+                                type: "block_user",
+                                userId: this.chattingWithId,
+                            })
+                        );
+                        blockBtn.innerHTML = "UNBLOCK";
+                    } else {
+                        key.send(
+                            JSON.stringify({
+                                type: "unblock_user",
+                                userId: this.chattingWithId,
+                            })
+                        );
+                        blockBtn.innerHTML = "BLOCK";
+                    }
+                }
+            }
+        });
+
+        await this.listenToWebSocketChannels();
+
+        const inviteBtn = document.createElement("button");
+        inviteBtn.classList.add("btn", "btn-success", "invite");
+        inviteBtn.innerHTML = "INVITE";
+
+        inviteBtn.addEventListener("click", () => {});
 
         this.chatHeader.appendChild(img);
         this.chatHeader.appendChild(span);
+        this.chatHeader.appendChild(blockBtn);
+        this.chatHeader.appendChild(inviteBtn);
     }
 
     async init() {
@@ -342,11 +454,13 @@ export default class Chatbox extends Component {
         this.wsChannelMap = new Map();
         this.personMap = new Map();
         this.searchingArray = [];
-        this.chattingWith = "";
         this.searching = "";
+        this.chattingWithId = "";
 
         this.onready = async () => {
-            this.info = await post("/api/player/c/nickname").then((res) => res.json());
+            this.info = await post("/api/player/c/nickname")
+                .then((res) => res.json())
+                .catch((err) => {});
 
             // Load userlist.
             this.usersList = await fetchApi("/api/usersList", {})
@@ -359,31 +473,34 @@ export default class Chatbox extends Component {
             this.phone = document.getElementById("SG-001");
             this.notification = document.getElementById("notification-sound");
 
+            this.id = await getUserIdByNickname(this.info.nickname);
+
             const personContainer = document.getElementById("person-container");
 
             // Load all registered user on phone.
             for (let i = 0; i < this.usersList.length; i++) {
-                if (this.usersList[i].nickname !== this.info.nickname) {
+                if (this.usersList[i].user_id !== this.id) {
                     this.personMap.set(
-                        this.usersList[i].nickname,
-                        this.addNewPerson(
+                        this.usersList[i].user_id,
+                        await this.addNewPerson(
                             personContainer,
-                            this.usersList[i].nickname,
-                            "/img/Outer-Wilds/Giants-Deep.png"
+                            this.usersList[i].user_id,
+                            "/img/Outer-Wilds/Giants-Deep.png",
+                            "red"
                         )
                     );
-                    this.createDiscussionContainer(this.usersList[i].nickname);
+                    this.createDiscussionContainer(this.usersList[i].user_id);
                 }
             }
 
             const persons = document.querySelectorAll(".person");
             persons.forEach((person) => {
-                person.addEventListener("click", () => {
+                person.addEventListener("click", async () => {
                     this.chatContainer.style.display = "flex";
                     personContainer.style.display = "none";
-                    this.chattingWith = person.querySelector(".chat-profile-name").innerHTML;
+                    this.chattingWithId = person.getAttribute("data-sender");
 
-                    this.updateChatHeader(this.chattingWith, "/img/Outer-Wilds/Giants-Deep.png");
+                    await this.updateChatHeader(this.chattingWithId, "/img/Outer-Wilds/Giants-Deep.png");
 
                     this.showDiscussion();
 
@@ -391,7 +508,7 @@ export default class Chatbox extends Component {
                         this.generalWs.send(
                             JSON.stringify({
                                 type: "create_channel",
-                                userlist: [this.info.nickname, this.chattingWith],
+                                userlist: [this.id, this.chattingWithId],
                             })
                         );
                     }
@@ -413,7 +530,7 @@ export default class Chatbox extends Component {
             // Connect to a global WS, everybody is in there. For now there should be only channel creation type event.
             // So all channel requests are sent in general, each user listens to the general channel and checks if he is in the userlist.
             // If it's the case, then he will add the dedicated WS with the URL and listen to it too.
-            const channelInfo = { channelUrl: "general", personName: "general" };
+            const channelInfo = { channelUrl: "general", personId: "general" };
             this.generalWs = new WebSocket(`wss://${getOriginNoProtocol()}/ws/chat/general`);
             this.wsChannelMap.set(this.generalWs, channelInfo);
 
@@ -421,13 +538,11 @@ export default class Chatbox extends Component {
             // TODO (1): If the person is not in the list, he should not be connected to the WS channel.
             // TODO (1): The function will probably take an user ID and channel name in the backend.
             // This is a sort of main loop, creation of channels comes here. Of course, messages are sent in the generated channel.
-            this.generalWs.onopen = (event) => {
-                this.listenToWebSocketChannels();
+            this.generalWs.onopen = async (event) => {
+                await this.listenToWebSocketChannels();
             };
 
-            this.generalWs.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-            };
+            this.generalWs.onmessage = (event) => {};
 
             const sendBtn = document.getElementById("send-btn");
 
@@ -439,7 +554,7 @@ export default class Chatbox extends Component {
 
                 // FInd the ws and channel_name for specified person.
                 for (const [key, channelInfo] of this.wsChannelMap.entries()) {
-                    if (channelInfo.personName === this.chattingWith && channelInfo.personName) {
+                    if (channelInfo.personId == this.chattingWithId && channelInfo.personId) {
                         ws = key;
                         channelName = channelInfo.channelUrl;
                         break;
@@ -451,10 +566,9 @@ export default class Chatbox extends Component {
                         JSON.stringify({
                             type: "send_message",
                             content: msg,
-                            sender: this.info.nickname,
-                            receiver: this.chattingWith,
+                            sender: this.id,
+                            receiver: this.chattingWithId,
                             channel_name: channelName,
-                            timestamp: "",
                         })
                     );
                 } else {
@@ -474,10 +588,10 @@ export default class Chatbox extends Component {
 
             const searchingInput = document.getElementById("search-bar");
 
-            searchingInput.addEventListener("input", () => {
+            searchingInput.addEventListener("input", async () => {
                 this.searching = searchingInput.value;
 
-                this.showSearchBarResult();
+                await this.showSearchBarResult();
             });
 
             const closeBtn = document.getElementById("end-call");

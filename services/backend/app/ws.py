@@ -10,8 +10,14 @@ from asgiref.sync import sync_to_async
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 from channels.db import database_sync_to_async
+from django.utils import timezone
 
 import uuid
+import logging
+
+
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
 
 pong_manager = PongManager()
 tournaments = TournamentManager(game="pong", manager=pong_manager)
@@ -163,9 +169,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.channel_name = self.channel_name
         self.user = self.scope['user']
 
-        self.nickname = self.user.username
+        if not self.user.is_authenticated:
+            await self.close()
+            return
 
-        await self.set_player_online(self.nickname)
+        self.user_id = self.user.id 
+
+        await self.set_player_online(self.user.id)
 
         # Join room group.
         await self.channel_layer.group_add(
@@ -175,9 +185,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
-        # Retrieve the Player instance.
-        user = self.scope["user"]
-        player = await sync_to_async(Player.objects.get)(user=user)
+        player = await sync_to_async(Player.objects.get)(user=self.user)
 
         # Send the channelList to the frontend.
         await self.send(text_data=json.dumps({
@@ -192,7 +200,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             "general",
             {
                 'type': 'user_status',
-                'user': self.nickname,
+                'user': self.user_id,
                 'status': 'online'
             }
         )
@@ -204,54 +212,95 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
     async def disconnect(self, close_code):
+        if not self.user.is_authenticated:
+            await self.close()
+            return
 
-        await self.set_player_offline(self.nickname)
+        await self.set_player_offline(self.user.id)
 
-        # Leave room group.
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
         )
 
-        # Retrieve the Player instance.
-        user = self.scope["user"]
-        player = await sync_to_async(Player.objects.get)(user=user)
-
-        # Notify other clients about the disconnection.
         await self.channel_layer.group_send(
             "general",
             {
                 'type': 'user_status',
-                'user': self.nickname,
+                'user': self.user.id,
                 'status': 'offline'
             }
         )
+        
+        online_users = await self.get_online_users()
+        await self.channel_layer.group_send(
+            "general",
+            {
+                'type': 'online_users',
+                'online_users': online_users
+            }
+        )
 
-        # Save the updated Player instance.
-        await sync_to_async(player.save)()
+        await self.close()
 
-    async def user_disconnected(self, event):
-        message = event['message']
-        await self.send(text_data=json.dumps({
-            'type': 'user_disconnected',
-            'message': message
-        }))
 
     async def receive(self, text_data):
         data = json.loads(text_data)
         message_type = data.get("type")
 
+        if not self.user.is_authenticated:
+            await self.close()
+            return
+
+        if "type" not in data:
+            return
+
         if message_type == "create_channel":
             await self.create_channel(data)
         elif message_type == "send_message":
             await self.send_message(data)
+        elif message_type == "block_user":
+            await self.block_user(data)
+        elif message_type == "unblock_user":
+            await self.unblock_user(data)
 
     async def create_channel(self, data):
         # Generate a unique channel name.
         new_channel_name = str(uuid.uuid4())
         userlist = data.get("userlist")
-
-        # Broadcast the new channel information to all users in the general channel.
+    
+        # Ensure all users exist.
+        for user_id in userlist:
+            user_exists = await sync_to_async(get_user_model().objects.filter(id=user_id).exists)()
+            if not user_exists:
+                await self.send(text_data=json.dumps({
+                    'type': 'error',
+                    'message': f'User with ID {user_id} does not exist'
+                }))
+                return
+    
+        # Check if the users are already discussing with each other and update their lists.
+        for user_id in userlist:
+            player = await sync_to_async(Player.objects.get)(user__id=user_id)
+            for other_user_id in userlist:
+                if other_user_id == user_id:
+                    continue
+                other_player = await sync_to_async(Player.objects.get)(user__id=other_user_id)
+    
+                # Check if the users are already discussing with each other.
+                if other_player.id in player.discussingWith:
+                    continue 
+                
+                # Append the new channel URL and the other user's ID to the respective lists if not already present.
+                if new_channel_name not in player.channelList:
+                    player.channelList.append(new_channel_name)
+                if other_player.id not in player.discussingWith:
+                    player.discussingWith.append(other_player.id)
+    
+            # Save the updated Player instance.
+            await sync_to_async(player.save)()
+    
+        # Send the channel_created message only after successful updates
         await self.channel_layer.group_send(
             "general",
             {
@@ -261,60 +310,35 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
         )
 
-        # Update the Player instance for each user in the userlist.
-        for username in userlist:
-            user = await sync_to_async(get_user_model().objects.get)(username=username)
-            player = await sync_to_async(Player.objects.get)(user=user)
-
-            # Find the other user in the userlist.
-            other_user = next(u for u in userlist if u != username)
-            other_user_instance = await sync_to_async(get_user_model().objects.get)(username=other_user)
-            other_player = await sync_to_async(Player.objects.get)(user=other_user_instance)
-
-            # Append the new channel URL and the other user's nickname to the respective lists.
-            player.channelList.append(new_channel_name)
-            player.discussingWith.append(other_player.nickname)
-
-            # Save the updated Player instance.
-            await sync_to_async(player.save)()
-
-
-    async def channel_created(self, event):
-        channel_name = event["channel_name"]
-        userlist = event["userlist"]
-
-        # Retrieve the Player instances.
-        player1 = await sync_to_async(Player.objects.get)(nickname=userlist[0])
-        player2 = await sync_to_async(Player.objects.get)(nickname=userlist[1])
-
-        # Retrieve or create the chat instance.
-        chat, created = await sync_to_async(Chat.objects.get_or_create)(
-            channel_name=channel_name
-        )
-
-        await self.send(text_data=json.dumps({
-            "type": "channel_created",
-            "channel_name": channel_name,
-            "userlist": userlist
-        }))
-
     async def send_message(self, data):
         message_text = data.get("content")
-        sender_username = data.get("sender")
-        receiver_username = data.get("receiver")
+        sender_id = data.get("sender")
+        receiver_id = data.get("receiver")
         channel_name = data.get("channel_name")
 
-        # Retrieve the sender and receiver instances.
-        sender = await sync_to_async(Player.objects.get)(user__username=sender_username)
-        receiver = await sync_to_async(Player.objects.get)(user__username=receiver_username)
-    
-        # Retrieve or create the chat instance.
+        if not message_text or not sender_id or not receiver_id or not channel_name:
+            return
+
+        sender = await sync_to_async(Player.objects.get)(user__id=sender_id)
+        receiver = await sync_to_async(Player.objects.get)(user__id=receiver_id)
+
+        if sender_id in receiver.blockedUsers:
+            await self.send(text_data=json.dumps({
+                "type": "error",
+                "message": "You are blocked by this user."
+            }))
+            return
+
         chat, created = await sync_to_async(Chat.objects.get_or_create)(
             channel_name=channel_name
         )
 
-        # Create a new Message instance.
-        message = await sync_to_async(Message.objects.create)(content=message_text, timestamp="", sender=sender, receiver=receiver)
+        message = await sync_to_async(Message.objects.create)(
+            content=message_text, 
+            timestamp=timezone.now(), 
+            sender=sender, 
+            receiver=receiver
+        )
 
         # Add the message to the chat.
         await sync_to_async(chat.messages.add)(message)
@@ -325,11 +349,90 @@ class ChatConsumer(AsyncWebsocketConsumer):
             {
                 "type": "chat_message",
                 "message": message_text,
-                "sender": sender_username,
-                "receiver": receiver_username,
-                "timestamp": ""
+                "sender": sender_id,
+                "receiver": receiver_id,
+                "timestamp": message.timestamp.isoformat()
             }
         )
+
+
+    async def block_user(self, data):
+        user_id = int(data.get("userId"))
+        player = await sync_to_async(Player.objects.get)(user=self.user)
+        if user_id not in player.blockedUsers:
+            player.blockedUsers.append(user_id)
+            await sync_to_async(player.save)()
+            await self.send(text_data=json.dumps({
+                "type": "block",
+                "status": "success",
+                "user_id": user_id
+            }))
+        else:
+            await self.send(text_data=json.dumps({
+                "type": "block",
+                "status": "already_blocked",
+                "user_id": user_id
+            }))
+
+    async def unblock_user(self, data):
+        user_id = int(data.get("userId"))
+        player = await sync_to_async(Player.objects.get)(user=self.user)
+        if user_id in player.blockedUsers:
+            player.blockedUsers.remove(user_id)
+            await sync_to_async(player.save)()
+            await self.send(text_data=json.dumps({
+                "type": "unblock",
+                "status": "success",
+                "user_id": user_id
+            }))
+        else:
+            await self.send(text_data=json.dumps({
+                "type": "unblock",
+                "status": "not_blocked",
+                "user_id": user_id
+            }))
+
+    async def blocked_user(self, event):
+        user_id = event["user_id"]
+        status = event["status"]
+
+        await self.send(text_data=json.dumps({
+            "type": "block",
+            "status": status,
+            "user_id": user_id
+        }))
+
+    async def unblocked_user(self, event):
+        user_id = event["user_id"]
+        status = event["status"]
+
+        await self.send(text_data=json.dumps({
+            "type": "unblock",
+            "status": status,
+            "user_id": user_id
+        }))
+
+    async def channel_created(self, event):
+        channel_name = event["channel_name"]
+        userlist = event["userlist"]
+
+        if not channel_name or not userlist:
+            return
+    
+        # Retrieve the Player instances using user IDs.
+        player1 = await sync_to_async(Player.objects.get)(user__id=userlist[0])
+        player2 = await sync_to_async(Player.objects.get)(user__id=userlist[1])
+    
+        # Retrieve or create the chat instance.
+        chat, created = await sync_to_async(Chat.objects.get_or_create)(
+            channel_name=channel_name
+        )
+    
+        await self.send(text_data=json.dumps({
+            "type": "channel_created",
+            "channel_name": channel_name,
+            "userlist": userlist
+        }))
 
     async def chat_message(self, event):
         message = event["message"]
@@ -359,17 +462,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
     @database_sync_to_async
-    def set_player_online(self, nickname):
-        player, created = Player.objects.get_or_create(nickname=nickname)
+    def set_player_online(self, user_id):
+        player, created = Player.objects.get_or_create(user_id=user_id)
         player.is_online = True
         player.save()
-
+    
     @database_sync_to_async
-    def set_player_offline(self, nickname):
-        player = Player.objects.get(nickname=nickname)
+    def set_player_offline(self, user_id):
+        player = Player.objects.get(user_id=user_id)
         player.is_online = False
         player.save()
-        
+    
     @database_sync_to_async
     def get_online_users(self):
-        return list(Player.objects.filter(is_online=True).values_list('nickname', flat=True))
+        return list(Player.objects.filter(is_online=True).values_list('user_id', flat=True))

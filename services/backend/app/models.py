@@ -24,11 +24,11 @@ class Player(models.Model):
 
     pongElo = IntegerField(default=0)
 
-    friends = models.ManyToManyField("self", symmetrical=True, related_name="friend_set", default=list)
-    blockedUsers = ArrayField(IntegerField(), default=list)
+    friends = models.ManyToManyField("self", symmetrical=True, related_name="friend_set")
+    blockedUsers = ArrayField(models.IntegerField(), default=list)
 
     channelList = ArrayField(models.CharField(max_length=255), default=list)
-    discussingWith = ArrayField(models.CharField(max_length=255), default=list)
+    discussingWith = ArrayField(models.IntegerField(), default=list)
     is_online = models.BooleanField(default=False)
 
 
@@ -71,8 +71,7 @@ class Message(models.Model):
 
 class Chat(models.Model):
     messages = models.ManyToManyField(Message, related_name="chats")
-    channel_name = CharField(max_length=255, null=True, blank=True) 
-    
+    channel_name = CharField(max_length=255, null=True, blank=True)     
 
 # TODO: Maybe store the game data to replay it later ?
 

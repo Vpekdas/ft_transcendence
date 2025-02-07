@@ -1,11 +1,14 @@
 import { tr } from "../../i18n";
 import { Component } from "../../micro";
-import { api, fetchApi, post, getNickname } from "../../utils";
+import { api, fetchApi, post, getNickname, getUserIdByNickname } from "../../utils";
 
 /** @type {import("../../micro").Component} */
 
 export default class OtherProfile extends Component {
-    showProfile() {
+    async showProfile() {
+        const actualName = localStorage.getItem("nickname");
+        const actualId = await getUserIdByNickname(actualName);
+
         const div = document.createElement("div");
         div.classList.add("card", "settings", "other-profile");
 
@@ -15,7 +18,7 @@ export default class OtherProfile extends Component {
 
         const img = document.createElement("img");
         img.classList.add("card-img-top", "profile");
-        img.src = api("/api/player/c/picture");
+        img.src = api("/api/player/" + actualId + "/picture");
 
         const div2 = document.createElement("div");
         div2.classList.add("card", "settings", "other-profile");
@@ -26,7 +29,7 @@ export default class OtherProfile extends Component {
 
         const nickname = document.createElement("div");
         nickname.classList.add("card-body", "settings", "other-profile");
-        nickname.innerHTML = "Actual nickname";
+        nickname.innerHTML = actualName;
 
         div.appendChild(header);
         div.appendChild(img);
@@ -34,8 +37,9 @@ export default class OtherProfile extends Component {
         div2.appendChild(secondHeader);
         div2.appendChild(nickname);
 
-        this.dataContainer.appendChild(div);
-        this.dataContainer.appendChild(div2);
+        const dataContainer = document.getElementById("other-profile-data");
+        dataContainer.appendChild(div);
+        dataContainer.appendChild(div2);
     }
 
     async showMatchHistory() {
@@ -107,7 +111,10 @@ export default class OtherProfile extends Component {
 
                 ul.appendChild(li);
 
-                this.dataContainer.appendChild(ul);
+                const dataContainer = document.getElementById("other-profile-data");
+
+                console.log(dataContainer);
+                dataContainer.appendChild(ul);
             }
         }
     }
@@ -150,29 +157,36 @@ export default class OtherProfile extends Component {
         }
 
         this.onready = async () => {
-            this.dataContainer = document.getElementById("other-profile-data");
-            this.showProfile();
+            const dataContainer = document.getElementById("other-profile-data");
+            const profile = document.getElementById("other-player-profile");
+            await this.showProfile();
 
             const navLinks = document.querySelectorAll(".nav-item");
 
             navLinks.forEach((link) => {
                 link.addEventListener("click", async () => {
                     const data = link.querySelector(".nav-link").getAttribute("data");
-                    this.dataContainer.innerHTML = "";
+                    dataContainer.innerHTML = "";
 
                     if (data === "Profile") {
-                        this.showProfile();
+                        await this.showProfile();
                     } else if (data === "Match History") {
                         await this.showMatchHistory();
                     } else if (data === "Statistics") {
                     }
                 });
             });
+
+            const returnBtn = document.getElementById("confirm-button");
+
+            returnBtn.addEventListener("click", async () => {
+                profile.style.display = "none";
+            });
         };
     }
 
     render() {
-        return /* HTML */ ` <div class="container-fluid dashboard-container other-profile">
+        return /* HTML */ ` <div class="container-fluid dashboard-container other-profile" id="other-player-profile">
             <div class="container-fluid dashboard-navbar other-profile">
                 <ul class="nav flex-column dashboard-tab other-profile">
                     <li class="nav-item">
@@ -196,6 +210,7 @@ export default class OtherProfile extends Component {
                 </ul>
             </div>
             <ul class="list-group settings other-profile" id="other-profile-data"></ul>
+            <button id="confirm-button" class="modal-button other-profile">Return</button>
         </div>`;
     }
 }

@@ -2831,6 +2831,17 @@ ow-system[labels="false"] ow-name {
     width: 50px;
     height: 50px;
     object-fit: cover;
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.chat-profile-picture:hover {
+    transform: scale(1.1);
+    box-shadow:
+        0 0 10px #d89123,
+        0 0 20px #d89123;
+    cursor: pointer;
 }
 
 .notification-indicator {
@@ -3283,12 +3294,12 @@ ow-system[labels="false"] ow-name {
 }
 
 .container-fluid.dashboard-container.other-profile {
-    display: flex;
+    display: none;
     position: absolute;
     height: 75%;
-    width: 50%;
+    width: 75%;
     top: 10%;
-    left: 25%;
+    left: 10%;
     overflow: hidden;
     padding: 0;
     margin: 0;
@@ -3298,9 +3309,7 @@ ow-system[labels="false"] ow-name {
     display: flex;
     position: relative;
     height: 100%;
-    width: 25%;
-    padding: 0;
-    margin: 0;
+    width: 30%;
 }
 
 .nav.flex-column.dashboard-tab.other-profile {
@@ -3316,11 +3325,25 @@ ow-system[labels="false"] ow-name {
     position: relative;
     height: 100%;
     width: 100%;
-    background-color: #001f3f;
     align-items: center;
     justify-content: space-evenly;
 }
 
 .card-body.settings.other-profile {
     align-items: center;
+}
+
+.card.settings.other-profile {
+    display: flex;
+    position: relative;
+    width: 75%;
+}
+
+.modal-button.other-profile {
+    display: flex;
+    position: absolute;
+    right: 0%;
+    margin-left: auto;
+    height: 8%;
+    width: 10%;
 }

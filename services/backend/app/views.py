@@ -538,7 +538,7 @@ def deleteFriend(request: HttpRequest, friend_id):
 #         "state": t.state,
 #     })
 
-def getUsersList(request):
+def get_users_list(request):
     users = Player.objects.all().values('user_id')
     return JsonResponse(list(users), safe=False)
 

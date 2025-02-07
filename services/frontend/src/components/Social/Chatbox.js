@@ -1,5 +1,5 @@
 import { Component } from "../../micro";
-import { getOriginNoProtocol, post, fetchApi, showToast, getNickname, getUserIdByNickname } from "/utils";
+import { getOriginNoProtocol, post, fetchApi, showToast, getNickname, getUserIdByNickname, api } from "/utils";
 
 export default class Chatbox extends Component {
     async addNewPerson(personContainer, fullname, picture, colorStatus) {
@@ -238,7 +238,7 @@ export default class Chatbox extends Component {
                         const newPersonElement = await this.addNewPerson(
                             personContainer,
                             data.user,
-                            "/img/Outer-Wilds/Giants-Deep.png",
+                            api("/api/player/" + data.user + "/picture"),
                             "green"
                         );
 
@@ -249,7 +249,10 @@ export default class Chatbox extends Component {
                             this.chattingWithId = newPersonElement.getAttribute("data-sender");
                             this.createDiscussionContainer(this.chattingWithId);
 
-                            await this.updateChatHeader(this.chattingWithId, "/img/Outer-Wilds/Giants-Deep.png");
+                            await this.updateChatHeader(
+                                this.chattingWithId,
+                                api("/api/player/" + this.chattingWithId + "/picture")
+                            );
 
                             this.showDiscussion();
 
@@ -360,7 +363,7 @@ export default class Chatbox extends Component {
                     await this.addNewPerson(
                         personContainer,
                         this.searchingArray[i].key,
-                        "/img/Outer-Wilds/Giants-Deep.png",
+                        api("/api/player/" + key + "/picture"),
                         this.searchingArray[i].colorStatus
                     );
                 }
@@ -375,7 +378,10 @@ export default class Chatbox extends Component {
                 personContainer.style.display = "none";
                 this.chattingWithId = person.getAttribute("data-sender");
 
-                await this.updateChatHeader(this.chattingWithId, "/img/Outer-Wilds/Giants-Deep.png");
+                await this.updateChatHeader(
+                    this.chattingWithId,
+                    api("/api/player/" + this.chattingWithId + "/picture")
+                );
 
                 this.showDiscussion();
 
@@ -393,12 +399,19 @@ export default class Chatbox extends Component {
 
     async updateChatHeader(fullname, picture) {
         this.chatHeader.innerHTML = "";
+        const otherProfile = document.getElementById("other-player-profile");
+        const idToNickname = await getNickname(fullname);
 
         const img = document.createElement("img");
         img.classList.add("chat-profile-picture");
         img.src = picture;
 
-        const idToNickname = await getNickname(fullname);
+        // Since the component is already created, updating his attribute will have no effect.
+        // So I'm using the localstorage to transfer the info.
+        img.addEventListener("click", async () => {
+            otherProfile.style.display = "flex";
+            localStorage.setItem("nickname", idToNickname);
+        });
 
         const span = document.createElement("span");
         span.classList.add("chat-profile-name");
@@ -482,7 +495,7 @@ export default class Chatbox extends Component {
                         await this.addNewPerson(
                             personContainer,
                             this.usersList[i].user_id,
-                            "/img/Outer-Wilds/Giants-Deep.png",
+                            api("/api/player/" + this.usersList[i].user_id + "/picture"),
                             "red"
                         )
                     );
@@ -497,7 +510,10 @@ export default class Chatbox extends Component {
                     personContainer.style.display = "none";
                     this.chattingWithId = person.getAttribute("data-sender");
 
-                    await this.updateChatHeader(this.chattingWithId, "/img/Outer-Wilds/Giants-Deep.png");
+                    await this.updateChatHeader(
+                        this.chattingWithId,
+                        api("/api/player/" + this.chattingWithId + "/picture")
+                    );
 
                     this.showDiscussion();
 

@@ -147,11 +147,6 @@ class Pong(Game):
         if self.state == State.STARTED:
             if self.countdown_timer.is_done():
                 self.scene.update()
-
-                # Update all AIs
-                for client in self.clients:
-                    if isinstance(client, PongAI):
-                        client.process(self.scene)
             else:
                 self.countdown_timer.update()
         elif self.state == State.ENDED:
@@ -228,10 +223,6 @@ class Pong(Game):
 
             self.player1.client = self.clients[0]
             self.player2.client = self.clients[1]
-
-            # TODO: Remove
-            # self.player1.client.ready = True
-            # self.player2.client.ready = True
 
             self.time_started = time_secs()
         elif self.gamemode == "1v1":

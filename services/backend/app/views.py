@@ -275,9 +275,11 @@ Return the profile picture of a user
 """
 def getProfilePicture(request: HttpRequest, id: str):
     if id == "c" and request.user.is_authenticated:
-        id = int(Player.objects.filter(user=request.user).first().id)
-    else:
+        id = request.user.id
+    elif id != "c":
         id = int(id)
+    else:
+        return HttpResponseBadRequest()
 
     player = Player.objects.filter(id=id).first()
 
@@ -564,13 +566,15 @@ def get_chat_messages_by_channel_name(request, channel_name):
             return JsonResponse({"error": "Chat not found"}, status=404)
     return JsonResponse({"error": "Invalid request method"}, status=400)
 
-@require_GET
-@login_required
+@require_POST
 def get_user_id_by_nickname(request: HttpRequest):
-    nickname = request.GET.get('nickname')
-    if not nickname:
+    data = json.loads(request.body)
+    
+    if "nickname" not in data:
         return JsonResponse({"error": "Nickname parameter is required"}, status=400)
     
+    nickname = data["nickname"]
+
     try:
         user = User.objects.get(username=nickname)
         return JsonResponse({"user_id": user.id})

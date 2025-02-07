@@ -49,7 +49,7 @@ urlpatterns = [
     # Chat
     path('api/usersList', views.get_users_list),
     path('api/chat/<str:channel_name>/', views.get_chat_messages_by_channel_name, name='get_chat_messages_by_channel_name'),
-    path('api/get_user_id_by_nickname/', views.get_user_id_by_nickname, name='get_user_id_by_nickname'),
+    path('api/user-id-by-nickname', views.get_user_id_by_nickname),
 
 ]
 

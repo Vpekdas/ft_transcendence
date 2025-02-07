@@ -24,6 +24,12 @@ export async function post(url, init = { body: "{}" }) {
     return await fetch(api(url), init);
 }
 
+export async function get(url, init = {}) {
+    init.method = "GET";
+    init.credentials = "include";
+    return await fetch(api(url), init);
+}
+
 export async function isLoggedIn() {
     const response = await post("/api/check-logged", {}).then((res) => res.json());
     return response["error"] === undefined;
@@ -35,7 +41,7 @@ export async function getNickname(id) {
 
 export async function getUserIdByNickname(nickname) {
     try {
-        const response = await fetch(`/api/get_user_id_by_nickname?nickname=${nickname}`);
+        const response = await post(`/api/user-id-by-nickname`, { body: JSON.stringify({ nickname: nickname }) });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }

@@ -2,11 +2,9 @@ import { tr } from "../../i18n";
 import { Component } from "../../micro";
 import { api, fetchApi, post, getNickname, getUserIdByNickname } from "../../utils";
 
-/** @type {import("../../micro").Component} */
-
 export default class OtherProfile extends Component {
     async showProfile() {
-        const actualName = localStorage.getItem("nickname");
+        const actualName = this.attributes.get("nickname");
         const actualId = await getUserIdByNickname(actualName);
 
         const div = document.createElement("div");

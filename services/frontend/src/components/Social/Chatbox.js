@@ -406,11 +406,15 @@ export default class Chatbox extends Component {
         img.classList.add("chat-profile-picture");
         img.src = picture;
 
+        const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", "");
+
         // Since the component is already created, updating his attribute will have no effect.
         // So I'm using the localstorage to transfer the info.
         img.addEventListener("click", async () => {
-            otherProfile.style.display = "flex";
-            localStorage.setItem("nickname", idToNickname);
+            // otherProfile.style.display = "flex";
+            // localStorage.setItem("nickname", idToNickname);
+
+            setOtherProfileNickname(idToNickname);
         });
 
         const span = document.createElement("span");
@@ -625,6 +629,8 @@ export default class Chatbox extends Component {
     // TODO: Add the antenna.
 
     render() {
+        const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", "");
+
         return /* HTML */ `
             <div id="SG-001">
                 <div id="screen">
@@ -963,7 +969,7 @@ export default class Chatbox extends Component {
             </div>
             <audio id="notification-sound" src="/music/Tuturu.mp3"></audio>
             <div id="toast-container"></div>
-            <OtherProfile />
+            ${otherProfileNickname().length > 0 ? `<OtherProfile nickname="${otherProfileNickname()}" />` : ""}
         `;
     }
 }

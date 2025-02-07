@@ -275,7 +275,7 @@ class Board:
         Returns `True` if after the move `pos` => `to`, the king of color `color` is in check.
         """
 
-        return self.is_in_check(color) or (needs_recursive_checking and self.is_check_after_move(color, pos, to))
+        return needs_recursive_checking and self.is_check_after_move(color, pos, to)
 
     def is_in_check(self, color: Color) -> bool:
         """

@@ -136,6 +136,8 @@ export default class Chatbox extends Component {
                                     if (senderLi) {
                                         senderLi.classList.add("new-message");
                                     }
+                                    // ! On safari, music are not allowed to play automatically without user interaction.
+                                    // ! Once you have clicked one time, It seems working.
                                     this.notification.play();
                                 }
 
@@ -408,11 +410,8 @@ export default class Chatbox extends Component {
 
         const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", "");
 
-        // Since the component is already created, updating his attribute will have no effect.
-        // So I'm using the localstorage to transfer the info.
         img.addEventListener("click", async () => {
-            // otherProfile.style.display = "flex";
-            // localStorage.setItem("nickname", idToNickname);
+            otherProfile.style.display = "flex";
 
             setOtherProfileNickname(idToNickname);
         });

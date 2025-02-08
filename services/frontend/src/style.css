@@ -196,54 +196,137 @@
     background-color: red;
 }
 
-/* SOCIAL */
-
 /* MATCH HISTORY */
 
-.list-group.match-history {
+.micro-Accordion {
     display: flex;
+    position: relative;
+    width: 100%;
+    height: auto;
+}
+
+.accordion.container {
+    display: flex;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    align-items: center;
     flex-direction: column;
+    overflow: auto;
+}
+
+.accordion-item.match-history {
+    display: flex;
+    position: relative;
+    height: auto;
+    width: 100%;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.accordion-header.match-history {
+    display: flex;
+    position: relative;
+    height: auto;
+    width: auto;
+}
+
+.accordion-button.collapsed.match-history {
+    display: flex;
+    position: relative;
     height: 100%;
     width: 100%;
-    overflow-y: auto;
+    border: 2px solid #00ffff;
+    border-radius: 10px;
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+    background: linear-gradient(135deg, #00264d, #00264d 50%, #000000 100%);
+    color: white;
 }
 
-.list-group.match-history > .list-group-item {
-    flex: 0 0 auto;
-    height: 50px;
+.accordion-button.match-history:not(.collapsed) {
     display: flex;
+    position: relative;
+    height: 100%;
+    width: 100%;
+    border: 2px solid #00ffff;
+    border-radius: 10px;
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+    background: linear-gradient(135deg, #00264d, #00264d 50%, #000000 100%);
+    color: white;
+}
+
+.accordion-button.match-history:not(.collapsed)::after {
+    color: #00ffff;
+}
+
+.accordion-body.match-history {
+    background: linear-gradient(240deg, #00264d, #00264d 50%, #000000 100%);
+}
+
+.container-fluid.match-history-container {
+    display: flex;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    flex-direction: row;
+    justify-content: space-around;
     align-items: center;
-    justify-content: center;
-    border: 1px solid black;
-    background-color: #d89123;
+    margin: 0;
+    padding: 0;
 }
 
-.list-group.match-history .vs {
-    margin: 0px 10px;
+.history-winner {
+    display: flex;
+    position: relative;
+    height: 100%;
+    width: 20%;
+    flex-direction: row;
+    justify-content: space-evenly;
 }
 
-.list-group.match-history .score {
-    margin: 0px 10px;
+.history-looser {
+    display: flex;
+    position: relative;
+    height: 100%;
+    width: 20%;
+    flex-direction: row;
+    justify-content: space-evenly;
 }
 
-.match-history .history-winner {
-    background-color: green;
+.vs.match-history {
+    display: flex;
+    position: relative;
+    height: 100%;
+    width: auto;
+    justify-content: space-around;
 }
 
-.match-history .history-looser {
-    background-color: red;
+.history-time {
+    display: flex;
+    position: relative;
+    height: 100%;
+    width: auto;
+    justify-content: space-around;
 }
 
-.match-history .history-time {
-    margin-left: 15px;
+.history-gamemode {
+    display: flex;
+    position: relative;
+    height: 100%;
+    width: auto;
+    justify-content: space-around;
 }
 
-.match-history .history-gamemode {
-    margin-left: 15px;
-}
-
-.match-history .history-date {
-    margin-left: 15px;
+.history-date {
+    display: flex;
+    position: relative;
+    height: 100%;
+    width: auto;
+    justify-content: space-around;
 }
 
 /* STATISTICS */
@@ -3293,6 +3376,14 @@ ow-system[labels="false"] ow-name {
     transform: scale(0.95);
 }
 
+/* OTHER PROFILE */
+
+.nav-link.custom-link.other-profile {
+    color: white;
+}
+
+/* ! MAKE NONE AFTER FINISHING */
+
 .container-fluid.dashboard-container.other-profile {
     display: none;
     position: absolute;
@@ -3303,6 +3394,9 @@ ow-system[labels="false"] ow-name {
     overflow: hidden;
     padding: 0;
     margin: 0;
+    --glow-color: cyan;
+    border: cyan;
+    background: linear-gradient(135deg, #001f3f, #001f3f 50%, #000000 100%);
 }
 
 .container-fluid.dashboard-navbar.other-profile {
@@ -3310,6 +3404,7 @@ ow-system[labels="false"] ow-name {
     position: relative;
     height: 100%;
     width: 30%;
+    background: transparent;
 }
 
 .nav.flex-column.dashboard-tab.other-profile {

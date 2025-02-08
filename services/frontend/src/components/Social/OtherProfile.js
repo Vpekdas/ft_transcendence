@@ -1,8 +1,35 @@
 import { tr } from "../../i18n";
 import { Component } from "../../micro";
 import { api, fetchApi, post, getNickname, getUserIdByNickname } from "../../utils";
-
+import Accordion from "../Accordion";
 export default class OtherProfile extends Component {
+    timeInMinutes(s) {
+        if (s < 10) {
+            return "0:0" + s;
+        } else if (s < 60) {
+            return "0:" + s;
+        } else {
+            let r = s % 60;
+            if (r < 10) return s / 60 + ":";
+            else return s / 60 + ":0" + r;
+        }
+    }
+
+    timeAsDate(s) {
+        const date = new Date(s * 1000);
+        return date.getUTCFullYear() + "-" + (date.getUTCMonth() + 1) + "-" + date.getUTCDate();
+    }
+
+    gamemodeName(tid, gamemode) {
+        if (tid != undefined) {
+            return tr("Tournament");
+        } else if (gamemode == "1v1local") {
+            return tr("Local");
+        } else if (gamemode == "1v1") {
+            return tr("Remote");
+        }
+    }
+
     async showProfile() {
         const actualName = this.attributes.get("nickname");
         const actualId = await getUserIdByNickname(actualName);
@@ -41,8 +68,7 @@ export default class OtherProfile extends Component {
     }
 
     async showMatchHistory() {
-        const ul = document.createElement("ul");
-        ul.classList.add("list-group", "match-history");
+        this.results = await post("/api/player/c/matches").then((res) => res.json());
 
         if (this.results != undefined && this.results["results"] != undefined) {
             for (let result of this.results["results"]) {
@@ -57,118 +83,62 @@ export default class OtherProfile extends Component {
                     player2Class = "history-winner";
                 }
 
-                const li = document.createElement("list-group-item");
-                li.classList.add("list-group-item");
+                const config = {
+                    player1Class: player1Class,
+                    player2Class: player2Class,
+                    player1Name: result["player1"],
+                    player2Name: result["player2"],
+                    player1Score: result["score1"],
+                    player2Score: result["score2"],
+                    historyTime: this.timeInMinutes(result["timeEnded"] - result["timeStarted"]),
+                    gamemode: this.gamemodeName(result["tid"], result["gamemode"]),
+                    date: this.timeAsDate(result["timeEnded"]),
+                };
 
-                const player1 = document.createElement("span");
-                player1.classList.add(player1Class);
-                const historyPlayer1 = document.createElement("span");
-                historyPlayer1.classList.add("history-player-name");
-                historyPlayer1.innerHTML = result["player1"];
-                const scorePlayer1 = document.createElement("span");
-                scorePlayer1.classList.add("score");
-                scorePlayer1.innerHTML = result["score1"];
-
-                player1.appendChild(historyPlayer1);
-                player1.appendChild(scorePlayer1);
-
-                const vs = document.createElement("span");
-                vs.classList.add("vs");
-                vs.innerHTML = "vs";
-
-                const player2 = document.createElement("span");
-                player2.classList.add(player2Class);
-                const historyPlayer2 = document.createElement("span");
-                historyPlayer2.classList.add("history-player-name");
-                historyPlayer2.innerHTML = result["player2"];
-                const scorePlayer2 = document.createElement("span");
-                scorePlayer2.classList.add("score");
-                scorePlayer2.innerHTML = result["score2"];
-
-                player2.appendChild(historyPlayer2);
-                player2.appendChild(scorePlayer2);
-
-                const time = document.createElement("span");
-                time.classList.add("history-time");
-                time.innerHTML = this.timeInMinutes(result["timeEnded"] - result["timeStarted"]);
-
-                const gamemode = document.createElement("span");
-                gamemode.classList.add("history-gamemode");
-                gamemode.innerHTML = this.gamemodeName(result["tid"], result["gamemode"]);
-
-                const date = document.createElement("span");
-                date.classList.add("history-date");
-                date.innerHTML = this.timeAsDate(result["timeEnded"]);
-
-                li.appendChild(player1);
-                li.appendChild(vs);
-                li.appendChild(player2);
-                li.appendChild(time);
-                li.appendChild(gamemode);
-                li.appendChild(date);
-
-                ul.appendChild(li);
-
-                const dataContainer = document.getElementById("other-profile-data");
-
-                console.log(dataContainer);
-                dataContainer.appendChild(ul);
+                this.appendAccordionInstances(config);
             }
         }
     }
 
-    timeInMinutes(s) {
-        if (s < 10) {
-            return "0:0" + s;
-        } else if (s < 60) {
-            return "0:" + s;
-        } else {
-            let r = s % 60;
-            if (r < 10) return s / 60 + ":";
-            else return s / 60 + ":0" + r;
-        }
-    }
+    // TODO: Get the date from backend.
+    appendAccordionInstances(config) {
+        const chartConfig = {
+            width: "200",
+            colorNumber: "2",
+            color1: "#4287f5",
+            color2: "#42f58d",
+            fillPercent1: "30",
+            fillPercent2: "70",
+        };
 
-    timeAsDate(s) {
-        const date = new Date(s * 1000);
-        return date.getUTCFullYear() + "-" + (date.getUTCMonth() + 1) + "-" + date.getUTCDate();
-    }
-
-    gamemodeName(tid, gamemode) {
-        if (tid != undefined) {
-            return tr("Tournament");
-        } else if (gamemode == "1v1local") {
-            return tr("Local");
-        } else if (gamemode == "1v1") {
-            return tr("Remote");
-        }
+        const accordionInstance = new Accordion(config, chartConfig);
+        accordionInstance.init();
+        this.accordionContainer.innerHTML += accordionInstance.render();
     }
 
     async init() {
-        this.results = await post("/api/player/c/matches").then((res) => res.json());
-
-        if (this.results != undefined && this.results["results"] != undefined) {
-            for (let result of this.results["results"]) {
-                result["player1"] = await getNickname(result["player1"]);
-                result["player2"] = await getNickname(result["player2"]);
-            }
-        }
-
         this.onready = async () => {
-            const dataContainer = document.getElementById("other-profile-data");
+            this.dataContainer = document.getElementById("other-profile-data");
             const profile = document.getElementById("other-player-profile");
-            await this.showProfile();
-
             const navLinks = document.querySelectorAll(".nav-item");
+
+            await this.showProfile();
 
             navLinks.forEach((link) => {
                 link.addEventListener("click", async () => {
+                    this.dataContainer.innerHTML = "";
                     const data = link.querySelector(".nav-link").getAttribute("data");
-                    dataContainer.innerHTML = "";
 
                     if (data === "Profile") {
                         await this.showProfile();
                     } else if (data === "Match History") {
+                        // Create the accordion container
+                        this.accordionContainer = document.createElement("div");
+                        this.accordionContainer.classList.add("accordion", "container");
+                        this.accordionContainer.id = "match-history-accordion";
+                        this.dataContainer.appendChild(this.accordionContainer);
+
+                        // Create accordions.
                         await this.showMatchHistory();
                     } else if (data === "Statistics") {
                     }
@@ -188,19 +158,19 @@ export default class OtherProfile extends Component {
             <div class="container-fluid dashboard-navbar other-profile">
                 <ul class="nav flex-column dashboard-tab other-profile">
                     <li class="nav-item">
-                        <a class="nav-link custom-link" data="Profile">
+                        <a class="nav-link custom-link other-profile" data="Profile">
                             <i class="bi bi-person-badge"></i>
                             <span>${tr("Profile")}</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link custom-link" data="Match History">
+                        <a class="nav-link custom-link other-profile" data="Match History">
                             <i class="bi bi-clock-history"></i>
                             <span>${tr("Match History")}</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link custom-link" data="Statistics">
+                        <a class="nav-link custom-link other-profile" data="Statistics">
                             <i class="bi bi-file-bar-graph"></i>
                             <span>${tr("Statistics")}</span>
                         </a>

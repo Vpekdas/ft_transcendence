@@ -1,13 +1,12 @@
-// https://heyoka.medium.com/scratch-made-svg-donut-pie-charts-in-html5-2c587e935d72
 import { Component } from "../../micro";
 
 const r = 15.91549430918954;
 /** @type {import("../../micro").Component} */
 export default class DonutChart extends Component {
-    // r = 100/(2π)
-
-    // stroke-dashoffset="25" -> stroke-dashoffset moves counter-clockwise.
-    // So, we’d need to set this value for 25% in the opposite direction from 3:00 back to 12:00)
+    constructor(config) {
+        super();
+        this.config = config;
+    }
 
     generateSegment(color, dashArray, dashOffset, textPosition, content) {
         return /* HTML */ `
@@ -59,9 +58,9 @@ export default class DonutChart extends Component {
     }
 
     async init() {
-        this.width = parseInt(this.attributes.get("width"));
+        this.width = this.config.width;
 
-        const colorNumber = parseInt(this.attributes.get("colorNumber"));
+        const colorNumber = this.config.colorNumber;
 
         const circles = [];
 
@@ -73,12 +72,12 @@ export default class DonutChart extends Component {
                 textPosition: { x: 0, y: 0 },
                 content: "",
             };
-            circle.color = this.attributes.get("color" + (i + 1));
+            circle.color = this.config["color" + (i + 1)];
 
-            const fillingPercent = parseInt(this.attributes.get("fillPercent" + (i + 1)));
+            const fillingPercent = this.config["fillPercent" + (i + 1)];
             const notFilledPercent = 100 - fillingPercent;
 
-            circle.fillPercent = this.attributes.get("fillPercent" + (i + 1)) + " " + notFilledPercent.toString();
+            circle.fillPercent = fillingPercent + " " + notFilledPercent.toString();
             circle.fillOffset = this.calculateOffset(circles, i);
             circle.textPosition = this.calculateTextPosition(fillingPercent, circle.fillOffset);
             circle.content = fillingPercent.toString();

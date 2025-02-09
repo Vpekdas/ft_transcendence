@@ -1,11 +1,13 @@
 import { Component } from "../micro";
 import DonutChart from "./Charts/DonutChart";
+import BarChart from "./Charts/BarChart";
 
 export default class Accordion extends Component {
-    constructor(config, chartConfig) {
+    constructor(config, chartConfig, barChartConfig) {
         super();
         this.config = config;
         this.chartConfig = chartConfig;
+        this.barChartConfig = barChartConfig;
         this.id = this.generateRandomId();
     }
     async init() {
@@ -24,6 +26,12 @@ export default class Accordion extends Component {
         const donutChartInstance = new DonutChart(this.chartConfig);
         donutChartInstance.init();
         return donutChartInstance.render();
+    }
+
+    renderBarChart() {
+        const barChartInstance = new BarChart(this.barChartConfig);
+        barChartInstance.init();
+        return barChartInstance.render();
     }
 
     render() {
@@ -59,7 +67,7 @@ export default class Accordion extends Component {
                     class="accordion-collapse collapse match-history"
                     aria-labelledby="heading-${this.id}"
                 >
-                    <div class="accordion-body match-history">${this.renderDonutChart()}</div>
+                    <div class="accordion-body match-history">${this.renderDonutChart()} ${this.renderBarChart()}</div>
                 </div>
             </div>
         `;

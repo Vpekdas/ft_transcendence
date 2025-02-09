@@ -264,7 +264,12 @@
 }
 
 .accordion-body.match-history {
+    position: relative;
+    display: flex;
     background: linear-gradient(240deg, #00264d, #00264d 50%, #000000 100%);
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
 }
 
 .container-fluid.match-history-container {
@@ -677,6 +682,22 @@
     display: flex;
     position: relative;
     background: #d89123;
+}
+
+.bar-chart-caption {
+    color: #d89123;
+}
+
+.bar-chart-text {
+    fill: #ffffff;
+}
+
+.bar-chart-rectangle-higher {
+    fill: green;
+}
+
+.bar-chart-rectangle-lower {
+    fill: red;
 }
 
 /* SETTINGS */

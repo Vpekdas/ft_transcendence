@@ -100,7 +100,7 @@ export default class DonutChart extends Component {
     render() {
         return /* HTML */ ` <svg width="${this.width}" height="${this.width * 1.2}" viewBox="0 0 42 42" class="donut">
             <text x="21" y="0" text-anchor="middle" alignment-baseline="middle" font-size="4" fill="#d2320a">
-                Chart Title
+                ${this.config.title}
             </text>
             <circle class="donut-hole" cx="21" cy="21" r="${r}" fill="transparent"></circle>
             ${this.segment}

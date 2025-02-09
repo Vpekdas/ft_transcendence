@@ -68,7 +68,10 @@ export default class OtherProfile extends Component {
     }
 
     async showMatchHistory() {
-        this.results = await post("/api/player/c/matches").then((res) => res.json());
+        const actualName = this.attributes.get("nickname");
+        const actualId = await getUserIdByNickname(actualName);
+
+        this.results = await post("/api/player/" + actualId + "/matches").then((res) => res.json());
 
         if (this.results != undefined && this.results["results"] != undefined) {
             for (let result of this.results["results"]) {
@@ -83,35 +86,66 @@ export default class OtherProfile extends Component {
                     player2Class = "history-winner";
                 }
 
+                let player1Name = await getNickname(result["player1"]);
+                let player2Name = await getNickname(result["player2"]);
+
+                const gamemode = this.gamemodeName(result["tid"], result["gamemode"]);
+
+                if (gamemode == tr("Local")) {
+                    player1Name += "(L)";
+                    player2Name += "(R)";
+                }
+
                 const config = {
                     player1Class: player1Class,
                     player2Class: player2Class,
-                    player1Name: result["player1"],
-                    player2Name: result["player2"],
+                    player1Name: player1Name,
+                    player2Name: player2Name,
                     player1Score: result["score1"],
                     player2Score: result["score2"],
                     historyTime: this.timeInMinutes(result["timeEnded"] - result["timeStarted"]),
-                    gamemode: this.gamemodeName(result["tid"], result["gamemode"]),
+                    gamemode: gamemode,
                     date: this.timeAsDate(result["timeEnded"]),
                 };
 
-                this.appendAccordionInstances(config);
+                const donutChartConfig = {
+                    width: "180",
+                    colorNumber: "2",
+                    color1: "#4287f5",
+                    color2: "#42f58d",
+                    fillPercent1: "30",
+                    fillPercent2: "70",
+                    title: "Hello",
+                };
+
+                if (result["stats"]["p1"]["up_count"] > result["stats"]["p2"]["up_count"]) {
+                    player1Class = "bar-chart-rectangle-higher";
+                    player2Class = "bar-chart-rectangle-lower";
+                } else {
+                    player1Class = "bar-chart-rectangle-lower";
+                    player2Class = "bar-chart-rectangle-higher";
+                }
+
+                const barChartConfig = {
+                    width: "180",
+                    height: "150",
+                    title: "Up Count",
+                    titleColor: "white",
+                    player1Class: player1Class,
+                    player1Name: player1Name,
+                    firstElementWidth: result["stats"]["p1"]["up_count"],
+                    player2Class: player2Class,
+                    player2Name: player2Name,
+                    secondElementWidth: result["stats"]["p2"]["up_count"],
+                };
+
+                this.appendAccordionInstances(config, donutChartConfig, barChartConfig);
             }
         }
     }
 
-    // TODO: Get the date from backend.
-    appendAccordionInstances(config) {
-        const chartConfig = {
-            width: "200",
-            colorNumber: "2",
-            color1: "#4287f5",
-            color2: "#42f58d",
-            fillPercent1: "30",
-            fillPercent2: "70",
-        };
-
-        const accordionInstance = new Accordion(config, chartConfig);
+    appendAccordionInstances(config, donutChartConfig, barChartConfig) {
+        const accordionInstance = new Accordion(config, donutChartConfig, barChartConfig);
         accordionInstance.init();
         this.accordionContainer.innerHTML += accordionInstance.render();
     }

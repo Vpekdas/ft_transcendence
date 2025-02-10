@@ -175,22 +175,6 @@ export default class Pong extends Component {
 
         document.getElementById("score1").textContent = score1;
         document.getElementById("score2").textContent = score2;
-
-        const geometry = new TextGeometry(score1 + " - " + score2, {
-            font: this.font,
-            size: 80,
-            depth: 0,
-            curveSegments: 12,
-            bevelEnabled: true,
-            bevelThickness: 10,
-            bevelSize: 8,
-            bevelOffset: 0,
-            bevelSegments: 5,
-        });
-
-        var oldGeometry = this.textMesh.geometry;
-        this.textMesh.geometry = geometry;
-        oldGeometry.dispose();
     }
 
     async onMessage(data) {
@@ -201,35 +185,7 @@ export default class Pong extends Component {
         } else if (data.type == "winner" && !gameEnded) {
             gameEnded = true;
 
-            let geometry;
-
-            if (data.winner == this.playerInfo.id) {
-                geometry = new TextGeometry("You win !", {
-                    font: font,
-                    size: 80,
-                    depth: 0,
-                    curveSegments: 12,
-                    bevelEnabled: true,
-                    bevelThickness: 10,
-                    bevelSize: 8,
-                    bevelOffset: 0,
-                    bevelSegments: 5,
-                });
-            } else {
-                geometry = new TextGeometry("You loose :(", {
-                    font: font,
-                    size: 80,
-                    depth: 0,
-                    curveSegments: 12,
-                    bevelEnabled: true,
-                    bevelThickness: 10,
-                    bevelSize: 8,
-                    bevelOffset: 0,
-                    bevelSegments: 5,
-                });
-            }
-            const mesh = new THREE.Mesh(geometry);
-            this.scene.add(mesh);
+            // TODO
         } else if (data["type"] == "redirectTournament") {
             navigateTo(`/tournament/${data["id"]}`);
         } else if (data["type"] == "countdown") {
@@ -258,7 +214,6 @@ export default class Pong extends Component {
         this.modelLoader = new GLTFLoader();
 
         this.font = await this.fontLoader.loadAsync("/fonts/TakaoMincho_Regular.json");
-        this.textMesh = new THREE.Mesh(undefined);
 
         this.gameStarted = false;
 
@@ -270,9 +225,6 @@ export default class Pong extends Component {
         // this.scene.add(lava.scene);
 
         this.onready = () => {
-            this.textMesh.scale.set(0.01, 0.01, 0.01);
-            this.scene.add(this.textMesh);
-
             const c = document.getElementById("pong");
 
             let camera = new THREE.PerspectiveCamera(70, c.clientWidth / c.clientHeight, 0.1, 1000);

@@ -91,6 +91,8 @@ class Pong(Game):
     def __init__(self, *, gamemode: str, tid: str = None, accepted_players: list[int] = None):
         super().__init__(tid=tid, gamemode=gamemode)
 
+        # size is 36x24
+
         self.settings = Settings()
         self.service = 0
         self.players_count = 2
@@ -118,8 +120,8 @@ class Pong(Game):
 
         border_box = Box(Vec3(-18, -0.2, 0), Vec3(18, 0.2, 0))
 
-        self.scene.add_body(Body(type="Wall", shape=border_box, pos=Vec3(0, -12, 0)))
-        self.scene.add_body(Body(type="Wall", shape=border_box, pos=Vec3(0, 12, 0)))
+        self.scene.add_body(Body(type="Wall", shape=border_box, pos=Vec3(0, -12.4, 0)))
+        self.scene.add_body(Body(type="Wall", shape=border_box, pos=Vec3(0, 12.4, 0)))
 
         self.already_send_redirect = False
         self.already_saved = False
@@ -160,14 +162,14 @@ class Pong(Game):
                 self.already_send_redirect = True
             elif not self.is_tournament_game():
                 self.state = State.DEAD
-            
+
             if not self.already_saved:
                 # Save the result of the game in the database
                 await self.save_results()
         elif self.state == State.IN_LOBBY:
             if len(self.clients) == 2:
                 self.state = State.STARTED
-                
+
         await self.broadcast({ "type": "update", "bodies": self.scene.to_dict(), "scores": [ self.player1.score, self.player2.score ] })
 
         for event in self.scene.backlog:
@@ -204,7 +206,7 @@ class Pong(Game):
                 gain = (1 / winner.pongElo / 2) * base
             else:
                 gain = looser.pongElo / winner.pongElo / 2 * base
-            
+
             winner.pongElo += gain
             looser.pongElo -= gain
 
@@ -262,7 +264,7 @@ class MatchmakePlayer:
         self.player_id = player_id
         self.gamemode = gamemode
         self.elo = elo
-    
+
     def __lt__(self, other):
         return self.elo < other.elo
 
@@ -288,7 +290,7 @@ class PongManager(GameManager):
         asyncio.set_event_loop(self.event_loop)
         self.event_loop.create_task(self.matchmake_loop())
         self.event_loop.run_forever()
-    
+
     async def matchmake_loop(self):
         while self.loop_running:
             if len(self.players) >= 2:
@@ -308,7 +310,7 @@ class PongManager(GameManager):
 
                 await p1.conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": "1v1" }))
                 await p2.conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": "1v1" }))
-            
+
             await asyncio.sleep(1.0)
 
     async def do_matchmaking(self, conn, gamemode: str, player: Player, opponent: int=None):
@@ -326,7 +328,7 @@ class PongManager(GameManager):
             await game.on_join(player.id)
         elif gamemode == "1v1":
             self.players.append(MatchmakePlayer(conn=conn, player_id=player.id, gamemode=gamemode, elo=player.pongElo))
-            
+
             # try:
             #     opponent = next(filter(lambda p: p.gamemode == gamemode, self.players))
 

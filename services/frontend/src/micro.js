@@ -841,6 +841,7 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
             let newNode2 = newNode.children.at(index);
             // console.log(oldNode, oldElement, parentElement);
             // console.log(oldNode.children.length, newNode.children.length, oldElement.childNodes.length);
+            console.log(oldElement);
             let oldElement2 = oldElement.childNodes.item(index);
 
             await updateDOM(oldNode2, newNode2, oldElement2, oldElement);
@@ -862,6 +863,13 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
                 }
             }
         }
+    }
+}
+
+async function unmountAll(node) {
+    for (let child of node.children) {
+        await child.unmount();
+        await unmountAll(child);
     }
 }
 
@@ -907,6 +915,11 @@ async function router() {
         newNode = await createComponentNode(view, new Map(), undefined);
     }
 
+    if (rootNode) {
+        await unmountAll(rootNode);
+        app.replaceChildren([]);
+        rootNode = null;
+    }
     await updateDOM(rootNode, newNode, app.firstElementChild, app);
     // console.log(document.querySelector(".container-fluid.round-container"));
 

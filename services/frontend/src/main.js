@@ -7,7 +7,6 @@ import Home from "./views/Home";
 import Registration from "./views/Registration";
 import Login from "./views/Login";
 import Logout from "./views/Logout";
-import Clicker from "./views/Clicker";
 import SolarSystem from "./views/SolarSystem";
 import Pong from "./views/Pong";
 import PongMatchmake from "./views/PongMatchmake";
@@ -31,7 +30,6 @@ defineRouter({
         { path: "/logout", view: Logout },
         { path: "/profile/social/[tab=friends,blacklist]", view: Social },
         { path: "/profile/[tab=match-history,statistics,skins,settings]", view: Profile },
-        { path: "/duck", view: Clicker },
         { path: "/solar-system", view: SolarSystem },
         { path: "/play/pong/[id=$[a-zA-Z0-9]+$]", view: Pong },
         { path: "/play/chess/[id=$[a-zA-Z0-9]+$]", view: Chess },

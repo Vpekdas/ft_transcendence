@@ -401,7 +401,6 @@ export default class Chatbox extends Component {
 
     async updateChatHeader(fullname, picture) {
         this.chatHeader.innerHTML = "";
-        const otherProfile = document.getElementById("other-player-profile");
         const idToNickname = await getNickname(fullname);
 
         const img = document.createElement("img");
@@ -411,8 +410,6 @@ export default class Chatbox extends Component {
         const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", "");
 
         img.addEventListener("click", async () => {
-            otherProfile.style.display = "flex";
-
             setOtherProfileNickname(idToNickname);
         });
 

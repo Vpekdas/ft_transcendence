@@ -3406,7 +3406,7 @@ ow-system[labels="false"] ow-name {
 /* ! MAKE NONE AFTER FINISHING */
 
 .container-fluid.dashboard-container.other-profile {
-    display: none;
+    display: flex;
     position: absolute;
     height: 75%;
     width: 75%;

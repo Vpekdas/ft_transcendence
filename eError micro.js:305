@@ -1,0 +1,77 @@
+[1mdiff --git a/services/frontend/src/components/Social/Chatbox.js b/services/frontend/src/components/Social/Chatbox.js[m
+[1mindex 7dea609..fe6c9d5 100644[m
+[1m--- a/services/frontend/src/components/Social/Chatbox.js[m
+[1m+++ b/services/frontend/src/components/Social/Chatbox.js[m
+[36m@@ -401,7 +401,6 @@[m [mexport default class Chatbox extends Component {[m
+ [m
+     async updateChatHeader(fullname, picture) {[m
+         this.chatHeader.innerHTML = "";[m
+[31m-        const otherProfile = document.getElementById("other-player-profile");[m
+         const idToNickname = await getNickname(fullname);[m
+ [m
+         const img = document.createElement("img");[m
+[36m@@ -411,8 +410,6 @@[m [mexport default class Chatbox extends Component {[m
+         const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", "");[m
+ [m
+         img.addEventListener("click", async () => {[m
+[31m-            otherProfile.style.display = "flex";[m
+[31m-[m
+             setOtherProfileNickname(idToNickname);[m
+         });[m
+ [m
+[1mdiff --git a/services/frontend/src/components/Social/OtherProfile.js b/services/frontend/src/components/Social/OtherProfile.js[m
+[1mindex 1efb005..a5b083b 100644[m
+[1m--- a/services/frontend/src/components/Social/OtherProfile.js[m
+[1m+++ b/services/frontend/src/components/Social/OtherProfile.js[m
+[36m@@ -151,6 +151,8 @@[m [mexport default class OtherProfile extends Component {[m
+     }[m
+ [m
+     async init() {[m
+[32m+[m[32m        const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", "");[m
+[32m+[m
+         this.onready = async () => {[m
+             this.dataContainer = document.getElementById("other-profile-data");[m
+             const profile = document.getElementById("other-player-profile");[m
+[36m@@ -182,7 +184,7 @@[m [mexport default class OtherProfile extends Component {[m
+             const returnBtn = document.getElementById("confirm-button");[m
+ [m
+             returnBtn.addEventListener("click", async () => {[m
+[31m-                profile.style.display = "none";[m
+[32m+[m[32m                setOtherProfileNickname("");[m
+             });[m
+         };[m
+     }[m
+[36m@@ -190,19 +192,7 @@[m [mexport default class OtherProfile extends Component {[m
+     render() {[m
+         return /* HTML */ ` <div class="container-fluid dashboard-container other-profile" id="other-player-profile">[m
+             <div class="container-fluid dashboard-navbar other-profile">[m
+[31m-                <ul class="nav flex-column dashboard-tab other-profile">[m
+[31m-                    <li class="nav-item">[m
+[31m-                        <a class="nav-link custom-link other-profile" data="Profile">[m
+[31m-                            <i class="bi bi-person-badge"></i>[m
+[31m-                            <span>${tr("Profile")}</span>[m
+[31m-                        </a>[m
+[31m-                    </li>[m
+[31m-                    <li class="nav-item">[m
+[31m-                        <a class="nav-link custom-link other-profile" data="Match History">[m
+[31m-                            <i class="bi bi-clock-history"></i>[m
+[31m-                            <span>${tr("Match History")}</span>[m
+[31m-                        </a>[m
+[31m-                    </li>[m
+[32m+[m[32m                <ul class="nav flex-column dashboard-https://localhost:8080/[m
+                     <li class="nav-item">[m
+                         <a class="nav-link custom-link other-profile" data="Statistics">[m
+                             <i class="bi bi-file-bar-graph"></i>[m
+[1mdiff --git a/services/frontend/src/style.css b/services/frontend/src/style.css[m
+[1mindex 9163700..34bcf48 100644[m
+[1m--- a/services/frontend/src/style.css[m
+[1m+++ b/services/frontend/src/style.css[m
+[36m@@ -3406,7 +3406,7 @@[m [mow-system[labels="false"] ow-name {[m
+ /* ! MAKE NONE AFTER FINISHING */[m
+ [m
+ .container-fluid.dashboard-container.other-profile {[m
+[31m-    display: none;[m
+[32m+[m[32m    display: flex;[m
+     position: absolute;[m
+     height: 75%;[m
+     width: 75%;[m

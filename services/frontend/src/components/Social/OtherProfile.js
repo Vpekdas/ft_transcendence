@@ -151,6 +151,8 @@ export default class OtherProfile extends Component {
     }
 
     async init() {
+        const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", "");
+
         this.onready = async () => {
             this.dataContainer = document.getElementById("other-profile-data");
             const profile = document.getElementById("other-player-profile");
@@ -182,7 +184,7 @@ export default class OtherProfile extends Component {
             const returnBtn = document.getElementById("confirm-button");
 
             returnBtn.addEventListener("click", async () => {
-                profile.style.display = "none";
+                setOtherProfileNickname("");
             });
         };
     }

@@ -27,8 +27,6 @@ export async function setLanguage(l) {
 
 export var languageDb = undefined;
 
-if (languageDb == undefined) {
-    setTimeout(async () => {
-        await setLanguage(getLanguage());
-    }, 0);
-}
+document.addEventListener("DOMContentLoaded", async () => {
+    if (languageDb == undefined) await setLanguage(getLanguage());
+});

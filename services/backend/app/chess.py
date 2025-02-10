@@ -60,19 +60,19 @@ class Board:
 
     def get(self, x: int, y: int) -> Piece:
         return self.tiles[x + y * 8]
-    
+
     def present(self, x: int, y: int) -> bool:
         return self.get(x, y) is not None
 
     def move(self, pos: str, to: str) -> str:
         piece = self.tiles[shorthand_to_index(pos)]
-        
+
         self.tiles[shorthand_to_index(pos)] = None
         self.tiles[shorthand_to_index(to)] = piece
 
     def copy(self):
         board = Board()
-        
+
         for x in range(8):
             for y in range(8):
                 piece = self.get(x, y)
@@ -81,7 +81,7 @@ class Board:
                     board.tiles[x + y * 8] = Piece(piece.type, piece.color)
                     board.tiles[x + y * 8].has_moved = piece.has_moved
                     board.tiles[x + y * 8].available_moves = piece.available_moves
-        
+
         return board
 
     def compute_all_available_moves(self, color: Color=None, check: bool=True):
@@ -99,7 +99,7 @@ class Board:
 
     def get_available_rook_moves(self, coords: (int, int), piece: Piece, check: bool) -> list[str]:
         moves = []
-        
+
         # Y
         for y in range(coords[1] + 1, 8):
             coords2 = (coords[0], y)
@@ -292,7 +292,7 @@ class Board:
                 if piece is not None and piece.type == PieceType.KING and piece.color == color:
                     king = piece
                     coords = (x, y)
-        
+
         if coords is None:
             return True
 
@@ -308,11 +308,11 @@ class Board:
 
         if not self.is_in_check(color):
             return False
-        
+
         for piece in pieces:
             if len(piece.available_moves) > 0:
                 return False
-        
+
         return True
 
     def is_stalemate(self, color: Color) -> bool:
@@ -325,11 +325,11 @@ class Board:
 
         if self.is_in_check(color):
             return False
-        
+
         for piece in pieces:
             if len(piece.available_moves) > 0:
                 return False
-        
+
         return True
 
     def new_board_after_move(self, color: Color, pos: (int, int), to: (int, int)):
@@ -367,7 +367,7 @@ class Board:
                     s += "Q"
                 elif piece.type == PieceType.PAWN:
                     s += "P"
-                
+
             print(s, file=sys.stderr)
 
 class Side:
@@ -382,59 +382,59 @@ class ChessGame:
         self.white: Side = None
         self.black: Side = None
 
-        self.turn: Color = Color.BLACK
+        self.turn: Color = Color.WHITE
         self.turn_num: int = 0
 
         self.setup_board()
 
     def setup_board(self):
         # white pieces
-        # self.place_piece(PieceType.PAWN, "A2", Color.WHITE)
-        # self.place_piece(PieceType.PAWN, "B2", Color.WHITE)
-        # self.place_piece(PieceType.PAWN, "C2", Color.WHITE)
-        # self.place_piece(PieceType.PAWN, "D2", Color.WHITE)
-        # self.place_piece(PieceType.PAWN, "E2", Color.WHITE)
-        # self.place_piece(PieceType.PAWN, "F2", Color.WHITE)
-        # self.place_piece(PieceType.PAWN, "G2", Color.WHITE)
-        # self.place_piece(PieceType.PAWN, "H2", Color.WHITE)
+        self.place_piece(PieceType.PAWN, "A2", Color.WHITE)
+        self.place_piece(PieceType.PAWN, "B2", Color.WHITE)
+        self.place_piece(PieceType.PAWN, "C2", Color.WHITE)
+        self.place_piece(PieceType.PAWN, "D2", Color.WHITE)
+        self.place_piece(PieceType.PAWN, "E2", Color.WHITE)
+        self.place_piece(PieceType.PAWN, "F2", Color.WHITE)
+        self.place_piece(PieceType.PAWN, "G2", Color.WHITE)
+        self.place_piece(PieceType.PAWN, "H2", Color.WHITE)
 
-        # self.place_piece(PieceType.ROOK, "A1", Color.WHITE)
-        # self.place_piece(PieceType.KNIGHT, "B1", Color.WHITE)
-        # self.place_piece(PieceType.BISHOP, "C1", Color.WHITE)
-        # self.place_piece(PieceType.KING, "D1", Color.WHITE)
-        # self.place_piece(PieceType.QUEEN, "E1", Color.WHITE)
-        # self.place_piece(PieceType.BISHOP, "F1", Color.WHITE)
-        # self.place_piece(PieceType.KNIGHT, "G1", Color.WHITE)
-        # self.place_piece(PieceType.ROOK, "H1", Color.WHITE)
+        self.place_piece(PieceType.ROOK, "A1", Color.WHITE)
+        self.place_piece(PieceType.KNIGHT, "B1", Color.WHITE)
+        self.place_piece(PieceType.BISHOP, "C1", Color.WHITE)
+        self.place_piece(PieceType.KING, "D1", Color.WHITE)
+        self.place_piece(PieceType.QUEEN, "E1", Color.WHITE)
+        self.place_piece(PieceType.BISHOP, "F1", Color.WHITE)
+        self.place_piece(PieceType.KNIGHT, "G1", Color.WHITE)
+        self.place_piece(PieceType.ROOK, "H1", Color.WHITE)
 
         # black pieces
-        # self.place_piece(PieceType.PAWN, "A7", Color.BLACK)
-        # self.place_piece(PieceType.PAWN, "B7", Color.BLACK)
-        # self.place_piece(PieceType.PAWN, "C7", Color.BLACK)
-        # self.place_piece(PieceType.PAWN, "D7", Color.BLACK)
-        # self.place_piece(PieceType.PAWN, "E7", Color.BLACK)
-        # self.place_piece(PieceType.PAWN, "F7", Color.BLACK)
-        # self.place_piece(PieceType.PAWN, "G7", Color.BLACK)
-        # self.place_piece(PieceType.PAWN, "H7", Color.BLACK)
+        self.place_piece(PieceType.PAWN, "A7", Color.BLACK)
+        self.place_piece(PieceType.PAWN, "B7", Color.BLACK)
+        self.place_piece(PieceType.PAWN, "C7", Color.BLACK)
+        self.place_piece(PieceType.PAWN, "D7", Color.BLACK)
+        self.place_piece(PieceType.PAWN, "E7", Color.BLACK)
+        self.place_piece(PieceType.PAWN, "F7", Color.BLACK)
+        self.place_piece(PieceType.PAWN, "G7", Color.BLACK)
+        self.place_piece(PieceType.PAWN, "H7", Color.BLACK)
 
-        # self.place_piece(PieceType.ROOK, "A8", Color.BLACK)
-        # self.place_piece(PieceType.KNIGHT, "B8", Color.BLACK)
-        # self.place_piece(PieceType.BISHOP, "C8", Color.BLACK)
-        # self.place_piece(PieceType.KING, "D8", Color.BLACK)
-        # self.place_piece(PieceType.QUEEN, "E8", Color.BLACK)
-        # self.place_piece(PieceType.BISHOP, "F8", Color.BLACK)
-        # self.place_piece(PieceType.KNIGHT, "G8", Color.BLACK)
-        # self.place_piece(PieceType.ROOK, "H8", Color.BLACK)
+        self.place_piece(PieceType.ROOK, "A8", Color.BLACK)
+        self.place_piece(PieceType.KNIGHT, "B8", Color.BLACK)
+        self.place_piece(PieceType.BISHOP, "C8", Color.BLACK)
+        self.place_piece(PieceType.KING, "D8", Color.BLACK)
+        self.place_piece(PieceType.QUEEN, "E8", Color.BLACK)
+        self.place_piece(PieceType.BISHOP, "F8", Color.BLACK)
+        self.place_piece(PieceType.KNIGHT, "G8", Color.BLACK)
+        self.place_piece(PieceType.ROOK, "H8", Color.BLACK)
 
         # -----------------------------------------------------
         # TEST BOARDS
 
         # 1.
-        self.place_piece(PieceType.KING, "H8", Color.BLACK)
+        # self.place_piece(PieceType.KING, "H8", Color.BLACK)
         # self.place_piece(PieceType.PAWN, "H1", Color.BLACK)
 
-        self.place_piece(PieceType.KING, "C3", Color.WHITE)
-        self.place_piece(PieceType.QUEEN, "H1", Color.WHITE)
+        # self.place_piece(PieceType.KING, "C3", Color.WHITE)
+        # self.place_piece(PieceType.QUEEN, "H1", Color.WHITE)
         # self.place_piece(PieceType.PAWN, "D7", Color.WHITE)
 
         self.board.compute_all_available_moves()
@@ -574,7 +574,7 @@ class ChessGame:
                     promotion = PieceType.from_str(data["promotionType"])
                 else:
                     promotion = PieceType.QUEEN # 99% of the time you want a queen anyway
-                
+
                 self.place_piece(promotion, data["to"], piece.color)
 
             self.turn_num += 1

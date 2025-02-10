@@ -851,7 +851,7 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
         let newElement = newNode.children[index].build();
 
         parentElement.append(newElement);
-        await newElement.mount();
+        await newNode.children[index].mount();
 
         if (!(newNode instanceof VirtualNodeText)) {
             for (let child of newNode.children) {

@@ -6,6 +6,7 @@ export default class BarChart extends Component {
     constructor(config) {
         super();
         this.config = config;
+        this.sumWidth = config.firstElementWidth + config.secondElementWidth;
     }
     async init() {}
 
@@ -24,10 +25,14 @@ export default class BarChart extends Component {
             >
                 <title class="title-bar-chart">${this.config.title}</title>
                 <g class="bar-chart">
-                    <rect class=${this.config.player1Class} width=${this.config.firstElementWidth} height="19"></rect>
+                    <rect
+                        class="${this.config.player1Class}"
+                        width="${(this.config.firstElementWidth / this.sumWidth) * 100}"
+                        height="19"
+                    ></rect>
                     <text
                         class="bar-chart-text"
-                        x=${this.config.firstElementWidth}
+                        x="${(this.config.firstElementWidth / this.sumWidth) * 100} "
                         y="9.5"
                         dy=".35em"
                         text-anchor="start"
@@ -37,14 +42,14 @@ export default class BarChart extends Component {
                 </g>
                 <g class="bar-chart">
                     <rect
-                        class=${this.config.player2Class}
-                        width=${this.config.secondElementWidth * 10}
+                        class="${this.config.player2Class}"
+                        width="${(this.config.secondElementWidth / this.sumWidth) * 100}"
                         height="19"
                         y="20"
                     ></rect>
                     <text
                         class="bar-chart-text"
-                        x=${this.config.secondElementWidth * 10}
+                        x="${(this.config.secondElementWidth / this.sumWidth) * 100}"
                         y="28"
                         dy=".35em"
                         text-anchor="start"

@@ -700,6 +700,24 @@
     fill: red;
 }
 
+.heatmap {
+    position: relative;
+    display: grid;
+    width: auto;
+    grid-template-columns: repeat(36, 0fr);
+    grid-template-rows: repeat(24, 1fr);
+    gap: 0px;
+    isolation: isolate;
+}
+
+.rainbow {
+    --hue: calc((1 - var(--intensity)) * 240);
+    background: hsl(var(--hue), 100%, 50%);
+    height: 10px;
+    width: 10px;
+    display: block;
+}
+
 /* SETTINGS */
 
 .container-fluid.settings {

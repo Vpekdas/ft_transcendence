@@ -1,6 +1,7 @@
 import { Component } from "../micro";
 import DonutChart from "./Charts/DonutChart";
 import BarChart from "./Charts/BarChart";
+import HeatMap from "./Charts/HeatMap";
 
 export default class Accordion extends Component {
     constructor(config, chartConfig, barChartConfig) {
@@ -32,6 +33,12 @@ export default class Accordion extends Component {
         const barChartInstance = new BarChart(this.barChartConfig);
         barChartInstance.init();
         return barChartInstance.render();
+    }
+
+    renderHeatMap() {
+        const heatMapInstance = new HeatMap();
+        heatMapInstance.init();
+        return heatMapInstance.render();
     }
 
     render() {
@@ -67,7 +74,9 @@ export default class Accordion extends Component {
                     class="accordion-collapse collapse match-history"
                     aria-labelledby="heading-${this.id}"
                 >
-                    <div class="accordion-body match-history">${this.renderDonutChart()} ${this.renderBarChart()}</div>
+                    <div class="accordion-body match-history">
+                        ${this.renderDonutChart()} ${this.renderBarChart()} ${this.renderHeatMap()}
+                    </div>
                 </div>
             </div>
         `;

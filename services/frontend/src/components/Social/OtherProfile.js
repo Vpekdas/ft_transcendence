@@ -153,7 +153,6 @@ export default class OtherProfile extends Component {
     async init() {
         const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", "");
 
-
         this.onready = async () => {
             this.dataContainer = document.getElementById("other-profile-data");
             const profile = document.getElementById("other-player-profile");

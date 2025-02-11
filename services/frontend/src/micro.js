@@ -934,9 +934,11 @@ async function router() {
         newNode = await createComponentNode(view, new Map(), undefined);
     }
 
-    // if (rootNode) {
-    //     await unmountAll(rootNode);
-    // }
+    if (rootNode) {
+        await unmountAll(rootNode);
+        app.replaceChildren([]);
+        rootNode = null;
+    }
 
     // let element = await createTree(newNode);
     // app.replaceChild(element, app.firstElementChild);

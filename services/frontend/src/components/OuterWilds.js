@@ -221,15 +221,6 @@ export default class OuterWilds extends Component {
                 });
             });
         };
-
-        // TODO: Probably will append each line.
-        // TODO: Remove the border of previous line so the "cursor" will not be visible.
-
-        //     <div class="typewriter-wrapper">
-        //     <div>
-        //         <h1 class="typewriter-text line-1">Lorem Ipsum Dolor</h1>
-        //     </div>
-        // </div>
     }
 
     render() {

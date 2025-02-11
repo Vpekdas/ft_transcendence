@@ -2181,53 +2181,6 @@ ow-system[labels="false"] ow-name {
     text-align: center;
 }
 
-/* TODO: Change display to flex */
-
-.typewriter-wrapper {
-    display: none;
-    position: fixed;
-    height: 90%;
-    width: 90%;
-    left: 5%;
-    justify-content: center;
-    background-color: #005f73;
-    z-index: 10;
-}
-
-.typewriter-text {
-    position: relative;
-    margin: 2rem auto;
-    white-space: nowrap;
-    overflow: hidden;
-    width: 0;
-    border-right: 1px solid white;
-}
-
-.line-1 {
-    animation:
-        type 3s 0.5s steps(30, end) forwards,
-        blink 0.5s step-end infinite;
-}
-
-@keyframes type {
-    0% {
-        width: 0;
-    }
-    100% {
-        width: 100%;
-    }
-}
-
-@keyframes blink {
-    0%,
-    100% {
-        border-color: transparent;
-    }
-    50% {
-        border-color: white;
-    }
-}
-
 .micro-Coordinates {
     display: flex;
     position: relative;

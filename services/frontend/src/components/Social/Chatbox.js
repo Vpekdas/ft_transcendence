@@ -622,8 +622,6 @@ export default class Chatbox extends Component {
         };
     }
 
-    // TODO: Add the antenna.
-
     render() {
         const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", "");
 

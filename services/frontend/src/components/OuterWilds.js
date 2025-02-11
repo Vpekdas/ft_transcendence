@@ -214,7 +214,7 @@ export default class OuterWilds extends Component {
                             coordinates.currentPath.length = 0;
 
                             if (coordinates.endGame) {
-                                document.querySelector(".fluid-container.coordinates-container").style.display = "flex";
+                                document.querySelector(".container-fluid.coordinates-container").style.display = "flex";
                             }
                         }
                     }

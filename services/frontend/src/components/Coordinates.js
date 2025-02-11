@@ -8,7 +8,7 @@ export default class Coordinates extends Component {
         return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
     }
 
-    isRIghtCoordinate(userPath, rightPath) {
+    isRightCoordinate(userPath, rightPath) {
         if (userPath.length !== rightPath.length) {
             return false;
         }
@@ -17,7 +17,7 @@ export default class Coordinates extends Component {
                 return false;
             }
         }
-        const coordinate = document.querySelector(".fluid-container.coordinates-container");
+        const coordinate = document.getElementById("navigate");
         if (coordinate) {
             const paths = document.querySelectorAll(".path");
             paths.forEach((path) => path.remove());
@@ -27,7 +27,7 @@ export default class Coordinates extends Component {
 
     async init() {
         this.onready = () => {
-            const container = document.querySelector(".coordinates-container");
+            const container = document.getElementById("navigate");
             const coordinates = container.querySelectorAll(".coordinates");
 
             var click = 0,
@@ -88,7 +88,7 @@ export default class Coordinates extends Component {
                                 y = firstPolyVertices[i].y;
                                 xp = secondPolyVertices[j].x;
                                 yp = secondPolyVertices[j].y;
-                                distance = calculateDistance(x, y, xp, yp);
+                                distance = this.calculateDistance(x, y, xp, yp);
                                 closestVertices.push({ x: x, y: y, xp: xp, yp: yp, distance: distance });
                             }
                         }
@@ -158,13 +158,6 @@ export default class Coordinates extends Component {
                         // Ensure the same polygon is not drawn twice in the reverse order.
 
                         for (let i = 0; i < drawnPolygons.length; i++) {
-                            console.log(
-                                "points: ",
-                                points,
-                                "polygons: ",
-                                drawnPolygons[i].split(" ").reverse().join(" ")
-                            );
-
                             if (points === drawnPolygons[i].split(" ").reverse().join(" ")) {
                                 click = 0;
                                 skip = 0;
@@ -179,7 +172,7 @@ export default class Coordinates extends Component {
                         drawnPolygons.push(points);
 
                         // Draw the polygon.
-                        const navigate = container.querySelector("#navigate");
+                        const navigate = document.getElementById("navigate");
                         var newPoly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
                         newPoly.setAttribute("class", "path");
                         newPoly.setAttribute("points", points);
@@ -196,7 +189,7 @@ export default class Coordinates extends Component {
 
                         window.addEventListener("keydown", (event) => {
                             if (event.key === "c") {
-                                const coordinate = document.querySelector(".fluid-container.coordinates-container");
+                                const coordinate = document.getElementById("navigate");
                                 if (coordinate) {
                                     const paths = document.querySelectorAll(".path");
                                     paths.forEach((path) => path.remove());
@@ -206,17 +199,17 @@ export default class Coordinates extends Component {
                         });
 
                         if (validatedStep === 0) {
-                            if (isRIghtCoordinate(drawnPolygons, FIRST_COORDINATES)) {
+                            if (this.isRightCoordinate(drawnPolygons, FIRST_COORDINATES)) {
                                 validatedStep++;
                                 drawnPolygons.length = 0;
                             }
                         } else if (validatedStep === 1) {
-                            if (isRIghtCoordinate(drawnPolygons, SECOND_COORDINATES)) {
+                            if (this.isRightCoordinate(drawnPolygons, SECOND_COORDINATES)) {
                                 validatedStep++;
                                 drawnPolygons.length = 0;
                             }
                         } else {
-                            if (isRIghtCoordinate(drawnPolygons, THIRD_COORDINATES)) {
+                            if (this.isRightCoordinate(drawnPolygons, THIRD_COORDINATES)) {
                                 validatedStep++;
                                 drawnPolygons.length = 0;
                             }
@@ -232,65 +225,63 @@ export default class Coordinates extends Component {
     }
 
     render() {
-        return /* HTML */ ` <div class="fluid-container coordinates-container">
-            <svg id="navigate" height="100%" width="100%" viewBox="0 0 300 300">
-                <polygon points="${POLYGON_VERTICES}" fill="#d9cba3" stroke="black" stroke-width="3" />
-                <svg class="coordinates" x="269" y="135">
-                    <polygon
-                        class="poly"
-                        points="${POLYGON_VERTICES}"
-                        fill="#58402A"
-                        stroke-width="20"
-                        transform="scale(0.1)"
-                    />
-                </svg>
-                <svg class="coordinates" x="202" y="251">
-                    <polygon
-                        class="poly"
-                        points="${POLYGON_VERTICES}"
-                        fill="#58402A"
-                        stroke-width="20"
-                        transform="scale(0.1)"
-                    />
-                </svg>
-                <svg class="coordinates" x="68" y="251" skip="yes">
-                    <polygon
-                        class="poly"
-                        points="${POLYGON_VERTICES}"
-                        fill="#58402A"
-                        stroke-width="20"
-                        transform="scale(0.1)"
-                    />
-                </svg>
-                <svg class="coordinates" x="1" y="135" skip="yes">
-                    <polygon
-                        class="poly"
-                        points="${POLYGON_VERTICES}"
-                        fill="#58402A"
-                        stroke-width="20"
-                        transform="scale(0.1)"
-                    />
-                </svg>
-                <svg class="coordinates" x="68" y="19" skip="yes" topSkip="yes">
-                    <polygon
-                        class="poly"
-                        points="${POLYGON_VERTICES}"
-                        fill="#58402A"
-                        stroke-width="20"
-                        transform="scale(0.1)"
-                    />
-                </svg>
-                <svg class="coordinates" x="202" y="19" topSkip="yes">
-                    <polygon
-                        class="poly"
-                        points="${POLYGON_VERTICES}"
-                        fill="#58402A"
-                        stroke-width="20"
-                        transform="scale(0.1)"
-                    />
-                </svg>
+        return /* HTML */ `<svg id="navigate" height="100%" width="100%" viewBox="0 0 300 300">
+            <polygon points="${POLYGON_VERTICES}" fill="#d9cba3" stroke="black" stroke-width="3" />
+            <svg class="coordinates" x="269" y="135">
+                <polygon
+                    class="poly"
+                    points="${POLYGON_VERTICES}"
+                    fill="#58402A"
+                    stroke-width="20"
+                    transform="scale(0.1)"
+                />
             </svg>
-        </div>`;
+            <svg class="coordinates" x="202" y="251">
+                <polygon
+                    class="poly"
+                    points="${POLYGON_VERTICES}"
+                    fill="#58402A"
+                    stroke-width="20"
+                    transform="scale(0.1)"
+                />
+            </svg>
+            <svg class="coordinates" x="68" y="251" skip="yes">
+                <polygon
+                    class="poly"
+                    points="${POLYGON_VERTICES}"
+                    fill="#58402A"
+                    stroke-width="20"
+                    transform="scale(0.1)"
+                />
+            </svg>
+            <svg class="coordinates" x="1" y="135" skip="yes">
+                <polygon
+                    class="poly"
+                    points="${POLYGON_VERTICES}"
+                    fill="#58402A"
+                    stroke-width="20"
+                    transform="scale(0.1)"
+                />
+            </svg>
+            <svg class="coordinates" x="68" y="19" skip="yes" topSkip="yes">
+                <polygon
+                    class="poly"
+                    points="${POLYGON_VERTICES}"
+                    fill="#58402A"
+                    stroke-width="20"
+                    transform="scale(0.1)"
+                />
+            </svg>
+            <svg class="coordinates" x="202" y="19" topSkip="yes">
+                <polygon
+                    class="poly"
+                    points="${POLYGON_VERTICES}"
+                    fill="#58402A"
+                    stroke-width="20"
+                    transform="scale(0.1)"
+                />
+            </svg>
+        </svg>`;
     }
 }
 

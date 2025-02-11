@@ -23,35 +23,42 @@ export default class Home extends Component {
     render() {
         return /* HTML */ `
             <HomeNavBar />
-            <div class="container-fluid game-container">
-                <div id="toast-container"></div>
-                <div class="card pong-game">
-                    <h5 class="card-title pong-game">Pong</h5>
-                    <img src="/favicon.svg" class="card-img-top pong-game" alt="..." />
-                    <div class="card-body pong-game">
-                        <p class="card-text pong-game">${tr("Play 1v1 Local Pong.")}</p>
-                        <button type="button" class="btn btn-success play" id="play-pong-1v1local">
-                            ${tr("Play")}
-                        </button>
+            <div class="container-fluid home-container">
+                <div class="container-fluid game-container">
+                    <div id="toast-container"></div>
+                    <div class="card pong-game">
+                        <h5 class="card-title pong-game">Pong</h5>
+                        <img src="/favicon.svg" class="card-img-top pong-game" alt="..." />
+                        <div class="card-body pong-game">
+                            <p class="card-text pong-game">${tr("Play 1v1 Local Pong.")}</p>
+                            <button type="button" class="btn btn-success play" id="play-pong-1v1local">
+                                ${tr("Play")}
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card pong-game">
+                        <h5 class="card-title pong-game">Pong</h5>
+                        <img src="/favicon.svg" class="card-img-top pong-game" alt="..." />
+                        <div class="card-body pong-game">
+                            <p class="card-text pong-game">${tr("Play 1v1 Online Pong.")}</p>
+                            <button type="button" class="btn btn-success play" id="play-pong-1v1">${tr("Play")}</button>
+                        </div>
+                    </div>
+                    <div class="card pong-game">
+                        <h5 class="card-title pong-game">Pong</h5>
+                        <img src="/favicon.svg" class="card-img-top pong-game" alt="..." />
+                        <div class="card-body pong-game">
+                            <p class="card-text pong-game">${tr("Create a Pong Tournament.")}</p>
+                            <button type="button" class="btn btn-success play" id="play-pong-tournament">
+                                ${tr("Create")}
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <div class="card pong-game">
-                    <h5 class="card-title pong-game">Pong</h5>
-                    <img src="/favicon.svg" class="card-img-top pong-game" alt="..." />
-                    <div class="card-body pong-game">
-                        <p class="card-text pong-game">${tr("Play 1v1 Online Pong.")}</p>
-                        <button type="button" class="btn btn-success play" id="play-pong-1v1">${tr("Play")}</button>
-                    </div>
-                </div>
-                <div class="card pong-game">
-                    <h5 class="card-title pong-game">Pong</h5>
-                    <img src="/favicon.svg" class="card-img-top pong-game" alt="..." />
-                    <div class="card-body pong-game">
-                        <p class="card-text pong-game">${tr("Create a Pong Tournament.")}</p>
-                        <button type="button" class="btn btn-success play" id="play-pong-tournament">
-                            ${tr("Create")}
-                        </button>
-                    </div>
+                <div class="container-fluid outer-wilds-container">
+                    <OuterWilds />
+                    <Coordinates />
+                    <EyeOfTheUniverse />
                 </div>
             </div>
             <Chatbox />

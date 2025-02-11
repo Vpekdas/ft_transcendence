@@ -982,9 +982,11 @@ export function defineRouter(settings) {
                 target = target.parentElement;
             }
 
-            if (target instanceof HTMLAnchorElement) {
+            if (target instanceof HTMLAnchorElement && target.href.length > 0) {
                 event.preventDefault();
                 navigateTo(target.href);
+            } else if (target instanceof HTMLAnchorElement) {
+                event.preventDefault();
             }
         });
 

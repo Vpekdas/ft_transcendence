@@ -27,12 +27,12 @@ export default class BarChart extends Component {
                 <g class="bar-chart">
                     <rect
                         class="${this.config.player1Class}"
-                        width="${(this.config.firstElementWidth / this.sumWidth) * 100}"
+                        width="${(this.config.firstElementWidth / this.sumWidth) * 100}%"
                         height="19"
                     ></rect>
                     <text
                         class="bar-chart-text"
-                        x="${(this.config.firstElementWidth / this.sumWidth) * 100} "
+                        x="${(this.config.firstElementWidth / this.sumWidth) * 100}%"
                         y="9.5"
                         dy=".35em"
                         text-anchor="start"
@@ -43,13 +43,13 @@ export default class BarChart extends Component {
                 <g class="bar-chart">
                     <rect
                         class="${this.config.player2Class}"
-                        width="${(this.config.secondElementWidth / this.sumWidth) * 100}"
+                        width="${(this.config.secondElementWidth / this.sumWidth) * 100}%"
                         height="19"
                         y="20"
                     ></rect>
                     <text
                         class="bar-chart-text"
-                        x="${(this.config.secondElementWidth / this.sumWidth) * 100}"
+                        x="${(this.config.secondElementWidth / this.sumWidth) * 100}%"
                         y="28"
                         dy=".35em"
                         text-anchor="start"

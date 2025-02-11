@@ -93,7 +93,7 @@ export default class OuterWilds extends Component {
             // ! If the user does not interact, a Promise is returned by audio.
             chronometer.timerId = setInterval(() => {
                 chronometer.seconds++;
-                if (chronometer.seconds === 1200 && !supernova) {
+                if (chronometer.seconds === 120 && !supernova) {
                     supernova = true;
                     if (music.audio.duration > 0 && !music.audio.paused) {
                         music.audio.pause();

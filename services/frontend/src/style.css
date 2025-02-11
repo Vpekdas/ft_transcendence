@@ -956,8 +956,6 @@
     width: 45%;
 }
 
-/* Overflow hidden ensure that windows are not scrollable */
-/* ! Weird scroll effect even if there is nothing to scroll ? */
 body {
     background: linear-gradient(to bottom, #000000, #1a1a1a);
     color: #ffffff;
@@ -965,8 +963,6 @@ body {
     width: 100%;
     overflow: hidden;
 }
-
-/* NAV BAR */
 
 body::before {
     content: "";
@@ -980,11 +976,12 @@ body::before {
         linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
     opacity: 0.1;
     z-index: -1;
-    animation: light-streams 20s linear infinite;
+    animation: ZoomRotate 20s linear infinite;
     background-size: cover;
+    overflow: hidden;
 }
 
-@keyframes light-streams {
+@keyframes ZoomRotate {
     0% {
         background-position: 0 0;
         transform: scale(1) rotate(0deg);
@@ -1006,6 +1003,8 @@ body::before {
         transform: scale(1) rotate(0deg);
     }
 }
+
+/* NAV BAR */
 
 .background-elements {
     position: relative;
@@ -1055,20 +1054,6 @@ body::before {
     100% {
         transform: translateY(-100%);
     }
-}
-
-.data-stream {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 10%, rgba(255, 255, 255, 0) 90%);
-    background-size: 100% 50%;
-    animation: flow 5s linear infinite;
-    opacity: 0.5;
-    pointer-events: none;
-    z-index: -1;
 }
 
 .nav.navbar {
@@ -1602,7 +1587,7 @@ canvas {
 }
 
 ow-system {
-    --cycle: 1320s; /* 22-minute cycle (game-accurate) */
+    --cycle: 240s;
     --unit: calc(var(--scale, 1) * 95vmin);
     --sun-glow: #ba702f;
     --orbit-border-width: 1px;
@@ -1623,11 +1608,6 @@ ow-system {
     animation: --sun-glow var(--cycle) linear infinite;
     transition: --scale 5ms linear;
 }
-
-/* You can change supernova timer here */
-/* ow-system[timelapse="true"] {
-    --cycle: 180s;
-} */
 
 ow-orbit {
     position: relative;
@@ -2001,8 +1981,6 @@ ow-system[labels="false"] ow-name {
         rotate360 10s linear infinite,
         var(--orbit-animation);
 }
-
-/* !FIXME: Hovering works only if screen has certain size ?  (Ex: when pressing alt) */
 
 #white-hole-station {
     --orbit-radius: 0.48;

@@ -1442,11 +1442,11 @@ canvas {
     height: 100%;
     width: 100%;
     border: solid 1px;
-    border-color: red;
     border-radius: 10px;
     align-items: center;
     justify-content: space-evenly;
     gap: 20px;
+    padding: 20px;
 }
 
 .card.pong-game {
@@ -2121,7 +2121,6 @@ ow-system[labels="false"] ow-name {
     justify-content: center;
     align-items: center;
     background-color: #000;
-    border: 2px solid yellow;
 }
 
 .container-fluid.planet-card-container {
@@ -2188,7 +2187,6 @@ ow-system[labels="false"] ow-name {
     width: 100%;
     align-items: center;
     justify-content: space-around;
-    border: 2px solid yellow;
 }
 
 /* TODO: Find a new animation */
@@ -2249,7 +2247,6 @@ ow-system[labels="false"] ow-name {
     position: relative;
     height: 100%;
     width: 100%;
-    border: 2px solid yellow;
 }
 
 .container-fluid.outer-wilds-container {
@@ -3421,4 +3418,25 @@ ow-system[labels="false"] ow-name {
     overflow-y: scroll;
     justify-content: space-around;
     align-items: center;
+}
+
+.container-fluid.intro-container {
+    display: flex;
+    position: relative;
+    height: 100%;
+    width: 100%;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.8);
+    font-family: "Courier New", Courier, monospace;
+    font-size: 1.5em;
+    padding: 20px;
+    border: 2px solid #ff7e00;
+    box-shadow:
+        0 0 10px #ff7e00,
+        0 0 20px #ff7e00;
+    border-radius: 10px;
+}
+
+.decoded-intro {
+    animation: flicker 1.5s infinite;
 }

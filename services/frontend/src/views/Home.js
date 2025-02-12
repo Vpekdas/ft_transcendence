@@ -1,5 +1,6 @@
 import { tr } from "../i18n";
 import { Component, navigateTo } from "../micro";
+import { INTRO, INTRO2 } from "../constant";
 
 export default class Home extends Component {
     async init() {
@@ -17,7 +18,45 @@ export default class Home extends Component {
             document.querySelector("#play-pong-tournament").addEventListener("click", () => {
                 navigateTo("/create-tournament");
             });
+
+            const firstIntro = document.getElementById("intro1");
+            const secondIntro = document.getElementById("intro2");
+            const thirdIntro = document.getElementById("intro3");
+
+            this.decodeEffect(INTRO, firstIntro);
+            this.decodeEffect(INTRO2, secondIntro);
         };
+    }
+
+    decodeEffect(rightText, decodedContainerId) {
+        const randArray = "§1234567890-=qwertyuiop[]asdfghjkl;zxcvbnm,./±!@#$%^&*()_+{}|<>?";
+        let textArray = rightText.split("");
+        const wordArray = rightText.split(" ");
+
+        const decode = setInterval(() => {
+            const randChar = randArray[Math.floor(Math.random() * randArray.length)];
+            const randIndex = Math.floor(Math.random() * textArray.length);
+
+            textArray[randIndex] = randChar;
+            decodedContainerId.innerHTML = textArray.join("");
+        }, 10);
+
+        // Correct each word one by one
+        let previousWordLength = 0;
+        wordArray.forEach((word, index) => {
+            setTimeout(
+                () => {
+                    clearInterval(decode);
+                    for (let j = 0; j < word.length; j++) {
+                        textArray[previousWordLength + j] = word[j];
+                    }
+                    decodedContainerId.innerHTML = textArray.join("");
+                    previousWordLength += word.length + 1;
+                    textArray[previousWordLength - 1] = " ";
+                },
+                3000 + index * rightText.length
+            );
+        });
     }
 
     render() {
@@ -55,8 +94,14 @@ export default class Home extends Component {
                         </div>
                     </div>
                 </div>
+                <div class="container-fluid intro-container">
+                    <span class="decoded-intro" id="intro1"></span>
+                </div>
                 <div class="container-fluid outer-wilds-container">
                     <OuterWilds />
+                    <div class="container-fluid intro-container">
+                        <span class="decoded-intro" id="intro2"></span>
+                    </div>
                     <Coordinates />
                     <EyeOfTheUniverse />
                 </div>

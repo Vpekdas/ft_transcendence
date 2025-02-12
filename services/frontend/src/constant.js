@@ -50,7 +50,7 @@ export const THIRD_COORDINATES = [
 ];
 
 export const INTRO =
-    "Hello everyone. welcome to our transcendence. As you noticed (ot not ?), the theme is highly inspired by greatest anime and the greatest game ! :)";
+    "Hello everyone. welcome to our transcendence. As you noticed (ot not ?), the theme is highly inspired by greatest anime and the greatest game ! :) 🤿";
 
 export const INTRO2 =
     "Next discovery can be a spoiler for beginner, care !. Only courageous traveler can solve the next mystery";

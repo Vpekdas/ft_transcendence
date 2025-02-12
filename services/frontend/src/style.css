@@ -1586,6 +1586,10 @@ canvas {
     initial-value: 1;
 }
 
+.micro-OuterWilds {
+    display: flex;
+}
+
 ow-system {
     --cycle: 240s;
     --unit: calc(var(--scale, 1) * 95vmin);
@@ -2136,6 +2140,7 @@ ow-system[labels="false"] ow-name {
     justify-content: space-evenly;
     border-radius: 20px;
     align-items: center;
+    z-index: 100;
 }
 
 @keyframes expandHeight {
@@ -2143,7 +2148,7 @@ ow-system[labels="false"] ow-name {
         height: 0;
     }
     to {
-        height: 60%;
+        height: 20%;
     }
 }
 
@@ -2933,7 +2938,7 @@ ow-system[labels="false"] ow-name {
 
 #SG-001 {
     display: none;
-    position: absolute;
+    position: fixed;
     height: 100%;
     width: 20%;
     border-top: 16px solid #b22222;
@@ -3255,6 +3260,7 @@ ow-system[labels="false"] ow-name {
         background-color 0.3s ease;
     justify-content: center;
     flex-direction: column;
+    z-index: 100;
 }
 
 #d-mail-button:hover {
@@ -3418,6 +3424,7 @@ ow-system[labels="false"] ow-name {
     overflow-y: scroll;
     justify-content: space-around;
     align-items: center;
+    gap: 10px;
 }
 
 .container-fluid.intro-container {

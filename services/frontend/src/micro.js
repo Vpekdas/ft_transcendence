@@ -834,14 +834,10 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
 
             await oldNode2.unmount();
 
-            // console.log("removing ", oldElement2);
             oldElement.removeChild(oldElement2);
         } else {
             let oldNode2 = oldNode.children.at(index);
             let newNode2 = newNode.children.at(index);
-            // console.log(oldNode, oldElement, parentElement);
-            // console.log(oldNode.children.length, newNode.children.length, oldElement.childNodes.length);
-            // console.log(oldElement);
             let oldElement2 = oldElement.childNodes.item(index);
 
             await updateDOM(oldNode2, newNode2, oldElement2, oldElement);
@@ -849,47 +845,9 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
     }
 
     for (; index < newNode.children.length; index++) {
-        let newElement = newNode.children[index].build();
-
-        parentElement.append(newElement);
-        await newNode.children[index].mount();
-
-        if (!(newNode instanceof VirtualNodeText)) {
-            for (let child of newNode.children) {
-                await updateDOM(undefined, child, parentElement, newElement);
-
-                if (newNode instanceof VirtualNodeComponent && newNode.component.onready) {
-                    await newNode.component.onready();
-                }
-            }
-        }
+        let newNode2 = newNode.children.at(index);
+        await updateDOM(undefined, newNode2, undefined, oldElement);
     }
-}
-
-async function unmountAll(node) {
-    for (let child of node.children) {
-        await child.unmount();
-        await unmountAll(child);
-    }
-}
-
-async function createTree(node) {
-    let element = node.build();
-
-    if (!(node instanceof VirtualNodeText)) {
-        await node.mount();
-
-        for (let child of node.children) {
-            let childElement = await createTree(child);
-            element.appendChild(childElement);
-        }
-
-        if (node instanceof VirtualNodeComponent && node.component.onready) {
-            await node.component.onready();
-        }
-    }
-
-    return element;
 }
 
 /** @type {VirtualNode} */
@@ -934,11 +892,11 @@ async function router() {
         newNode = await createComponentNode(view, new Map(), undefined);
     }
 
-    if (rootNode) {
-        await unmountAll(rootNode);
-        app.replaceChildren([]);
-        rootNode = null;
-    }
+    // if (rootNode) {
+    //     await unmountAll(rootNode);
+    //     app.replaceChildren([]);
+    //     rootNode = null;
+    // }
 
     // let element = await createTree(newNode);
     // app.replaceChild(element, app.firstElementChild);
@@ -965,9 +923,6 @@ async function router() {
     initialPageLoad = false;
 }
 
-/**
- * @param {import("./micro").RouterSettings} settings
- */
 export function defineRouter(settings) {
     routerSettings = settings;
 

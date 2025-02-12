@@ -69,7 +69,6 @@ class Ball(Body):
             self.velocity = (dir + normal * (1.0 - factor)).normalized() * self.speed
 
             player: Player = collision.collider
-            player.client.hits.append({ "x": self.pos.x, "y": self.pos.y })
         else:
             self.velocity = self._bounce_vec(collision.normal, dir, self.bounce) * self.speed
 
@@ -127,6 +126,11 @@ class Pong(Game):
         self.already_saved = False
         self.countdown_timer = Timer(time=3.0)
 
+        ## Global stats
+        
+        # stores the position of the ball every X seconds
+        self.heatmap = []
+
     def reset(self):
         self.player1.pos.y = 0
         self.player2.pos.y = 0
@@ -149,6 +153,8 @@ class Pong(Game):
         if self.state == State.STARTED:
             if self.countdown_timer.is_done():
                 self.scene.update()
+
+                if self.frames % 15 == 0: self.heatmap.append({ { "x": self.ball.pos.x, "y": self.ball.pos.y } })
             else:
                 self.countdown_timer.update()
         elif self.state == State.ENDED:
@@ -187,7 +193,7 @@ class Pong(Game):
             timeStarted=self.time_started,
             timeEnded=self.time_ended,
             gamemode=self.gamemode,
-            stats={ "p1": { "hits": self.clients[0].hits, "up_count": self.clients[0].up_count, "down_count": self.clients[1].down_count }, "p2": { "hits": self.clients[1].hits, "up_count": self.clients[1].up_count, "down_count": self.clients[1].down_count } }
+            stats={ "heapmap": self.heatmap, "p1": { "up_count": self.clients[0].up_count, "down_count": self.clients[1].down_count }, "p2": { "up_count": self.clients[1].up_count, "down_count": self.clients[1].down_count } }
         )
 
         if self.gamemode == "1v1":

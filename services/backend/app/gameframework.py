@@ -187,7 +187,6 @@ class Client:
         self.ready = False
 
         # Random stats
-        self.hits = []
         self.up_count = 0
         self.down_count = 0
 
@@ -369,6 +368,8 @@ class Game:
         self.consumers = []
         self.framerate = 60
 
+        self.frames = 0
+
     def is_tournament_game(self) -> bool:
         return self.tid is not None
 
@@ -388,6 +389,9 @@ class Game:
             previous_time = before_time
 
             await self.on_update()
+            self.frames += 1
+
+            if self.frames > 60: self.frames = 0
 
             # Sleep the rest of the time
             after_time = time_secs()

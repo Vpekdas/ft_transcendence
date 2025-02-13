@@ -134,7 +134,6 @@ export default class Home extends Component {
                         <span class="decoded-intro" id="intro2"></span>
                     </div>
                     <Coordinates />
-                    <EyeOfTheUniverse />
                 </div>
             </div>
             <Chatbox />

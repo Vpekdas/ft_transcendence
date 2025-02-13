@@ -84,10 +84,7 @@ export default class Pong extends Component {
 
         let lastKey;
 
-        // ! Remove preventDefault If the player cannot move.
         window.addEventListener("keydown", (event) => {
-            event.preventDefault();
-
             if (event.key == lastKey) return;
 
             if (event.key === "w") {
@@ -106,10 +103,7 @@ export default class Pong extends Component {
             lastKey = event.key;
         });
 
-        // ! Remove preventDefault If the player cannot move.
         window.addEventListener("keyup", (event) => {
-            event.preventDefault();
-
             if (event.key === "w") {
                 this.ws.send(JSON.stringify(action("player1", "up", "release")));
             }
@@ -124,6 +118,21 @@ export default class Pong extends Component {
             }
             lastKey = undefined;
         });
+
+        // Ensure that page is not scrolled down during game.
+        const preventArrowDown = (event) => {
+            if (event.key === "ArrowDown" && event.target === document.body) {
+                event.preventDefault();
+            }
+        };
+
+        // TODO: For now, I can enable ArrowDown in each view but I need to add them manually.
+        // TODO: I will see If I can re enable it automatically.
+        function enableArrowDown() {
+            window.removeEventListener("keydown", preventArrowDown);
+        }
+
+        window.addEventListener("keydown", preventArrowDown);
     }
 
     createBody(type, id, shape, position) {

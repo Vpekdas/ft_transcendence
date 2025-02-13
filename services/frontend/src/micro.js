@@ -56,25 +56,6 @@ export class Component {
      */
 
     /**
-     * @param {string} name
-     * @returns {[() => typeof defaultValue, (value: typeof defaultValue) => void ]}
-     */
-    use(name, defaultValue) {
-        return [
-            () => {
-                if (!this.stores.has(name)) {
-                    this.stores.set(name, defaultValue);
-                }
-                return this.stores.get(name);
-            },
-            (value) => {
-                this.stores.set(name, value);
-                setTimeout(async () => await router());
-            },
-        ];
-    }
-
-    /**
      * A store which use localStorage to persist its value.
      *
      * @param {string} name

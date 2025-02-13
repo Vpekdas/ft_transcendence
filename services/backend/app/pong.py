@@ -154,7 +154,8 @@ class Pong(Game):
             if self.countdown_timer.is_done():
                 self.scene.update()
 
-                if self.frames % 15 == 0: self.heatmap.append({ { "x": self.ball.pos.x, "y": self.ball.pos.y } })
+                if self.frames % 15 == 0:
+                    self.heatmap.append({ "x": self.ball.pos.x, "y": self.ball.pos.y })
             else:
                 self.countdown_timer.update()
         elif self.state == State.ENDED:
@@ -173,7 +174,7 @@ class Pong(Game):
                 # Save the result of the game in the database
                 await self.save_results()
         elif self.state == State.IN_LOBBY:
-            if len(self.clients) == 2:
+            if len(self.clients) == 2 or self.gamemode == "1v1local":
                 self.state = State.STARTED
 
         await self.broadcast({ "type": "update", "bodies": self.scene.to_dict(), "scores": [ self.player1.score, self.player2.score ] })
@@ -247,13 +248,6 @@ class Pong(Game):
                 self.time_started = time_secs()
 
         return True
-
-    def on_client_ready(self, client: Client, params):
-        client.ready = True
-
-        if self.gamemode == "1v1local":
-            for client in self.clients:
-                client.ready = True
 
     async def on_unhandled_message(self, msg):
         pass

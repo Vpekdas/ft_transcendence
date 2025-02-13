@@ -90,12 +90,6 @@ class PongClientConsumer(AsyncWebsocketConsumer):
                     else:
                         client = self.game.get_client(self.player.id, None)
                     if client is not None: client.on_input(data)
-                elif data["type"] == "ready" and "params" in data:
-                    if self.game.gamemode == "1v1local" and "playerSubId" in data:
-                        client = self.game.get_client(self.player.id, data["playerSubId"])
-                    else:
-                        client = self.game.get_client(self.player.id, None)
-                    if client is not None: self.game.on_client_ready(client, data["params"])
                 else:
                     await self.game.on_unhandled_message(data)
         except json.JSONDecodeError:

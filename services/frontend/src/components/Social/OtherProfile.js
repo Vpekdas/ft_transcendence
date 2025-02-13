@@ -73,6 +73,8 @@ export default class OtherProfile extends Component {
 
         this.results = await post("/api/player/" + actualId + "/matches").then((res) => res.json());
 
+        console.log(this.results);
+
         if (this.results != undefined && this.results["results"] != undefined) {
             for (let result of this.results["results"]) {
                 let player1Class = "";
@@ -115,7 +117,7 @@ export default class OtherProfile extends Component {
                     color2: "#42f58d",
                     fillPercent1: "30",
                     fillPercent2: "70",
-                    title: "Hello",
+                    title: "Donut Chart",
                 };
 
                 if (result["stats"]["p1"]["up_count"] > result["stats"]["p2"]["up_count"]) {
@@ -139,7 +141,9 @@ export default class OtherProfile extends Component {
                     secondElementWidth: result["stats"]["p2"]["up_count"],
                 };
 
-                this.appendAccordionInstances(config, donutChartConfig, barChartConfig);
+                const heatMapConfig = { points: "" };
+
+                this.appendAccordionInstances(config, donutChartConfig, barChartConfig, heatMapConfig);
             }
         }
     }

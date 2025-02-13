@@ -1,10 +1,11 @@
 import { tr } from "../i18n";
 import { Component, navigateTo } from "../micro";
-import { INTRO, INTRO2 } from "../constant";
+import { INTRO } from "../constant";
 
 export default class Home extends Component {
     async init() {
         document.title = tr("Home");
+        this.animatedIntroArray = [];
 
         this.onready = () => {
             document.querySelector("#play-pong-1v1local").addEventListener("click", () => {
@@ -19,13 +20,43 @@ export default class Home extends Component {
                 navigateTo("/create-tournament");
             });
 
-            const firstIntro = document.getElementById("intro1");
-            const secondIntro = document.getElementById("intro2");
-            const thirdIntro = document.getElementById("intro3");
+            for (let i = 0; i < 2; i++) {
+                this.animatedIntroArray.push({
+                    text: INTRO[i],
+                    animated: false,
+                    e: document.getElementById("intro" + (i + 1)),
+                    id: "intro-container-" + (i + 1),
+                });
+            }
 
-            this.decodeEffect(INTRO, firstIntro);
-            this.decodeEffect(INTRO2, secondIntro);
+            // TODO: FInd an animation when the intro spawn.
+            // TODO: Maybe set style to none when intro cannot be seen.
+            window.addEventListener("scroll", () => {
+                this.animatedIntroArray.forEach((intro) => {
+                    const introContainer = document.getElementById(intro.id);
+
+                    if (this.isElementVisible(intro.e) && !intro.animated) {
+                        intro.animated = true;
+                        introContainer.style.display = "flex";
+                        this.decodeEffect(intro.text, intro.e);
+                    }
+                    if (!this.isElementVisible(intro.e) && intro.animated) {
+                        intro.animated = false;
+                    }
+                });
+            });
         };
+    }
+
+    isElementVisible(element) {
+        const rect = element.getBoundingClientRect();
+
+        return (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+        );
     }
 
     decodeEffect(rightText, decodedContainerId) {
@@ -94,12 +125,12 @@ export default class Home extends Component {
                         </div>
                     </div>
                 </div>
-                <div class="container-fluid intro-container">
+                <div class="container-fluid intro-container" id="intro-container-1">
                     <span class="decoded-intro" id="intro1"></span>
                 </div>
                 <div class="container-fluid outer-wilds-container">
                     <OuterWilds />
-                    <div class="container-fluid intro-container">
+                    <div class="container-fluid intro-container" id="intro-container-2">
                         <span class="decoded-intro" id="intro2"></span>
                     </div>
                     <Coordinates />

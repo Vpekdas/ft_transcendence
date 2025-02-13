@@ -49,8 +49,7 @@ export const THIRD_COORDINATES = [
     "276,137 291,137 232,34 224,47",
 ];
 
-export const INTRO =
-    "Hello everyone. welcome to our transcendence. As you noticed (ot not ?), the theme is highly inspired by greatest anime and the greatest game ! :) 🤿";
-
-export const INTRO2 =
-    "Next discovery can be a spoiler for beginner, care !. Only courageous traveler can solve the next mystery";
+export const INTRO = [
+    "Hello everyone. welcome to our transcendence. As you noticed (or not ?), the theme is highly inspired by greatest anime and the greatest game ! :) 🤿",
+    "Next discovery can be a spoiler for beginner, care !. Only courageous traveler can solve the next mystery",
+];

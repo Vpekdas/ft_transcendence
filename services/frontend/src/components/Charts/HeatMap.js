@@ -5,19 +5,25 @@ import { Component } from "../../micro";
 // https://expensive.toys/blog/svg-filter-heat-map
 
 export default class HeatMap extends Component {
+    constructor(config) {
+        super();
+        this.config = config;
+    }
     async init() {
         this.pixels = "";
 
-        let points = [
-            { x: 3.1, y: 0 },
-            { x: 3.2, y: 0 },
-            { x: 3.3, y: 0 },
-            { x: 4.2, y: 0 },
-            { x: 4.3, y: 0 },
-            { x: 4.4, y: 0 },
-            { x: 4.5, y: 0 },
-            { x: 1.5, y: 0 },
-        ];
+        let points = this.config.points;
+
+        // let points = [
+        //     { x: 3.1, y: 0 },
+        //     { x: 3.2, y: 0 },
+        //     { x: 3.3, y: 0 },
+        //     { x: 4.2, y: 0 },
+        //     { x: 4.3, y: 0 },
+        //     { x: 4.4, y: 0 },
+        //     { x: 4.5, y: 0 },
+        //     { x: 1.5, y: 0 },
+        // ];
 
         for (let y = 0; y < 24; y++) {
             for (let x = 0; x < 36; x++) {

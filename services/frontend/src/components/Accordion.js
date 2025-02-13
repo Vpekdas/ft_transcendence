@@ -4,11 +4,12 @@ import BarChart from "./Charts/BarChart";
 import HeatMap from "./Charts/HeatMap";
 
 export default class Accordion extends Component {
-    constructor(config, chartConfig, barChartConfig) {
+    constructor(config, chartConfig, barChartConfig, heatMapConfig) {
         super();
         this.config = config;
         this.chartConfig = chartConfig;
         this.barChartConfig = barChartConfig;
+        this.heatMapConfig = heatMapConfig;
         this.id = this.generateRandomId();
     }
     async init() {
@@ -36,7 +37,7 @@ export default class Accordion extends Component {
     }
 
     renderHeatMap() {
-        const heatMapInstance = new HeatMap();
+        const heatMapInstance = new HeatMap(this.heatMapConfig);
         heatMapInstance.init();
         return heatMapInstance.render();
     }

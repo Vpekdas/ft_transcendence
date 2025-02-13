@@ -975,10 +975,10 @@ body::before {
         url("/img/background.jpg") repeat,
         linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
     opacity: 0.1;
-    z-index: -1;
     animation: ZoomRotate 20s linear infinite;
     background-size: cover;
-    overflow: hidden;
+    overflow-x: hidden;
+    z-index: -1;
 }
 
 @keyframes ZoomRotate {
@@ -1205,7 +1205,6 @@ body::before {
 }
 
 canvas {
-    border: 1px solid red;
     height: 100%;
     width: 100%;
 }
@@ -1447,6 +1446,7 @@ canvas {
     justify-content: space-evenly;
     gap: 20px;
     padding: 20px;
+    background-color: transparent;
 }
 
 .card.pong-game {
@@ -3428,7 +3428,7 @@ ow-system[labels="false"] ow-name {
 }
 
 .container-fluid.intro-container {
-    display: flex;
+    display: none;
     position: relative;
     height: 100%;
     width: 100%;

@@ -4,16 +4,12 @@ import BarChart from "./Charts/BarChart";
 import HeatMap from "./Charts/HeatMap";
 
 export default class Accordion extends Component {
-    constructor(config, chartConfig, barChartConfig, heatMapConfig) {
-        super();
-        this.config = config;
-        this.chartConfig = chartConfig;
-        this.barChartConfig = barChartConfig;
-        this.heatMapConfig = heatMapConfig;
-        this.id = this.generateRandomId();
-    }
     async init() {
-        this.onready = async () => {};
+        this.config = JSON.parse(this.attributes.get("config"));
+
+        this.donutChartConfig = this.config.donut;
+
+        this.id = this.generateRandomId();
     }
 
     // Generate random id, It allow to accordion toggle off once at time.
@@ -24,25 +20,10 @@ export default class Accordion extends Component {
         return "accordion-" + Math.random().toString(36).substring(2, 9);
     }
 
-    renderDonutChart() {
-        const donutChartInstance = new DonutChart(this.chartConfig);
-        donutChartInstance.init();
-        return donutChartInstance.render();
-    }
-
-    renderBarChart() {
-        const barChartInstance = new BarChart(this.barChartConfig);
-        barChartInstance.init();
-        return barChartInstance.render();
-    }
-
-    renderHeatMap() {
-        const heatMapInstance = new HeatMap(this.heatMapConfig);
-        heatMapInstance.init();
-        return heatMapInstance.render();
-    }
-
     render() {
+        // prettier-ignore
+        let charts = /* HTML */ `<DonutChart config='${JSON.stringify(this.donutChartConfig)}' />`;
+
         return /* HTML */ `
             <div class="accordion-item match-history">
                 <h2 class="accordion-header match-history" id="heading-${this.id}">
@@ -55,18 +36,18 @@ export default class Accordion extends Component {
                         aria-controls="panelsStayOpen-collapse-${this.id}"
                     >
                         <div class="container-fluid match-history-container">
-                            <span class=${this.config.player1Class}>
-                                <span class="history-player-name">${this.config.player1Name}</span>
-                                <span class="score">${this.config.player1Score}</span>
+                            <span class=${this.config.config.player1Class}>
+                                <span class="history-player-name">${this.config.config.player1Name}</span>
+                                <span class="score">${this.config.config.player1Score}</span>
                             </span>
                             <span class="vs match-history">vs</span>
-                            <span class=${this.config.player2Class}>
-                                <span class="history-player-name">${this.config.player2Name}</span>
-                                <span class="score">${this.config.player2Score}</span>
+                            <span class=${this.config.config.player2Class}>
+                                <span class="history-player-name">${this.config.config.player2Name}</span>
+                                <span class="score">${this.config.config.player2Score}</span>
                             </span>
-                            <span class="history-time">${this.config.historyTime}</span>
-                            <span class="history-gamemode">${this.config.gamemode}</span>
-                            <span class="history-date">${this.config.date}</span>
+                            <span class="history-time">${this.config.config.historyTime}</span>
+                            <span class="history-gamemode">${this.config.config.gamemode}</span>
+                            <span class="history-date">${this.config.config.date}</span>
                         </div>
                     </button>
                 </h2>
@@ -75,9 +56,7 @@ export default class Accordion extends Component {
                     class="accordion-collapse collapse match-history"
                     aria-labelledby="heading-${this.id}"
                 >
-                    <div class="accordion-body match-history">
-                        ${this.renderDonutChart()} ${this.renderBarChart()} ${this.renderHeatMap()}
-                    </div>
+                    <div class="accordion-body match-history">${charts}</div>
                 </div>
             </div>
         `;

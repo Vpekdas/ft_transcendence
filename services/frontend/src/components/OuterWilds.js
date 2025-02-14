@@ -116,8 +116,8 @@ export default class OuterWilds extends Component {
             const ashTwin = document.querySelector("#ash-twin");
             const emberTwin = document.querySelector("#ember-twin");
 
-            ashTwin.addEventListener("click", () => handlePlanetClick(ashTwin, music, supernova, coordinates));
-            emberTwin.addEventListener("click", () => handlePlanetClick(emberTwin, music, supernova, coordinates));
+            ashTwin.addEventListener("click", () => handlePlanetClick(ashTwin, supernova, coordinates));
+            emberTwin.addEventListener("click", () => handlePlanetClick(emberTwin, supernova, coordinates));
 
             orbits.forEach((orbit) => {
                 if (orbit.id === "twins" || orbit.id === "hourglass-twins") {
@@ -179,7 +179,7 @@ export default class OuterWilds extends Component {
                     }
 
                     // Ensure that only one music track is played at a time by pausing the current track before playing a new one.
-                    if (this.music.audio.duration > 0 && !this.music.audio.paused && !supernova) {
+                    if (this.music.audio && this.music.audio.duration > 0 && !this.music.audio.paused && !supernova) {
                         this.music.audio.pause();
                     }
 
@@ -197,11 +197,12 @@ export default class OuterWilds extends Component {
         };
     }
 
+    // Ensure that music is stopped when navigating outside homepage.
     clean() {
-        if (this.music) {
+        if (this.music.audio && this.music.audio.duration > 0 && !this.music.audio.paused) {
+            console.log("closing music");
             this.music.audio.pause();
             this.music.audio.currentTime = 0;
-            this.music.audio = null;
         }
     }
 

@@ -3,11 +3,6 @@ import { Component } from "../../micro";
 const r = 15.91549430918954;
 /** @type {import("../../micro").Component} */
 export default class DonutChart extends Component {
-    constructor(config) {
-        super();
-        this.config = config;
-    }
-
     generateSegment(color, dashArray, dashOffset, textPosition, content) {
         return /* HTML */ `
             <circle
@@ -58,6 +53,8 @@ export default class DonutChart extends Component {
     }
 
     async init() {
+        this.config = JSON.parse(this.attributes.get("config"));
+
         this.width = this.config.width;
 
         const colorNumber = this.config.colorNumber;

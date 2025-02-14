@@ -12,7 +12,9 @@ export default class HeatMap extends Component {
     async init() {
         this.pixels = "";
 
-        let points = this.config.points;
+        let points = this.config;
+
+        console.log(this.config);
 
         // let points = [
         //     { x: 3.1, y: 0 },

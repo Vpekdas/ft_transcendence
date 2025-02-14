@@ -33,12 +33,6 @@ export default class HomeNavBar extends Component {
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link custom-link ${this.activeTabClass("/solar-system")}" href="/solar-system">
-                        <i class="bi bi-rocket"></i>
-                        <span>${tr("Solar System")}</span>
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link custom-link ${this.activeTabClass("/logout")}" href="/logout">
                         <i class="bi bi-box-arrow-in-right"></i>
                         <span>${tr("Logout")}</span></a

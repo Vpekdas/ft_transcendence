@@ -70,10 +70,7 @@ export default class OtherProfile extends Component {
     async showMatchHistory() {
         const actualName = this.attributes.get("nickname");
         const actualId = await getUserIdByNickname(actualName);
-
         this.results = await post("/api/player/" + actualId + "/matches").then((res) => res.json());
-
-        console.log(this.results);
 
         if (this.results != undefined && this.results["results"] != undefined) {
             for (let result of this.results["results"]) {
@@ -141,9 +138,9 @@ export default class OtherProfile extends Component {
                     secondElementWidth: result["stats"]["p2"]["up_count"],
                 };
 
-                const heatMapConfig = { points: "" };
+                const heatMapConfig = result["stats"]["heatmap"];
 
-                this.appendAccordionInstances(config, donutChartConfig, barChartConfig, heatMapConfig);
+                // this.appendAccordionInstances(config, donutChartConfig, barChartConfig, heatMapConfig);
             }
         }
     }
@@ -157,9 +154,13 @@ export default class OtherProfile extends Component {
     async init() {
         const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", "");
 
+        const actualName = this.attributes.get("nickname");
+
+        const actualId = await getUserIdByNickname(actualName);
+        this.results = await post("/api/player/" + actualId + "/matches").then((res) => res.json());
+
         this.onready = async () => {
             this.dataContainer = document.getElementById("other-profile-data");
-            const profile = document.getElementById("other-player-profile");
             const navLinks = document.querySelectorAll(".nav-item");
 
             await this.showProfile();
@@ -179,7 +180,7 @@ export default class OtherProfile extends Component {
                         this.dataContainer.appendChild(this.accordionContainer);
 
                         // Create accordions.
-                        await this.showMatchHistory();
+                        // await this.showMatchHistory();
                     } else if (data === "Statistics") {
                     }
                 });
@@ -194,6 +195,82 @@ export default class OtherProfile extends Component {
     }
 
     render() {
+        var dataHTML = "";
+
+        if (this.results != undefined && this.results["results"] != undefined) {
+            for (let result of this.results["results"]) {
+                let player1Class = "";
+                let player2Class = "";
+
+                if (result["score1"] > result["score2"]) {
+                    player1Class = "history-winner";
+                    player2Class = "history-looser";
+                } else {
+                    player1Class = "history-looser";
+                    player2Class = "history-winner";
+                }
+
+                let player1Name = result["player1"]; // await getNickname(result["player1"]);
+                let player2Name = result["player2"]; // await getNickname(result["player2"]);
+
+                const gamemode = this.gamemodeName(result["tid"], result["gamemode"]);
+
+                if (gamemode == tr("Local")) {
+                    player1Name += "(L)";
+                    player2Name += "(R)";
+                }
+
+                const config = {
+                    player1Class: player1Class,
+                    player2Class: player2Class,
+                    player1Name: player1Name,
+                    player2Name: player2Name,
+                    player1Score: result["score1"],
+                    player2Score: result["score2"],
+                    historyTime: this.timeInMinutes(result["timeEnded"] - result["timeStarted"]),
+                    gamemode: gamemode,
+                    date: this.timeAsDate(result["timeEnded"]),
+                };
+
+                const donutChartConfig = {
+                    width: "180",
+                    colorNumber: "2",
+                    color1: "#4287f5",
+                    color2: "#42f58d",
+                    fillPercent1: "30",
+                    fillPercent2: "70",
+                    title: "Donut Chart",
+                };
+
+                if (result["stats"]["p1"]["up_count"] > result["stats"]["p2"]["up_count"]) {
+                    player1Class = "bar-chart-rectangle-higher";
+                    player2Class = "bar-chart-rectangle-lower";
+                } else {
+                    player1Class = "bar-chart-rectangle-lower";
+                    player2Class = "bar-chart-rectangle-higher";
+                }
+
+                const barChartConfig = {
+                    width: "180",
+                    height: "150",
+                    title: "Up Count",
+                    titleColor: "white",
+                    player1Class: player1Class,
+                    player1Name: player1Name,
+                    firstElementWidth: result["stats"]["p1"]["up_count"],
+                    player2Class: player2Class,
+                    player2Name: player2Name,
+                    secondElementWidth: result["stats"]["p2"]["up_count"],
+                };
+
+                const heatMapConfig = result["stats"]["heatmap"];
+
+                // prettier-ignore
+                dataHTML += `<Accordion config='${JSON.stringify({config: config, donut: donutChartConfig})}' />`;
+                console.log(dataHTML);
+            }
+        }
+
         return /* HTML */ ` <div class="container-fluid dashboard-container other-profile" id="other-player-profile">
             <div class="container-fluid dashboard-navbar other-profile">
                 <ul class="nav flex-column dashboard-tab other-profile">
@@ -217,7 +294,9 @@ export default class OtherProfile extends Component {
                     </li>
                 </ul>
             </div>
-            <ul class="list-group settings other-profile" id="other-profile-data"></ul>
+            <ul class="list-group settings other-profile" id="other-profile-data">
+                ${dataHTML}
+            </ul>
             <button id="confirm-button" class="modal-button other-profile">Return</button>
         </div>`;
     }

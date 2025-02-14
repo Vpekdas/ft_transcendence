@@ -20,7 +20,7 @@ export default class Home extends Component {
                 navigateTo("/create-tournament");
             });
 
-            for (let i = 0; i < 2; i++) {
+            for (let i = 0; i < INTRO.length; i++) {
                 this.animatedIntroArray.push({
                     text: INTRO[i],
                     animated: false,
@@ -29,34 +29,41 @@ export default class Home extends Component {
                 });
             }
 
-            // TODO: FInd an animation when the intro spawn.
-            // TODO: Maybe set style to none when intro cannot be seen.
-            window.addEventListener("scroll", () => {
-                this.animatedIntroArray.forEach((intro) => {
-                    const introContainer = document.getElementById(intro.id);
+            // Ensure that text are displayed only if the user can see it.
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        // Give the element to observe.
+                        const intro = this.animatedIntroArray.find((intro) => intro.e === entry.target);
+                        const introContainer = document.getElementById(intro.id);
 
-                    if (this.isElementVisible(intro.e) && !intro.animated) {
-                        intro.animated = true;
-                        introContainer.style.display = "flex";
-                        this.decodeEffect(intro.text, intro.e);
-                    }
-                    if (!this.isElementVisible(intro.e) && intro.animated) {
-                        intro.animated = false;
-                    }
-                });
+                        if (introContainer) {
+                            // If user can see it then add the appear class so the animation will be played.
+                            if (entry.isIntersecting && !intro.animated) {
+                                intro.animated = true;
+                                introContainer.classList.add("appear");
+                                this.decodeEffect(intro.text, intro.e);
+                            } else if (!entry.isIntersecting && intro.animated) {
+                                intro.animated = false;
+                                introContainer.classList.remove("appear");
+                            }
+                        }
+                    });
+                },
+                {
+                    // Ensure that the text is displayed only if the user sees the top side + 50px of offset.
+                    // The whole text is displayed. Otherwise, the text pops up before the user scrolls down to the end of the text.
+                    rootMargin: "0px 0px -50px 0px",
+
+                    // Since I'm displaying an appear animation, I want to detect the earliest point at which the element can be visible.
+                    threshold: 0.1,
+                }
+            );
+
+            this.animatedIntroArray.forEach((intro) => {
+                observer.observe(intro.e);
             });
         };
-    }
-
-    isElementVisible(element) {
-        const rect = element.getBoundingClientRect();
-
-        return (
-            rect.top >= 0 &&
-            rect.left >= 0 &&
-            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-        );
     }
 
     decodeEffect(rightText, decodedContainerId) {
@@ -64,6 +71,7 @@ export default class Home extends Component {
         let textArray = rightText.split("");
         const wordArray = rightText.split(" ");
 
+        // Every 10s randomize a character in text.
         const decode = setInterval(() => {
             const randChar = randArray[Math.floor(Math.random() * randArray.length)];
             const randIndex = Math.floor(Math.random() * textArray.length);
@@ -72,7 +80,7 @@ export default class Home extends Component {
             decodedContainerId.innerHTML = textArray.join("");
         }, 10);
 
-        // Correct each word one by one
+        // Correct each word one by one by adding a delay.
         let previousWordLength = 0;
         wordArray.forEach((word, index) => {
             setTimeout(
@@ -85,7 +93,7 @@ export default class Home extends Component {
                     previousWordLength += word.length + 1;
                     textArray[previousWordLength - 1] = " ";
                 },
-                3000 + index * rightText.length
+                3000 + (index * rightText.length) / 4
             );
         });
     }
@@ -134,6 +142,9 @@ export default class Home extends Component {
                         <span class="decoded-intro" id="intro2"></span>
                     </div>
                     <Coordinates />
+                    <div class="container-fluid intro-container" id="intro-container-3">
+                        <span class="decoded-intro" id="intro3"></span>
+                    </div>
                 </div>
             </div>
             <Chatbox />

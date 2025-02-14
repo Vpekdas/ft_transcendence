@@ -1,18 +1,9 @@
 import { Component } from "../micro";
-import { PLANETS, END_GAME } from "../constant";
-
-function isRightPath(currentPath) {
-    for (let i = 0; i < END_GAME.length; i++) {
-        if (END_GAME[i] !== currentPath[i]) {
-            return false;
-        }
-    }
-    return true;
-}
+import { PLANETS } from "../constant";
 
 // Since Ash Twin and Ember Twin are under the "twins" ID, we need to add event listeners to both elements individually.
 // Additionally, they are not part of the "ow-orbit" elements.
-const handlePlanetClick = (planetElement, music, supernova, coordinates) => {
+const handlePlanetClick = (planetElement, supernova, coordinates) => {
     const planetContainer = document.querySelector(".container-fluid.planet-card-container");
     const displayedPlanet = document.querySelector(".planet-img");
     const displayedPlanetName = document.querySelector(".planet-name");
@@ -33,27 +24,23 @@ const handlePlanetClick = (planetElement, music, supernova, coordinates) => {
 
     // If there is multiple music, choose one randomly :).
     if (PLANETS[displayedPlanetName.textContent].Music.length > 1 && !supernova) {
-        music.index = Math.floor(Math.random() * PLANETS[displayedPlanetName.textContent].Music.length);
+        this.music.index = Math.floor(Math.random() * PLANETS[displayedPlanetName.textContent].Music.length);
     } else {
-        music.index = 0;
+        this.music.index = 0;
     }
 
     // Ensure that only one music track is played at a time by pausing the current track before playing a new one.
-    if (music.name && !supernova) {
-        music.audio.pause();
+    if (this.music.name && !supernova) {
+        this.music.audio.pause();
     }
 
     if (!supernova) {
-        music.audio = new Audio("/music/" + PLANETS[displayedPlanetName.textContent].Music[music.index] + ".mp3");
-        if (music.audio) {
-            music.audio.play();
-            music.name = PLANETS[displayedPlanetName.textContent].Music[music.index];
-        }
-    }
-
-    if (!coordinates.endGame) {
-        if (coordinates.currentPath.length < 3) {
-            coordinates.currentPath.push(displayedPlanetName.textContent);
+        this.music.audio = new Audio(
+            "/music/" + PLANETS[displayedPlanetName.textContent].Music[this.music.index] + ".mp3"
+        );
+        if (this.music.audio) {
+            this.music.audio.play();
+            this.music.name = PLANETS[displayedPlanetName.textContent].Music[this.music.index];
         }
     }
 };
@@ -85,7 +72,7 @@ export default class OuterWilds extends Component {
         }
 
         this.onready = () => {
-            const music = { audio: Audio, name: "", index: 0 };
+            this.music = { audio: Audio, name: "", index: 0 };
             const chronometer = { timerId: 0, seconds: 0 };
             const coordinates = { endGame: false, currentPath: [] };
             let supernova = false;
@@ -95,12 +82,12 @@ export default class OuterWilds extends Component {
                 chronometer.seconds++;
                 if (chronometer.seconds === 120 && !supernova) {
                     supernova = true;
-                    if (music.audio.duration > 0 && !music.audio.paused) {
-                        music.audio.pause();
+                    if (this.music.audio.duration > 0 && !this.music.audio.paused) {
+                        this.music.audio.pause();
                     }
-                    music.audio = new Audio("/music/End Times.mp3");
-                    if (music.audio) {
-                        music.audio.play();
+                    this.music.audio = new Audio("/music/End Times.mp3");
+                    if (this.music.audio) {
+                        this.music.audio.play();
                         clearInterval(chronometer.timerId);
                     }
                 }
@@ -184,43 +171,38 @@ export default class OuterWilds extends Component {
 
                     // If there is multiple music, choose one randomly :).
                     if (PLANETS[displayedPlanetName.textContent].Music.length > 1 && !supernova) {
-                        music.index = Math.floor(Math.random() * PLANETS[displayedPlanetName.textContent].Music.length);
+                        this.music.index = Math.floor(
+                            Math.random() * PLANETS[displayedPlanetName.textContent].Music.length
+                        );
                     } else {
-                        music.index = 0;
+                        this.music.index = 0;
                     }
 
                     // Ensure that only one music track is played at a time by pausing the current track before playing a new one.
-                    if (music.audio.duration > 0 && !music.audio.paused && !supernova) {
-                        music.audio.pause();
+                    if (this.music.audio.duration > 0 && !this.music.audio.paused && !supernova) {
+                        this.music.audio.pause();
                     }
 
                     if (!supernova) {
-                        music.audio = new Audio(
-                            "/music/" + PLANETS[displayedPlanetName.textContent].Music[music.index] + ".mp3"
+                        this.music.audio = new Audio(
+                            "/music/" + PLANETS[displayedPlanetName.textContent].Music[this.music.index] + ".mp3"
                         );
-                        if (music.audio) {
-                            music.audio.play();
-                            music.name = PLANETS[displayedPlanetName.textContent].Music[music.index];
-                        }
-                    }
-
-                    if (!coordinates.endGame) {
-                        if (coordinates.currentPath.length < 3) {
-                            coordinates.currentPath.push(displayedPlanetName.textContent);
-                        }
-
-                        if (coordinates.currentPath.length === 3) {
-                            coordinates.endGame = isRightPath(coordinates.currentPath);
-                            coordinates.currentPath.length = 0;
-
-                            if (coordinates.endGame) {
-                                document.querySelector(".container-fluid.coordinates-container").style.display = "flex";
-                            }
+                        if (this.music.audio) {
+                            this.music.audio.play();
+                            this.music.name = PLANETS[displayedPlanetName.textContent].Music[this.music.index];
                         }
                     }
                 });
             });
         };
+    }
+
+    clean() {
+        if (this.music) {
+            this.music.audio.pause();
+            this.music.audio.currentTime = 0;
+            this.music.audio = null;
+        }
     }
 
     render() {

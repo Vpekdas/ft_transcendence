@@ -27,8 +27,6 @@ export const PLANETS = {
     "White Hole Station": { Description: "", Music: ["Space"] },
 };
 
-export const END_GAME = ["Timber Hearth", "Ash Twin", "Dark Bramble"];
-
 export const SCALE = 10;
 
 export const POLYGON_VERTICES = "300,150 225,280 75,280 0,150 75,20 225,20";
@@ -50,6 +48,11 @@ export const THIRD_COORDINATES = [
 ];
 
 export const INTRO = [
-    "Hello everyone. welcome to our transcendence. As you noticed (or not ?), the theme is highly inspired by greatest anime and the greatest game ! :) 🤿",
-    "Next discovery can be a spoiler for beginner, care !. Only courageous traveler can solve the next mystery",
+    "Hello everyone! Welcome to our great FT_TRANSCENDENCE project! This project is the result of hard work and high motivation! " +
+        "As the lead front-end developer (🤿), I have decided to be inspired by the greatest anime (🥼📱⏰🍌) and the greatest game (🚀🪐🌞☄️), which I think is a nice and well-fitting combo! " +
+        "I hope you will recognize the little elements that are referring to them. Many surprises are waiting for you." +
+        "I've added some spoilers, so no need to be scared :)",
+    "If you're tired of playing games or just want to have a chill time or are just curious, you can explore the infinite space here. " +
+        "With some patience, you can even witness beautiful moments!",
+    "Let's see if your memory is still intact after time looping :)",
 ];

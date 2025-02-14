@@ -77,7 +77,7 @@ export class Component {
             },
             (value) => {
                 localStorage.setItem(fullName, JSON.stringify(value));
-                setTimeout(async () => await router());
+                setTimeout(async () => await dirty());
             },
         ];
     }
@@ -948,12 +948,14 @@ export function navigateTo(url) {
     } catch (ex) {}
 
     initialPageLoad = true;
-    setTimeout(async () => await router());
+    setTimeout(async () => await dirty());
 }
 
 /**
  * Force the refresh of the DOM.
  */
 export async function dirty() {
+    // try {
     await router();
+    // } catch (e) {}
 }

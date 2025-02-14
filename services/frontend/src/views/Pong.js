@@ -36,7 +36,7 @@ function registerAllSkins() {
 
 function createCube(x, y, width, height, color) {
     const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshBasicMaterial({ color: color });
+    const material = new THREE.MeshToonMaterial({ color: color });
     const cube = new THREE.Mesh(geometry, material);
 
     cube.position.set(x, y, 0);
@@ -46,7 +46,7 @@ function createCube(x, y, width, height, color) {
 
 function createSphere(x, y, radius, widthSegments, heightSegments, color) {
     const geometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
-    const material = new THREE.MeshBasicMaterial({ color: color });
+    const material = new THREE.MeshToonMaterial({ color: color });
     const sphere = new THREE.Mesh(geometry, material);
 
     sphere.position.set(x, y, 0);
@@ -283,10 +283,10 @@ export default class Pong extends Component {
             this.scene.background = spaceTexture;
 
             // ! For ground, It seems ok but may not be ok for other models.
-            const ambientLight = new THREE.AmbientLight(0xffffff, 10);
-            this.scene.add(ambientLight);
+            // const ambientLight = new THREE.AmbientLight(0xffffff, 10);
+            // this.scene.add(ambientLight);
 
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 2.5);
             directionalLight.position.set(0, -20, 20);
             this.scene.add(directionalLight);
 

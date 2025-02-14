@@ -417,7 +417,7 @@ function tokenizeHTML(source) {
                         index++;
                     } else {
                         // TODO: implement custom types, like event listeners
-                        throw new ParseError("expected string as attribute value");
+                        throw new ParseError("expected string as attribute value for '" + attributeName + "'");
                     }
 
                     attributes.set(attributeName, attributeValue);

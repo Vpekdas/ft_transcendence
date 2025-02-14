@@ -36,12 +36,12 @@ export default class Accordion extends Component {
                         aria-controls="panelsStayOpen-collapse-${this.id}"
                     >
                         <div class="container-fluid match-history-container">
-                            <span class=${this.config.config.player1Class}>
+                            <span class="${this.config.config.player1Class}">
                                 <span class="history-player-name">${this.config.config.player1Name}</span>
                                 <span class="score">${this.config.config.player1Score}</span>
                             </span>
                             <span class="vs match-history">vs</span>
-                            <span class=${this.config.config.player2Class}>
+                            <span class="${this.config.config.player2Class}">
                                 <span class="history-player-name">${this.config.config.player2Name}</span>
                                 <span class="score">${this.config.config.player2Score}</span>
                             </span>

@@ -194,7 +194,7 @@ class Pong(Game):
             timeStarted=self.time_started,
             timeEnded=self.time_ended,
             gamemode=self.gamemode,
-            stats={ "heatmap": self.heatmap, "p1": { "up_count": self.clients[0].up_count, "down_count": self.clients[1].down_count }, "p2": { "up_count": self.clients[1].up_count, "down_count": self.clients[1].down_count } }
+            stats={ "heatmap": self.heatmap, "p1": { "up_count": self.clients[0].up_count, "down_count": self.clients[0].down_count }, "p2": { "up_count": self.clients[1].up_count, "down_count": self.clients[1].down_count } }
         )
 
         if self.gamemode == "1v1":

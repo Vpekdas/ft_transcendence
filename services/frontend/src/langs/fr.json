@@ -60,5 +60,7 @@
     "Are you sure you want to delete your account?": "Etes-vous sure de supprimer votre compte?",
     "Confirm": "Confirmer",
     "Cancel": "Annuler",
-    "Nickname is already used": "Pseudo deja utilise"
+    "Nickname is already used": "Pseudo deja utilise",
+    "Elo": "Elo",
+    "Return": "Retour"
 }

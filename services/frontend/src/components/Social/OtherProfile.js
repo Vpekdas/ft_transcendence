@@ -34,17 +34,19 @@ export default class OtherProfile extends Component {
         const actualId = await getUserIdByNickname(actualName);
 
         this.profileHTML = /* HTML */ `
-            <div class="card settings other-profile">
-                <h5 class="card-title settings">${tr("Profile Picture")}</h5>
-                <img class="card-img-top profile" src="${api("/api/player/" + actualId + "/picture")}" />
-            </div>
-            <div class="card settings other-profile">
-                <h5 class="card-title settings">${tr("Nickname")}</h5>
-                <div class="card-body settings other-profile">${actualName}</div>
-            </div>
-            <div class="card settings other-profile">
-                <h5 class="card-title settings">${tr("Elo")}</h5>
-                <div class="card-body settings other-profile">${this.elo.pongElo}</div>
+            <div>
+                <div class="card settings other-profile">
+                    <h5 class="card-title settings">${tr("Profile Picture")}</h5>
+                    <img class="card-img-top profile" src="${api("/api/player/" + actualId + "/picture")}" />
+                </div>
+                <div class="card settings other-profile">
+                    <h5 class="card-title settings">${tr("Nickname")}</h5>
+                    <div class="card-body settings other-profile">${actualName}</div>
+                </div>
+                <div class="card settings other-profile">
+                    <h5 class="card-title settings">${tr("Elo")}</h5>
+                    <div class="card-body settings other-profile">${this.elo.pongElo}</div>
+                </div>
             </div>
         `;
     }

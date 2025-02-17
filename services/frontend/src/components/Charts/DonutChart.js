@@ -7,8 +7,8 @@ export default class DonutChart extends Component {
         return /* HTML */ `
             <circle
                 class="donut-segment"
-                cx="21"
-                cy="21"
+                cx="${this.config.donutChartConfig.viewWidth / 2}"
+                cy="${this.config.donutChartConfig.viewHeight / 2}"
                 r="${r}"
                 fill="transparent"
                 stroke="${color}"
@@ -46,8 +46,8 @@ export default class DonutChart extends Component {
     calculateTextPosition(percentageFilled, dashOffset) {
         const angle = (dashOffset - percentageFilled / 2) * 3.6;
         const radians = (angle * Math.PI) / 180;
-        const x = 21 + r * Math.cos(radians);
-        const y = 21 - r * Math.sin(radians);
+        const x = this.config.donutChartConfig.viewWidth / 2 + r * Math.cos(radians);
+        const y = this.config.donutChartConfig.viewHeight / 2 - r * Math.sin(radians);
 
         return { x, y };
     }
@@ -56,6 +56,7 @@ export default class DonutChart extends Component {
         this.config = JSON.parse(this.attributes.get("config"));
 
         this.width = this.config.donutChartConfig.width;
+        this.height = this.config.donutChartConfig.height;
 
         const colorNumber = this.config.donutChartConfig.colorNumber;
 
@@ -95,18 +96,27 @@ export default class DonutChart extends Component {
     }
 
     render() {
-        return /* HTML */ ` <svg width="${this.width}" height="${this.width * 1.2}" viewBox="0 0 42 42" class="donut">
+        return /* HTML */ ` <svg
+            width="${this.width}"
+            height="${this.height}"
+            viewBox="0 0 ${this.config.donutChartConfig.viewWidth} ${this.config.donutChartConfig.viewHeight}"
+            class="donut"
+        >
             <text
-                x="21"
-                y="-2"
+                x="${this.config.donutChartConfig.viewWidth / 2}"
+                y="4"
                 text-anchor="middle"
-                alignment-baseline="middle"
-                font-size="4"
-                fill="${this.config.donutChartConfig.titleColor}"
+                class="chart-title donut"
             >
                 ${this.config.donutChartConfig.title}
             </text>
-            <circle class="donut-hole" cx="21" cy="21" r="${r}" fill="transparent"></circle>
+            <circle
+                class="donut-hole"
+                cx="${this.config.donutChartConfig.viewWidth / 2}"
+                cy="${this.config.donutChartConfig.viewHeight / 2}"
+                r="${r}"
+                fill="transparent"
+            ></circle>
             ${this.segment}
         </svg>`;
     }

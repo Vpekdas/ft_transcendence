@@ -58,6 +58,7 @@ export default class OtherProfile extends Component {
         this.matchCount = 0;
         this.winCount = 0;
         this.gameDurationArray = [];
+        this.averageGamePointArray = [];
         // prettier-ignore
         this.matchHistoryHTML = /* HTML */ `<div class="accordion container">`;
 
@@ -78,6 +79,7 @@ export default class OtherProfile extends Component {
 
                     if (gamemode !== tr("Local") && player1Name === actualName) {
                         this.winCount++;
+                        this.averageGamePointArray.push(result["score1"]);
                     }
                 } else {
                     player1Class = "history-looser";
@@ -85,6 +87,7 @@ export default class OtherProfile extends Component {
 
                     if (gamemode !== tr("Local") && player2Name === actualName) {
                         this.winCount++;
+                        this.averageGamePointArray.push(result["score2"]);
                     }
                 }
 
@@ -189,7 +192,10 @@ export default class OtherProfile extends Component {
         }
 
         const donutChartConfig = {
-            width: "180",
+            width: "400",
+            height: "200",
+            viewWidth: 50,
+            viewHeight: 50,
             colorNumber: "2",
             color1: "#00FF00",
             color2: "#FF0000",
@@ -204,11 +210,31 @@ export default class OtherProfile extends Component {
         });
 
         const lineChartConfig = {
-            width: 400,
-            height: 200,
-            viewWidth: 300,
-            viewHeight: 100,
+            width: 600,
+            height: 300,
+            viewWidth: 600,
+            viewHeight: 400,
             points: lineChartPoints,
+            lineColor: "#00FF00",
+            circleColor: "#00FFFF",
+            title: "Game Duration",
+            duration: true,
+        };
+
+        const lineChartPoints2 = this.averageGamePointArray.map((point, index) => {
+            return { x: index, y: point };
+        });
+
+        const lineChartConfig2 = {
+            width: 600,
+            height: 300,
+            viewWidth: 600,
+            viewHeight: 400,
+            points: lineChartPoints2,
+            lineColor: "#00FF00",
+            circleColor: "#00FFFF",
+            title: "Average Point in game",
+            duration: false,
         };
 
         // prettier-ignore
@@ -219,6 +245,10 @@ export default class OtherProfile extends Component {
         // prettier-ignore
         this.statisticsHTML += /* HTML */ `<div class="container-fluid line-chart-container">`;
         this.statisticsHTML += `<LineChart config='${JSON.stringify({ lineChartConfig: lineChartConfig })}' />`;
+
+        if (this.averageGamePointArray.length > 1) {
+            this.statisticsHTML += `<LineChart config='${JSON.stringify({ lineChartConfig: lineChartConfig2 })}' />`;
+        }
         this.statisticsHTML += /* HTML */ `</div>`;
 
         this.statisticsHTML += `</ul>`;

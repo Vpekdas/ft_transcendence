@@ -651,8 +651,9 @@
 .donut {
     display: flex;
     position: relative;
+    height: auto;
+    width: auto;
     justify-content: space-around;
-    align-items: center;
 }
 
 .donut-segment {
@@ -685,10 +686,37 @@
     }
 }
 
+.x-axis line,
+.x-axis text {
+    stroke: #00ff00;
+    fill: #00ff00;
+}
+
+.y-axis line,
+.y-axis text {
+    stroke: #00ffff;
+    fill: #00ffff;
+}
+
+.chart-title {
+    fill: #00ff00;
+    font-size: 16px;
+    text-shadow:
+        0 0 5px #00ff00,
+        0 0 10px #00ff00;
+}
+
+.chart-title.donut {
+    fill: #00ff00;
+    font-size: 3px;
+    text-shadow:
+        0 0 5px #00ff00,
+        0 0 10px #00ff00;
+}
+
 .line-chart {
     display: flex;
     position: relative;
-    background: #d89123;
 }
 
 .bar-chart-caption {

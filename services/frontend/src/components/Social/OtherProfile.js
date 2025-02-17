@@ -57,6 +57,9 @@ export default class OtherProfile extends Component {
         this.results = await post("/api/player/" + actualId + "/matches").then((res) => res.json());
         this.matchCount = 0;
         this.winCount = 0;
+        this.localCount = 0;
+        this.tournamentCount = 0;
+        this.remoteCount = 0;
         this.gameDurationArray = [];
         this.averageGamePointArray = [];
         // prettier-ignore
@@ -94,6 +97,15 @@ export default class OtherProfile extends Component {
                 if (gamemode == tr("Local")) {
                     player1Name += "(L)";
                     player2Name += "(R)";
+                    this.localCount++;
+                }
+
+                if (gamemode == tr("Remote")) {
+                    this.remoteCount++;
+                }
+
+                if (gamemode == tr("Tournament")) {
+                    this.tournamentCount++;
                 }
 
                 const time = this.timeInMinutes(result["timeEnded"] - result["timeStarted"]);
@@ -154,7 +166,11 @@ export default class OtherProfile extends Component {
                 const heatMapConfig = result["stats"]["heatmap"];
 
                 // prettier-ignore
-                this.matchHistoryHTML += `<Accordion config='${JSON.stringify({config: config, barChart1: barChartConfig1, barChart2: barChartConfig2, heatMap: heatMapConfig})}' />`;
+                this.matchHistoryHTML += `<Accordion config='${JSON.stringify({
+                    config: config, 
+                    barChart1: barChartConfig1, 
+                    barChart2: barChartConfig2,
+                    heatMap: heatMapConfig})}' />`;
             }
             this.matchHistoryHTML += /* HTML */ `</div>`;
         }
@@ -181,14 +197,18 @@ export default class OtherProfile extends Component {
         this.averageGameDuration = "0:00";
 
         if (this.matchCount !== 0) {
-            this.winRatio = (this.winCount / this.matchCount) * 100;
-            this.loseRatio = 100 - this.winRatio;
+            this.winRatio = ((this.winCount / this.matchCount) * 100).toFixed(2);
+            this.loseRatio = (100 - this.winRatio).toFixed(2);
 
             this.gameDurationSum = this.gameDurationArray
                 .map(this.convertToSeconds)
                 .reduce((sum, duration) => sum + duration, 0);
 
             this.averageGameDuration = this.convertToMinutesAndSeconds(this.gameDurationSum / this.matchCount);
+
+            this.localRatio = ((this.localCount / this.matchCount) * 100).toFixed(2);
+            this.remoteRatio = ((this.remoteCount / this.matchCount) * 100).toFixed(2);
+            this.tournamentRatio = ((this.tournamentCount / this.matchCount) * 100).toFixed(2);
         }
 
         const donutChartConfig = {
@@ -202,6 +222,22 @@ export default class OtherProfile extends Component {
             fillPercent1: this.winRatio,
             fillPercent2: this.loseRatio,
             title: "Win / Lose ratio",
+            titleColor: "#d89123",
+        };
+
+        const donutChartConfig2 = {
+            width: "400",
+            height: "200",
+            viewWidth: 50,
+            viewHeight: 50,
+            colorNumber: "3",
+            color1: "#00FF00",
+            color2: "#FF0000",
+            color2: "#0000FF",
+            fillPercent1: this.localRatio,
+            fillPercent2: this.remoteRatio,
+            fillPercent3: this.tournamentRatio,
+            title: "Gamemode Distrib",
             titleColor: "#d89123",
         };
 
@@ -233,13 +269,14 @@ export default class OtherProfile extends Component {
             points: lineChartPoints2,
             lineColor: "#00FF00",
             circleColor: "#00FFFF",
-            title: "Average Point in game",
+            title: "Average Point in Game",
             duration: false,
         };
 
         // prettier-ignore
         this.statisticsHTML += /* HTML */ `<div class="container-fluid donut-chart-container">`
         this.statisticsHTML += `<DonutChart config='${JSON.stringify({ donutChartConfig: donutChartConfig })}' />`;
+        this.statisticsHTML += `<DonutChart config='${JSON.stringify({ donutChartConfig: donutChartConfig2 })}' />`;
         this.statisticsHTML += /* HTML */ `</div>`;
 
         // prettier-ignore

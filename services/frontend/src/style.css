@@ -671,17 +671,17 @@
 @keyframes neonPulse {
     0% {
         stroke: var(--neon-color, #fff);
-        stroke-width: 6;
+        stroke-width: 9;
         filter: drop-shadow(0 0 5px var(--neon-color, #fff)) drop-shadow(0 0 10px var(--neon-color, #fff));
     }
     50% {
         stroke: var(--neon-color, #fff);
-        stroke-width: 8;
+        stroke-width: 10;
         filter: drop-shadow(0 0 10px var(--neon-color, #fff)) drop-shadow(0 0 20px var(--neon-color, #fff));
     }
     100% {
         stroke: var(--neon-color, #fff);
-        stroke-width: 6;
+        stroke-width: 9;
         filter: drop-shadow(0 0 5px var(--neon-color, #fff)) drop-shadow(0 0 10px var(--neon-color, #fff));
     }
 }
@@ -780,6 +780,27 @@
     display: flex;
     position: relative;
     color: #d89123;
+}
+
+.container-fluid.line-chart-container {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    justify-content: space-around;
+    height: 100%;
+    width: 100%;
+    gap: 10%;
+    padding: 10px;
+}
+
+.container-fluid.donut-chart-container {
+    display: flex;
+    position: relative;
+    flex-direction: row;
+    justify-content: space-around;
+    height: 100%;
+    width: 100%;
+    padding: 10px;
 }
 
 /* SETTINGS */

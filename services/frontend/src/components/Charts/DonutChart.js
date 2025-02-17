@@ -12,7 +12,7 @@ export default class DonutChart extends Component {
                 r="${r}"
                 fill="transparent"
                 stroke="${color}"
-                stroke-width="6"
+                stroke-width="9"
                 stroke-dasharray="${dashArray}"
                 stroke-dashoffset="${dashOffset}"
                 style="--neon-color: ${color};"
@@ -22,9 +22,8 @@ export default class DonutChart extends Component {
                 x="${textPosition.x}"
                 y="${textPosition.y}"
                 text-anchor="middle"
-                alignment-baseline="middle"
                 font-size="3"
-                fill="#000"
+                fill="white"
                 >${content}</text
             >
         `;

@@ -14,10 +14,10 @@ export default class LineChart extends Component {
         this.padding = 20;
         this.paddingTop = 10;
 
+        this.duration = this.config.lineChartConfig.duration;
+
         this.points = this.generatePoints(this.config.lineChartConfig.points);
         this.circles = this.generateCircles(this.config.lineChartConfig.points);
-
-        this.duration = this.config.lineChartConfig.duration;
 
         this.onready = async () => {
             const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
@@ -58,7 +58,7 @@ export default class LineChart extends Component {
                 const x = this.padding + index * xScale;
                 const y = this.viewHeight - point.y * yScale;
                 let duration = "";
-                if (this.duration) {
+                if (this.duration == true) {
                     duration = this.convertToMinutesAndSeconds(point.y);
                 } else {
                     duration = point.y;

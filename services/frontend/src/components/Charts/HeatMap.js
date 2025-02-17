@@ -5,42 +5,40 @@ import { Component } from "../../micro";
 // https://expensive.toys/blog/svg-filter-heat-map
 
 export default class HeatMap extends Component {
-    constructor(config) {
-        super();
-        this.config = config;
-    }
     async init() {
         this.pixels = "";
 
-        let points = this.config;
+        let points = JSON.parse(this.attributes.get("config"));
 
-        console.log(this.config);
-
-        // let points = [
-        //     { x: 3.1, y: 0 },
-        //     { x: 3.2, y: 0 },
-        //     { x: 3.3, y: 0 },
-        //     { x: 4.2, y: 0 },
-        //     { x: 4.3, y: 0 },
-        //     { x: 4.4, y: 0 },
-        //     { x: 4.5, y: 0 },
-        //     { x: 1.5, y: 0 },
-        // ];
+        // Find the cell with the maximum number of points, which will be used as the max range for normalization.
+        let maxPointsInCell = 0;
+        for (let y = 0; y < 24; y++) {
+            for (let x = 0; x < 36; x++) {
+                let x2 = x - 18;
+                let y2 = y - 12;
+                let pointCount = points.filter((p) => p.x > x2 && p.x <= x2 + 1 && p.y > y2 && p.y <= y2 + 1).length;
+                if (pointCount > maxPointsInCell) {
+                    maxPointsInCell = pointCount;
+                }
+            }
+        }
 
         for (let y = 0; y < 24; y++) {
             for (let x = 0; x < 36; x++) {
                 let x2 = x - 18;
                 let y2 = y - 12;
+                let pointCount = points.filter((p) => p.x > x2 && p.x <= x2 + 1 && p.y > y2 && p.y <= y2 + 1).length;
 
-                let intensity =
-                    (points.filter((p) => p.x > x2 && p.x <= x2 + 1 && p.y > y2 && p.y <= y2 + 1).length /
-                        points.length) *
-                    2.0;
+                // Normalize and ensure value is not greater than 1.
+                let intensity = pointCount / maxPointsInCell;
+                intensity = Math.min(intensity, 1);
 
                 this.pixels += /* HTML */ `<div
                     class="rainbow"
                     style="--intensity: ${intensity}"
-                    data-intensity="${intensity}"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    title="${intensity}"
                 ></div>`;
             }
         }
@@ -56,6 +54,9 @@ export default class HeatMap extends Component {
                     </feComponentTransfer>
                 </filter>
             </svg>
-            <div class="heatmap">${this.pixels}</div>`;
+            <div class="container-fluid heatmap-container">
+                <h5 class="heatmap-title">Heatmap</h5>
+                <div class="heatmap">${this.pixels}</div>
+            </div>`;
     }
 }

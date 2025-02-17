@@ -42,9 +42,7 @@ export default class HomeNavBar extends Component {
                     <a class="nav-link custom-link ${this.activeTabClass("/test")}" href="/test"> <span>Test</span></a>
                 </li>
                 <div class="language-picker-container">
-                    <div class="elo-container">Elo: ${this.results.pongElo}</div>
-                </div>
-                <div class="language-picker-container">
+                    <div class="elo-container"><i class="bi bi-trophy"></i> ${tr("Elo")} ${this.results.pongElo}</div>
                     <LanguagePicker />
                 </div>
             </ul>

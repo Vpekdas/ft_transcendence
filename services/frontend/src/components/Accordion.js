@@ -1,15 +1,21 @@
 import { Component } from "../micro";
-import DonutChart from "./Charts/DonutChart";
-import BarChart from "./Charts/BarChart";
-import HeatMap from "./Charts/HeatMap";
+import * as bootstrap from "bootstrap";
 
 export default class Accordion extends Component {
     async init() {
         this.config = JSON.parse(this.attributes.get("config"));
-
-        this.donutChartConfig = this.config.donut;
+        this.barChart1 = this.config.barChart1;
+        this.barChart2 = this.config.barChart2;
+        this.heatMap = this.config.heatMap;
 
         this.id = this.generateRandomId();
+
+        this.onready = async () => {
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            const tooltipList = [...tooltipTriggerList].map(
+                (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
+            );
+        };
     }
 
     // Generate random id, It allow to accordion toggle off once at time.
@@ -22,7 +28,11 @@ export default class Accordion extends Component {
 
     render() {
         // prettier-ignore
-        let charts = /* HTML */ `<DonutChart config='${JSON.stringify(this.donutChartConfig)}' />`;
+        let charts = /* HTML */ `<div class="container-fluid bar-chart-container">
+            <BarChart config='${JSON.stringify(this.barChart1)}' />
+            <BarChart config='${JSON.stringify(this.barChart2)}' />
+        </div>
+        <HeatMap config='${JSON.stringify(this.heatMap)}' />`;
 
         return /* HTML */ `
             <div class="accordion-item match-history">

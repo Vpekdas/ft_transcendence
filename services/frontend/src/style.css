@@ -192,10 +192,6 @@
     width: 15%;
 }
 
-.elo-container {
-    background-color: red;
-}
-
 /* MATCH HISTORY */
 
 .micro-Accordion {
@@ -212,7 +208,8 @@
     height: 100%;
     align-items: center;
     flex-direction: column;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: scroll;
 }
 
 .accordion-item.match-history {
@@ -222,6 +219,7 @@
     width: 100%;
     flex-direction: column;
     justify-content: space-around;
+    overflow-x: hidden;
 }
 
 .accordion-header.match-history {
@@ -700,14 +698,37 @@
     fill: red;
 }
 
+.container-fluid.bar-chart-container {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 100%;
+    height: 100%;
+}
+
+.container-fluid.heatmap-container {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+}
+
 .heatmap {
     position: relative;
     display: grid;
-    width: auto;
+    width: 100%;
+    height: 100%;
     grid-template-columns: repeat(36, 0fr);
     grid-template-rows: repeat(24, 1fr);
     gap: 0px;
     isolation: isolate;
+    filter: url(#thermal-vision);
+    overflow-x: hidden;
 }
 
 .rainbow {
@@ -716,6 +737,12 @@
     height: 10px;
     width: 10px;
     display: block;
+}
+
+.heatmap-title {
+    display: flex;
+    position: relative;
+    color: #d89123;
 }
 
 /* SETTINGS */
@@ -1152,7 +1179,7 @@ body::before {
 
 .nav-link.custom-link {
     position: relative;
-    color: #d2320a;
+    color: #d89123;
     text-decoration: none;
     transition: color 0.3s ease;
     display: flex;
@@ -1573,9 +1600,43 @@ canvas {
 
 .language-picker-container {
     margin-left: auto;
-    margin-right: 100px;
+    margin-right: 5%;
     display: flex;
     align-items: center;
+    height: 10%;
+    width: 20%;
+    justify-content: space-around;
+}
+
+.elo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    color: #d89123;
+    border: 1px solid #d89123;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow:
+        0 0 10px rgba(216, 145, 35, 0.5),
+        0 0 20px rgba(216, 145, 35, 0.3);
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+    height: auto;
+    width: auto;
+}
+
+.elo-container i {
+    margin-right: 5px;
+    color: #d89123;
+}
+
+.elo-container:hover {
+    transform: scale(1.05);
+    box-shadow:
+        0 0 20px rgba(216, 145, 35, 1),
+        0 0 40px rgba(216, 145, 35, 0.8);
 }
 
 /* OUTER WILDS */
@@ -3352,8 +3413,6 @@ ow-system[labels="false"] ow-name {
     color: white;
 }
 
-/* ! MAKE NONE AFTER FINISHING */
-
 .container-fluid.dashboard-container.other-profile {
     display: flex;
     position: fixed;
@@ -3386,12 +3445,14 @@ ow-system[labels="false"] ow-name {
 }
 
 .list-group.settings.other-profile {
-    display: flex;
+    display: block;
     position: relative;
     height: 100%;
     width: 100%;
     align-items: center;
-    justify-content: space-evenly;
+    justify-content: space-around;
+    overflow-x: hidden;
+    overflow-y: scroll;
 }
 
 .card-body.settings.other-profile {
@@ -3401,7 +3462,8 @@ ow-system[labels="false"] ow-name {
 .card.settings.other-profile {
     display: flex;
     position: relative;
-    width: 75%;
+    width: auto;
+    height: auto;
 }
 
 .modal-button.other-profile {
@@ -3470,6 +3532,6 @@ ow-system[labels="false"] ow-name {
 }
 
 .decoded-intro {
-    animation: flicker 1.5s infinite;
+    /* animation: flicker 1.5s infinite; */
     align-content: center;
 }

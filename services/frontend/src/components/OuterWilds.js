@@ -199,7 +199,7 @@ export default class OuterWilds extends Component {
 
     // Ensure that music is stopped when navigating outside homepage.
     clean() {
-        if (this.music.audio && this.music.audio.duration > 0 && !this.music.audio.paused) {
+        if (this.music && this.music.audio && this.music.audio.duration > 0 && !this.music.audio.paused) {
             console.log("closing music");
             this.music.audio.pause();
             this.music.audio.currentTime = 0;

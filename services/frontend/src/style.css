@@ -336,9 +336,11 @@
 
 .list-group.statistics {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     height: 100%;
     width: 100%;
+    justify-content: space-around;
+    overflow-y: scroll;
 }
 
 /* 404 PAGE */
@@ -646,6 +648,13 @@
 
 /* CHART */
 
+.donut {
+    display: flex;
+    position: relative;
+    justify-content: space-around;
+    align-items: center;
+}
+
 .donut-segment {
     pointer-events: stroke;
     transition:
@@ -759,6 +768,7 @@
     height: 100%;
     width: 100%;
     gap: 20px;
+    overflow-y: scroll;
 }
 
 .card.settings {
@@ -3457,6 +3467,15 @@ ow-system[labels="false"] ow-name {
 
 .card-body.settings.other-profile {
     align-items: center;
+}
+
+.container-fluid.card-other-profile-container {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    justify-content: space-around;
+    height: auto;
+    width: auto;
 }
 
 .card.settings.other-profile {

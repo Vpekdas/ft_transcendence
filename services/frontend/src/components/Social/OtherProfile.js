@@ -34,7 +34,7 @@ export default class OtherProfile extends Component {
         const actualId = await getUserIdByNickname(actualName);
 
         this.profileHTML = /* HTML */ `
-            <div>
+            <div class="container-fluid card-other-profile-container">
                 <div class="card settings other-profile">
                     <h5 class="card-title settings">${tr("Profile Picture")}</h5>
                     <img class="card-img-top profile" src="${api("/api/player/" + actualId + "/picture")}" />
@@ -55,32 +55,46 @@ export default class OtherProfile extends Component {
         const actualName = this.attributes.get("nickname");
         const actualId = await getUserIdByNickname(actualName);
         this.results = await post("/api/player/" + actualId + "/matches").then((res) => res.json());
-
+        this.matchCount = 0;
+        this.winCount = 0;
+        this.gameDurationArray = [];
         // prettier-ignore
         this.matchHistoryHTML = /* HTML */ `<div class="accordion container">`;
 
         if (this.results != undefined && this.results["results"] != undefined) {
             for (let result of this.results["results"]) {
-                let player1Class = "";
-                let player2Class = "";
-
-                if (result["score1"] > result["score2"]) {
-                    player1Class = "history-winner";
-                    player2Class = "history-looser";
-                } else {
-                    player1Class = "history-looser";
-                    player2Class = "history-winner";
-                }
+                this.matchCount++;
+                let player1Class = "history-winner";
+                let player2Class = "history-looser";
 
                 let player1Name = await getNickname(result["player1"]);
                 let player2Name = await getNickname(result["player2"]);
 
                 const gamemode = this.gamemodeName(result["tid"], result["gamemode"]);
 
+                if (result["score1"] > result["score2"]) {
+                    player1Class = "history-winner";
+                    player2Class = "history-looser";
+
+                    if (gamemode !== tr("Local") && player1Name === actualName) {
+                        this.winCount++;
+                    }
+                } else {
+                    player1Class = "history-looser";
+                    player2Class = "history-winner";
+
+                    if (gamemode !== tr("Local") && player2Name === actualName) {
+                        this.winCount++;
+                    }
+                }
+
                 if (gamemode == tr("Local")) {
                     player1Name += "(L)";
                     player2Name += "(R)";
                 }
+
+                const time = this.timeInMinutes(result["timeEnded"] - result["timeStarted"]);
+                this.gameDurationArray.push(time);
 
                 const config = {
                     player1Class: player1Class,
@@ -89,7 +103,7 @@ export default class OtherProfile extends Component {
                     player2Name: player2Name,
                     player1Score: result["score1"],
                     player2Score: result["score2"],
-                    historyTime: this.timeInMinutes(result["timeEnded"] - result["timeStarted"]),
+                    historyTime: time,
                     gamemode: gamemode,
                     date: this.timeAsDate(result["timeEnded"]),
                 };
@@ -143,6 +157,73 @@ export default class OtherProfile extends Component {
         }
     }
 
+    convertToSeconds(duration) {
+        const [minutes, seconds] = duration.split(":").map(Number);
+        return minutes * 60 + seconds;
+    }
+
+    convertToMinutesAndSeconds(totalSeconds) {
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+    }
+
+    async showStatistics() {
+        // prettier-ignore
+        this.statisticsHTML = /* HTML */ `<ul class="list-group statistics">`;
+
+        this.winRatio = 0;
+        this.loseRatio = 0;
+        this.gameDurationSum = 0;
+        this.averageGameDuration = "0:00";
+
+        if (this.matchCount !== 0) {
+            this.winRatio = (this.winCount / this.matchCount) * 100;
+            this.loseRatio = 100 - this.winRatio;
+
+            this.gameDurationSum = this.gameDurationArray
+                .map(this.convertToSeconds)
+                .reduce((sum, duration) => sum + duration, 0);
+
+            this.averageGameDuration = this.convertToMinutesAndSeconds(this.gameDurationSum / this.matchCount);
+        }
+
+        const donutChartConfig = {
+            width: "180",
+            colorNumber: "2",
+            color1: "#00FF00",
+            color2: "#FF0000",
+            fillPercent1: this.winRatio,
+            fillPercent2: this.loseRatio,
+            title: "Win / Lose ratio",
+            titleColor: "#d89123",
+        };
+
+        const lineChartPoints = this.gameDurationArray.map((duration, index) => {
+            return { x: index, y: this.convertToSeconds(duration) };
+        });
+
+        const lineChartConfig = {
+            width: 400,
+            height: 200,
+            viewWidth: 300,
+            viewHeight: 100,
+            points: lineChartPoints,
+        };
+
+        // prettier-ignore
+        this.statisticsHTML += /* HTML */ `<div class="container-fluid donut-chart-container">`
+        this.statisticsHTML += `<DonutChart config='${JSON.stringify({ donutChartConfig: donutChartConfig })}' />`;
+        this.statisticsHTML += /* HTML */ `</div>`;
+
+        // prettier-ignore
+        this.statisticsHTML += /* HTML */ `<div class="container-fluid line-chart-container">`;
+        this.statisticsHTML += `<LineChart config='${JSON.stringify({ lineChartConfig: lineChartConfig })}' />`;
+        this.statisticsHTML += /* HTML */ `</div>`;
+
+        this.statisticsHTML += `</ul>`;
+    }
+
     async init() {
         const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", "");
         const [otherProfileTab, setOtherProfileTab] = this.usePersistent("otherProfileTab", "Profile");
@@ -154,6 +235,7 @@ export default class OtherProfile extends Component {
 
         await this.showProfile();
         await this.showMatchHistory();
+        await this.showStatistics();
 
         this.onready = async () => {
             const navLinks = document.querySelectorAll(".nav-item");
@@ -188,7 +270,7 @@ export default class OtherProfile extends Component {
         } else if (otherProfileTab() === "Match History") {
             this.dataHTML = this.matchHistoryHTML;
         } else if (otherProfileTab() === "Statistics") {
-            this.dataHTML = "";
+            this.dataHTML = this.statisticsHTML;
         }
 
         return /* HTML */ ` <div class="container-fluid dashboard-container other-profile" id="other-player-profile">

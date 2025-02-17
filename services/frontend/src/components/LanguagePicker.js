@@ -40,12 +40,6 @@ export default class LanguagePicker extends Component {
                     </button>
                 </li>
                 <li>
-                    <button type="button" lang="kr" class="btn btn-outline-info language-picker">
-                        <img src="/img/lang/kr.png" />
-                        <span>한국어</span>
-                    </button>
-                </li>
-                <li>
                     <button type="button" lang="tr" class="btn btn-outline-info language-picker">
                         <img src="/img/lang/tr.png" />
                         <span>TÜRKÇE</span>

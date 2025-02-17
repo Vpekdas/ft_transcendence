@@ -1,5 +1,4 @@
 import { Component } from "../micro";
-import * as bootstrap from "bootstrap";
 export default class Accordion extends Component {
     async init() {
         this.config = JSON.parse(this.attributes.get("config"));

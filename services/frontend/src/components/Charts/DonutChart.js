@@ -55,9 +55,9 @@ export default class DonutChart extends Component {
     async init() {
         this.config = JSON.parse(this.attributes.get("config"));
 
-        this.width = this.config.width;
+        this.width = this.config.donutChartConfig.width;
 
-        const colorNumber = this.config.colorNumber;
+        const colorNumber = this.config.donutChartConfig.colorNumber;
 
         const circles = [];
 
@@ -69,9 +69,9 @@ export default class DonutChart extends Component {
                 textPosition: { x: 0, y: 0 },
                 content: "",
             };
-            circle.color = this.config["color" + (i + 1)];
+            circle.color = this.config.donutChartConfig["color" + (i + 1)];
 
-            const fillingPercent = this.config["fillPercent" + (i + 1)];
+            const fillingPercent = this.config.donutChartConfig["fillPercent" + (i + 1)];
             const notFilledPercent = 100 - fillingPercent;
 
             circle.fillPercent = fillingPercent + " " + notFilledPercent.toString();
@@ -96,8 +96,15 @@ export default class DonutChart extends Component {
 
     render() {
         return /* HTML */ ` <svg width="${this.width}" height="${this.width * 1.2}" viewBox="0 0 42 42" class="donut">
-            <text x="21" y="0" text-anchor="middle" alignment-baseline="middle" font-size="4" fill="#d2320a">
-                ${this.config.title}
+            <text
+                x="21"
+                y="-2"
+                text-anchor="middle"
+                alignment-baseline="middle"
+                font-size="4"
+                fill="${this.config.donutChartConfig.titleColor}"
+            >
+                ${this.config.donutChartConfig.title}
             </text>
             <circle class="donut-hole" cx="21" cy="21" r="${r}" fill="transparent"></circle>
             ${this.segment}

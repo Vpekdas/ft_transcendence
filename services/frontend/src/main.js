@@ -19,6 +19,8 @@ import { registerAll } from "./micro.generated";
 import Social from "./views/Social";
 import Callback from "./views/Callback";
 import Chess from "./views/Chess";
+import * as bootstrap from "bootstrap";
+window.bootstrap = bootstrap;
 
 defineRouter({
     routes: [

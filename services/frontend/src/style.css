@@ -150,8 +150,8 @@
     justify-content: left;
     border-radius: 10px;
     flex-direction: row;
-    overflow: auto;
     background: #222;
+    overflow: hidden;
     color: #ffffff;
     font-family: "Courier New", monospace;
     font-size: 20px;
@@ -341,6 +341,13 @@
     width: 100%;
     justify-content: space-around;
     overflow-y: scroll;
+}
+
+.list-group.match-history {
+    display: flex;
+    position: relative;
+    height: 100%;
+    width: 100%;
 }
 
 /* 404 PAGE */
@@ -1116,6 +1123,7 @@ body {
     height: 100%;
     width: 100%;
     overflow-x: hidden;
+    cursor: auto;
 }
 
 body::before {
@@ -3578,8 +3586,7 @@ ow-system[labels="false"] ow-name {
     width: 100%;
     align-items: center;
     justify-content: space-around;
-    overflow-x: hidden;
-    overflow-y: scroll;
+    overflow: hidden;
 }
 
 .card-body.settings.other-profile {

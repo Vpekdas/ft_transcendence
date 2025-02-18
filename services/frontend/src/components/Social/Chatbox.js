@@ -42,6 +42,7 @@ export default class Chatbox extends Component {
 
         li.addEventListener("click", () => {
             li.classList.remove("new-message");
+            this.userInteracted = true;
         });
 
         personContainer.appendChild(li);
@@ -136,13 +137,15 @@ export default class Chatbox extends Component {
                                     if (senderLi) {
                                         senderLi.classList.add("new-message");
                                     }
-                                    // ! On safari, music are not allowed to play automatically without user interaction.
-                                    // ! Once you have clicked one time, It seems working.
-                                    this.notification.play();
+                                    if (this.userInteracted) {
+                                        this.notification.play();
+                                    }
                                 }
 
                                 let discussion = document.getElementById("private-discussion-" + this.chattingWithId);
-                                this.addNewMessage(discussion, sender, message);
+                                if (discussion) {
+                                    this.addNewMessage(discussion, sender, message);
+                                }
                             }
                         };
 
@@ -184,7 +187,9 @@ export default class Chatbox extends Component {
                                         if (senderLi) {
                                             senderLi.classList.add("new-message");
                                         }
-                                        this.notification.play();
+                                        if (this.userInteracted) {
+                                            this.notification.play();
+                                        }
                                     }
 
                                     let discussion = document.getElementById(
@@ -246,6 +251,7 @@ export default class Chatbox extends Component {
 
                         // Ensure that you can directly speak with new registered user.
                         newPersonElement.addEventListener("click", async () => {
+                            this.userInteracted = true;
                             this.chatContainer.style.display = "flex";
                             personContainer.style.display = "none";
                             this.chattingWithId = newPersonElement.getAttribute("data-sender");
@@ -288,7 +294,9 @@ export default class Chatbox extends Component {
                         if (senderLi) {
                             senderLi.classList.add("new-message");
                         }
-                        this.notification.play();
+                        if (this.userInteracted) {
+                            this.notification.play();
+                        }
                     }
 
                     let discussion = document.getElementById("private-discussion-" + this.chattingWithId);
@@ -296,16 +304,20 @@ export default class Chatbox extends Component {
                 }
 
                 if (messageData.type === "block") {
+                    const idToNickname = await getNickname(this.chattingWithId);
+
                     if (messageData.status === "success") {
-                        showToast(this.chattingWithId + " successfully been blocked !", "bi bi-check-circle-fill");
+                        showToast(idToNickname + " has successfully been blocked !", "bi bi-check-circle-fill");
                     } else {
-                        showToast(this.chattingWithId + " is already blocked !", "bi bi-bell");
+                        showToast(idToNickname + " is already blocked !", "bi bi-bell");
                     }
                 } else if (messageData.type === "unblock") {
+                    const idToNickname = await getNickname(this.chattingWithId);
+
                     if (messageData.status === "success") {
-                        showToast(this.chattingWithId + " successfully been unblocked !", "bi bi-check-circle-fill");
+                        showToast(idToNickname + " has successfully been unblocked !", "bi bi-check-circle-fill");
                     } else {
-                        showToast(this.chattingWithId + " is already been unblocked !", "bi bi-bell");
+                        showToast(idToNickname + " is already been unblocked !", "bi bi-bell");
                     }
                 } else if (messageData.type === "error") {
                     showToast(messageData.message, "bi bi-ban");
@@ -376,6 +388,7 @@ export default class Chatbox extends Component {
 
         newPersons.forEach((person) => {
             person.addEventListener("click", async () => {
+                this.userInteracted = true;
                 this.chatContainer.style.display = "flex";
                 personContainer.style.display = "none";
                 this.chattingWithId = person.getAttribute("data-sender");
@@ -411,6 +424,7 @@ export default class Chatbox extends Component {
 
         img.addEventListener("click", async () => {
             setOtherProfileNickname(idToNickname);
+            this.userInteracted = true;
         });
 
         const span = document.createElement("span");
@@ -422,6 +436,7 @@ export default class Chatbox extends Component {
         blockBtn.innerHTML = "BLOCK";
 
         blockBtn.addEventListener("click", async () => {
+            this.userInteracted = true;
             for (const [key, channelInfo] of this.wsChannelMap.entries()) {
                 if (channelInfo.personId == this.chattingWithId) {
                     if (blockBtn.innerHTML === "BLOCK") {
@@ -466,6 +481,7 @@ export default class Chatbox extends Component {
         this.searchingArray = [];
         this.searching = "";
         this.chattingWithId = "";
+        this.userInteracted = false;
 
         this.onready = async () => {
             this.info = await post("/api/player/c/nickname")
@@ -506,6 +522,7 @@ export default class Chatbox extends Component {
             const persons = document.querySelectorAll(".person");
             persons.forEach((person) => {
                 person.addEventListener("click", async () => {
+                    this.userInteracted = true;
                     this.chatContainer.style.display = "flex";
                     personContainer.style.display = "none";
                     this.chattingWithId = person.getAttribute("data-sender");
@@ -547,9 +564,6 @@ export default class Chatbox extends Component {
             this.generalWs = new WebSocket(`wss://${getOriginNoProtocol()}/ws/chat/general`);
             this.wsChannelMap.set(this.generalWs, channelInfo);
 
-            // TODO (1): Since everybody checks the list, I must code a security in the backend to ensure that
-            // TODO (1): If the person is not in the list, he should not be connected to the WS channel.
-            // TODO (1): The function will probably take an user ID and channel name in the backend.
             // This is a sort of main loop, creation of channels comes here. Of course, messages are sent in the generated channel.
             this.generalWs.onopen = async (event) => {
                 await this.listenToWebSocketChannels();
@@ -560,6 +574,7 @@ export default class Chatbox extends Component {
             const sendBtn = document.getElementById("send-btn");
 
             sendBtn.addEventListener("click", () => {
+                this.userInteracted = true;
                 const msg = this.writeArea.value;
 
                 let ws = null;
@@ -595,6 +610,7 @@ export default class Chatbox extends Component {
             const backBtn = document.getElementById("back-btn");
 
             backBtn.addEventListener("click", () => {
+                this.userInteracted = true;
                 this.chatContainer.style.display = "none";
                 personContainer.style.display = "flex";
             });
@@ -611,11 +627,13 @@ export default class Chatbox extends Component {
 
             closeBtn.addEventListener("click", () => {
                 this.phone.classList.add("hide");
+                this.userInteracted = true;
             });
 
             const dMailButton = document.getElementById("d-mail-button");
 
             dMailButton.addEventListener("click", () => {
+                this.userInteracted = true;
                 this.phone.classList.remove("hide");
                 this.phone.style.display = "flex";
             });

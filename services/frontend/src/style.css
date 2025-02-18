@@ -3668,6 +3668,6 @@ ow-system[labels="false"] ow-name {
 }
 
 .decoded-intro {
-    /* animation: flicker 1.5s infinite; */
+    animation: flicker 1.5s infinite;
     align-content: center;
 }

@@ -82,7 +82,6 @@ export default class OtherProfile extends Component {
 
                     if (gamemode !== tr("Local") && player1Name === actualName) {
                         this.winCount++;
-                        this.averageGamePointArray.push(result["score1"]);
                     }
                 } else {
                     player1Class = "history-looser";
@@ -90,8 +89,13 @@ export default class OtherProfile extends Component {
 
                     if (gamemode !== tr("Local") && player2Name === actualName) {
                         this.winCount++;
-                        this.averageGamePointArray.push(result["score2"]);
                     }
+                }
+
+                if (player1Name === actualName) {
+                    this.averageGamePointArray.push(result["score1"]);
+                } else if (player2Name === actualName) {
+                    this.averageGamePointArray.push(result["score2"]);
                 }
 
                 if (gamemode == tr("Local")) {
@@ -279,14 +283,13 @@ export default class OtherProfile extends Component {
         this.statisticsHTML += `<DonutChart config='${JSON.stringify({ donutChartConfig: donutChartConfig2 })}' />`;
         this.statisticsHTML += /* HTML */ `</div>`;
 
-        // prettier-ignore
-        this.statisticsHTML += /* HTML */ `<div class="container-fluid line-chart-container">`;
-        this.statisticsHTML += `<LineChart config='${JSON.stringify({ lineChartConfig: lineChartConfig })}' />`;
-
-        if (this.averageGamePointArray.length > 1) {
+        if (this.remoteCount >= 2 || this.tournamentCount >= 2) {
+            // prettier-ignore
+            this.statisticsHTML += /* HTML */ `<div class="container-fluid line-chart-container">`;
+            this.statisticsHTML += `<LineChart config='${JSON.stringify({ lineChartConfig: lineChartConfig })}' />`;
             this.statisticsHTML += `<LineChart config='${JSON.stringify({ lineChartConfig: lineChartConfig2 })}' />`;
+            this.statisticsHTML += /* HTML */ `</div>`;
         }
-        this.statisticsHTML += /* HTML */ `</div>`;
 
         this.statisticsHTML += `</ul>`;
     }

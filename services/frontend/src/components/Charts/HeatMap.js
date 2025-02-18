@@ -35,7 +35,7 @@ export default class HeatMap extends Component {
 
                 this.pixels += /* HTML */ `<div
                     class="rainbow"
-                    style="--intensity: ${intensity}"
+                    style="--intensity: ${intensity}; --x: ${x}; --y: ${y};"
                     data-bs-toggle="tooltip"
                     data-bs-placement="top"
                     title="${intensity}"

@@ -15,7 +15,7 @@ export default class DonutChart extends Component {
                 stroke-width="9"
                 stroke-dasharray="${dashArray}"
                 stroke-dashoffset="${dashOffset}"
-                style="--neon-color: ${color};"
+                style="--neon-color: ${color}; --dasharray: ${dashArray}; --dashoffset: ${dashOffset};"
             ></circle>
             <text
                 class="chart-content"

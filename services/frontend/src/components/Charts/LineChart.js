@@ -28,6 +28,7 @@ export default class LineChart extends Component {
     }
 
     generatePoints(data) {
+        // Find an even spacing for each points.
         const xScale = (this.viewWidth - 2 * this.padding) / (data.length - 1);
         const yMax = Math.max(...data.map((point) => point.y));
         const yScale = this.viewHeight / yMax;
@@ -35,6 +36,8 @@ export default class LineChart extends Component {
         return data
             .map((point, index) => {
                 const x = this.padding + index * xScale;
+
+                // Inverting y coordinate.
                 const y = this.viewHeight - point.y * yScale + this.paddingTop;
 
                 return `${x},${y}`;
@@ -49,6 +52,7 @@ export default class LineChart extends Component {
     }
 
     generateCircles(data) {
+        // Find an even spacing for each points.
         const xScale = (this.viewWidth - 2 * this.padding) / (data.length - 1);
         const yMax = Math.max(...data.map((point) => point.y));
         const yScale = this.viewHeight / yMax;
@@ -56,6 +60,7 @@ export default class LineChart extends Component {
         return data
             .map((point, index) => {
                 const x = this.padding + index * xScale;
+                // Inverting y coordinate.
                 const y = this.viewHeight - point.y * yScale;
                 let duration = "";
                 if (this.duration == true) {

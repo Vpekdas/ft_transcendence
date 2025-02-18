@@ -648,6 +648,17 @@
 
 /* CHART */
 
+@keyframes fillDonut {
+    from {
+        stroke-dasharray: 0 var(--dasharray);
+        stroke-dashoffset: var(--dasharray);
+    }
+    to {
+        stroke-dasharray: var(--dasharray);
+        stroke-dashoffset: var(--dashoffset);
+    }
+}
+
 .donut {
     display: flex;
     position: relative;
@@ -661,11 +672,13 @@
     transition:
         transform 0.3s ease,
         filter 0.3s ease;
+    animation: fillDonut 2s ease-out forwards;
+    animation-fill-mode: forwards;
 }
 
 .donut-segment:hover {
     transform: scale(1.05);
-    animation: neonPulse 2s infinite;
+    filter: drop-shadow(0 0 5px var(--neon-color, #fff)) drop-shadow(0 0 10px var(--neon-color, #fff));
 }
 
 @keyframes neonPulse {
@@ -727,12 +740,55 @@
     fill: #ffffff;
 }
 
+@keyframes fillBar {
+    from {
+        transform: scaleX(0);
+    }
+    to {
+        transform: scaleX(1);
+    }
+}
+
 .bar-chart-rectangle-higher {
+    transform-origin: left;
+    transform: scaleX(0);
     fill: green;
+    transition:
+        transform 0.3s ease,
+        filter 0.3s ease,
+        box-shadow 0.3s ease;
+    animation: fillBar 2s ease-out forwards;
+}
+
+.bar-chart-rectangle-higher:hover {
+    animation: neonPulse 2s infinite;
+    --neon-color: green;
+    transform: scaleY(1.2);
+    box-shadow:
+        0 0 10px green,
+        0 0 20px green,
+        0 0 30px green;
 }
 
 .bar-chart-rectangle-lower {
+    transform-origin: left;
+    transform: scaleX(0);
     fill: red;
+    transition:
+        transform 0.3s ease,
+        filter 0.3s ease,
+        box-shadow 0.3s ease;
+    animation: fillBar 2s ease-out forwards;
+}
+
+.bar-chart-rectangle-lower:hover {
+    animation: neonPulse 2s infinite;
+    --neon-color: red;
+    transform: scaleY(1.2);
+    box-shadow:
+        0 0 10px red,
+        0 0 20px red,
+        0 0 30px red;
 }
 
 .container-fluid.bar-chart-container {
@@ -768,12 +824,24 @@
     overflow-x: hidden;
 }
 
+@keyframes popIn {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
 .rainbow {
     --hue: calc((1 - var(--intensity)) * 240);
     background: hsl(var(--hue), 100%, 50%);
     height: 10px;
     width: 10px;
     display: block;
+    animation: popIn 1s ease-out forwards;
 }
 
 .heatmap-title {

@@ -5,6 +5,7 @@ import { getNickname, post } from "../utils";
 export default class MatchHistory extends Component {
     async init() {
         document.title = tr("Match History");
+        this.matchHistoryHTML = "";
         await this.showMatchHistory();
     }
 

@@ -16,6 +16,6 @@ export default class Settings extends Component {
                 <Activate2FAForm />
                 <DeleteAccountForm />
             </ul>
-        </div>`;
+        </div> `;
     }
 }

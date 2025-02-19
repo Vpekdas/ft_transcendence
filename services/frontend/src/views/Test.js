@@ -282,7 +282,7 @@ export default class Test extends Component {
                 0.4, // radius
                 0.85 // threshold
             );
-            // ballComposer.addPass(bloomPass);
+            ballComposer.addPass(bloomPass);
 
             renderer.setAnimationLoop(() => {
                 controls.update();

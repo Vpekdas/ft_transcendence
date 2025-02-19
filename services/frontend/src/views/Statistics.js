@@ -5,6 +5,7 @@ import { getNickname, post } from "../utils";
 export default class Statistics extends Component {
     async init() {
         document.title = tr("Statistics");
+        this.statisticsHTML = " ";
         await this.fetchMatchData();
         await this.showStatistics();
     }
@@ -50,7 +51,7 @@ export default class Statistics extends Component {
     async fetchMatchData() {
         this.info = await post("/api/player/c/nickname").then((res) => res.json());
         const actualName = this.info["nickname"];
-        
+
         this.results = await post("/api/player/c/matches").then((res) => res.json());
         this.matchCount = 0;
         this.winCount = 0;
@@ -129,82 +130,82 @@ export default class Statistics extends Component {
             this.localRatio = ((this.localCount / this.matchCount) * 100).toFixed(2);
             this.remoteRatio = ((this.remoteCount / this.matchCount) * 100).toFixed(2);
             this.tournamentRatio = ((this.tournamentCount / this.matchCount) * 100).toFixed(2);
-        }
 
-        const donutChartConfig = {
-            width: "400",
-            height: "200",
-            viewWidth: 50,
-            viewHeight: 50,
-            colorNumber: "2",
-            color1: "#00FF00",
-            color2: "#FF0000",
-            fillPercent1: this.winRatio,
-            fillPercent2: this.loseRatio,
-            title: "Win / Lose ratio",
-            titleColor: "#d89123",
-        };
+            const donutChartConfig = {
+                width: "400",
+                height: "200",
+                viewWidth: 50,
+                viewHeight: 50,
+                colorNumber: "2",
+                color1: "#00FF00",
+                color2: "#FF0000",
+                fillPercent1: this.winRatio,
+                fillPercent2: this.loseRatio,
+                title: "Win / Lose ratio",
+                titleColor: "#d89123",
+            };
 
-        const donutChartConfig2 = {
-            width: "400",
-            height: "200",
-            viewWidth: 50,
-            viewHeight: 50,
-            colorNumber: "3",
-            color1: "#00FF00",
-            color2: "#FF0000",
-            color2: "#0000FF",
-            fillPercent1: this.localRatio,
-            fillPercent2: this.remoteRatio,
-            fillPercent3: this.tournamentRatio,
-            title: "Gamemode Distrib",
-            titleColor: "#d89123",
-        };
+            const donutChartConfig2 = {
+                width: "400",
+                height: "200",
+                viewWidth: 50,
+                viewHeight: 50,
+                colorNumber: "3",
+                color1: "#00FF00",
+                color2: "#FF0000",
+                color2: "#0000FF",
+                fillPercent1: this.localRatio,
+                fillPercent2: this.remoteRatio,
+                fillPercent3: this.tournamentRatio,
+                title: "Gamemode Distrib",
+                titleColor: "#d89123",
+            };
 
-        const lineChartPoints = this.gameDurationArray.map((duration, index) => {
-            return { x: index, y: this.convertToSeconds(duration) };
-        });
+            const lineChartPoints = this.gameDurationArray.map((duration, index) => {
+                return { x: index, y: this.convertToSeconds(duration) };
+            });
 
-        const lineChartConfig = {
-            width: 600,
-            height: 300,
-            viewWidth: 600,
-            viewHeight: 400,
-            points: lineChartPoints,
-            lineColor: "#00FF00",
-            circleColor: "#00FFFF",
-            title: "Game Duration",
-            duration: true,
-        };
+            const lineChartConfig = {
+                width: 600,
+                height: 300,
+                viewWidth: 600,
+                viewHeight: 400,
+                points: lineChartPoints,
+                lineColor: "#00FF00",
+                circleColor: "#00FFFF",
+                title: "Game Duration",
+                duration: true,
+            };
 
-        const lineChartPoints2 = this.averageGamePointArray.map((point, index) => {
-            return { x: index, y: point };
-        });
+            const lineChartPoints2 = this.averageGamePointArray.map((point, index) => {
+                return { x: index, y: point };
+            });
 
-        const lineChartConfig2 = {
-            width: 600,
-            height: 300,
-            viewWidth: 600,
-            viewHeight: 400,
-            points: lineChartPoints2,
-            lineColor: "#00FF00",
-            circleColor: "#00FFFF",
-            title: "Average Point in Game",
-            duration: false,
-        };
+            const lineChartConfig2 = {
+                width: 600,
+                height: 300,
+                viewWidth: 600,
+                viewHeight: 400,
+                points: lineChartPoints2,
+                lineColor: "#00FF00",
+                circleColor: "#00FFFF",
+                title: "Average Point in Game",
+                duration: false,
+            };
 
-        // prettier-ignore
-        this.statisticsHTML += /* HTML */ `<div class="container-fluid donut-chart-container">`
-        this.statisticsHTML += `<DonutChart config='${JSON.stringify({ donutChartConfig: donutChartConfig })}' />`;
-        this.statisticsHTML += `<DonutChart config='${JSON.stringify({ donutChartConfig: donutChartConfig2 })}' />`;
-        this.statisticsHTML += /* HTML */ `</div>`;
-
-        if (this.remoteCount >= 2 || this.tournamentCount >= 2) {
             // prettier-ignore
-            this.statisticsHTML += /* HTML */ `<div class="container-fluid line-chart-container">`;
-            this.statisticsHTML += `<LineChart config='${JSON.stringify({ lineChartConfig: lineChartConfig })}' />`;
-            this.statisticsHTML += `<LineChart config='${JSON.stringify({ lineChartConfig: lineChartConfig2 })}' />`;
+            this.statisticsHTML += /* HTML */ `<div class="container-fluid donut-chart-container">`
+            this.statisticsHTML += `<DonutChart config='${JSON.stringify({ donutChartConfig: donutChartConfig })}' />`;
+            this.statisticsHTML += `<DonutChart config='${JSON.stringify({ donutChartConfig: donutChartConfig2 })}' />`;
             this.statisticsHTML += /* HTML */ `</div>`;
+
+            if (this.remoteCount >= 2 || this.tournamentCount >= 2) {
+                // prettier-ignore
+                this.statisticsHTML += /* HTML */ `<div class="container-fluid line-chart-container">`;
+                this.statisticsHTML += `<LineChart config='${JSON.stringify({ lineChartConfig: lineChartConfig })}' />`;
+                this.statisticsHTML += `<LineChart config='${JSON.stringify({ lineChartConfig: lineChartConfig2 })}' />`;
+                this.statisticsHTML += /* HTML */ `</div>`;
+            }
         }
 
         this.statisticsHTML += `</ul>`;

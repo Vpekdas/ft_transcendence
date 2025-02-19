@@ -87,14 +87,14 @@ def signinExternal(request: HttpRequest):
 
         if res.status_code != 200:
             return JsonResponse({"error": INVALID_TOKEN})
-        
+
         res = res.json()
         user = User.objects.filter(username=res["login"]).first()
 
         if not user:
             # The access token is valid but the account does not exists, probably due to a database wipe
             return JsonResponse({"error": INVALID_TOKEN})
-        
+
         login(request, user)
 
         return JsonResponse({ "access_token": data["access_token"] })
@@ -154,19 +154,23 @@ def loginRoute(request: HttpRequest):
 
     if player.two_factor and "otp" not in data:
         if authenticate(request, username=username, password=data["password"]) is None:
-            return JsonResponse({ "error": MISMATCH_CREDENTIALS }) 
-        
+            return JsonResponse({ "error": MISMATCH_CREDENTIALS })
+
         # Génération et envoi du code OTP
         otp_code = ''.join(random.choices(string.digits, k=6))  # Code OTP à 6 chiffres
         OTP.objects.update_or_create(user=user, defaults={'otp_code': otp_code})
 
-        # send_mail(
-        #     "Votre code de vérification",
-        #     f"Votre code de vérification est : {otp_code}",
-        #     "no-reply@ft_transcendence.com",
-        #     [username],
-        #     fail_silently=False,
-        # )
+        print(os.getenv('EMAIL_HOST_USER'), os.getenv('EMAIL_HOST_PASSWORD'), file=sys.stderr)
+
+        send_mail(
+            "Votre code de vérification",
+            f"Votre code de vérification est : {otp_code}",
+            "fttranscendence5@gmail.com",
+            [user.email],
+            fail_silently=False,
+            auth_user=os.getenv('EMAIL_HOST_USER'),
+            auth_password=os.getenv('EMAIL_HOST_PASSWORD'),
+        )
 
         print("code is", otp_code, file=sys.stderr)
 
@@ -185,8 +189,8 @@ def loginRoute(request: HttpRequest):
         user = authenticate(request, username=username, password=data["password"])
 
         if user is None:
-            return JsonResponse({ "error": MISMATCH_CREDENTIALS }) 
-        
+            return JsonResponse({ "error": MISMATCH_CREDENTIALS })
+
         login(request, user)
         return JsonResponse({ })
 
@@ -505,7 +509,7 @@ def tournamentInvite(request: HttpRequest, tid):
 
     data = json.loads(request.body)
     player = Player.objects.filter(user=request.user).first()\
-    
+
     if not "pid" in data:
         return HttpResponseServerError()
 
@@ -629,10 +633,10 @@ def get_chat_messages_by_channel_name(request, channel_name):
 @require_POST
 def get_user_id_by_nickname(request: HttpRequest):
     data = json.loads(request.body)
-    
+
     if "nickname" not in data:
         return JsonResponse({"error": "Nickname parameter is required"}, status=400)
-    
+
     nickname = data["nickname"]
 
     try:

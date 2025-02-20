@@ -9,6 +9,15 @@ export default class Profile extends Component {
         this.onready = () => {
             const introContainer = document.getElementById("intro4");
             this.decodeEffect(INTRO[3], introContainer);
+
+            const pacman = document.getElementsByClassName("pacman")[0];
+            window.addEventListener("scroll", function (e) {
+                var perc =
+                    (e.target.scrollingElement.scrollTop /
+                        (e.target.scrollingElement.scrollHeight - window.innerHeight + 64)) *
+                    100;
+                pacman.style.top = `calc(2px + ${perc}%)`;
+            });
         };
     }
 
@@ -65,6 +74,9 @@ export default class Profile extends Component {
                     <span class="decoded-intro" id="intro4"></span>
                 </div>
                 ${comp}
+            </div>
+            <div class="scrollbar">
+                <div class="pacman"></div>
             </div>
         `;
     }

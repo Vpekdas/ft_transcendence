@@ -18,7 +18,9 @@ export default class TournamentPrivacyCard extends Component {
     render() {
         return /* HTML */ ` <div>
             <div class="card settings">
-                <h5 class="card-title settings">${tr("Tournament Privacy Settings")}</h5>
+                <h5 class="card-title settings" data-text="${tr("Tournament Privacy Settings")}">
+                    ${tr("Tournament Privacy Settings")}
+                </h5>
                 <div class="btn-group tournament-privacy" role="group" aria-label="Basic radio toggle button group">
                     <input type="radio" class="btn-check" name="privacy" id="btn-open" autocomplete="off" checked />
                     <label class="btn btn-outline-primary" for="btn-open">${tr("Open")}</label>
@@ -28,7 +30,7 @@ export default class TournamentPrivacyCard extends Component {
                 </div>
                 <div class="container-fluid settings tournament-password">
                     <div class="card settings">
-                        <h5 class="card-title settings">${tr("Password")}</h5>
+                        <h5 class="card-title settings" data-text="${tr("Password")}">${tr("Password")}</h5>
                         <div class="card-body settings">
                             <p class="card-text settings">${tr("Choose your tournament password here.")}</p>
                             <input

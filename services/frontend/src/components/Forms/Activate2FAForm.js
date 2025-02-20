@@ -27,9 +27,11 @@ export default class Activate2FAForm extends Component {
         return /* HTML */ ` <div>
             <div class="container-fluid settings">
                 <div class="card settings">
-                    <h5 class="card-title settings">${tr("Delete your account")}</h5>
+                    <h5 class="card-title settings" data-text="${tr("Activate 2FA Authentication")}">
+                        ${tr("Activate 2FA Authentication")}
+                    </h5>
                     <div class="card-body settings">
-                        <p class="card-text settings">${tr("Permanently delete your account here.")}</p>
+                        <p class="card-text settings">${tr("Activate 2FA Authentication for your account here.")}</p>
                         <div class="form-check form-switch 2FA">
                             <input class="form-check-input 2FA" type="checkbox" role="switch" id="switch2FA" />
                             <label class="form-check-label 2FA" for="switch2FA">2FA</label>

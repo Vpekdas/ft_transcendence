@@ -62,5 +62,7 @@
     "Cancel": "Annuler",
     "Nickname is already used": "Pseudo deja utilise",
     "Elo": "Elo",
-    "Return": "Retour"
+    "Return": "Retour",
+    "Activate 2FA Authentication": "Activer l’authentification à 2 facteurs (2FA)",
+    "Activate 2FA Authentication for your account here.": "Activez l'authentification à deux facteurs (2FA) pour votre compte ici."
 }

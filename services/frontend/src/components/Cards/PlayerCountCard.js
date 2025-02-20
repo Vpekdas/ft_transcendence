@@ -5,7 +5,7 @@ import { Component } from "../../micro";
 export default class PlayerCountCard extends Component {
     render() {
         return /* HTML */ ` <div class="card settings">
-            <h5 class="card-title settings">${tr("Number of Players")}</h5>
+            <h5 class="card-title settings" data-text="${tr("Number of Players")}">${tr("Number of Players")}</h5>
             <div class="btn-group player-count" role="group" aria-label="Basic radio toggle button group">
                 <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off" checked />
                 <label class="btn btn-outline-primary" for="btnradio2">2</label>

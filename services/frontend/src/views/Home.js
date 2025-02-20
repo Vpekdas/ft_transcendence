@@ -8,6 +8,15 @@ export default class Home extends Component {
         this.animatedIntroArray = [];
 
         this.onready = () => {
+            const pacman = document.getElementsByClassName("pacman")[0];
+            window.addEventListener("scroll", function (e) {
+                var perc =
+                    (e.target.scrollingElement.scrollTop /
+                        (e.target.scrollingElement.scrollHeight - window.innerHeight + 64)) *
+                    100;
+                pacman.style.top = `calc(2px + ${perc}%)`;
+            });
+
             document.querySelector("#play-pong-1v1local").addEventListener("click", () => {
                 navigateTo("/matchmake/pong?gamemode=1v1local");
             });
@@ -20,7 +29,7 @@ export default class Home extends Component {
                 navigateTo("/create-tournament");
             });
 
-            for (let i = 0; i < INTRO.length; i++) {
+            for (let i = 0; i < INTRO.length - 1; i++) {
                 this.animatedIntroArray.push({
                     text: INTRO[i],
                     animated: false,
@@ -148,6 +157,9 @@ export default class Home extends Component {
                 </div>
             </div>
             <Chatbox />
+            <div class="scrollbar">
+                <div class="pacman"></div>
+            </div>
         `;
     }
 }

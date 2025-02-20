@@ -37,7 +37,7 @@ export default class ChangePasswordForm extends Component {
         return /* HTML */ `<div class="container-fluid settings">
             <div id="toast-container"></div>
             <div class="card settings">
-                <h5 class="card-title settings">${tr("Password")}</h5>
+                <h5 class="card-title settings" data-text="${tr("Password")}">${tr("Password")}</h5>
                 <div class="card-body settings">
                     <p class="card-text settings">${tr("Update your password in the form below.")}</p>
                     <input

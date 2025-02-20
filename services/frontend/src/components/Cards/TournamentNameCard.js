@@ -6,7 +6,7 @@ import { Component } from "../../micro";
 export default class TournamentNameCard extends Component {
     render() {
         return /* HTML */ ` <div class="card settings">
-            <h5 class="card-title settings">${tr("Tournament Name")}</h5>
+            <h5 class="card-title settings" data-text="${tr("Tournament Name")}">${tr("Tournament Name")}</h5>
             <div class="card-body settings">
                 <p class="card-text settings">${tr("Choose the tournament name here.")}</p>
                 <input

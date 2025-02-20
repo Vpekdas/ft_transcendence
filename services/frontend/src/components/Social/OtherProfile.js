@@ -36,15 +36,15 @@ export default class OtherProfile extends Component {
         this.profileHTML = /* HTML */ `
             <div class="container-fluid card-other-profile-container">
                 <div class="card settings other-profile">
-                    <h5 class="card-title settings">${tr("Profile Picture")}</h5>
+                    <h5 class="card-title settings" data-text="${tr("Profile Picture")}">${tr("Profile Picture")}</h5>
                     <img class="card-img-top profile" src="${api("/api/player/" + actualId + "/picture")}" />
                 </div>
                 <div class="card settings other-profile">
-                    <h5 class="card-title settings">${tr("Nickname")}</h5>
+                    <h5 class="card-title settings" data-text="${tr("Nickname")}">${tr("Nickname")}</h5>
                     <div class="card-body settings other-profile">${actualName}</div>
                 </div>
                 <div class="card settings other-profile">
-                    <h5 class="card-title settings">${tr("Elo")}</h5>
+                    <h5 class="card-title settings" data-text="${tr("Nickname")}">${tr("Elo")}</h5>
                     <div class="card-body settings other-profile">${this.elo.pongElo}</div>
                 </div>
             </div>

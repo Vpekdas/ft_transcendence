@@ -42,7 +42,7 @@ export default class ChangeProfilePictureForm extends Component {
     render() {
         return /* HTML */ ` <div class="container-fluid settings">
             <div class="card settings">
-                <h5 class="card-title settings">${tr("Profile Picture")}</h5>
+                <h5 class="card-title settings" data-text="${tr("Profile Picture")}">${tr("Profile Picture")}</h5>
                 <img src="${api("/api/player/c/picture")}" class="card-img-top profile" id="profile-picture" />
                 <div class="card-body settings">
                     <div class="input-group settings">

@@ -980,7 +980,6 @@ export default class Chatbox extends Component {
                 <span>Send a d-mail here !</span>
             </div>
             <audio id="notification-sound" src="/music/Tuturu.mp3"></audio>
-            <div id="toast-container"></div>
             ${otherProfileNickname().length > 0 ? `<OtherProfile nickname="${otherProfileNickname()}" />` : ""}
         `;
     }

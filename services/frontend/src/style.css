@@ -1120,16 +1120,20 @@
 
 body {
     background: linear-gradient(to bottom, #000000, #1a1a1a);
-    color: #ffffff;
     height: 100%;
     width: 100%;
     overflow-x: hidden;
     cursor: auto;
+    background-size: auto;
+    background-repeat: repeat;
+    background-position: center;
+    background-attachment: fixed;
+    overflow-y: auto;
 }
 
 body::before {
     content: "";
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
@@ -1138,32 +1142,39 @@ body::before {
         url("/img/background.jpg") repeat,
         linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
     opacity: 0.1;
-    animation: ZoomRotate 20s linear infinite;
-    background-size: cover;
+    animation: RotateBackground 20s both infinite;
+    background-size: auto;
+    background-repeat: repeat;
+    background-position: center;
+    background-attachment: fixed;
     overflow-x: hidden;
+    overflow-y: auto;
     z-index: -1;
 }
 
-@keyframes ZoomRotate {
+#micro-app {
+}
+
+@keyframes RotateBackground {
     0% {
         background-position: 0 0;
-        transform: scale(1) rotate(0deg);
+        transform: rotate(0deg);
     }
     25% {
         background-position: 50% 50%;
-        transform: scale(1.1) rotate(10deg);
+        transform: rotate(10deg);
     }
     50% {
         background-position: 100% 100%;
-        transform: scale(1.2) rotate(20deg);
+        transform: rotate(20deg);
     }
     75% {
         background-position: 50% 50%;
-        transform: scale(1.1) rotate(10deg);
+        transform: rotate(10deg);
     }
     100% {
         background-position: 0 0;
-        transform: scale(1) rotate(0deg);
+        transform: rotate(0deg);
     }
 }
 
@@ -2321,7 +2332,7 @@ ow-system[labels="false"] ow-name {
     width: 100%;
     justify-content: center;
     align-items: center;
-    background-color: #000;
+    background: transparent;
 }
 
 .container-fluid.planet-card-container {

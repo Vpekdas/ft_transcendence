@@ -8,7 +8,7 @@ export default class Profile extends Component {
 
         this.onready = () => {
             const introContainer = document.getElementById("intro4");
-            this.decodeEffect(INTRO[0], introContainer);
+            this.decodeEffect(INTRO[3], introContainer);
         };
     }
 

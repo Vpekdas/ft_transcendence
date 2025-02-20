@@ -55,4 +55,5 @@ export const INTRO = [
     "If you're tired of playing games or just want to have a chill time or are just curious, you can explore the infinite space here. " +
         "With some patience, you can even witness beautiful moments!",
     "Let's see if your memory is still intact after time looping :)",
+    "Hello again, here you will find the profile page, where you can modify your infos, see you game history, statistics, skins and your friend list !",
 ];

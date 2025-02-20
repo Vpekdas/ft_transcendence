@@ -160,19 +160,13 @@ def loginRoute(request: HttpRequest):
         otp_code = ''.join(random.choices(string.digits, k=6))  # Code OTP à 6 chiffres
         OTP.objects.update_or_create(user=user, defaults={'otp_code': otp_code})
 
-        print(os.getenv('EMAIL_HOST_USER'), os.getenv('EMAIL_HOST_PASSWORD'), file=sys.stderr)
-
         send_mail(
             "Votre code de vérification",
             f"Votre code de vérification est : {otp_code}",
-            "fttranscendence5@gmail.com",
+            "noreply@example.com",
             [user.email],
             fail_silently=False,
-            auth_user=os.getenv('EMAIL_HOST_USER'),
-            auth_password=os.getenv('EMAIL_HOST_PASSWORD'),
         )
-
-        print("code is", otp_code, file=sys.stderr)
 
         return JsonResponse({ "need_2fa": True })
     elif player.two_factor and "otp" in data:

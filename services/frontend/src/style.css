@@ -1065,6 +1065,8 @@
     }
 }
 
+/* TODO: Modify the active, it's bootstrap blue :( */
+
 .btn-primary.settings {
     background-color: transparent;
     border: 1px solid #d89123;
@@ -1453,6 +1455,7 @@ canvas {
     font-family: "Courier New", monospace;
     color: #d89123;
     flex-direction: column;
+    margin-bottom: 50%;
 }
 
 .delete-modal-header h2 {
@@ -2986,11 +2989,10 @@ ow-system[labels="false"] ow-name {
     height: 15%;
     width: 100%;
     align-items: center;
-    justify-content: space-around;
+    justify-content: space-evenly;
     background-color: #1c1c1c;
     border-bottom: 2px solid #00bfff;
     color: #00bfff;
-    font-family: "Courier New", Courier, monospace;
     padding: 10px;
     box-shadow: 0 0 10px #00bfff;
     transition:
@@ -2998,12 +3000,26 @@ ow-system[labels="false"] ow-name {
         box-shadow 0.3s ease;
 }
 
-.container-fluid.chat-header img {
+.container-fluid.chat-header > img {
     height: 40px;
     width: 40px;
     border-radius: 50%;
     border: 2px solid #00bfff;
     margin-right: 10px;
+}
+
+.container-fluid.chat-header > i {
+    height: 20px;
+    width: 20px;
+}
+
+.container-fluid.chat-header > i:hover {
+    transform: scale(1.2);
+    color: #ff0000;
+    transition:
+        transform 0.3s ease,
+        color 0.3s ease;
+    animation: pulse 1s infinite;
 }
 
 .container-fluid.chat-message-container {
@@ -3269,6 +3285,8 @@ ow-system[labels="false"] ow-name {
     box-shadow: 0 0 10px #00bfff;
     outline: none;
     resize: none;
+    scrollbar-color: #00bfff #1c1c1c;
+    scrollbar-width: thin;
 }
 
 #messageArea::placeholder {
@@ -3587,7 +3605,7 @@ ow-system[labels="false"] ow-name {
     width: 100%;
     align-items: center;
     justify-content: space-around;
-    overflow: hidden;
+    overflow: auto;
 }
 
 .card-body.settings.other-profile {
@@ -3794,5 +3812,97 @@ ow-system[labels="false"] ow-name {
     position: relative;
     height: 100%;
     width: 100%;
-    background-color: pink;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+.friend {
+    display: flex;
+    position: relative;
+    width: 100%;
+    height: 10%;
+    justify-content: space-around;
+    align-items: center;
+    margin-bottom: auto;
+}
+
+.friend > img {
+    display: flex;
+    position: relative;
+    width: 32px;
+    height: 32px;
+}
+
+.friend > svg {
+    display: flex;
+    position: relative;
+    width: 10%;
+}
+
+.friend-name {
+    display: flex;
+    position: relative;
+    margin-left: 10px;
+}
+
+.btn-primary.settings.view-friend {
+    background-color: transparent;
+    border: 1px solid #00bfff;
+    color: #00bfff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.btn-primary.settings.view-friend:hover {
+    background-color: #00bfff;
+    color: #fff;
+    box-shadow:
+        0 0 10px #00bfff,
+        0 0 20px #00bfff;
+    border-color: #00bfff;
+}
+
+.btn-primary.settings.view-friend:active {
+    background-color: #007acc;
+    color: #fff;
+    box-shadow:
+        0 0 5px #007acc,
+        0 0 10px #007acc;
+    border-color: #007acc;
+}
+
+.btn-primary.settings.remove-friend {
+    background-color: transparent;
+    border: 1px solid #ff4d4d;
+    color: #ff4d4d;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.btn-primary.settings.remove-friend:hover {
+    background-color: #ff4d4d;
+    color: #fff;
+    box-shadow:
+        0 0 10px #ff4d4d,
+        0 0 20px #ff4d4d;
+    border-color: #ff4d4d;
+}
+
+.btn-primary.settings.remove-friend:active {
+    background-color: #cc0000;
+    color: #fff;
+    box-shadow:
+        0 0 5px #cc0000,
+        0 0 10px #cc0000;
+    border-color: #cc0000;
 }

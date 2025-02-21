@@ -515,6 +515,11 @@ def addFriend(request: HttpRequest, friend_id):
     if not request.user.is_authenticated:
         return JsonResponse({"error": NOT_AUTHENTICATED})
 
+    try:
+        friend_id = int(friend_id)
+    except ValueError:
+        return JsonResponse({"error": INVALID_FRIEND_ID})
+
     # Récupérer le joueur actuel
     player = Player.objects.filter(user=request.user).first()
     if not player:
@@ -524,11 +529,17 @@ def addFriend(request: HttpRequest, friend_id):
     friend = Player.objects.filter(id=friend_id).first()
     if not friend:
         return JsonResponse({"error": FRIEND_NOT_FOUND})
+    
+    if player.friends.filter(id=friend_id).exists():
+        return JsonResponse({"error": FRIEND_ALREADY_IN_LIST})
+
+    if player.id in friend.blockedUsers:
+        return JsonResponse({"error": FRIEND_BLOCKED})
 
     # Ajouter l'ami
     player.friends.add(friend)
 
-    return JsonResponse({"message": "Friend added successfully."})
+    return JsonResponse({})
 
 
 @require_POST
@@ -549,41 +560,7 @@ def deleteFriend(request: HttpRequest, friend_id):
     # Supprimer l'ami
     player.friends.remove(friend)
 
-    return JsonResponse({"message": "Friend removed successfully."})
-
-
-def sendMessage(request: HttpRequest, id, contenu: string):
-     if not request.user.is_authenticated:
-        return JsonResponse({ "error": NOT_AUTHENTICATED })
-     data = json.loads(request.body)
-     player = Player.objects.filter(user=request.user).first()
-     if not player:
-        return JsonResponse({ "error": INTERNAL_ERROR })
-     p2 = Player.objects.filter(id=id).first()
-     if not p2:
-         return JsonResponse({ "error": INTERNAL_ERROR })
-     chat, create = Chat.objects.get_or_create(player1=player, player2=p2)
-     if not chat:
-        return JsonResponse({ "error": INTERNAL_ERROR })
-     message = Message.objects.create(content=contenu, sender=player, receiver=p2)
-     chat.messages.insert(message)
-     return JsonResponse({})
-
-def getMessages(request: HttpRequest, id):
-     if not request.user.is_authenticated:
-        return JsonResponse({ "error": NOT_AUTHENTICATED })
-     data = json.loads(request.body)
-     player = Player.objects.filter(user=request.user).first()
-     if not player:
-        return JsonResponse({ "error": INTERNAL_ERROR })
-     p2 = Player.objects.filter(id=id).first()
-     if not p2:
-         return JsonResponse({ "error": INTERNAL_ERROR })
-     chat = Chat.objects.filter(player1 = player, player2=p2)
-     if not chat:
-        return JsonResponse({ "error": INTERNAL_ERROR })
-     messages = chat.messages.all().values("content", "sender", "receiver")
-     return JsonResponse({"messages" : list(messages)})
+    return JsonResponse({})
 
 # @require_POST
 # def tournament_info(request: HttpRequest, id: str):
@@ -599,12 +576,17 @@ def getMessages(request: HttpRequest, id):
 #         "state": t.state,
 #     })
 
-def get_users_list(request):
+def get_users_list(request: HttpRequest):
+    if not request.user.is_authenticated:
+        return JsonResponse({ "error": NOT_AUTHENTICATED })
     users = Player.objects.all().values('user_id')
     return JsonResponse(list(users), safe=False)
 
 @csrf_exempt
-def get_chat_messages_by_channel_name(request, channel_name):
+def get_chat_messages_by_channel_name(request: HttpRequest, channel_name):
+    if not request.user.is_authenticated:
+        return JsonResponse({ "error": NOT_AUTHENTICATED })
+    
     if request.method == 'GET':
         try:
             chat = Chat.objects.filter(channel_name=channel_name).first()
@@ -639,3 +621,18 @@ def get_user_id_by_nickname(request: HttpRequest):
         return JsonResponse({"user_id": user.id})
     except User.DoesNotExist:
         return JsonResponse({"error": "User not found"}, status=404)
+
+@require_POST
+def get_friends(request: HttpRequest):
+    if not request.user.is_authenticated:
+        return JsonResponse({ "error": NOT_AUTHENTICATED })
+    
+    player = Player.objects.filter(user=request.user).first()
+    if not player:
+        return JsonResponse({"error": INTERNAL_ERROR})
+    
+    friends = player.friends.all()
+
+    friends_list = [{"id": friend.id, "nickname": friend.nickname, "is_online": friend.is_online} for friend in friends]
+
+    return JsonResponse({"friends": friends_list})

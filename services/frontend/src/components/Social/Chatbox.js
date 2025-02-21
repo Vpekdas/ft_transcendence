@@ -53,7 +53,7 @@ export default class Chatbox extends Component {
     createStatus(colorStatus) {
         return /* HTML */ `
             <svg class="circle-status" xmlns="http://www.w3.org/2000/svg">
-                <circle class="circle-color" r="10" cx="50%" cy="50%" fill=${colorStatus} />
+                <circle class="circle-color" r="10" cx="50%" cy="50%" fill="${colorStatus}" />
             </svg>
         `;
     }
@@ -97,7 +97,7 @@ export default class Chatbox extends Component {
                 const data = JSON.parse(event.data);
                 const messageData = JSON.parse(event.data);
 
-                console.log("message on ws: ", ws, "content: ", data);
+                console.log(data);
 
                 if (data.type === "channel_list") {
                     for (let i = 0; i < data.channelList.length; i++) {
@@ -429,6 +429,22 @@ export default class Chatbox extends Component {
             this.userInteracted = true;
         });
 
+        const i = document.createElement("i");
+        i.classList.add("bi", "bi-heart-fill");
+
+        i.addEventListener("click", async () => {
+            const response = await post("/api/add-friend/" + fullname, {})
+                .then((res) => res.json())
+                .catch((err) => {
+                    showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
+                });
+            if (response.error) {
+                showToast(response.error, "bi bi-exclamation-triangle-fill");
+            } else {
+                showToast("Friend added successfully.", "bi bi-check-circle-fill");
+            }
+        });
+
         const span = document.createElement("span");
         span.classList.add("chat-profile-name");
         span.textContent = idToNickname;
@@ -462,8 +478,6 @@ export default class Chatbox extends Component {
             }
         });
 
-        await this.listenToWebSocketChannels();
-
         const inviteBtn = document.createElement("button");
         inviteBtn.classList.add("btn", "btn-success", "invite");
         inviteBtn.innerHTML = "INVITE";
@@ -471,9 +485,12 @@ export default class Chatbox extends Component {
         inviteBtn.addEventListener("click", () => {});
 
         this.chatHeader.appendChild(img);
+        this.chatHeader.appendChild(i);
         this.chatHeader.appendChild(span);
         this.chatHeader.appendChild(blockBtn);
         this.chatHeader.appendChild(inviteBtn);
+
+        await this.listenToWebSocketChannels();
     }
 
     clean() {

@@ -203,12 +203,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'online_users': online_users
         }))
 
-        friend_list = await self.get_friends()
-        await self.send(text_data=json.dumps({
-            'type': 'friends',
-            'friends': friend_list
-        }))
-
     async def disconnect(self, close_code):
         if not self.user.is_authenticated:
             await self.close()
@@ -471,13 +465,3 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def get_online_users(self):
         return list(Player.objects.filter(is_online=True).values_list('user_id', flat=True))
     
-    @database_sync_to_async
-    def get_friends(self):
-        player = Player.objects.filter(user=self.user).first()
-        if not player:
-            return []
-
-        friends = player.friends.all()
-        friends_list = [{"nickname": friend.nickname} for friend in friends]
-
-        return friends_list

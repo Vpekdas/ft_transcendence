@@ -103,7 +103,7 @@ export default class Profile extends Component {
             comp = `<Settings />`;
         } else if (tab == "skins") {
             comp = `<Skins />`;
-        }
+        }  
 
         return /* HTML */ `
             <HomeNavBar />

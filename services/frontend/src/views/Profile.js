@@ -4,21 +4,55 @@ import { INTRO } from "../constant";
 /** @type {import("../micro").Component} */
 export default class Profile extends Component {
     async init() {
-        // this.animatedIntroArray = [];
-
         this.onready = () => {
             const introContainer = document.getElementById("intro4");
             this.decodeEffect(INTRO[3], introContainer);
 
-            const pacman = document.getElementsByClassName("pacman")[0];
-            window.addEventListener("scroll", function (e) {
-                var perc =
-                    (e.target.scrollingElement.scrollTop /
-                        (e.target.scrollingElement.scrollHeight - window.innerHeight + 64)) *
-                    100;
-                pacman.style.top = `calc(2px + ${perc}%)`;
+            const rocket = document.querySelector(".space-rocket");
+            const supernova = document.querySelector(".supernova");
+            const particleContainer = document.querySelector(".particle-container");
+
+            this.updateRocketHeight(rocket, supernova);
+
+            window.addEventListener("scroll", () => {
+                this.updateRocketHeight(rocket, supernova);
             });
+
+            setInterval(() => {
+                this.createParticles(particleContainer, rocket);
+            }, 100);
         };
+    }
+
+    createParticles(container, rocket) {
+        const particle = document.createElement("div");
+        particle.classList.add("particle");
+
+        const rocketRect = rocket.getBoundingClientRect();
+        particle.style.left = `${Math.random() * 16}px`;
+        particle.style.top = `${rocketRect.top + rocketRect.height - 32}px`;
+
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = Math.random() * 50;
+        particle.style.setProperty("--x", `${Math.random() * 16}px`);
+        particle.style.setProperty("--y", `${Math.sin(angle) * distance}px`);
+
+        container.appendChild(particle);
+
+        particle.addEventListener("animationend", () => {
+            particle.remove();
+        });
+    }
+
+    updateRocketHeight(rocket, supernova) {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrollPercent = scrollTop / docHeight;
+        const maxHeight = document.querySelector(".custom-scrollbar").clientHeight;
+        const rocketHeight = scrollPercent * maxHeight;
+
+        rocket.style.height = `${rocketHeight}px`;
+        supernova.style.height = `${rocketHeight - 25}px`;
     }
 
     decodeEffect(rightText, decodedContainerId) {
@@ -75,8 +109,25 @@ export default class Profile extends Component {
                 </div>
                 ${comp}
             </div>
-            <div class="scrollbar">
-                <div class="pacman"></div>
+            <div class="custom-scrollbar">
+                <img src="/img/Outer-Wilds/Sun.png" />
+                <img src="/img/Outer-Wilds/Sun-Station.png" />
+                <img src="/img/Outer-Wilds/The-Interloper.png" />
+                <img src="/img/Outer-Wilds/Ash-Twin.png" />
+                <img src="/img/Outer-Wilds/Ember-Twin.png" />
+                <img src="/img/Outer-Wilds/Timber-Hearth.png" />
+                <img src="/img/Outer-Wilds/Attlerock.png" />
+                <img src="/img/Outer-Wilds/Brittle-Hollow.png" />
+                <img src="/img/Outer-Wilds/Hollows-Lantern.png" />
+                <img src="/img/Outer-Wilds/Giants-Deep.png" />
+                <img src="/img/Outer-Wilds/Orbital-Probe-Cannon.png" />
+                <img src="/img/Outer-Wilds/Quantum-Moon.png" />
+                <img src="/img/Outer-Wilds/Dark-Bramble.png" />
+            </div>
+            <div class="space-rocket">
+                <img src="/img/spaceScrollbar.svg" />
+                <div class="supernova"></div>
+                <div class="particle-container"></div>
             </div>
         `;
     }

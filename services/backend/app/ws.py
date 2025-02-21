@@ -181,7 +181,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         player = await sync_to_async(Player.objects.get)(user=self.user)
 
-        # Send the channelList to the frontend.
         await self.send(text_data=json.dumps({
             'type': 'channel_list',
             'channelList': player.channelList,
@@ -189,7 +188,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         }))
 
-        # Broadcast player online status
         await self.channel_layer.group_send(
             "general",
             {
@@ -203,6 +201,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'type': 'online_users',
             'online_users': online_users
+        }))
+
+        friend_list = await self.get_friends()
+        await self.send(text_data=json.dumps({
+            'type': 'friends',
+            'friends': friend_list
         }))
 
     async def disconnect(self, close_code):
@@ -291,10 +295,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 if other_player.id not in player.discussingWith:
                     player.discussingWith.append(other_player.id)
     
-            # Save the updated Player instance.
             await sync_to_async(player.save)()
     
-        # Send the channel_created message only after successful updates
         await self.channel_layer.group_send(
             "general",
             {
@@ -334,10 +336,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             receiver=receiver
         )
 
-        # Add the message to the chat.
         await sync_to_async(chat.messages.add)(message)
 
-        # Broadcast the message to the channel.
         await self.channel_layer.group_send(
             channel_name,
             {
@@ -413,11 +413,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if not channel_name or not userlist:
             return
     
-        # Retrieve the Player instances using user IDs.
         player1 = await sync_to_async(Player.objects.get)(user__id=userlist[0])
         player2 = await sync_to_async(Player.objects.get)(user__id=userlist[1])
     
-        # Retrieve or create the chat instance.
         chat, created = await sync_to_async(Chat.objects.get_or_create)(
             channel_name=channel_name
         )
@@ -434,7 +432,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         receiver = event["receiver"]
         timestamp = event["timestamp"]
 
-        # Send message to WebSocket
         await self.send(text_data=json.dumps({
             "type": "chat_message",
             "message": message,
@@ -444,11 +441,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
     async def user_status(self, event):
-        # Handle user status change
         user = event['user']
         status = event['status']
 
-        # Send status update to WebSocket
         await self.send(text_data=json.dumps({
             'type': 'user_status',
             'user': user,
@@ -476,3 +471,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def get_online_users(self):
         return list(Player.objects.filter(is_online=True).values_list('user_id', flat=True))
     
+    @database_sync_to_async
+    def get_friends(self):
+        player = Player.objects.filter(user=self.user).first()
+        if not player:
+            return []
+
+        friends = player.friends.all()
+        friends_list = [{"nickname": friend.nickname} for friend in friends]
+
+        return friends_list

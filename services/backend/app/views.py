@@ -510,6 +510,7 @@ def tournamentInvite(request: HttpRequest, tid):
     t = tournaments.tournaments[tid]
     t.invited.append(data["pid"])
 
+@require_POST
 def addFriend(request: HttpRequest, friend_id):
     if not request.user.is_authenticated:
         return JsonResponse({"error": NOT_AUTHENTICATED})

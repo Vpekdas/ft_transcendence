@@ -97,6 +97,8 @@ export default class Chatbox extends Component {
                 const data = JSON.parse(event.data);
                 const messageData = JSON.parse(event.data);
 
+                console.log("message on ws: ", ws, "content: ", data);
+
                 if (data.type === "channel_list") {
                     for (let i = 0; i < data.channelList.length; i++) {
                         const channelInfo = { channelUrl: data.channelList[i], personId: data.discussingWith[i] };
@@ -472,6 +474,12 @@ export default class Chatbox extends Component {
         this.chatHeader.appendChild(span);
         this.chatHeader.appendChild(blockBtn);
         this.chatHeader.appendChild(inviteBtn);
+    }
+
+    clean() {
+        for (const [key, channelInfo] of this.wsChannelMap.entries()) {
+            key.close();
+        }
     }
 
     async init() {

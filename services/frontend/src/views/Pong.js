@@ -297,23 +297,6 @@ export default class Pong extends Component {
                 renderer.render(this.scene, camera);
             });
 
-            Array(200)
-                .fill()
-                .forEach(() => {
-                    const geometry = new THREE.SphereGeometry(0.25, 24, 24);
-                    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-                    const star = new THREE.Mesh(geometry, material);
-
-                    const [x, y, z] = Array(3)
-                        .fill()
-                        .map(() => THREE.MathUtils.randFloatSpread(100));
-                    star.position.set(x, y, z);
-                    this.scene.add(star);
-                });
-
-            const spaceTexture = this.textureLoader.load("/img/space.jpg");
-            this.scene.background = spaceTexture;
-
             // ! For ground, It seems ok but may not be ok for other models.
             // const ambientLight = new THREE.AmbientLight(0xffffff, 10);
             // this.scene.add(ambientLight);

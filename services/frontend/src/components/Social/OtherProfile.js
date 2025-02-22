@@ -277,11 +277,13 @@ export default class OtherProfile extends Component {
             duration: false,
         };
 
-        // prettier-ignore
-        this.statisticsHTML += /* HTML */ `<div class="container-fluid donut-chart-container">`
-        this.statisticsHTML += `<DonutChart config='${JSON.stringify({ donutChartConfig: donutChartConfig })}' />`;
-        this.statisticsHTML += `<DonutChart config='${JSON.stringify({ donutChartConfig: donutChartConfig2 })}' />`;
-        this.statisticsHTML += /* HTML */ `</div>`;
+        if (this.matchCount >= 1) {
+            // prettier-ignore
+            this.statisticsHTML += /* HTML */ `<div class="container-fluid donut-chart-container">`
+            this.statisticsHTML += `<DonutChart config='${JSON.stringify({ donutChartConfig: donutChartConfig })}' />`;
+            this.statisticsHTML += `<DonutChart config='${JSON.stringify({ donutChartConfig: donutChartConfig2 })}' />`;
+            this.statisticsHTML += /* HTML */ `</div>`;
+        }
 
         if (this.remoteCount >= 2 || this.tournamentCount >= 2) {
             // prettier-ignore

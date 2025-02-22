@@ -520,12 +520,10 @@ def addFriend(request: HttpRequest, friend_id):
     except ValueError:
         return JsonResponse({"error": INVALID_FRIEND_ID})
 
-    # Récupérer le joueur actuel
     player = Player.objects.filter(user=request.user).first()
     if not player:
         return JsonResponse({"error": INTERNAL_ERROR})
 
-    # Récupérer le joueur ami
     friend = Player.objects.filter(id=friend_id).first()
     if not friend:
         return JsonResponse({"error": FRIEND_NOT_FOUND})
@@ -533,31 +531,32 @@ def addFriend(request: HttpRequest, friend_id):
     if player.friends.filter(id=friend_id).exists():
         return JsonResponse({"error": FRIEND_ALREADY_IN_LIST})
 
-    if player.id in friend.blockedUsers:
+    if friend.blockedUsers.filter(id=player.id).exists():
         return JsonResponse({"error": FRIEND_BLOCKED})
 
-    # Ajouter l'ami
     player.friends.add(friend)
 
     return JsonResponse({})
 
 
 @require_POST
-def deleteFriend(request: HttpRequest, friend_id):
+def removeFriend(request: HttpRequest, friend_id):
     if not request.user.is_authenticated:
         return JsonResponse({"error": NOT_AUTHENTICATED})
 
-    # Récupérer le joueur actuel
+    try:
+        friend_id = int(friend_id)
+    except ValueError:
+        return JsonResponse({"error": INVALID_FRIEND_ID})
+
     player = Player.objects.filter(user=request.user).first()
     if not player:
         return JsonResponse({"error": INTERNAL_ERROR})
 
-    # Récupérer le joueur ami
     friend = Player.objects.filter(id=friend_id).first()
     if not friend:
         return JsonResponse({"error": FRIEND_NOT_FOUND})
 
-    # Supprimer l'ami
     player.friends.remove(friend)
 
     return JsonResponse({})
@@ -575,6 +574,55 @@ def deleteFriend(request: HttpRequest, friend_id):
 #         "openType": t.name,
 #         "state": t.state,
 #     })
+
+
+@require_POST
+def blockUser(request: HttpRequest, blocked_user_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": NOT_AUTHENTICATED})
+
+    try:
+        blocked_user_id = int(blocked_user_id)
+    except ValueError:
+        return JsonResponse({"error": INVALID_BLOCKED_USER_ID})
+
+    player = Player.objects.filter(user=request.user).first()
+    if not player:
+        return JsonResponse({"error": INTERNAL_ERROR})
+
+    blocked_user = Player.objects.filter(id=blocked_user_id).first()
+    if not blocked_user:
+        return JsonResponse({"error": BLOCKED_USER_NOT_FOUND})
+    
+    if player.blockedUsers.filter(id=blocked_user_id).exists():
+        return JsonResponse({"error": BLOCKED_USER_ALREADY_IN_LIST})
+
+    player.blockedUsers.add(blocked_user)
+
+    return JsonResponse({})
+
+
+@require_POST
+def unblockUser(request: HttpRequest, blocked_user_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": NOT_AUTHENTICATED})
+
+    try:
+        blocked_user_id = int(blocked_user_id)
+    except ValueError:
+        return JsonResponse({"error": INVALID_BLOCKED_USER_ID})
+
+    player = Player.objects.filter(user=request.user).first()
+    if not player:
+        return JsonResponse({"error": INTERNAL_ERROR})
+
+    blocked_user = Player.objects.filter(id=blocked_user_id).first()
+    if not blocked_user:
+        return JsonResponse({"error": BLOCKED_USER_NOT_FOUND})
+
+    player.blockedUsers.remove(blocked_user)
+
+    return JsonResponse({})
 
 def get_users_list(request: HttpRequest):
     if not request.user.is_authenticated:
@@ -636,3 +684,18 @@ def get_friends(request: HttpRequest):
     friends_list = [{"id": friend.id, "nickname": friend.nickname, "is_online": friend.is_online} for friend in friends]
 
     return JsonResponse({"friends": friends_list})
+
+@require_POST
+def get_blocked_users(request: HttpRequest):
+    if not request.user.is_authenticated:
+        return JsonResponse({ "error": NOT_AUTHENTICATED })
+    
+    player = Player.objects.filter(user=request.user).first()
+    if not player:
+        return JsonResponse({"error": INTERNAL_ERROR})
+    
+    blocked_users = player.blockedUsers.all()
+
+    blocked_users_list = [{"id": blocked_user.id, "nickname": blocked_user.nickname, "is_online": blocked_user.is_online} for blocked_user in blocked_users]
+
+    return JsonResponse({"blocked_users": blocked_users_list})

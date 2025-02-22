@@ -97,8 +97,6 @@ export default class Chatbox extends Component {
                 const data = JSON.parse(event.data);
                 const messageData = JSON.parse(event.data);
 
-                console.log(data);
-
                 if (data.type === "channel_list") {
                     for (let i = 0; i < data.channelList.length; i++) {
                         const channelInfo = { channelUrl: data.channelList[i], personId: data.discussingWith[i] };
@@ -305,24 +303,9 @@ export default class Chatbox extends Component {
                     this.addNewMessage(discussion, sender, message);
                 }
 
-                if (messageData.type === "block") {
-                    const idToNickname = await getNickname(this.chattingWithId);
-
-                    if (messageData.status === "success") {
-                        showToast(idToNickname + " has successfully been blocked !", "bi bi-check-circle-fill");
-                    } else {
-                        showToast(idToNickname + " is already blocked !", "bi bi-bell");
-                    }
-                } else if (messageData.type === "unblock") {
-                    const idToNickname = await getNickname(this.chattingWithId);
-
-                    if (messageData.status === "success") {
-                        showToast(idToNickname + " has successfully been unblocked !", "bi bi-check-circle-fill");
-                    } else {
-                        showToast(idToNickname + " is already been unblocked !", "bi bi-bell");
-                    }
-                } else if (messageData.type === "error") {
-                    showToast(messageData.message, "bi bi-ban");
+                if (messageData.type === "error") {
+                    const message = messageData.message;
+                    showToast(message, "bi bi-bell");
                 }
             };
         }
@@ -455,25 +438,29 @@ export default class Chatbox extends Component {
 
         blockBtn.addEventListener("click", async () => {
             this.userInteracted = true;
-            for (const [key, channelInfo] of this.wsChannelMap.entries()) {
-                if (channelInfo.personId == this.chattingWithId) {
-                    if (blockBtn.innerHTML === "BLOCK") {
-                        key.send(
-                            JSON.stringify({
-                                type: "block_user",
-                                userId: this.chattingWithId,
-                            })
-                        );
-                        blockBtn.innerHTML = "UNBLOCK";
-                    } else {
-                        key.send(
-                            JSON.stringify({
-                                type: "unblock_user",
-                                userId: this.chattingWithId,
-                            })
-                        );
-                        blockBtn.innerHTML = "BLOCK";
-                    }
+            if (blockBtn.innerHTML === "BLOCK") {
+                blockBtn.innerHTML = "UNBLOCK";
+                const response = await post("/api/block-user/" + fullname, {})
+                    .then((res) => res.json())
+                    .catch((err) => {
+                        showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
+                    });
+                if (response.error) {
+                    showToast(response.error, "bi bi-exclamation-triangle-fill");
+                } else {
+                    showToast("User blocked successfully.", "bi bi-check-circle-fill");
+                }
+            } else if (blockBtn.innerHTML === "UNBLOCK") {
+                blockBtn.innerHTML = "BLOCK";
+                const response = await post("/api/unblock-user/" + fullname, {})
+                    .then((res) => res.json())
+                    .catch((err) => {
+                        showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
+                    });
+                if (response.error) {
+                    showToast(response.error, "bi bi-exclamation-triangle-fill");
+                } else {
+                    showToast("User unblocked successfully.", "bi bi-check-circle-fill");
                 }
             }
         });

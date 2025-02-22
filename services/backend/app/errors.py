@@ -25,3 +25,7 @@ RECEIVER_NOT_FOUND = "Receiver not found."
 FRIEND_ALREADY_IN_LIST = "Friend already in list"
 FRIEND_BLOCKED = "You are blocked by this user"
 INVALID_FRIEND_ID = "Invalid friend ID"
+
+INVALID_BLOCKED_USER_ID = "Invalid blocked user ID"
+BLOCKED_USER_NOT_FOUND = "Blocked user not found."
+BLOCKED_USER_ALREADY_IN_LIST = "Blocked user already in list"

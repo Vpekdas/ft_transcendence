@@ -52,8 +52,11 @@ urlpatterns = [
     path('api/chat/<str:channel_name>/', views.get_chat_messages_by_channel_name, name='get_chat_messages_by_channel_name'),
     path('api/user-id-by-nickname', views.get_user_id_by_nickname),
     path('api/add-friend/<str:friend_id>', views.addFriend),
+    path('api/remove-friend/<str:friend_id>', views.removeFriend),
+    path('api/block-user/<str:blocked_user_id>', views.blockUser),
+    path('api/unblock-user/<str:blocked_user_id>', views.unblockUser),
     path('api/friends', views.get_friends),
-    path('api/blocked_users', views.get_blocked_users),
+    path('api/blocked-users', views.get_blocked_users),
 
 ]
 

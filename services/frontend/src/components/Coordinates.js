@@ -1,28 +1,10 @@
 import { SCALE, POLYGON_VERTICES } from "../constant";
-import { FIRST_COORDINATES, SECOND_COORDINATES, THIRD_COORDINATES } from "../constant";
 import { Component } from "../micro";
 
 /** @type {import("../micro").Component} */
 export default class Coordinates extends Component {
     calculateDistance(x1, y1, x2, y2) {
         return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-    }
-
-    isRightCoordinate(userPath, rightPath) {
-        if (userPath.length !== rightPath.length) {
-            return false;
-        }
-        for (let i = 0; i < rightPath.length; i++) {
-            if (userPath[i] !== rightPath[i]) {
-                return false;
-            }
-        }
-        const coordinate = document.getElementById("navigate");
-        if (coordinate) {
-            const paths = document.querySelectorAll(".path");
-            paths.forEach((path) => path.remove());
-        }
-        return true;
     }
 
     async init() {
@@ -197,27 +179,6 @@ export default class Coordinates extends Component {
                                 }
                             }
                         });
-
-                        if (validatedStep === 0) {
-                            if (this.isRightCoordinate(drawnPolygons, FIRST_COORDINATES)) {
-                                validatedStep++;
-                                drawnPolygons.length = 0;
-                            }
-                        } else if (validatedStep === 1) {
-                            if (this.isRightCoordinate(drawnPolygons, SECOND_COORDINATES)) {
-                                validatedStep++;
-                                drawnPolygons.length = 0;
-                            }
-                        } else {
-                            if (this.isRightCoordinate(drawnPolygons, THIRD_COORDINATES)) {
-                                validatedStep++;
-                                drawnPolygons.length = 0;
-                            }
-                        }
-
-                        if (validatedStep === 3) {
-                            console.log("congrats x)");
-                        }
                     }
                 });
             });
@@ -285,6 +246,8 @@ export default class Coordinates extends Component {
     }
 }
 
+
+// ! Little polygons inside big polygons as in the game.
 //     <polygon
 //     class="poly"
 //     points="${POLYGON_VERTICES}"

@@ -251,10 +251,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.create_channel(data)
         elif message_type == "send_message":
             await self.send_message(data)
-        elif message_type == "block_user":
-            await self.block_user(data)
-        elif message_type == "unblock_user":
-            await self.unblock_user(data)
 
     async def create_channel(self, data):
         # Generate a unique channel name.
@@ -312,10 +308,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
         sender = await sync_to_async(Player.objects.get)(user__id=sender_id)
         receiver = await sync_to_async(Player.objects.get)(user__id=receiver_id)
 
-        if sender_id in receiver.blockedUsers:
+
+        if await sync_to_async(receiver.blockedUsers.filter(id=sender.id).exists)():
             await self.send(text_data=json.dumps({
                 "type": "error",
                 "message": "You are blocked by this user."
+            }))
+            return
+
+        if await sync_to_async(sender.blockedUsers.filter(id=receiver.id).exists)():
+            await self.send(text_data=json.dumps({
+                "type": "error",
+                "message": "You have blocked this user."
             }))
             return
 
@@ -342,63 +346,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "timestamp": message.timestamp.isoformat()
             }
         )
-
-
-    async def block_user(self, data):
-        user_id = int(data.get("userId"))
-        player = await sync_to_async(Player.objects.get)(user=self.user)
-        if user_id not in player.blockedUsers:
-            player.blockedUsers.append(user_id)
-            await sync_to_async(player.save)()
-            await self.send(text_data=json.dumps({
-                "type": "block",
-                "status": "success",
-                "user_id": user_id
-            }))
-        else:
-            await self.send(text_data=json.dumps({
-                "type": "block",
-                "status": "already_blocked",
-                "user_id": user_id
-            }))
-
-    async def unblock_user(self, data):
-        user_id = int(data.get("userId"))
-        player = await sync_to_async(Player.objects.get)(user=self.user)
-        if user_id in player.blockedUsers:
-            player.blockedUsers.remove(user_id)
-            await sync_to_async(player.save)()
-            await self.send(text_data=json.dumps({
-                "type": "unblock",
-                "status": "success",
-                "user_id": user_id
-            }))
-        else:
-            await self.send(text_data=json.dumps({
-                "type": "unblock",
-                "status": "not_blocked",
-                "user_id": user_id
-            }))
-
-    async def blocked_user(self, event):
-        user_id = event["user_id"]
-        status = event["status"]
-
-        await self.send(text_data=json.dumps({
-            "type": "block",
-            "status": status,
-            "user_id": user_id
-        }))
-
-    async def unblocked_user(self, event):
-        user_id = event["user_id"]
-        status = event["status"]
-
-        await self.send(text_data=json.dumps({
-            "type": "unblock",
-            "status": status,
-            "user_id": user_id
-        }))
 
     async def channel_created(self, event):
         channel_name = event["channel_name"]

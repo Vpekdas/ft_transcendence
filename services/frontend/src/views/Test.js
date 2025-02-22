@@ -249,19 +249,19 @@ export default class Test extends Component {
 
     async init() {
         this.onready = async () => {
-            const c = document.getElementById("test");
+            this.c = document.getElementById("test");
 
             this.scene = new THREE.Scene();
-            this.camera = new THREE.PerspectiveCamera(70, c.clientWidth / c.clientHeight, 0.1, 1000);
+            this.camera = new THREE.PerspectiveCamera(70, this.c.clientWidth / this.c.clientHeight, 0.1, 1000);
             this.renderer = new THREE.WebGLRenderer();
 
-            this.controls = new OrbitControls(this.camera, c);
+            this.controls = new OrbitControls(this.camera, this.c);
 
             this.camera.position.z = 20;
             this.camera.position.y = -2;
 
-            this.renderer.setSize(c.clientWidth, c.clientHeight);
-            c.appendChild(this.renderer.domElement);
+            this.renderer.setSize(this.c.clientWidth, this.c.clientHeight);
+            this.c.appendChild(this.renderer.domElement);
 
             this.renderer.setClearColor(0x000000);
 
@@ -284,37 +284,37 @@ export default class Test extends Component {
                 texture: "/models/BrittleHollow/Fire.jpg",
             });
 
-            const start = Date.now();
-            let previousTime = performance.now();
+            this.start = Date.now();
+            this.previousTime = performance.now();
 
             // Ensure map looks dark.
             this.renderer.toneMapping = THREE.ReinhardToneMapping;
             this.renderer.toneMappingExposure = 0.3;
 
             // Set up post-processing for the ball scene.
-            const ballComposer = new EffectComposer(this.renderer);
-            const ballRenderPass = new RenderPass(this.scene, this.camera);
-            ballComposer.addPass(ballRenderPass);
+            this.ballComposer = new EffectComposer(this.renderer);
+            this.ballRenderPass = new RenderPass(this.scene, this.camera);
+            this.ballComposer.addPass(this.ballRenderPass);
 
             const bloomPass = new UnrealBloomPass(
-                new THREE.Vector2(c.clientWidth, c.clientHeight),
+                new THREE.Vector2(this.c.clientWidth, this.c.clientHeight),
                 1.5, // strength
                 0.4, // radius
                 0.85 // threshold
             );
-            ballComposer.addPass(bloomPass);
+            this.ballComposer.addPass(bloomPass);
 
             this.renderer.setAnimationLoop(() => {
                 this.controls.update();
 
-                this.fireCustomShaderMaterial.uniforms["time"].value = 0.00025 * (Date.now() - start);
-                const currentTime = performance.now();
-                const timeElapsed = (currentTime - previousTime) / 1000;
-                previousTime = currentTime;
+                this.fireCustomShaderMaterial.uniforms["time"].value = 0.00025 * (Date.now() - this.start);
+                this.currentTime = performance.now();
+                this.timeElapsed = (this.currentTime - this.previousTime) / 1000;
+                this.previousTime = this.currentTime;
 
-                this.particleSystem.step(timeElapsed);
+                this.particleSystem.step(this.timeElapsed);
 
-                ballComposer.render(this.scene, this.camera);
+                this.ballComposer.render(this.scene, this.camera);
             });
         };
     }

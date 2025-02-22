@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
-import { FontLoader } from "three/addons/loaders/FontLoader.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
@@ -11,20 +10,126 @@ import { Component, dirty, params } from "../micro";
 import { tr } from "../i18n";
 import BrittleHollow from "./Test";
 
+async function loadShaderFile(url) {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Failed to load shader file: ${url}`);
+    }
+    return await response.text();
+}
+
 class TerrainSkin {
-    constructor(name, model) {
+    constructor(name) {
         this.name = name;
-        this.model = model;
     }
 
-    update() {}
+    /**
+     * @param {GLTFLoader} gltfLoader
+     * @param {THREE.Scene} scene
+     */
+    async init(gltfLoader, scene) {}
+
+    async update() {}
+}
+
+class BrittleHollowSkin extends TerrainSkin {
+    /**
+     * @param {GLTFLoader} gltfLoader
+     * @param {THREE.Scene} scene
+     */
+    async init(gltfLoader, scene) {
+        this.piece = (await gltfLoader.loadAsync("/models/BrittleHollow/BrittleHollowTerrainPiece.glb")).scene;
+        this.piece.children[0].material = new THREE.ShaderMaterial({
+            vertexShader: await loadShaderFile("/models/BrittleHollow/TerrainPiece.vert"),
+            fragmentShader: await loadShaderFile("/models/BrittleHollow/TerrainPiece.frag"),
+        });
+
+        this.piece.rotation.x = Math.PI / 2;
+        this.piece.rotation.y = Math.PI / 2;
+
+        const scale = 2.0;
+
+        const totalCellHeight = 9;
+        const totalHeight = 1.73 * totalCellHeight * scale;
+
+        const totalCellWidth = 9 * 2;
+        const totalWidth = totalCellWidth * 1.5 * scale;
+
+        const offsetX = -totalWidth / 2;
+        const offsetY = -totalHeight / 2 + (1.73 * scale) / 2;
+
+        this.createBigRow(0, totalCellHeight, scene, offsetX, offsetY, scale);
+        this.createSmallRow(1, totalCellHeight - 1, scene, offsetX, offsetY, scale);
+        this.createBigRow(2, totalCellHeight, scene, offsetX, offsetY, scale);
+        this.createSmallRow(3, totalCellHeight - 1, scene, offsetX, offsetY, scale);
+        this.createBigRow(4, totalCellHeight, scene, offsetX, offsetY, scale);
+        this.createSmallRow(5, totalCellHeight - 1, scene, offsetX, offsetY, scale);
+        this.createBigRow(6, totalCellHeight, scene, offsetX, offsetY, scale);
+        this.createSmallRow(7, totalCellHeight - 1, scene, offsetX, offsetY, scale);
+        this.createBigRow(8, totalCellHeight, scene, offsetX, offsetY, scale);
+        this.createSmallRow(9, totalCellHeight - 1, scene, offsetX, offsetY, scale);
+        this.createBigRow(10, totalCellHeight, scene, offsetX, offsetY, scale);
+        this.createSmallRow(11, totalCellHeight - 1, scene, offsetX, offsetY, scale);
+        this.createBigRow(12, totalCellHeight, scene, offsetX, offsetY, scale);
+        this.createSmallRow(13, totalCellHeight - 1, scene, offsetX, offsetY, scale);
+        this.createBigRow(14, totalCellHeight, scene, offsetX, offsetY, scale);
+        this.createSmallRow(15, totalCellHeight - 1, scene, offsetX, offsetY, scale);
+        this.createBigRow(16, totalCellHeight, scene, offsetX, offsetY, scale);
+        this.createSmallRow(17, totalCellHeight - 1, scene, offsetX, offsetY, scale);
+        this.createBigRow(18, totalCellHeight, scene, offsetX, offsetY, scale);
+    }
+
+    randomHeight() {
+        return Math.random() * 0.3;
+    }
+
+    createBigRow(x, height, scene, offsetX, offsetY, scale) {
+        for (let i = 0; i < height; i++) {
+            let piece2 = this.piece.clone();
+            piece2.position.x = x * 1.5 * scale + offsetX;
+            piece2.position.y = 1.73 * i * scale + offsetY;
+            piece2.position.z = -this.randomHeight() - 2.6;
+
+            piece2.scale.set(scale, scale, scale);
+
+            scene.add(piece2);
+        }
+    }
+
+    createSmallRow(x, height, scene, offsetX, offsetY, scale) {
+        for (let i = 0; i < height; i++) {
+            let piece2 = this.piece.clone();
+            piece2.position.x = x * 1.5 * scale + offsetX;
+            piece2.position.y = 1.73 * i * scale + (1.73 * scale) / 2.0 + offsetY;
+            piece2.position.z = -this.randomHeight() - 2.6;
+
+            piece2.scale.set(scale, scale, scale);
+
+            scene.add(piece2);
+        }
+    }
+
+    async update() {}
 }
 
 class BallSkin {
-    constructor(name, model) {
+    constructor(name) {
         this.name = name;
-        this.model = model;
     }
+
+    /**
+     * @param {GLTFLoader} gltfLoader
+     * @param {THREE.Scene} scene
+     */
+    async init(gltfLoader, scene) {}
+}
+
+class LavaBallSkin {
+    /**
+     * @param {GLTFLoader} gltfLoader
+     * @param {THREE.Scene} scene
+     */
+    async init(gltfLoader, scene) {}
 }
 
 /** @type {Map<string, TerrainSkin>} */
@@ -34,9 +139,12 @@ let ballSkins = new Map();
 
 function registerAllSkins() {
     // Terrain skins
-    terrainSkins.set("brittle-hollow", new TerrainSkin("brittle-hollow", "/models/Test.glb"));
+    terrainSkins.set("colorful-terrain", new TerrainSkin("colorful-terrain"));
+    terrainSkins.set("brittle-hollow", new BrittleHollowSkin("brittle-hollow"));
 
     // Ball skins
+    terrainSkins.set("colorful-ball", new TerrainSkin("colorful-ball"));
+    ballSkins.set("lava-ball", new LavaBallSkin("lava-ball"));
 }
 
 function createCube(x, y, width, height, color) {
@@ -109,36 +217,36 @@ export default class Pong extends Component {
     }
 
     async setupGameTerrain() {
-        const terrain = await this.modelLoader.loadAsync(this.skin.model);
+        await this.skin.init(this.gltfLoader, this.scene);
 
-        const terrainSceneRight = terrain.scene;
-        terrainSceneRight.rotation.set(Math.PI / 2, 0, 0);
-        terrainSceneRight.position.set(13, 0, -2);
+        // const terrainSceneRight = terrain.scene;
+        // terrainSceneRight.rotation.set(Math.PI / 2, 0, 0);
+        // terrainSceneRight.position.set(13, 0, -2);
 
-        // ! Add an If statement or find a proper way.
-        this.scene.add(this.brittle.get("GroundLeft"));
+        // // ! Add an If statement or find a proper way.
+        // this.scene.add(this.brittle.get("GroundLeft"));
 
-        const terrainSceneLeft = terrain.scene.clone();
-        terrainSceneLeft.rotation.set(Math.PI / 2, Math.PI, 0);
-        terrainSceneLeft.position.set(-13, 0, -2);
+        // const terrainSceneLeft = terrain.scene.clone();
+        // terrainSceneLeft.rotation.set(Math.PI / 2, Math.PI, 0);
+        // terrainSceneLeft.position.set(-13, 0, -2);
 
-        this.scene.add(this.brittle.get("GroundRight"));
+        // this.scene.add(this.brittle.get("GroundRight"));
 
-        this.brittle.get("QuantumShard").rotation.set(-300, 0, 0);
-        this.brittle.get("QuantumShard").position.set(-22, 0, -1);
-        this.scene.add(this.brittle.get("QuantumShard"));
+        // this.brittle.get("QuantumShard").rotation.set(-300, 0, 0);
+        // this.brittle.get("QuantumShard").position.set(-22, 0, -1);
+        // this.scene.add(this.brittle.get("QuantumShard"));
 
-        this.brittle.get("Campfire").rotation.set(-300, 0, 0);
-        this.brittle.get("Campfire").position.set(-22, 10, -0.5);
-        this.scene.add(this.brittle.get("Campfire"));
+        // this.brittle.get("Campfire").rotation.set(-300, 0, 0);
+        // this.brittle.get("Campfire").position.set(-22, 10, -0.5);
+        // this.scene.add(this.brittle.get("Campfire"));
 
-        this.brittle.get("DeadTree").rotation.set(-300, 0, 0);
-        this.brittle.get("DeadTree").position.set(-22, -10, -0.6);
-        this.scene.add(this.brittle.get("DeadTree"));
+        // this.brittle.get("DeadTree").rotation.set(-300, 0, 0);
+        // this.brittle.get("DeadTree").position.set(-22, -10, -0.6);
+        // this.scene.add(this.brittle.get("DeadTree"));
 
-        this.brittle.get("Meteorite").rotation.set(0, 0, 0);
-        this.brittle.get("Meteorite").position.set(0, 15, 0);
-        this.scene.add(this.brittle.get("Meteorite"));
+        // this.brittle.get("Meteorite").rotation.set(0, 0, 0);
+        // this.brittle.get("Meteorite").position.set(0, 15, 0);
+        // this.scene.add(this.brittle.get("Meteorite"));
 
         let lastKey;
 
@@ -183,9 +291,9 @@ export default class Pong extends Component {
         let body = undefined;
 
         if (type == "Ball") {
-            // body = createSphere(position["x"], position["y"], 0.5, 32, 16, "#ffde21");
+            body = createSphere(position["x"], position["y"], 0.5, 32, 16, "#ffde21");
             // ! Add an If statement or find a proper way.
-            body = this.brittle.get("Ball");
+            // body = this.brittle.get("Ball");
         } else if (type == "Player") {
             body = createCube(position["x"], position["y"], this.playerWidth, this.playerHeight, "#cd1c18");
         } else {
@@ -299,24 +407,17 @@ export default class Pong extends Component {
         this.playerHeight = 5.0;
 
         this.textureLoader = new THREE.TextureLoader();
-        this.fontLoader = new FontLoader();
-        this.modelLoader = new GLTFLoader();
-
-        this.font = await this.fontLoader.loadAsync("/fonts/TakaoMincho_Regular.json");
+        this.gltfLoader = new GLTFLoader();
 
         this.gameStarted = false;
         this.gameEnded = false;
 
-        this.BrittleClass = new BrittleHollow();
-        this.brittle = await this.initBrittleHollow();
-
         registerAllSkins();
 
         this.skin = terrainSkins.get("brittle-hollow");
-
         this.info = await post("/api/player/c/profile", {}).then((res) => res.json());
 
-        this.onready = () => {
+        this.onready = async () => {
             const c = document.getElementById("pong");
 
             let camera = new THREE.PerspectiveCamera(70, c.clientWidth / c.clientHeight, 0.1, 1000);
@@ -348,18 +449,20 @@ export default class Pong extends Component {
                 controls.enableDamping = false;
             }
 
+            await this.setupGameTerrain();
+
             // ! Ensure It's applied only on Brittle Hollow map.
-            renderer.toneMapping = THREE.ReinhardToneMapping;
-            renderer.toneMappingExposure = 0.3;
+            // renderer.toneMapping = THREE.ReinhardToneMapping;
+            // renderer.toneMappingExposure = 0.3;
 
-            const ballComposer = new EffectComposer(renderer);
-            const ballRenderPass = new RenderPass(this.scene, camera);
-            ballComposer.addPass(ballRenderPass);
+            // const ballComposer = new EffectComposer(renderer);
+            // const ballRenderPass = new RenderPass(this.scene, camera);
+            // ballComposer.addPass(ballRenderPass);
 
-            const bloomPass = new UnrealBloomPass(new THREE.Vector2(c.clientWidth, c.clientHeight), 1.5, 0.4, 0.85);
-            ballComposer.addPass(bloomPass);
+            // const bloomPass = new UnrealBloomPass(new THREE.Vector2(c.clientWidth, c.clientHeight), 1.5, 0.4, 0.85);
+            // ballComposer.addPass(bloomPass);
 
-            const particleSystem = this.brittle.get("ParticleSystem");
+            // const particleSystem = this.brittle.get("ParticleSystem");
 
             this.start = Date.now();
             this.previousTime = performance.now();
@@ -373,12 +476,12 @@ export default class Pong extends Component {
                 this.currentTime = performance.now();
                 this.timeElapsed = (this.currentTime - this.previousTime) / 1000;
                 this.previousTime = this.currentTime;
-                particleSystem.step(this.timeElapsed, this.basePosition);
+                // particleSystem.step(this.timeElapsed, this.basePosition);
 
-                this.fireCustomShaderMaterial.uniforms["time"].value = 0.00025 * (Date.now() - this.start);
+                // this.fireCustomShaderMaterial.uniforms["time"].value = 0.00025 * (Date.now() - this.start);
 
                 renderer.render(this.scene, camera);
-                ballComposer.render(this.scene, camera);
+                // ballComposer.render(this.scene, camera);
             });
 
             this.ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/pong/${id}`);

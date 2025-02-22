@@ -1368,6 +1368,9 @@ body::-webkit-scrollbar {
 canvas {
     height: 100%;
     width: 100%;
+    height: 90vh;
+    width: 100vw;
+    padding-top: 15px;
 }
 
 #pong-overlay {

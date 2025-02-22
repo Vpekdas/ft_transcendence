@@ -272,6 +272,8 @@ export default class BrittleHollow extends Component {
         const particleVertexShader = await loadShaderFile("/models/BrittleHollow/particlevertexShader.glsl");
         const particleFragmentShader = await loadShaderFile("/models/BrittleHollow/particlefragmentShader.glsl");
 
+        this.basePosition = new THREE.Vector3(0, -10, 0);
+
         const particleSystem = new ParticleSystem({
             parent: scene,
             vertexShader: particleVertexShader,
@@ -349,7 +351,7 @@ export default class BrittleHollow extends Component {
                 this.currentTime = performance.now();
                 this.timeElapsed = (this.currentTime - this.previousTime) / 1000;
                 this.previousTime = this.currentTime;
-                this.particleSystem.step(this.timeElapsed);
+                this.particleSystem.step(this.timeElapsed, this.basePosition);
 
                 this.ballComposer.render(this.scene, this.camera);
             });

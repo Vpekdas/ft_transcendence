@@ -86,22 +86,27 @@ class ParticleSystem {
         this.updateGeometry();
     }
 
-    createParticle() {
+    createParticle(basePosition) {
         const life = (Math.random() * 0.75 + 0.25) * 5.0;
 
         return {
-            position: new THREE.Vector3(
-                (Math.random() * 2 - 1) * 1.0,
-                (Math.random() * 2 - 1) * 1.0,
-                (Math.random() * 2 - 1) * 1.0
-            ),
-            size: (Math.random() * 0.5 + 0.5) * 1.0,
+            position: basePosition
+                .clone()
+                .add(
+                    new THREE.Vector3(
+                        (Math.random() * 2 - 1) * 1.0,
+                        (Math.random() * 2 - 1) * 1.0,
+                        (Math.random() * 2 - 1) * 1.0
+                    )
+                ),
+            size: (Math.random() * 0.5 + 0.5 / 3) * 1.0,
             color: new THREE.Color(),
             alpha: 1.0,
             life: life,
             maxLife: life,
-            rotation: Math.random() * 2.0 * Math.PI,
-            velocity: new THREE.Vector3(0, 15, 0),
+            rotation: Math.random() * 2.0 * Math.PI * 2,
+            // Modify as you wish the "direction" of particles.
+            velocity: new THREE.Vector3(0, 0, 10),
         };
     }
 
@@ -130,7 +135,7 @@ class ParticleSystem {
         this.geometry.attributes.angle.needsUpdate = true;
     }
 
-    updateParticles(timeElapsed) {
+    updateParticles(timeElapsed, basePosition) {
         for (let p of this.particles) {
             p.life -= timeElapsed;
         }
@@ -151,14 +156,14 @@ class ParticleSystem {
         }
 
         while (this.particles.length < 100) {
-            this.particles.push(this.createParticle());
+            this.particles.push(this.createParticle(basePosition));
         }
 
         this.updateGeometry();
     }
 
-    step(timeElapsed) {
-        this.updateParticles(timeElapsed);
+    step(timeElapsed, basePosition) {
+        this.updateParticles(timeElapsed, basePosition);
     }
 }
 

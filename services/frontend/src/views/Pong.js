@@ -100,6 +100,8 @@ export default class Pong extends Component {
         const ball = await this.BrittleClass.initBall(0, 0, 0);
         assets.set("Ball", ball);
 
+        this.basePosition = new THREE.Vector3(-22, 10, 0);
+
         const particleSystem = await this.BrittleClass.initParticle(this.scene);
         assets.set("ParticleSystem", particleSystem);
 
@@ -371,7 +373,7 @@ export default class Pong extends Component {
                 this.currentTime = performance.now();
                 this.timeElapsed = (this.currentTime - this.previousTime) / 1000;
                 this.previousTime = this.currentTime;
-                particleSystem.step(this.timeElapsed);
+                particleSystem.step(this.timeElapsed, this.basePosition);
 
                 this.fireCustomShaderMaterial.uniforms["time"].value = 0.00025 * (Date.now() - this.start);
 

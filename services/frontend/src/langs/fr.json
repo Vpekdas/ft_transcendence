@@ -63,11 +63,16 @@
     "Nickname is already used": "Pseudo deja utilise",
     "Elo": "Elo",
     "Return": "Retour",
-    "Activate 2FA Authentication": "Activer l’authentification à 2 facteurs (2FA)",
+    "Activate 2FA Authentication": "Activer l'authentification à 2 facteurs (2FA)",
     "Activate 2FA Authentication for your account here.": "Activez l'authentification à deux facteurs (2FA) pour votre compte ici.",
     "View Profile": "Regarder le profil",
     "Remove friend": "Supprimer l'ami",
     "Friends": "Amis",
     "Blocked users": "Utilisateur bloque",
-    "Remove blocked user": "Supprimer l'utilisateur bloque"
+    "Remove blocked user": "Supprimer l'utilisateur bloque",
+    "You win !": "Vous avez gagne !",
+    "You loose :(": "Vous avez perdu :(",
+    "Back to home": "Retour a l'accueil",
+    "Left side won !": "Le joueur de gauche a gagne !",
+    "Right side won !": "Le joueur de droite a gagne !"
 }

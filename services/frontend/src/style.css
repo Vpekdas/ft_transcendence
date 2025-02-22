@@ -1400,6 +1400,10 @@ canvas {
     display: inline-block;
 }
 
+#pong-overlay .ui ul {
+    list-style: none;
+}
+
 /* CHESS GAME */
 
 #chess {

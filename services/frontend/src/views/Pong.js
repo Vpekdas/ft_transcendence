@@ -3,8 +3,9 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import { FontLoader } from "three/addons/loaders/FontLoader.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { getOriginNoProtocol } from "../utils";
-import { Component, params } from "../micro";
+import { getOriginNoProtocol, post } from "../utils";
+import { Component, dirty, params } from "../micro";
+import { tr } from "../i18n";
 
 class TerrainSkin {
     constructor(name, model) {
@@ -183,16 +184,44 @@ export default class Pong extends Component {
 
         if (data.type == "update" && id != null) {
             this.onUpdateReceived(data);
-        } else if (data.type == "winner" && !gameEnded) {
-            gameEnded = true;
+        } else if (data.type == "gameEnded" && !this.gameEnded) {
+            this.gameEnded = true;
+            this.winner = data.winner;
+            this.score1 = data.score1;
+            this.score2 = data.score2;
 
-            // TODO
+            let winnerText = "";
+
+            if (this.gamemode == "1v1local") {
+                if (this.score1 > this.score2) {
+                    winnerText = tr("Left side won !");
+                } else {
+                    winnerText = tr("Right side won !");
+                }
+            } else if (this.winner == this.info["id"]) {
+                winnerText = tr("You win !");
+            } else {
+                winnerText = tr("You loose :(");
+            }
+
+            let gameover = /* HTML */ ` <li>
+                    <span>${winnerText}</span>
+                </li>
+                <li>
+                    <a href="/">${tr("Back to home")}</a>
+                </li>`;
+
+            document.querySelector(".ui-list").innerHTML += gameover;
         } else if (data["type"] == "redirectTournament") {
             navigateTo(`/tournament/${data["id"]}`);
         } else if (data["type"] == "countdown") {
             console.log("countdown:", data["value"], "...");
         } else if (data["type"] == "started") {
             this.gameStarted = true;
+        }
+
+        if (data.gamemode) {
+            this.gamemode = data.gamemode;
         }
     }
 
@@ -217,10 +246,13 @@ export default class Pong extends Component {
         this.font = await this.fontLoader.loadAsync("/fonts/TakaoMincho_Regular.json");
 
         this.gameStarted = false;
+        this.gameEnded = false;
 
         registerAllSkins();
 
         this.skin = terrainSkins.get("brittle-hollow");
+
+        this.info = await post("/api/player/c/profile", {}).then((res) => res.json());
 
         // const lava = await this.modelLoader.loadAsync("/models/Lava.glb");
         // this.scene.add(lava.scene);
@@ -311,9 +343,13 @@ export default class Pong extends Component {
 
     render() {
         let ui = /* HTML */ `<div class="ui">
-            <span class="score" id="score1">0</span>
-            <span class="vs"> - </span>
-            <span class="score" id="score2">0</span>
+            <ul class="ui-list">
+                <li>
+                    <span class="score" id="score1">0</span>
+                    <span class="vs"> - </span>
+                    <span class="score" id="score2">0</span>
+                </li>
+            </ul>
         </div>`;
 
         return /* HTML */ ` <HomeNavBar />

@@ -160,7 +160,7 @@ class Pong(Game):
                 self.countdown_timer.update()
         elif self.state == State.ENDED:
             winner = self.player1.client.id if self.player1.score > self.player2.score else self.player2.score
-            await self.broadcast({ "type": "gameEnded", "winner": winner })
+            await self.broadcast({ "type": "gameEnded", "winner": winner, "score1": self.player1.score, "score2": self.player2.score })
 
             if self.is_tournament_game() and not self.already_send_redirect:
                 # Tournaments need to collect the result of the game, so its up to it to set the state to DEAD
@@ -177,7 +177,7 @@ class Pong(Game):
             if len(self.clients) == 2 or self.gamemode == "1v1local":
                 self.state = State.STARTED
 
-        await self.broadcast({ "type": "update", "bodies": self.scene.to_dict(), "scores": [ self.player1.score, self.player2.score ] })
+        await self.broadcast({ "type": "update", "bodies": self.scene.to_dict(), "scores": [ self.player1.score, self.player2.score ], "gamemode": self.gamemode })
 
         for event in self.scene.backlog:
             await self.broadcast_raw(event)
@@ -197,7 +197,7 @@ class Pong(Game):
             stats={ "heatmap": self.heatmap, "p1": { "up_count": self.clients[0].up_count, "down_count": self.clients[0].down_count }, "p2": { "up_count": self.clients[1].up_count, "down_count": self.clients[1].down_count } }
         )
 
-        if self.gamemode == "1v1":
+        if self.gamemode == "1v1" and not self.is_tournament_game():
             p1 = PlayerModel.objects.filter(id=self.clients[0].id).first()
             p2 = PlayerModel.objects.filter(id=self.clients[1].id).first()
 

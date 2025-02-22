@@ -1,6 +1,6 @@
 import { getOriginNoProtocol, getNickname, post, api } from "../utils";
 import { tr } from "../i18n";
-import { Component, params } from "../micro";
+import { Component, params, navigateTo } from "../micro";
 
 export default class Tournament extends Component {
     createBracket(games) {

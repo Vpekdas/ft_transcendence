@@ -320,8 +320,6 @@ def getPlayerProfile(request: HttpRequest, id):
     if not request.user.is_authenticated:
         return JsonResponse({ "error": NOT_AUTHENTICATED })
 
-    data = json.loads(request.body)
-
     player = Player.objects.filter(user=request.user).first()
 
     return JsonResponse({

@@ -3,9 +3,13 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import { FontLoader } from "three/addons/loaders/FontLoader.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { getOriginNoProtocol, post } from "../utils";
 import { Component, dirty, params } from "../micro";
 import { tr } from "../i18n";
+import BrittleHollow from "./Test";
 
 class TerrainSkin {
     constructor(name, model) {
@@ -52,6 +56,7 @@ function createSphere(x, y, radius, widthSegments, heightSegments, color) {
 
     sphere.position.set(x, y, 0);
     sphere.scale.set(1.0, 1.0, 1.0);
+
     return sphere;
 }
 
@@ -70,18 +75,68 @@ export function action(subId, actionName, actionType) {
 }
 
 export default class Pong extends Component {
+    async initBrittleHollow() {
+        const assets = new Map();
+
+        const groundLeft = await this.BrittleClass.initGround(-12.5, 0, -1.2);
+        assets.set("GroundLeft", groundLeft);
+
+        const groundRight = await this.BrittleClass.initGround(12.5, 0, -1.2);
+        assets.set("GroundRight", groundRight);
+
+        const quantumShard = await this.BrittleClass.initQuantumShard(0, 0, 0);
+        assets.set("QuantumShard", quantumShard);
+
+        const campfire = await this.BrittleClass.initCampfire(0, 0, 0);
+        assets.set("Campfire", campfire);
+
+        const deadTree = await this.BrittleClass.initDeadTree(0, 0, 0);
+        assets.set("DeadTree", deadTree);
+
+        this.fireCustomShaderMaterial = await this.BrittleClass.initFireShader();
+        const meteorite = await this.BrittleClass.initMeteorite(0, 0, 0, this.fireCustomShaderMaterial);
+        assets.set("Meteorite", meteorite);
+
+        const ball = await this.BrittleClass.initBall(0, 0, 0);
+        assets.set("Ball", ball);
+
+        const particleSystem = await this.BrittleClass.initParticle(this.scene);
+        assets.set("ParticleSystem", particleSystem);
+
+        return assets;
+    }
+
     async setupGameTerrain() {
         const terrain = await this.modelLoader.loadAsync(this.skin.model);
 
         const terrainSceneRight = terrain.scene;
         terrainSceneRight.rotation.set(Math.PI / 2, 0, 0);
         terrainSceneRight.position.set(13, 0, -2);
-        this.scene.add(terrainSceneRight);
+
+        // ! Add an If statement or find a proper way.
+        this.scene.add(this.brittle.get("GroundLeft"));
 
         const terrainSceneLeft = terrain.scene.clone();
         terrainSceneLeft.rotation.set(Math.PI / 2, Math.PI, 0);
         terrainSceneLeft.position.set(-13, 0, -2);
-        this.scene.add(terrainSceneLeft);
+
+        this.scene.add(this.brittle.get("GroundRight"));
+
+        this.brittle.get("QuantumShard").rotation.set(-300, 0, 0);
+        this.brittle.get("QuantumShard").position.set(-22, 0, -1);
+        this.scene.add(this.brittle.get("QuantumShard"));
+
+        this.brittle.get("Campfire").rotation.set(-300, 0, 0);
+        this.brittle.get("Campfire").position.set(-22, 10, -0.5);
+        this.scene.add(this.brittle.get("Campfire"));
+
+        this.brittle.get("DeadTree").rotation.set(-300, 0, 0);
+        this.brittle.get("DeadTree").position.set(-22, -10, -0.6);
+        this.scene.add(this.brittle.get("DeadTree"));
+
+        this.brittle.get("Meteorite").rotation.set(0, 0, 0);
+        this.brittle.get("Meteorite").position.set(0, 15, 0);
+        this.scene.add(this.brittle.get("Meteorite"));
 
         let lastKey;
 
@@ -126,7 +181,9 @@ export default class Pong extends Component {
         let body = undefined;
 
         if (type == "Ball") {
-            body = createSphere(position["x"], position["y"], 0.5, 32, 16, "#ffde21");
+            // body = createSphere(position["x"], position["y"], 0.5, 32, 16, "#ffde21");
+            // ! Add an If statement or find a proper way.
+            body = this.brittle.get("Ball");
         } else if (type == "Player") {
             body = createCube(position["x"], position["y"], this.playerWidth, this.playerHeight, "#cd1c18");
         } else {
@@ -248,14 +305,14 @@ export default class Pong extends Component {
         this.gameStarted = false;
         this.gameEnded = false;
 
+        this.BrittleClass = new BrittleHollow();
+        this.brittle = await this.initBrittleHollow();
+
         registerAllSkins();
 
         this.skin = terrainSkins.get("brittle-hollow");
 
         this.info = await post("/api/player/c/profile", {}).then((res) => res.json());
-
-        // const lava = await this.modelLoader.loadAsync("/models/Lava.glb");
-        // this.scene.add(lava.scene);
 
         this.onready = () => {
             const c = document.getElementById("pong");
@@ -289,24 +346,38 @@ export default class Pong extends Component {
                 controls.enableDamping = false;
             }
 
+            // ! Ensure It's applied only on Brittle Hollow map.
+            renderer.toneMapping = THREE.ReinhardToneMapping;
+            renderer.toneMappingExposure = 0.3;
+
+            const ballComposer = new EffectComposer(renderer);
+            const ballRenderPass = new RenderPass(this.scene, camera);
+            ballComposer.addPass(ballRenderPass);
+
+            const bloomPass = new UnrealBloomPass(new THREE.Vector2(c.clientWidth, c.clientHeight), 1.5, 0.4, 0.85);
+            ballComposer.addPass(bloomPass);
+
+            const particleSystem = this.brittle.get("ParticleSystem");
+
+            this.start = Date.now();
+            this.previousTime = performance.now();
+
             renderer.setAnimationLoop(() => {
                 for (let [key, value] of this.boxes) {
                     value.update();
                 }
                 controls.update();
+
+                this.currentTime = performance.now();
+                this.timeElapsed = (this.currentTime - this.previousTime) / 1000;
+                this.previousTime = this.currentTime;
+                particleSystem.step(this.timeElapsed);
+
+                this.fireCustomShaderMaterial.uniforms["time"].value = 0.00025 * (Date.now() - this.start);
+
                 renderer.render(this.scene, camera);
+                ballComposer.render(this.scene, camera);
             });
-
-            // ! For ground, It seems ok but may not be ok for other models.
-            // const ambientLight = new THREE.AmbientLight(0xffffff, 10);
-            // this.scene.add(ambientLight);
-
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 2.5);
-            directionalLight.position.set(0, -20, 20);
-            this.scene.add(directionalLight);
-
-            // const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 5);
-            // scene.add(directionalLightHelper);
 
             this.ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/pong/${id}`);
             this.ws.onopen = async (event) => {

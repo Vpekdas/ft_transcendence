@@ -27,8 +27,8 @@ async function loadShaderFile(url) {
     return await response.text();
 }
 
-export default class Test extends Component {
-    async initGround(scene) {
+export default class BrittleHollow extends Component {
+    async initGround(x, y, z) {
         const vertexShader = await loadShaderFile("/models/BrittleHollow/Ground/vertexShader.glsl");
         const fragmentShader = await loadShaderFile("/models/BrittleHollow/Ground/fragmentShader.glsl");
 
@@ -48,14 +48,15 @@ export default class Test extends Component {
             side: THREE.DoubleSide,
         });
 
-        const cuboidGeometry = new THREE.BoxGeometry(20, 1, 20);
+        const cuboidGeometry = new THREE.BoxGeometry(25, 1, 25);
         const cuboid = new THREE.Mesh(cuboidGeometry, customShaderMaterial);
-        scene.add(cuboid);
+        cuboid.position.set(x, y, z);
+        cuboid.rotation.set(Math.PI / 2, 0, 0);
 
         return cuboid;
     }
 
-    async initQuantumShard(scene) {
+    async initQuantumShard(x, y, z) {
         const quantumShardVertexShader = await loadShaderFile("/models/BrittleHollow/QuantumShard/vertexShader.glsl");
         const quantumShardFragmentShader = await loadShaderFile(
             "/models/BrittleHollow/QuantumShard/fragmentShader.glsl"
@@ -95,28 +96,35 @@ export default class Test extends Component {
             transparent: true,
         });
 
-        const quantumShardLoader = new GLTFLoader();
-        quantumShardLoader.load("/models/BrittleHollow/QuantumShard/QuantumShard.glb", (gltf) => {
-            const quantumShard = gltf.scene;
+        return new Promise((resolve, reject) => {
+            const quantumShardLoader = new GLTFLoader();
+            quantumShardLoader.load(
+                "/models/BrittleHollow/QuantumShard/QuantumShard.glb",
+                (gltf) => {
+                    const quantumShard = gltf.scene;
 
-            quantumShard.traverse((child) => {
-                if (child.isMesh) {
-                    if (child.name === "Hole") {
-                        child.material = emissiveFresnelMaterial;
-                    } else {
-                        child.material = quantumShardShaderMaterial;
-                    }
+                    quantumShard.traverse((child) => {
+                        if (child.isMesh) {
+                            if (child.name === "Hole") {
+                                child.material = emissiveFresnelMaterial;
+                            } else {
+                                child.material = quantumShardShaderMaterial;
+                            }
+                        }
+                    });
+
+                    quantumShard.position.set(x, y, z);
+                    resolve(quantumShard);
+                },
+                undefined,
+                (error) => {
+                    reject(error);
                 }
-            });
-
-            // TODO: Ensure it not make the game unplayable or maybe make it appear randomly ?
-            quantumShard.position.set(THREE.MathUtils.randInt(-9, 9), 0, THREE.MathUtils.randInt(-9, 9));
-            scene.add(quantumShard);
-            return quantumShard;
+            );
         });
     }
 
-    async initCampfire(scene) {
+    async initCampfire(x, y, z) {
         const rockVertexShader = await loadShaderFile("/models/BrittleHollow/Campfire/rockVertexShader.glsl");
         const rockFragmentShader = await loadShaderFile("/models/BrittleHollow/Campfire/rockFragmentShader.glsl");
 
@@ -135,28 +143,36 @@ export default class Test extends Component {
             side: THREE.DoubleSide,
         });
 
-        const campfireLoader = new GLTFLoader();
-        campfireLoader.load("/models/BrittleHollow/Campfire/Campfire.glb", async (gltf) => {
-            const campfire = gltf.scene.clone();
-            campfire.traverse((child) => {
-                if (child.isMesh) {
-                    if (child.name === "Rock") {
-                        child.material = rockCustomShaderMaterial;
-                    } else {
-                        child.material = woodCustomShaderMaterial;
-                    }
-                }
-            });
+        return new Promise((resolve, reject) => {
+            const campfireLoader = new GLTFLoader();
+            campfireLoader.load(
+                "/models/BrittleHollow/Campfire/Campfire.glb",
+                (gltf) => {
+                    const campfire = gltf.scene.clone();
+                    campfire.traverse((child) => {
+                        if (child.isMesh) {
+                            if (child.name === "Rock") {
+                                child.material = rockCustomShaderMaterial;
+                            } else {
+                                child.material = woodCustomShaderMaterial;
+                            }
+                        }
+                    });
 
-            campfire.position.set(THREE.MathUtils.randInt(-6, 6), 0.5, THREE.MathUtils.randInt(-6, 6));
-            campfire.rotation.set(0, THREE.MathUtils.randInt(-360, 360), 0);
-            campfire.scale.set(3, 3, 3);
-            scene.add(campfire);
-            return campfire;
+                    campfire.position.set(x, y, z);
+                    campfire.rotation.set(0, THREE.MathUtils.randInt(-360, 360), 0);
+                    campfire.scale.set(3, 3, 3);
+                    resolve(campfire);
+                },
+                undefined,
+                (error) => {
+                    reject(error);
+                }
+            );
         });
     }
 
-    async initDeadTree(DeadTreeNumber, scene) {
+    async initDeadTree(x, y, z) {
         const deadTreeVertexShader = await loadShaderFile("/models/BrittleHollow/DeadTree/vertexShader.glsl");
         const deadTreeFragmentShader = await loadShaderFile("/models/BrittleHollow/DeadTree/fragmentShader.glsl");
 
@@ -176,31 +192,29 @@ export default class Test extends Component {
             side: THREE.DoubleSide,
         });
 
-        const loader = new GLTFLoader();
-        loader.load("/models/BrittleHollow/DeadTree/DeadTree.glb", (gltf) => {
-            for (let i = 0; i < DeadTreeNumber; i++) {
-                const tree = gltf.scene.clone();
-                tree.traverse((child) => {
-                    if (child.isMesh) {
-                        child.material = deadTreeCustomShaderMaterial;
-                    }
-                });
+        return new Promise((resolve, reject) => {
+            const loader = new GLTFLoader();
+            loader.load(
+                "/models/BrittleHollow/DeadTree/DeadTree.glb",
+                (gltf) => {
+                    const tree = gltf.scene.clone();
+                    tree.traverse((child) => {
+                        if (child.isMesh) {
+                            child.material = deadTreeCustomShaderMaterial;
+                        }
+                    });
 
-                tree.position.set(THREE.MathUtils.randInt(-9, 9), 0.5, THREE.MathUtils.randInt(-9, 9));
-                tree.rotation.set(0, THREE.MathUtils.randInt(-360, 360), 0);
-                tree.scale.set(0.5, 0.5, 0.5);
-                scene.add(tree);
-            }
+                    tree.position.set(x, y, z);
+                    tree.rotation.set(0, THREE.MathUtils.randInt(-360, 360), 0);
+                    tree.scale.set(0.5, 0.5, 0.5);
+                    resolve(tree);
+                },
+                undefined,
+                (error) => {
+                    reject(error);
+                }
+            );
         });
-    }
-
-    async initMeteorite(scene, x, y, z, fireCustomShaderMaterial) {
-        const mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(20, 4), fireCustomShaderMaterial);
-
-        mesh.position.set(x, y, z);
-        mesh.scale.set(0.1, 0.1, 0.1);
-        scene.add(mesh);
-        return mesh;
     }
 
     async initFireShader() {
@@ -227,7 +241,15 @@ export default class Test extends Component {
         });
     }
 
-    async initBall(scene, x, y, z) {
+    async initMeteorite(x, y, z, fireCustomShaderMaterial) {
+        const mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(20, 4), fireCustomShaderMaterial);
+
+        mesh.position.set(x, y, z);
+        mesh.scale.set(0.1, 0.1, 0.1);
+        return mesh;
+    }
+
+    async initBall(x, y, z) {
         const ballVertexShader = await loadShaderFile("/models/BrittleHollow/Ball/vertexShader.glsl");
         const ballFragmentShader = await loadShaderFile("/models/BrittleHollow/Ball/fragmentShader.glsl");
 
@@ -243,8 +265,21 @@ export default class Test extends Component {
         const ball = new THREE.Mesh(geometry, ballCustomShaderMaterial);
 
         ball.position.set(x, y, z);
-        scene.add(ball);
         return ball;
+    }
+
+    async initParticle(scene) {
+        const particleVertexShader = await loadShaderFile("/models/BrittleHollow/particlevertexShader.glsl");
+        const particleFragmentShader = await loadShaderFile("/models/BrittleHollow/particlefragmentShader.glsl");
+
+        const particleSystem = new ParticleSystem({
+            parent: scene,
+            vertexShader: particleVertexShader,
+            fragmentShader: particleFragmentShader,
+            texture: "/models/BrittleHollow/Fire.jpg",
+        });
+
+        return particleSystem;
     }
 
     async init() {
@@ -265,24 +300,26 @@ export default class Test extends Component {
 
             this.renderer.setClearColor(0x000000);
 
-            this.ground = await this.initGround(this.scene);
-            this.quantumShard = await this.initQuantumShard(this.scene);
-            this.campfire = await this.initCampfire(this.scene);
-            await this.initDeadTree(9, this.scene);
+            this.ground = await this.initGround(0, 0, 0);
+            this.scene.add(this.ground);
+
+            this.quantumShard = await this.initQuantumShard(10, 0, 10);
+            this.scene.add(this.quantumShard);
+
+            this.campfire = await this.initCampfire(8, 2, 8);
+            this.scene.add(this.campfire);
+
+            this.deadTree = await this.initDeadTree(6, 0, 6);
+            this.scene.add(this.deadTree);
 
             this.fireCustomShaderMaterial = await this.initFireShader();
-            this.meteorite = await this.initMeteorite(this.scene, 2, 2, 2, this.fireCustomShaderMaterial);
-            this.ball = await this.initBall(this.scene, 0, 2, 0);
+            this.meteorite = await this.initMeteorite(2, 5, 2, this.fireCustomShaderMaterial);
+            this.scene.add(this.meteorite);
 
-            const particleVertexShader = await loadShaderFile("/models/BrittleHollow/particlevertexShader.glsl");
-            const particleFragmentShader = await loadShaderFile("/models/BrittleHollow/particlefragmentShader.glsl");
+            this.ball = await this.initBall(0, 2, 0);
+            this.scene.add(this.ball);
 
-            this.particleSystem = new ParticleSystem({
-                parent: this.scene,
-                vertexShader: particleVertexShader,
-                fragmentShader: particleFragmentShader,
-                texture: "/models/BrittleHollow/Fire.jpg",
-            });
+            this.particleSystem = await this.initParticle(this.scene);
 
             this.start = Date.now();
             this.previousTime = performance.now();
@@ -296,22 +333,22 @@ export default class Test extends Component {
             this.ballRenderPass = new RenderPass(this.scene, this.camera);
             this.ballComposer.addPass(this.ballRenderPass);
 
-            const bloomPass = new UnrealBloomPass(
+            this.bloomPass = new UnrealBloomPass(
                 new THREE.Vector2(this.c.clientWidth, this.c.clientHeight),
                 1.5, // strength
                 0.4, // radius
                 0.85 // threshold
             );
-            this.ballComposer.addPass(bloomPass);
+            this.ballComposer.addPass(this.bloomPass);
 
             this.renderer.setAnimationLoop(() => {
                 this.controls.update();
 
                 this.fireCustomShaderMaterial.uniforms["time"].value = 0.00025 * (Date.now() - this.start);
+
                 this.currentTime = performance.now();
                 this.timeElapsed = (this.currentTime - this.previousTime) / 1000;
                 this.previousTime = this.currentTime;
-
                 this.particleSystem.step(this.timeElapsed);
 
                 this.ballComposer.render(this.scene, this.camera);

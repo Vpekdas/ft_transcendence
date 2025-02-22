@@ -74,5 +74,7 @@
     "You loose :(": "Vous avez perdu :(",
     "Back to home": "Retour a l'accueil",
     "Left side won !": "Le joueur de gauche a gagne !",
-    "Right side won !": "Le joueur de droite a gagne !"
+    "Right side won !": "Le joueur de droite a gagne !",
+    "Email": "Email",
+    "One time code is invalid": "Le code a usage unique est invalid"
 }

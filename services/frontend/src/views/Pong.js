@@ -18,6 +18,8 @@ async function loadShaderFile(url) {
     return await response.text();
 }
 
+/** Terrain skins */
+
 class TerrainSkin {
     constructor(name) {
         this.name = name;
@@ -32,7 +34,25 @@ class TerrainSkin {
     async update() {}
 }
 
+class ColorfulTerrainSkin {
+    constructor() {
+        super("colorful-terrain");
+    }
+
+    /**
+     * @param {GLTFLoader} gltfLoader
+     * @param {THREE.Scene} scene
+     */
+    async init(gltfLoader, scene) {
+        //
+    }
+}
+
 class BrittleHollowSkin extends TerrainSkin {
+    constructor() {
+        super("brittle-hollow");
+    }
+
     /**
      * @param {GLTFLoader} gltfLoader
      * @param {THREE.Scene} scene
@@ -112,6 +132,8 @@ class BrittleHollowSkin extends TerrainSkin {
     async update() {}
 }
 
+/** Ball skins */
+
 class BallSkin {
     constructor(name) {
         this.name = name;
@@ -120,31 +142,103 @@ class BallSkin {
     /**
      * @param {GLTFLoader} gltfLoader
      * @param {THREE.Scene} scene
+     * @returns {Promise<THREE.Object3D>}
      */
     async init(gltfLoader, scene) {}
 }
 
-class LavaBallSkin {
+class ColorfulBallSkin {
+    constructor() {
+        super("colorful-ball");
+    }
+
     /**
      * @param {GLTFLoader} gltfLoader
      * @param {THREE.Scene} scene
+     * @returns {THREE.Object3D}
+     */
+    async init(gltfLoader, scene) {
+        return createSphere(position["x"], position["y"], 0.5, 32, 16, "#ffde21");
+    }
+}
+
+class LavaBallSkin extends BallSkin {
+    constructor() {
+        super("lava-ball");
+    }
+
+    /**
+     * @param {GLTFLoader} gltfLoader
+     * @param {THREE.Scene} scene
+     * @returns {THREE.Object3D}
      */
     async init(gltfLoader, scene) {}
+}
+
+/** Bar skins */
+
+class BarSkin {
+    constructor(name) {
+        this.name = name;
+    }
+
+    /**
+     * @param {GLTFLoader} gltfLoader
+     * @param {THREE.Scene} scene
+     * @returns {Promise<THREE.Object3D>}
+     */
+    async init(gltfLoader, scene) {}
+}
+
+class ColorfulBarSkin extends BarSkin {
+    constructor() {
+        super("colorful-bar");
+    }
+
+    /**
+     * @param {GLTFLoader} gltfLoader
+     * @param {THREE.Scene} scene
+     * @returns {THREE.Object3D}
+     */
+    async init(gltfLoader, scene) {
+        return createCube(position["x"], position["y"], this.playerWidth, this.playerHeight, "#cd1c18");
+    }
+}
+
+class BrittleHollowBarSkin extends BarSkin {
+    constructor() {
+        super("brittle-hollow-bar");
+    }
+
+    /**
+     * @param {GLTFLoader} gltfLoader
+     * @param {THREE.Scene} scene
+     * @returns {THREE.Object3D}
+     */
+    async init(gltfLoader, scene) {
+        return await gltfLoader.loadAsync("/models/BrittleHollow/BrittleHollowPlayer.glb").scene;
+    }
 }
 
 /** @type {Map<string, TerrainSkin>} */
 let terrainSkins = new Map();
 /** @type {Map<string, BallSkin>} */
 let ballSkins = new Map();
+/** @type {Map<string, BarSkin>} */
+let barSkins = new Map();
 
 function registerAllSkins() {
     // Terrain skins
-    terrainSkins.set("colorful-terrain", new TerrainSkin("colorful-terrain"));
-    terrainSkins.set("brittle-hollow", new BrittleHollowSkin("brittle-hollow"));
+    terrainSkins.set("colorful-terrain", new ColorfulTerrainSkin());
+    terrainSkins.set("brittle-hollow", new BrittleHollowSkin());
 
     // Ball skins
-    terrainSkins.set("colorful-ball", new TerrainSkin("colorful-ball"));
-    ballSkins.set("lava-ball", new LavaBallSkin("lava-ball"));
+    ballSkins.set("colorful-ball", new ColorfulBallSkin());
+    ballSkins.set("lava-ball", new LavaBallSkin());
+
+    // Bar skins
+    barSkins.set("colorful-bar", new ColorfulBarSkin());
+    barSkins.set("brittle-hollow-bar", new BrittleHollowBarSkin());
 }
 
 function createCube(x, y, width, height, color) {
@@ -287,15 +381,22 @@ export default class Pong extends Component {
         });
     }
 
-    createBody(type, id, shape, position) {
+    async createBody(type, id, shape, position) {
         let body = undefined;
 
         if (type == "Ball") {
-            body = createSphere(position["x"], position["y"], 0.5, 32, 16, "#ffde21");
+            const ballSkin = ballSkins.get("lava-ball");
+
+            body = await ballSkin.init(this.gltfLoader, this.scene);
+
+            // body = createSphere(position["x"], position["y"], 0.5, 32, 16, "#ffde21");
             // ! Add an If statement or find a proper way.
             // body = this.brittle.get("Ball");
         } else if (type == "Player") {
-            body = createCube(position["x"], position["y"], this.playerWidth, this.playerHeight, "#cd1c18");
+            // body = createCube(position["x"], position["y"], this.playerWidth, this.playerHeight, "#cd1c18");
+            const playerSkin = barSkins.get("brittle-hollow-bar");
+
+            body = await playerSkin.init(this.gltfLoader, this.scene);
         } else {
             body = createCube(0, 0, 0, 0, "#000000");
         }
@@ -316,7 +417,7 @@ export default class Pong extends Component {
         return body;
     }
 
-    onUpdateReceived(data) {
+    async onUpdateReceived(data) {
         for (let body of data["bodies"]) {
             if (this.bodies.has(body["id"])) {
                 let lbody = this.bodies.get(body["id"]);
@@ -331,7 +432,7 @@ export default class Pong extends Component {
                     box.object.position.z = body["pos"]["z"];
                 }
             } else {
-                const lbody = this.createBody(body["type"], body["id"], body["shape"], body["pos"]);
+                const lbody = await this.createBody(body["type"], body["id"], body["shape"], body["pos"]);
                 if (lbody != undefined) {
                     this.bodies.set(body["id"], lbody);
                     this.scene.add(lbody);
@@ -350,7 +451,7 @@ export default class Pong extends Component {
         const id = params.get("id");
 
         if (data.type == "update" && id != null) {
-            this.onUpdateReceived(data);
+            await this.onUpdateReceived(data);
         } else if (data.type == "gameEnded" && !this.gameEnded) {
             this.gameEnded = true;
             this.winner = data.winner;

@@ -54,6 +54,10 @@ defineRouter({
             } else {
                 navigateTo("/login?redirect=" + encodeURIComponent(url));
             }
+
+            return false;
+        } else {
+            return true;
         }
     },
     notFound: NotFound,

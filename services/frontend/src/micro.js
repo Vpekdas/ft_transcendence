@@ -853,7 +853,9 @@ async function router() {
         if (routerSettings.hook && initialPageLoad) {
             // We don't want to call the hook every time we refresh the page, only when navigating
             // between pages.
-            await routerSettings.hook(route.route.path);
+            if (!(await routerSettings.hook(route.route.path))) {
+                return;
+            }
         }
 
         let attributes;

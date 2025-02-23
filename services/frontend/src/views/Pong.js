@@ -464,8 +464,8 @@ export default class Pong extends Component {
 
             // const particleSystem = this.brittle.get("ParticleSystem");
 
-            this.start = Date.now();
-            this.previousTime = performance.now();
+            // this.start = Date.now();
+            // this.previousTime = performance.now();
 
             renderer.setAnimationLoop(() => {
                 for (let [key, value] of this.boxes) {
@@ -473,9 +473,9 @@ export default class Pong extends Component {
                 }
                 controls.update();
 
-                this.currentTime = performance.now();
-                this.timeElapsed = (this.currentTime - this.previousTime) / 1000;
-                this.previousTime = this.currentTime;
+                // this.currentTime = performance.now();
+                // this.timeElapsed = (this.currentTime - this.previousTime) / 1000;
+                // this.previousTime = this.currentTime;
                 // particleSystem.step(this.timeElapsed, this.basePosition);
 
                 // this.fireCustomShaderMaterial.uniforms["time"].value = 0.00025 * (Date.now() - this.start);

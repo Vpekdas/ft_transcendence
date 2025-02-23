@@ -1,14 +1,26 @@
-varying vec3 v_pos;
+precision mediump float;
+
+varying vec3 vWorldPosition;
+varying vec3 vNormal;
+
+uniform vec3 u_emissiveColor;
+uniform float u_emissiveIntensity;
+uniform float u_opacity;
+uniform samplerCube u_envMap; 
+
+float fresnelSchlick(float cosTheta, float F0) {
+    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
 
 void main() {
-    vec3 groundColor = vec3(0.105, 0.161, 0.227);
-    vec3 crystalColor = vec3(209.0 / 255.0, 113.0 / 255.0, 142.0 / 255.0);
+    vec3 normal = normalize(vNormal);
+    vec3 viewDir = normalize(cameraPosition - vWorldPosition);
+    float fresnel = fresnelSchlick(dot(viewDir, normal), 0.04);
 
-    float t = -0.5;
+    vec3 reflectDir = reflect(-viewDir, normal);
+    vec3 envColor = textureCube(u_envMap, reflectDir).rgb;
 
-    if (v_pos.y > t) {
-        gl_FragColor = vec4(groundColor, 1.0);
-    } else {
-        gl_FragColor = vec4(crystalColor, 1.0);
-    }
+    vec3 emissiveColor = u_emissiveColor * u_emissiveIntensity * fresnel + envColor * fresnel;
+
+    gl_FragColor = vec4(emissiveColor, u_opacity);
 }

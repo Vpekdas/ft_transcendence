@@ -104,11 +104,15 @@ export default class Home extends Component {
         const scrollTop = window.scrollY;
         const docHeight = document.documentElement.scrollHeight - window.innerHeight;
         const scrollPercent = scrollTop / docHeight;
-        const maxHeight = document.querySelector(".custom-scrollbar").clientHeight;
-        const rocketHeight = scrollPercent * maxHeight;
+        const customScrollbar = document.querySelector(".custom-scrollbar");
 
-        rocket.style.height = `${rocketHeight}px`;
-        supernova.style.height = `${rocketHeight - 25}px`;
+        if (customScrollbar) {
+            const maxHeight = customScrollbar.clientHeight;
+            const rocketHeight = scrollPercent * maxHeight;
+
+            rocket.style.height = `${rocketHeight}px`;
+            supernova.style.height = `${rocketHeight - 25}px`;
+        }
     }
 
     decodeEffect(rightText, decodedContainerId) {

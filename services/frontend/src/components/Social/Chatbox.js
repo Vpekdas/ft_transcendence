@@ -585,7 +585,7 @@ export default class Chatbox extends Component {
 
             const sendBtn = document.getElementById("send-btn");
 
-            sendBtn.addEventListener("click", () => {
+            sendBtn.addEventListener("click", async () => {
                 this.userInteracted = true;
                 const msg = this.writeArea.value;
 

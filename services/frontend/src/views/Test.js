@@ -347,14 +347,14 @@ export default class BrittleHollow extends Component {
             // https://threejs-journey.com/lessons/environment-map#introduction
 
             const loader = new THREE.CubeTextureLoader();
-            const envMap = loader.load([
-                "/models/BrittleHollow/nx.png",
-                "/models/BrittleHollow/ny.png",
-                "/models/BrittleHollow/nz.png",
-                "/models/BrittleHollow/px.png",
-                "/models/BrittleHollow/py.png",
-                "/models/BrittleHollow/pz.png",
-            ]);
+            // const envMap = loader.load([
+            //     "/models/BrittleHollow/nx.png",
+            //     "/models/BrittleHollow/ny.png",
+            //     "/models/BrittleHollow/nz.png",
+            //     "/models/BrittleHollow/px.png",
+            //     "/models/BrittleHollow/py.png",
+            //     "/models/BrittleHollow/pz.png",
+            // ]);
 
             // https://discourse.threejs.org/t/gltfloader-and-rgbeloader-adding-hdr-texture-to-enviroment/36086
 
@@ -377,7 +377,7 @@ export default class BrittleHollow extends Component {
                         u_emissiveColor: { value: new THREE.Color("#d1718e") },
                         u_emissiveIntensity: { value: 1.0 },
                         u_opacity: { value: 1.0 },
-                        u_envMap: { value: texture },
+                        u_envMap: { value: envMap },
                     },
                     side: THREE.DoubleSide,
                 });

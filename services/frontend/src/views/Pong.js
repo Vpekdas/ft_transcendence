@@ -34,7 +34,7 @@ class TerrainSkin {
     async update() {}
 }
 
-class ColorfulTerrainSkin {
+class ColorfulTerrainSkin extends TerrainSkin {
     constructor() {
         super("colorful-terrain");
     }
@@ -147,7 +147,7 @@ class BallSkin {
     async init(gltfLoader, scene) {}
 }
 
-class ColorfulBallSkin {
+class ColorfulBallSkin extends BallSkin {
     constructor() {
         super("colorful-ball");
     }

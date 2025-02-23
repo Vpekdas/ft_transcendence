@@ -1,12 +1,69 @@
 import { Component } from "../micro";
+import { post } from "../utils";
+
 export default class Accordion extends Component {
     async init() {
         this.config = JSON.parse(this.attributes.get("config"));
-        this.barChart1 = this.config.barChart1;
-        this.barChart2 = this.config.barChart2;
-        this.heatMap = this.config.heatMap;
 
         this.id = this.generateRandomId();
+
+        {
+            this.stats = await post("/api/match/" + this.attributes.get("match-id") + "/stats").then((res) =>
+                res.json()
+            );
+
+            let player1Class = "";
+            let player2Class = "";
+
+            let player1Name = this.attributes.get("player1");
+            let player2Name = this.attributes.get("player2");
+
+            if (this.stats["p1"]["up_count"] > this.stats["p2"]["up_count"]) {
+                player1Class = "bar-chart-rectangle-higher";
+                player2Class = "bar-chart-rectangle-lower";
+            } else {
+                player1Class = "bar-chart-rectangle-lower";
+                player2Class = "bar-chart-rectangle-higher";
+            }
+
+            const barChartConfig1 = {
+                width: "180",
+                height: "80",
+                title: "Up Count",
+                player1Class: player1Class,
+                player1Name: player1Name,
+                firstElementWidth: this.stats["p1"]["up_count"],
+                player2Class: player2Class,
+                player2Name: player2Name,
+                secondElementWidth: this.stats["p2"]["up_count"],
+            };
+
+            if (this.stats["p1"]["down_count"] > this.stats["p2"]["down_count"]) {
+                player1Class = "bar-chart-rectangle-higher";
+                player2Class = "bar-chart-rectangle-lower";
+            } else {
+                player1Class = "bar-chart-rectangle-lower";
+                player2Class = "bar-chart-rectangle-higher";
+            }
+
+            const barChartConfig2 = {
+                width: "180",
+                height: "80",
+                title: "Down Count",
+                player1Class: player1Class,
+                player1Name: player1Name,
+                firstElementWidth: this.stats["p1"]["down_count"],
+                player2Class: player2Class,
+                player2Name: player2Name,
+                secondElementWidth: this.stats["p2"]["down_count"],
+            };
+
+            const heatMapConfig = this.stats["heatmap"];
+
+            this.barChart1 = barChartConfig1;
+            this.barChart2 = barChartConfig2;
+            this.heatMap = heatMapConfig;
+        }
 
         this.onready = async () => {
             const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');

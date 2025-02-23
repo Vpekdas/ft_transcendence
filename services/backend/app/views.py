@@ -466,7 +466,19 @@ def getMatches(request: HttpRequest, id):
     player = Player.objects.filter(id=request.user.id).first()
     results = PongGameResult.objects.filter(Q(player1=player.id) | Q(player2=player.id))
 
-    return JsonResponse({ "results": [{ "gamemode": r.gamemode, "player1": r.player1, "player2": r.player2, "score1": r.score1, "score2": r.score2, "timeStarted": r.timeStarted, "timeEnded": r.timeEnded, "stats": r.stats, "tid": r.tid } for r in results] })
+    return JsonResponse({ "results": [{ "id": r.id, "gamemode": r.gamemode, "player1": r.player1, "player2": r.player2, "score1": r.score1, "score2": r.score2, "timeStarted": r.timeStarted, "timeEnded": r.timeEnded, "tid": r.tid } for r in results] })
+
+@require_POST
+def getMatchStats(request: HttpRequest, id):
+    if not request.user.is_authenticated:
+        return JsonResponse({ "error": NOT_AUTHENTICATED })
+    
+    game = PongGameResult.objects.filter(id=int(id)).first()
+
+    if not game:
+        return HttpResponseBadRequest()
+    
+    return JsonResponse(game.stats)
 
 # /api/tournament/create
 @require_POST

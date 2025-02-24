@@ -7,6 +7,7 @@ import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPa
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { ParticleSystem } from "../ParticleSystem";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
+import { EXRLoader } from "three/examples/jsm/loaders/EXRLoader.js";
 
 // https://www.youtube.com/watch?v=oKbCaj1J6EI
 // https://github.com/franky-adl/voronoi-sphere/blob/main/src/shaders/voronoi3d_basic.glsl
@@ -344,36 +345,49 @@ export default class BrittleHollow extends Component {
             );
             this.ballComposer.addPass(this.bloomPass);
 
-
             // https://discourse.threejs.org/t/gltfloader-and-rgbeloader-adding-hdr-texture-to-enviroment/36086
-            const rgbeLoader = new RGBELoader();
-            rgbeLoader.load("/models/BrittleHollow/2k.hdr", async (texture) => {
+            // https://ambientcg.com/list?type=hdri&sort=popular
+
+            const exrLoader = new EXRLoader();
+            exrLoader.load("/models/BrittleHollow/4k.exr", async (texture) => {
                 texture.mapping = THREE.EquirectangularReflectionMapping;
 
-                this.scene.environment = texture;
+                // We cannot use same texture for different purpose, so I can clone them.
+                const envTexture = texture.clone();
+                const bgTexture = texture.clone();
 
-                this.scene.background = texture;
+                this.scene.environment = envTexture;
+                this.scene.background = bgTexture;
 
                 this.gltfLoader = new GLTFLoader();
                 this.piece = (
                     await this.gltfLoader.loadAsync("/models/BrittleHollow/BrittleHollowTerrainPiece.glb")
                 ).scene;
                 this.piece.children[0].material = new THREE.ShaderMaterial({
-                    vertexShader: await loadShaderFile("/models/BrittleHollow/TerrainPiece.vert"),
-                    fragmentShader: await loadShaderFile("/models/BrittleHollow/TerrainPiece.frag"),
+                    vertexShader: await loadShaderFile("/models/BrittleHollow/TerrainPieceVert.glsl"),
+                    fragmentShader: await loadShaderFile("/models/BrittleHollow/TerrainPieceFrag.glsl"),
                     uniforms: {
                         u_emissiveColor: { value: new THREE.Color("#d1718e") },
                         u_emissiveIntensity: { value: 1.0 },
                         u_opacity: { value: 1.0 },
                         u_envMap: { value: texture },
+                        t1: { value: 0.1 },
+                        t2: { value: 0.99 },
+                        crystalColor: { value: new THREE.Color("#FFA500") },
+                        u_time: { value: 1.0 },
+                        u_bFactor: { value: 2.0 },
+                        u_pcurveHandle: { value: 1.0 },
+                        u_scale: { value: 0.8 },
+                        u_roughness: { value: 1.0 },
+                        u_detail: { value: 1.0 },
+                        u_randomness: { value: 1.0 },
+                        u_lacunarity: { value: 1.0 },
                     },
                     side: THREE.DoubleSide,
                 });
 
                 this.scene.add(this.piece);
             });
-
-            this.scene.add(this.piece);
 
             this.renderer.setAnimationLoop(() => {
                 this.controls.update();

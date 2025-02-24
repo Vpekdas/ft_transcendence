@@ -60,8 +60,8 @@ class BrittleHollowSkin extends TerrainSkin {
     async init(gltfLoader, scene) {
         this.piece = (await gltfLoader.loadAsync("/models/BrittleHollow/BrittleHollowTerrainPiece.glb")).scene;
         this.piece.children[0].material = new THREE.ShaderMaterial({
-            vertexShader: await loadShaderFile("/models/BrittleHollow/TerrainPiece.vert"),
-            fragmentShader: await loadShaderFile("/models/BrittleHollow/TerrainPiece.frag"),
+            vertexShader: await loadShaderFile("/models/BrittleHollow/TerrainPieceVert.glsl"),
+            fragmentShader: await loadShaderFile("/models/BrittleHollow/TerrainPieceFrag.glsl"),
         });
 
         this.piece.rotation.x = Math.PI / 2;

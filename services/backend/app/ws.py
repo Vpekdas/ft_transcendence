@@ -398,7 +398,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def set_player_online(self, user_id):
-        player, created = Player.objects.get_or_create(user_id=user_id)
+        player = Player.objects.get(user_id=user_id)
         player.is_online = True
         player.save()
     

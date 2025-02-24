@@ -34,7 +34,7 @@ export default class Home extends Component {
                 this.createParticles(particleContainer, rocket);
             }, 100);
 
-            for (let i = 0; i < INTRO.length - 1; i++) {
+            for (let i = 0; i < 3; i++) {
                 this.animatedIntroArray.push({
                     text: INTRO[i],
                     animated: false,
@@ -120,7 +120,7 @@ export default class Home extends Component {
         let textArray = rightText.split("");
         const wordArray = rightText.split(" ");
 
-        // Every 10s randomize a character in text.
+        // Every 10ms randomize a character in text.
         const decode = setInterval(() => {
             const randChar = randArray[Math.floor(Math.random() * randArray.length)];
             const randIndex = Math.floor(Math.random() * textArray.length);

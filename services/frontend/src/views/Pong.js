@@ -7,7 +7,7 @@ import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { getOriginNoProtocol, post } from "../utils";
-import { Component, dirty, params } from "../micro";
+import { Component, dirty, params, navigateTo } from "../micro";
 import { tr } from "../i18n";
 import BrittleHollow from "./Test";
 

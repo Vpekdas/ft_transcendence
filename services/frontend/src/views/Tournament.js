@@ -106,6 +106,10 @@ export default class Tournament extends Component {
         });
     }
 
+    async clean() {
+        if (this.ws) this.ws.close();
+    }
+
     async init() {
         document.title = tr("Tournament");
 
@@ -115,6 +119,7 @@ export default class Tournament extends Component {
         this.roundsHtml = "";
 
         const [_, setRounds] = this.usePersistent("rounds", []);
+        const [players, setPlayers] = this.usePersistent("tplayers", []);
 
         this.onready = () => {
             this.ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/tournament/${this.id}`);
@@ -126,14 +131,11 @@ export default class Tournament extends Component {
                 const data = JSON.parse(event.data);
 
                 if (data["type"] == "players") {
-                    let players = "";
+                    let playersList = [];
                     for (let p of data["players"]) {
-                        let nickname = await getNickname(p);
-                        players += /* HTML */ `<span
-                            ><img src="${api("/api/player/" + p + "/picture")}" alt="" width="40vw" />${nickname}</span
-                        >`;
+                        playersList.push({ id: p, nickname: await getNickname(p) });
                     }
-                    document.querySelector("#player-list").innerHTML = players;
+                    setPlayers(playersList);
                     this.host = data["host"];
 
                     if (this.host != this.playerInfo.id) {
@@ -161,6 +163,7 @@ export default class Tournament extends Component {
 
     render() {
         const [rounds, _] = this.usePersistent("rounds", []);
+        const [players, setPlayers] = this.usePersistent("tplayers", []);
 
         let roundsHtml = "";
 
@@ -180,6 +183,18 @@ export default class Tournament extends Component {
             </div>`;
         }
 
+        let playersHTML = "";
+
+        for (let player of players()) {
+            playersHTML += /* HTML */ `<span
+                ><img
+                    src="${api("/api/player/" + player.id + "/picture")}"
+                    alt=""
+                    width="40vw"
+                />${player.nickname}</span
+            >`;
+        }
+
         return /* HTML */ ` <HomeNavBar />
             <div class="container-fluid dashboard-container tournament-container" id="tournament-container">
                 <div class="particle-container"></div>
@@ -189,9 +204,9 @@ export default class Tournament extends Component {
                 <div class="container-fluid dashboard-container player-container">
                     <h2 id="tournament-title">
                         <i class="bi bi-clock"></i>
-                        <span>Tournament Name</span>
+                        <span>${tr("Tournament")}</span>
                     </h2>
-                    <div id="player-list"></div>
+                    <div id="player-list">${playersHTML}</div>
                     <button id="start-tournament">
                         <i class="bi bi-rocket-takeoff"></i> <span>${tr("Start !")}</span>
                     </button>

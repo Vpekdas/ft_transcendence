@@ -477,10 +477,10 @@ def selectBarSkin(request: HttpRequest, id, name):
 
     player = Player.objects.filter(id=id).first()
 
-    if "player" not in player.skins:
-        player.skins.insert("player", name)
+    if "bar" not in player.skins:
+        player.skins.insert("bar", name)
     else:
-        player.skins["player"] = name
+        player.skins["bar"] = name
 
     player.save()
 

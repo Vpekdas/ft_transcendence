@@ -7,7 +7,6 @@ export default class CreateTournament extends Component {
         document.title = tr("Create Tournament");
 
         let playerCount = 2;
-        let openType = "open";
 
         this.onready = () => {
             document.querySelector("#btnradio2").addEventListener("change", async () => {
@@ -20,23 +19,15 @@ export default class CreateTournament extends Component {
                 playerCount = 8;
             });
 
-            document.querySelector("#btn-open").addEventListener("change", async () => {
-                openType = "open";
-            });
-            document.querySelector("#btn-invite-only").addEventListener("change", async () => {
-                openType = "invite";
-            });
-
             document.querySelector(".btn.btn-primary.settings").addEventListener("click", async () => {
                 const tournamentName = document.getElementById("tournament-name").value;
-                const tournamentPassword = document.getElementById("tournament-password").value;
 
                 const resp = await post("/api/tournament/create", {
                     body: JSON.stringify({
                         name: tournamentName,
                         playerCount: playerCount,
-                        openType: openType,
-                        password: tournamentPassword.length == 0 ? undefined : tournamentPassword,
+                        openType: "open",
+                        password: undefined,
                         game: "pong",
                         fillWithAI: false,
                         gameSettings: {},
@@ -56,7 +47,6 @@ export default class CreateTournament extends Component {
             <div class="container-fluid dashboard-container create-tournament-container">
                 <TournamentNameCard />
                 <PlayerCountCard />
-                <TournamentPrivacyCard />
                 <button type="submit" class="btn btn-primary settings">${tr("Create")}</button>
             </div>
         </div>`;

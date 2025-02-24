@@ -1,6 +1,7 @@
 import { getOriginNoProtocol, getNickname, post, api } from "../utils";
 import { tr } from "../i18n";
 import { Component, params, navigateTo } from "../micro";
+import TournamentRound from "../components/Tournament/TournamentRound";
 
 export default class Tournament extends Component {
     createBracket(games) {
@@ -131,11 +132,18 @@ export default class Tournament extends Component {
                 const data = JSON.parse(event.data);
 
                 if (data["type"] == "players") {
-                    let playersList = [];
+                    let playersHTML = "";
                     for (let p of data["players"]) {
-                        playersList.push({ id: p, nickname: await getNickname(p) });
+                        const nickname = await getNickname(p);
+
+                        playersHTML += /* HTML */ `<span
+                            ><img src="${api("/api/player/" + p + "/picture")}" alt="" width="40vw" />${nickname}</span
+                        >`;
                     }
-                    setPlayers(playersList);
+
+                    document.getElementById("player-list").innerHTML = playersHTML;
+
+                    // setPlayers(playersList);
                     this.host = data["host"];
 
                     if (this.host != this.playerInfo.id) {
@@ -145,7 +153,33 @@ export default class Tournament extends Component {
                         startBtn.style.pointerEvents = "none";
                     }
                 } else if (data["type"] == "rounds") {
-                    setRounds(data["rounds"]);
+                    let roundsHtml = "";
+
+                    for (let round of data["rounds"]) {
+                        const games = round["games"];
+                        const tournamentRound = new TournamentRound();
+
+                        tournamentRound.attributes.set("roundCount", "" + games.length);
+                        tournamentRound.attributes.set("data", JSON.stringify(games));
+
+                        await tournamentRound.init();
+
+                        roundsHtml += /* HTML */ ` <div class="container-fluid round-container">
+                            ${tournamentRound.render()}
+                            <div class="container-fluid bracket-container">
+                                <div class="bracket" row="1">
+                                    <div class="dot"></div>
+                                    <div class="dot"></div>
+                                    <div class="dot"></div>
+                                </div>
+                                <span class="round-tier"></span>
+                            </div>
+                        </div>`;
+                    }
+
+                    document.getElementById("match-container").innerHTML = roundsHtml;
+
+                    // setRounds(data["rounds"]);
                     this.createBracket(data["rounds"]);
                     this.createRoundTier();
                     // createBinaryParticle(15);
@@ -153,6 +187,8 @@ export default class Tournament extends Component {
                 } else if (data["type"] == "match") {
                     navigateTo(`/play/pong/${data["id"]}`);
                 }
+
+                console.log(data);
             };
 
             document.querySelector("#start-tournament").addEventListener("click", () => {
@@ -165,48 +201,34 @@ export default class Tournament extends Component {
         const [rounds, _] = this.usePersistent("rounds", []);
         const [players, setPlayers] = this.usePersistent("tplayers", []);
 
-        let roundsHtml = "";
+        // let roundsHtml = "";
 
-        for (let round of rounds()) {
-            let games = round["games"];
-            // prettier-ignore
-            roundsHtml += /* HTML */ ` <div class="container-fluid round-container">
-                <TournamentRound roundCount="${games.length}" data='${JSON.stringify(games)}' />
-                <div class="container-fluid bracket-container">
-                    <div class="bracket" row="1">
-                        <div class="dot"></div>
-                        <div class="dot"></div>
-                        <div class="dot"></div>
-                    </div>
-                    <span class="round-tier"></span>
-                </div>
-            </div>`;
-        }
-
-        let playersHTML = "";
-
-        for (let player of players()) {
-            playersHTML += /* HTML */ `<span
-                ><img
-                    src="${api("/api/player/" + player.id + "/picture")}"
-                    alt=""
-                    width="40vw"
-                />${player.nickname}</span
-            >`;
-        }
+        // for (let round of rounds()) {
+        //     let games = round["games"];
+        //     // prettier-ignore
+        //     roundsHtml += /* HTML */ ` <div class="container-fluid round-container">
+        //         <TournamentRound roundCount="${games.length}" data='${JSON.stringify(games)}' />
+        //         <div class="container-fluid bracket-container">
+        //             <div class="bracket" row="1">
+        //                 <div class="dot"></div>
+        //                 <div class="dot"></div>
+        //                 <div class="dot"></div>
+        //             </div>
+        //             <span class="round-tier"></span>
+        //         </div>
+        //     </div>`;
+        // }
 
         return /* HTML */ ` <HomeNavBar />
             <div class="container-fluid dashboard-container tournament-container" id="tournament-container">
                 <div class="particle-container"></div>
-                <div class="container-fluid dashboard-container match-container" id="match-container">
-                    ${roundsHtml}
-                </div>
+                <div class="container-fluid dashboard-container match-container" id="match-container"></div>
                 <div class="container-fluid dashboard-container player-container">
                     <h2 id="tournament-title">
                         <i class="bi bi-clock"></i>
                         <span>${tr("Tournament")}</span>
                     </h2>
-                    <div id="player-list">${playersHTML}</div>
+                    <div id="player-list"></div>
                     <button id="start-tournament">
                         <i class="bi bi-rocket-takeoff"></i> <span>${tr("Start !")}</span>
                     </button>

@@ -182,7 +182,7 @@ float fbm(vec3 p, vec3 rep, float scale, int detail, float roughness) {
 void main() {
     vec3 normal = normalize(vNormal);
     vec3 viewDir = normalize(cameraPosition - vWorldPosition);
-    float fresnel = fresnelSchlick(dot(viewDir, normal), 0.04);
+    float fresnel = max(0.5, fresnelSchlick(dot(viewDir, normal), 0.04));
 
     vec3 reflectDir = reflect(-viewDir, normal);
     vec3 envColor = textureCube(u_envMap, reflectDir).rgb;
@@ -190,7 +190,7 @@ void main() {
     vec3 emissiveColor = u_emissiveColor * u_emissiveIntensity * fresnel + envColor * fresnel;
 
     vec3 finalColor;
-    if(vWorldPosition.y > t2) {
+    if(v_pos.y > t2) {
         vec2 res = voronoi(v_pos * u_scale * u_lacunarity, u_time * u_roughness);
         vec3 mycolor = vec3(0.105, 0.161, 0.227);
 
@@ -201,7 +201,7 @@ void main() {
         mycolor = mix(mycolor, vec3(0.0), detailFactor);
 
         finalColor = mycolor;
-    } else if(vWorldPosition.y > t1) {
+    } else if(v_pos.y > t1) {
 
         float scale = 5.0;
         int detail = 10;

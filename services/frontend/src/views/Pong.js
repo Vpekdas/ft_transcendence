@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { EXRLoader } from "three/addons/loaders/EXRLoader.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
@@ -29,7 +30,7 @@ class TerrainSkin {
      * @param {GLTFLoader} gltfLoader
      * @param {THREE.Scene} scene
      */
-    async init(gltfLoader, scene) {}
+    async init(gltfLoader, exrLoader, scene) {}
 
     async update() {}
 }
@@ -43,8 +44,12 @@ class ColorfulTerrainSkin extends TerrainSkin {
      * @param {GLTFLoader} gltfLoader
      * @param {THREE.Scene} scene
      */
-    async init(gltfLoader, scene) {
-        //
+    async init(gltfLoader, exrLoader, scene) {
+        const wallTop = createCube(0, -12.4, 36, 0.4, 0.5, "green");
+        const wallBottom = createCube(0, 12.4, 36, 0.4, 0.5, "green");
+
+        scene.add(wallTop);
+        scene.add(wallBottom);
     }
 }
 
@@ -57,14 +62,41 @@ class BrittleHollowSkin extends TerrainSkin {
      * @param {GLTFLoader} gltfLoader
      * @param {THREE.Scene} scene
      */
-    async init(gltfLoader, scene) {
+    async init(gltfLoader, exrLoader, scene) {
+        let texture = await exrLoader.loadAsync("/models/BrittleHollow/4k.exr");
+
+        texture.mapping = THREE.EquirectangularReflectionMapping;
+
         this.piece = (await gltfLoader.loadAsync("/models/BrittleHollow/BrittleHollowTerrainPiece.glb")).scene;
         this.piece.children[0].material = new THREE.ShaderMaterial({
             vertexShader: await loadShaderFile("/models/BrittleHollow/TerrainPieceVert.glsl"),
             fragmentShader: await loadShaderFile("/models/BrittleHollow/TerrainPieceFrag.glsl"),
+            uniforms: {
+                u_emissiveColor: { value: new THREE.Color("#d1718e") },
+                u_emissiveIntensity: { value: 1.0 },
+                u_opacity: { value: 1.0 },
+                u_envMap: { value: texture },
+                t1: { value: 0.1 },
+                t2: { value: 0.99 },
+                crystalColor: { value: new THREE.Color("#FFA500") },
+                u_time: { value: 1.0 },
+                u_bFactor: { value: 2.0 },
+                u_pcurveHandle: { value: 1.0 },
+                u_scale: { value: 0.8 },
+                u_roughness: { value: 1.0 },
+                u_detail: { value: 1.0 },
+                u_randomness: { value: 1.0 },
+                u_lacunarity: { value: 1.0 },
+            },
+            side: THREE.DoubleSide,
         });
 
-        this.piece.rotation.x = Math.PI / 2;
+        const envTexture = texture.clone();
+        const bgTexture = texture.clone();
+
+        scene.environment = envTexture;
+        scene.background = bgTexture;
+
         this.piece.rotation.y = Math.PI / 2;
 
         const scale = 2.0;
@@ -97,18 +129,24 @@ class BrittleHollowSkin extends TerrainSkin {
         this.createBigRow(16, totalCellHeight, scene, offsetX, offsetY, scale);
         this.createSmallRow(17, totalCellHeight - 1, scene, offsetX, offsetY, scale);
         this.createBigRow(18, totalCellHeight, scene, offsetX, offsetY, scale);
+
+        const wallTop = createCube(0, -12.4, 36, 0.4, 0.5, "#1b293a");
+        const wallBottom = createCube(0, 12.4, 36, 0.4, 0.5, "#1b293a");
+
+        scene.add(wallTop);
+        scene.add(wallBottom);
     }
 
     randomHeight() {
-        return Math.random() * 0.3;
+        return Math.random() * 0.7;
     }
 
     createBigRow(x, height, scene, offsetX, offsetY, scale) {
         for (let i = 0; i < height; i++) {
             let piece2 = this.piece.clone();
             piece2.position.x = x * 1.5 * scale + offsetX;
-            piece2.position.y = 1.73 * i * scale + offsetY;
-            piece2.position.z = -this.randomHeight() - 2.6;
+            piece2.position.y = -this.randomHeight() - 2.6;
+            piece2.position.z = 1.73 * i * scale + offsetY;
 
             piece2.scale.set(scale, scale, scale);
 
@@ -120,8 +158,8 @@ class BrittleHollowSkin extends TerrainSkin {
         for (let i = 0; i < height; i++) {
             let piece2 = this.piece.clone();
             piece2.position.x = x * 1.5 * scale + offsetX;
-            piece2.position.y = 1.73 * i * scale + (1.73 * scale) / 2.0 + offsetY;
-            piece2.position.z = -this.randomHeight() - 2.6;
+            piece2.position.y = -this.randomHeight() - 2.6;
+            piece2.position.z = 1.73 * i * scale + (1.73 * scale) / 2.0 + offsetY;
 
             piece2.scale.set(scale, scale, scale);
 
@@ -158,7 +196,7 @@ class ColorfulBallSkin extends BallSkin {
      * @returns {THREE.Object3D}
      */
     async init(gltfLoader, scene) {
-        return createSphere(position["x"], position["y"], 0.5, 32, 16, "#ffde21");
+        return createSphere(0, 0, 0.5, 32, 16, "#ffde21");
     }
 }
 
@@ -201,7 +239,7 @@ class ColorfulBarSkin extends BarSkin {
      * @returns {THREE.Object3D}
      */
     async init(gltfLoader, scene) {
-        return createCube(position["x"], position["y"], this.playerWidth, this.playerHeight, "#cd1c18");
+        return createCube(0, 0, 1.0, 1.0, 5.0, "#cd1c18");
     }
 }
 
@@ -238,16 +276,16 @@ function registerAllSkins() {
 
     // Bar skins
     barSkins.set("colorful-bar", new ColorfulBarSkin());
-    barSkins.set("brittle-hollow-bar", new BrittleHollowBarSkin());
+    barSkins.set("brittle-hollow", new BrittleHollowBarSkin());
 }
 
-function createCube(x, y, width, height, color) {
+function createCube(x, y, width, height, depth, color) {
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     const material = new THREE.MeshToonMaterial({ color: color });
     const cube = new THREE.Mesh(geometry, material);
 
-    cube.position.set(x, y, 0);
-    cube.scale.set(width, height, 1);
+    cube.position.set(x, 0, y);
+    cube.scale.set(width, height, depth);
     return cube;
 }
 
@@ -256,91 +294,30 @@ function createSphere(x, y, radius, widthSegments, heightSegments, color) {
     const material = new THREE.MeshToonMaterial({ color: color });
     const sphere = new THREE.Mesh(geometry, material);
 
-    sphere.position.set(x, y, 0);
+    sphere.position.set(x, 0, y);
     sphere.scale.set(1.0, 1.0, 1.0);
 
     return sphere;
 }
 
 function debuggingBox2(position, width, height) {
-    const box = new THREE.BoxHelper(new THREE.Mesh(new THREE.BoxGeometry(width, height, 1)), 0xffff00);
+    const box = new THREE.BoxHelper(new THREE.Mesh(new THREE.BoxGeometry(width, 1, height)), 0xffff00);
     box.object.position.x = position["x"];
-    box.object.position.y = position["y"];
-    box.object.position.z = position["z"];
+    box.object.position.y = position["z"];
+    box.object.position.z = position["y"];
     return box;
 }
 
-const DEBUG = true;
+const DEBUG = false;
 
 export function action(subId, actionName, actionType) {
     return { type: "input", playerSubId: subId, action_name: actionName, action: actionType };
 }
 
 export default class Pong extends Component {
-    async initBrittleHollow() {
-        const assets = new Map();
-
-        const groundLeft = await this.BrittleClass.initGround(-12.5, 0, -1.2);
-        assets.set("GroundLeft", groundLeft);
-
-        const groundRight = await this.BrittleClass.initGround(12.5, 0, -1.2);
-        assets.set("GroundRight", groundRight);
-
-        const quantumShard = await this.BrittleClass.initQuantumShard(0, 0, 0);
-        assets.set("QuantumShard", quantumShard);
-
-        const campfire = await this.BrittleClass.initCampfire(0, 0, 0);
-        assets.set("Campfire", campfire);
-
-        const deadTree = await this.BrittleClass.initDeadTree(0, 0, 0);
-        assets.set("DeadTree", deadTree);
-
-        this.fireCustomShaderMaterial = await this.BrittleClass.initFireShader();
-        const meteorite = await this.BrittleClass.initMeteorite(0, 0, 0, this.fireCustomShaderMaterial);
-        assets.set("Meteorite", meteorite);
-
-        const ball = await this.BrittleClass.initBall(0, 0, 0);
-        assets.set("Ball", ball);
-
-        this.basePosition = new THREE.Vector3(-22, 10, 0);
-
-        const particleSystem = await this.BrittleClass.initParticle(this.scene);
-        assets.set("ParticleSystem", particleSystem);
-
-        return assets;
-    }
-
     async setupGameTerrain() {
-        await this.skin.init(this.gltfLoader, this.scene);
-
-        // const terrainSceneRight = terrain.scene;
-        // terrainSceneRight.rotation.set(Math.PI / 2, 0, 0);
-        // terrainSceneRight.position.set(13, 0, -2);
-
-        // // ! Add an If statement or find a proper way.
-        // this.scene.add(this.brittle.get("GroundLeft"));
-
-        // const terrainSceneLeft = terrain.scene.clone();
-        // terrainSceneLeft.rotation.set(Math.PI / 2, Math.PI, 0);
-        // terrainSceneLeft.position.set(-13, 0, -2);
-
-        // this.scene.add(this.brittle.get("GroundRight"));
-
-        // this.brittle.get("QuantumShard").rotation.set(-300, 0, 0);
-        // this.brittle.get("QuantumShard").position.set(-22, 0, -1);
-        // this.scene.add(this.brittle.get("QuantumShard"));
-
-        // this.brittle.get("Campfire").rotation.set(-300, 0, 0);
-        // this.brittle.get("Campfire").position.set(-22, 10, -0.5);
-        // this.scene.add(this.brittle.get("Campfire"));
-
-        // this.brittle.get("DeadTree").rotation.set(-300, 0, 0);
-        // this.brittle.get("DeadTree").position.set(-22, -10, -0.6);
-        // this.scene.add(this.brittle.get("DeadTree"));
-
-        // this.brittle.get("Meteorite").rotation.set(0, 0, 0);
-        // this.brittle.get("Meteorite").position.set(0, 15, 0);
-        // this.scene.add(this.brittle.get("Meteorite"));
+        const terrainSkin = terrainSkins.get(this.terrainSkin);
+        await terrainSkin.init(this.gltfLoader, this.exrLoader, this.scene);
 
         let lastKey;
 
@@ -385,7 +362,7 @@ export default class Pong extends Component {
         let body = undefined;
 
         if (type == "Ball") {
-            const ballSkin = ballSkins.get("lava-ball");
+            const ballSkin = ballSkins.get(this.ballSkin);
 
             body = await ballSkin.init(this.gltfLoader, this.scene);
 
@@ -394,11 +371,11 @@ export default class Pong extends Component {
             // body = this.brittle.get("Ball");
         } else if (type == "Player") {
             // body = createCube(position["x"], position["y"], this.playerWidth, this.playerHeight, "#cd1c18");
-            const playerSkin = barSkins.get("brittle-hollow-bar");
+            const playerSkin = barSkins.get(this.barSkin);
 
             body = await playerSkin.init(this.gltfLoader, this.scene);
         } else {
-            body = createCube(0, 0, 0, 0, "#000000");
+            body = createCube(0, 0, 0, 0, 0, "#000000");
         }
 
         if (DEBUG) {
@@ -422,14 +399,14 @@ export default class Pong extends Component {
             if (this.bodies.has(body["id"])) {
                 let lbody = this.bodies.get(body["id"]);
                 lbody.position.x = body["pos"]["x"];
-                lbody.position.y = body["pos"]["y"];
-                lbody.position.z = body["pos"]["z"];
+                lbody.position.y = body["pos"]["z"];
+                lbody.position.z = -body["pos"]["y"];
 
                 if (DEBUG && this.boxes.has(body["id"])) {
                     let box = this.boxes.get(body["id"]);
                     box.object.position.x = body["pos"]["x"];
-                    box.object.position.y = body["pos"]["y"];
-                    box.object.position.z = body["pos"]["z"];
+                    box.object.position.y = body["pos"]["z"];
+                    box.object.position.z = -body["pos"]["y"];
                 }
             } else {
                 const lbody = await this.createBody(body["type"], body["id"], body["shape"], body["pos"]);
@@ -509,14 +486,19 @@ export default class Pong extends Component {
 
         this.textureLoader = new THREE.TextureLoader();
         this.gltfLoader = new GLTFLoader();
+        this.exrLoader = new EXRLoader();
 
         this.gameStarted = false;
         this.gameEnded = false;
 
         registerAllSkins();
 
-        this.skin = terrainSkins.get("brittle-hollow");
         this.info = await post("/api/player/c/profile", {}).then((res) => res.json());
+
+        this.terrainSkin =
+            this.info.skins["terrain"] == "brittle-hollow" ? this.info.skins["terrain"] : "colorful-terrain";
+        this.ballSkin = this.info.skins["ball"] == "lava-ball" ? this.info.skins["ball"] : "colorful-ball";
+        this.barSkin = this.info.skins["bar"] == "brittle-hollow" ? this.info.skins["bar"] : "colorful-bar";
 
         this.onready = async () => {
             const c = document.getElementById("pong");
@@ -541,7 +523,13 @@ export default class Pong extends Component {
             const controls = new OrbitControls(camera, c);
 
             camera.position.z = 20;
-            camera.position.y = -15;
+            camera.position.y = 15;
+
+            const light = new THREE.DirectionalLight("white", 5.0);
+            light.position.z = 20;
+            light.position.y = 15;
+
+            this.scene.add(light);
 
             if (!DEBUG) {
                 controls.enableRotate = false;
@@ -550,7 +538,19 @@ export default class Pong extends Component {
                 controls.enableDamping = false;
             }
 
-            await this.setupGameTerrain();
+            this.ballComposer = new EffectComposer(renderer);
+            this.ballRenderPass = new RenderPass(this.scene, camera);
+            this.ballComposer.addPass(this.ballRenderPass);
+
+            this.bloomPass = new UnrealBloomPass(
+                new THREE.Vector2(c.clientWidth, c.clientHeight),
+                0.1, // strength
+                0.4, // radius
+                0.85 // threshold
+            );
+            this.ballComposer.addPass(this.bloomPass);
+
+            // await this.setupGameTerrain();
 
             // ! Ensure It's applied only on Brittle Hollow map.
             // renderer.toneMapping = THREE.ReinhardToneMapping;
@@ -581,8 +581,8 @@ export default class Pong extends Component {
 
                 // this.fireCustomShaderMaterial.uniforms["time"].value = 0.00025 * (Date.now() - this.start);
 
-                renderer.render(this.scene, camera);
-                // ballComposer.render(this.scene, camera);
+                // renderer.render(this.scene, camera);
+                this.ballComposer.render(this.scene, camera);
             });
 
             this.ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/pong/${id}`);

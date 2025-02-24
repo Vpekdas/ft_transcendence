@@ -43,6 +43,7 @@ urlpatterns = [
 
     path('api/player/<str:id>/skins/select-terrain/<str:name>', views.selectTerrainSkin),
     path('api/player/<str:id>/skins/select-ball/<str:name>', views.selectBallSkin),
+    path('api/player/<str:id>/skins/select-bar/<str:name>', views.selectBarSkin),
 
     path('api/match/<str:id>/stats', views.getMatchStats),
 

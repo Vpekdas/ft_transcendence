@@ -417,24 +417,28 @@ def getPongStats(request: HttpRequest, id):
         }
     })
 
-terrainSkins = [ "default-terrain", "brittle-hollow" ]
-ballSkins = [ "default-ball" ]
+terrainSkins = [ "colorful-terrain", "brittle-hollow" ]
+ballSkins = [ "colorful-ball", "lava-ball" ]
+barSkins = [ "colorful-bar", "brittle-hollow" ]
 
 @require_POST
 def selectTerrainSkin(request: HttpRequest, id, name):
     if id == "c" and request.user.is_authenticated:
         id = int(Player.objects.filter(user=request.user).first().id)
     else:
-        id = int(id)
+        return HttpResponseBadRequest()
 
     if name not in terrainSkins:
         return JsonResponse({ "error": INVALID_SKIN })
 
     player = Player.objects.filter(id=id).first()
-    skins = player.skins
 
-    if "terrain" in skins:
-        skins.insert("terrain", name)
+    if "terrain" not in player.skins:
+        player.skins.insert("terrain", name)
+    else:
+        player.skins["terrain"] = name
+
+    player.save()
 
     return JsonResponse({})
 
@@ -443,18 +447,40 @@ def selectBallSkin(request: HttpRequest, id, name):
     if id == "c" and request.user.is_authenticated:
         id = int(Player.objects.filter(user=request.user).first().id)
     else:
-        id = int(id)
-
-    player = Player.objects.filter(id=id).first()
+        return HttpResponseBadRequest()
 
     if name not in ballSkins:
         return JsonResponse({ "error": INVALID_SKIN })
 
     player = Player.objects.filter(id=id).first()
-    skins = player.skins
 
-    if "ball" in skins:
-        skins.insert("ball", name)
+    if "ball" not in player.skins:
+        player.skins.insert("ball", name)
+    else:
+        player.skins["ball"] = name
+
+    player.save()
+
+    return JsonResponse({})
+
+@require_POST
+def selectBarSkin(request: HttpRequest, id, name):
+    if id == "c" and request.user.is_authenticated:
+        id = int(Player.objects.filter(user=request.user).first().id)
+    else:
+        return HttpResponseBadRequest()
+
+    if name not in barSkins:
+        return JsonResponse({ "error": INVALID_SKIN })
+
+    player = Player.objects.filter(id=id).first()
+
+    if "player" not in player.skins:
+        player.skins.insert("player", name)
+    else:
+        player.skins["player"] = name
+
+    player.save()
 
     return JsonResponse({})
 
@@ -472,12 +498,12 @@ def getMatches(request: HttpRequest, id):
 def getMatchStats(request: HttpRequest, id):
     if not request.user.is_authenticated:
         return JsonResponse({ "error": NOT_AUTHENTICATED })
-    
+
     game = PongGameResult.objects.filter(id=int(id)).first()
 
     if not game:
         return HttpResponseBadRequest()
-    
+
     return JsonResponse(game.stats)
 
 # /api/tournament/create
@@ -537,7 +563,7 @@ def addFriend(request: HttpRequest, friend_id):
     friend = Player.objects.filter(id=friend_id).first()
     if not friend:
         return JsonResponse({"error": FRIEND_NOT_FOUND})
-    
+
     if player.friends.filter(id=friend_id).exists():
         return JsonResponse({"error": FRIEND_ALREADY_IN_LIST})
 
@@ -603,7 +629,7 @@ def blockUser(request: HttpRequest, blocked_user_id):
     blocked_user = Player.objects.filter(id=blocked_user_id).first()
     if not blocked_user:
         return JsonResponse({"error": BLOCKED_USER_NOT_FOUND})
-    
+
     if player.blockedUsers.filter(id=blocked_user_id).exists():
         return JsonResponse({"error": BLOCKED_USER_ALREADY_IN_LIST})
 
@@ -644,7 +670,7 @@ def get_users_list(request: HttpRequest):
 def get_chat_messages_by_channel_name(request: HttpRequest, channel_name):
     if not request.user.is_authenticated:
         return JsonResponse({ "error": NOT_AUTHENTICATED })
-    
+
     if request.method == 'GET':
         try:
             chat = Chat.objects.filter(channel_name=channel_name).first()
@@ -684,11 +710,11 @@ def get_user_id_by_nickname(request: HttpRequest):
 def get_friends(request: HttpRequest):
     if not request.user.is_authenticated:
         return JsonResponse({ "error": NOT_AUTHENTICATED })
-    
+
     player = Player.objects.filter(user=request.user).first()
     if not player:
         return JsonResponse({"error": INTERNAL_ERROR})
-    
+
     friends = player.friends.all()
 
     friends_list = [{"id": friend.id, "nickname": friend.nickname, "is_online": friend.is_online} for friend in friends]
@@ -699,11 +725,11 @@ def get_friends(request: HttpRequest):
 def get_blocked_users(request: HttpRequest):
     if not request.user.is_authenticated:
         return JsonResponse({ "error": NOT_AUTHENTICATED })
-    
+
     player = Player.objects.filter(user=request.user).first()
     if not player:
         return JsonResponse({"error": INTERNAL_ERROR})
-    
+
     blocked_users = player.blockedUsers.all()
 
     blocked_users_list = [{"id": blocked_user.id, "nickname": blocked_user.nickname, "is_online": blocked_user.is_online} for blocked_user in blocked_users]

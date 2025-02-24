@@ -2925,38 +2925,39 @@ ow-system[labels="false"] ow-name {
 
 /* SKINS */
 
-/* .skin-container {
+.container-fluid.skin-container {
     display: flex;
-    flex-wrap: wrap;
-}
-
-.skin-item {
-    width: 6vw;
-    height: 6vw;
-} */
-
-.skin-container {
+    position: relative;
+    height: 100%;
     width: 100%;
-    border: 2px dotted rgb(96 139 168);
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.btn.btn-outline-primary.skin {
     display: flex;
-    flex-wrap: wrap;
+    position: relative;
+    align-items: center;
+    justify-content: space-around;
+    width: 50%;
+    height: 100%;
 }
 
-.skin-item {
-    border: 2px solid rgb(96 139 168);
-    border-radius: 5px;
-    background-color: rgb(96 139 168 / 0.2);
-    cursor: pointer;
+.card.settings.skin {
+    display: flex;
+    position: relative;
+    width: 100%;
+    height: 100%;
 }
 
-.skin-item.selected {
-    border: 2px solid rgb(64 173 70);
-    background-color: rgb(64 173 70 / 0.2);
-}
-
-.skin-super-container {
-    list-style: none;
-    margin-bottom: 16vh;
+.micro-SkinCard {
+    display: flex;
+    position: relative;
+    height: auto;
+    width: 100%;
+    align-items: center;
+    justify-content: space-around;
 }
 
 /* CHATBOX */

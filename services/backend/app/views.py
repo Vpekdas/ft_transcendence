@@ -328,6 +328,8 @@ def getPlayerProfile(request: HttpRequest, id):
         "skins": player.skins,
         "pongElo": player.pongElo,
         "id": player.id,
+        "two_factor": player.two_factor,
+        "external": player.external,
     })
 
 """

@@ -38,8 +38,10 @@ urlpatterns = [
     path('api/player/<str:id>/picture/update', views.updateProfilePicture),
     path('api/player/<str:id>/delete', views.deleteProfile),
     path('api/player/<str:id>/set-2fa/<str:state>', views.set_2fa_state),
+    path('api/player/<str:id>/get-2fa/<str:state>', views.get_2fa_state),
     path('api/player/<str:id>/matches', views.getMatches),
     path('api/player/<str:id>/stats/pong', views.getPongStats),
+    
 
     path('api/player/<str:id>/skins/select-terrain/<str:name>', views.selectTerrainSkin),
     path('api/player/<str:id>/skins/select-ball/<str:name>', views.selectBallSkin),

@@ -70,7 +70,6 @@ export default class PongMatchmake extends Component {
 
     render() {
         return /* HTML */ `<HomeNavBar />
-            <div id="toast-container"></div>
             <div class="matchmake-container">
                 <ul>
                     <li>

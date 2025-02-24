@@ -35,7 +35,6 @@ export default class ChangePasswordForm extends Component {
     }
     render() {
         return /* HTML */ `<div class="container-fluid settings">
-            <div id="toast-container"></div>
             <div class="card settings">
                 <h5 class="card-title settings" data-text="${tr("Password")}">${tr("Password")}</h5>
                 <div class="card-body settings">

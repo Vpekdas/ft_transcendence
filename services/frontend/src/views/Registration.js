@@ -57,7 +57,6 @@ export default class Registration extends Component {
     render() {
         return /* HTML */ ` <div>
             <div class="container-fluid login-container">
-                <div id="toast-container"></div>
                 <form class="login-form was-validated" action="javascript:void(0)">
                     <img src="/img/login/Amadeus-Logo.webp" class="login-logo" />
                     <div class="row mb-3 login">

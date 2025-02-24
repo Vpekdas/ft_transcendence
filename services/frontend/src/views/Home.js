@@ -152,7 +152,6 @@ export default class Home extends Component {
             <HomeNavBar />
             <div class="container-fluid home-container">
                 <div class="container-fluid game-container">
-                    <div id="toast-container"></div>
                     <div class="card pong-game">
                         <h5 class="card-title pong-game">Pong</h5>
                         <img src="/favicon.svg" class="card-img-top pong-game" alt="..." />

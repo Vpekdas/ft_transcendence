@@ -210,7 +210,21 @@ class LavaBallSkin extends BallSkin {
      * @param {THREE.Scene} scene
      * @returns {THREE.Object3D}
      */
-    async init(gltfLoader, scene) {}
+    async init(gltfLoader, scene) {
+        const ballCustomShaderMaterial = new THREE.ShaderMaterial({
+            vertexShader: await loadShaderFile("/models/BrittleHollow/Ball/vertexShader.glsl"),
+            fragmentShader: await loadShaderFile("/models/BrittleHollow/Ball/fragmentShader.glsl"),
+            uniforms: {
+                emissiveIntensity: { value: 15.0 },
+            },
+        });
+
+        const geometry = new THREE.SphereGeometry(0.5);
+        const ball = new THREE.Mesh(geometry, ballCustomShaderMaterial);
+
+        ball.position.set(x, y, z);
+        return ball;
+    }
 }
 
 /** Bar skins */

@@ -435,10 +435,7 @@ def selectTerrainSkin(request: HttpRequest, id, name):
 
     player = Player.objects.filter(id=id).first()
 
-    if "terrain" not in player.skins:
-        player.skins.insert("terrain", name)
-    else:
-        player.skins["terrain"] = name
+    player.skins["terrain"] = name
 
     player.save()
 
@@ -456,10 +453,7 @@ def selectBallSkin(request: HttpRequest, id, name):
 
     player = Player.objects.filter(id=id).first()
 
-    if "ball" not in player.skins:
-        player.skins.insert("ball", name)
-    else:
-        player.skins["ball"] = name
+    player.skins["ball"] = name
 
     player.save()
 
@@ -477,10 +471,7 @@ def selectBarSkin(request: HttpRequest, id, name):
 
     player = Player.objects.filter(id=id).first()
 
-    if "bar" not in player.skins:
-        player.skins.insert("bar", name)
-    else:
-        player.skins["bar"] = name
+    player.skins["bar"] = name
 
     player.save()
 

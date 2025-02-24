@@ -3,8 +3,8 @@ import { Component, navigateTo } from "../../micro";
 import { post, showToast } from "../../utils";
 
 export default class SkinCard extends Component {
-    async chooseSkin(type, skin) {
-        const response = await post("/api/player/c/skins/select-" + type + "/" + skin, {})
+    async chooseSkin(skin) {
+        const response = await post("/api/player/c/skins/select-" + this.type + "/" + skin, {})
             .then((res) => res.json())
             .catch((err) => {
                 showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
@@ -12,7 +12,7 @@ export default class SkinCard extends Component {
         if (response.error) {
             showToast(response.error, "bi bi-exclamation-triangle-fill");
         } else {
-            showToast(skin + " " + type + " chosen successfully.", "bi bi-check-circle-fill");
+            showToast(skin + " " + this.type + " chosen successfully.", "bi bi-check-circle-fill");
         }
     }
 
@@ -20,40 +20,26 @@ export default class SkinCard extends Component {
         this.title = this.attributes.get("title");
         this.type = this.attributes.get("type");
 
-        if (this.type === "terrain") {
-            var [terrainSkin, setTerrainSkin] = this.usePersistent("terrainSkin", "colorful-terrain");
-        } else if (this.type === "ball") {
-            var [ballSkin, setBallSkin] = this.usePersistent("ballSkin", "colorful-ball");
-        } else if (this.type === "border") {
-            var [barSkin, setBarSkin] = this.usePersistent("barSkin", "colorful-bar");
-        }
-
         this.onready = async () => {
             const defaultButton = document.getElementById("btnradio default-" + this.type);
             defaultButton.addEventListener("change", async () => {
                 if (this.type === "terrain") {
-                    await this.chooseSkin("terrain", "colorful-terrain");
-                    setTerrainSkin("colorful-terrain");
+                    await this.chooseSkin("colorful-terrain");
                 } else if (this.type === "ball") {
-                    await this.chooseSkin("ball", "colorful-ball");
-                    setBallSkin("colorful-ball");
+                    await this.chooseSkin("colorful-ball");
                 } else if (this.type === "bar") {
-                    await this.chooseSkin("bar", "colorful-bar");
-                    setBarSkin("colorful-bar");
+                    await this.chooseSkin("colorful-bar");
                 }
             });
 
             const brittleButton = document.getElementById("btnradio brittle-hollow-" + this.type);
             brittleButton.addEventListener("change", async () => {
                 if (this.type === "terrain") {
-                    await this.chooseSkin("terrain", "brittle-hollow");
-                    setTerrainSkin("brittle-hollow");
+                    await this.chooseSkin("brittle-hollow");
                 } else if (this.type === "ball") {
-                    await this.chooseSkin("ball", "lava-ball");
-                    setBallSkin("lava-ball");
+                    await this.chooseSkin("lava-ball");
                 } else if (this.type === "bar") {
-                    await this.chooseSkin("bar", "brittle-hollow");
-                    setBarSkin("brittle-hollow");
+                    await this.chooseSkin("brittle-hollow");
                 }
             });
         };

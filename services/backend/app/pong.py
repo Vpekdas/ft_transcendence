@@ -234,7 +234,7 @@ class Pong(Game):
             self.player2.client = self.clients[1]
 
             self.time_started = time_secs()
-        elif self.gamemode == "1v1":
+        else:
             client = Client(id=player_id)
             self.clients.append(client)
 

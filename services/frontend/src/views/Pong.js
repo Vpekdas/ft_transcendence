@@ -222,7 +222,7 @@ class LavaBallSkin extends BallSkin {
         const geometry = new THREE.SphereGeometry(0.5);
         const ball = new THREE.Mesh(geometry, ballCustomShaderMaterial);
 
-        ball.position.set(x, y, z);
+        // ball.position.set(x, y, z);
         return ball;
     }
 }
@@ -434,8 +434,13 @@ export default class Pong extends Component {
         let score1 = data["scores"][0];
         let score2 = data["scores"][1];
 
-        document.getElementById("score1").textContent = score1;
-        document.getElementById("score2").textContent = score2;
+        const score1t = document.getElementById("score1");
+        const score2t = document.getElementById("score2");
+
+        if (score1t && score2t) {
+            document.getElementById("score1").textContent = score1;
+            document.getElementById("score2").textContent = score2;
+        }
     }
 
     async onMessage(data) {

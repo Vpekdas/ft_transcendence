@@ -1,4 +1,4 @@
-import { Component } from "../../micro";
+import { Component, navigateTo } from "../../micro";
 import { getOriginNoProtocol, post, fetchApi, showToast, getNickname, getUserIdByNickname, api } from "/utils";
 
 export default class Chatbox extends Component {
@@ -96,6 +96,8 @@ export default class Chatbox extends Component {
             ws.onmessage = async (event) => {
                 const data = JSON.parse(event.data);
                 const messageData = JSON.parse(event.data);
+
+                console.log(data);
 
                 if (data.type === "channel_list") {
                     for (let i = 0; i < data.channelList.length; i++) {
@@ -307,6 +309,11 @@ export default class Chatbox extends Component {
                     const message = messageData.message;
                     showToast(message, "bi bi-bell");
                 }
+
+                if (messageData.type === "create_game") {
+                    const gameId = messageData.game_id;
+                    navigateTo("/play/pong/" + gameId);
+                }
             };
         }
     }
@@ -469,7 +476,28 @@ export default class Chatbox extends Component {
         inviteBtn.classList.add("btn", "btn-success", "invite");
         inviteBtn.innerHTML = "INVITE";
 
-        inviteBtn.addEventListener("click", () => {});
+        inviteBtn.addEventListener("click", () => {
+            let channelName = "";
+
+            // FInd the channel_name for specified person.
+            for (const [key, channelInfo] of this.wsChannelMap.entries()) {
+                if (channelInfo.personId == this.chattingWithId && channelInfo.personId) {
+                    channelName = channelInfo.channelUrl;
+                    break;
+                }
+            }
+
+            if (channelName) {
+                console.log([this.id, this.chattingWithId]);
+                this.generalWs.send(
+                    JSON.stringify({
+                        type: "create_game",
+                        user_list: [this.id, this.chattingWithId],
+                        channel_name: channelName,
+                    })
+                );
+            }
+        });
 
         this.chatHeader.appendChild(img);
         this.chatHeader.appendChild(i);

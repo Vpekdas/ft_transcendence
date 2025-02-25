@@ -13,10 +13,12 @@ from channels.db import database_sync_to_async
 from django.utils import timezone
 
 import uuid
-import logging
+# import logging
 
 
 # logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# logger = logging.getLogger(__name__)
 
 
 pong_manager = PongManager()
@@ -251,6 +253,30 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.create_channel(data)
         elif message_type == "send_message":
             await self.send_message(data)
+        elif message_type == "create_game":
+            await self.create_game(data)
+
+    async def create_game(self, data):
+        accepted_user = data.get("user_list")
+        channel_name = data.get("channel_name")
+    
+        accepted_user = list(map(int, accepted_user))
+
+        game = pong_manager.start_game(gamemode="1v1invite")
+        game.accepted_players = accepted_user
+
+        # await self.channel_layer.group_send(
+        #     channel_name,
+        #     {
+        #         "type": "create_game",
+        #         "game_id": game.id
+        #     }
+        # )
+
+        await self.send(text_data=json.dumps({
+                "type": "create_game",
+                "game_id": game.id
+        }))
 
     async def create_channel(self, data):
         # Generate a unique channel name.

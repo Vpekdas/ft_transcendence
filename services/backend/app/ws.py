@@ -1,4 +1,6 @@
 import json
+import uuid
+import sys
 from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
 from .gameframework import log, sync, GameManager, TournamentManager, Client
 from .pong import PongManager
@@ -11,15 +13,6 @@ from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 from channels.db import database_sync_to_async
 from django.utils import timezone
-
-import uuid
-# import logging
-
-
-# logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-# logger = logging.getLogger(__name__)
-
 
 pong_manager = PongManager()
 tournaments = TournamentManager(game="pong", manager=pong_manager)
@@ -258,25 +251,28 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def create_game(self, data):
         accepted_user = data.get("user_list")
-        channel_name = data.get("channel_name")
-    
         accepted_user = list(map(int, accepted_user))
+        channel_name = data.get("channel_name")
 
         game = pong_manager.start_game(gamemode="1v1invite")
         game.accepted_players = accepted_user
 
-        # await self.channel_layer.group_send(
-        #     channel_name,
-        #     {
-        #         "type": "create_game",
-        #         "game_id": game.id
-        #     }
-        # )
+        await self.channel_layer.group_send(
+            channel_name,
+            {
+                "type": "game_created",
+                "game_id": game.id,
+            }
+        ) 
 
+
+    async def game_created(self, event):
         await self.send(text_data=json.dumps({
-                "type": "create_game",
-                "game_id": game.id
+            "type": "game_created",
+            "game_id": event["game_id"],
         }))
+
+
 
     async def create_channel(self, data):
         # Generate a unique channel name.

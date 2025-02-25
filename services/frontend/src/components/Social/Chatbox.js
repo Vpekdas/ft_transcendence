@@ -149,6 +149,11 @@ export default class Chatbox extends Component {
                                     this.addNewMessage(discussion, sender, message);
                                 }
                             }
+
+                            if (messageData.type === "game_created") {
+                                const gameId = messageData.game_id;
+                                navigateTo("/play/pong/" + gameId);
+                            }
                         };
 
                         newWs.onerror = (event) => {};
@@ -310,7 +315,7 @@ export default class Chatbox extends Component {
                     showToast(message, "bi bi-bell");
                 }
 
-                if (messageData.type === "create_game") {
+                if (messageData.type === "game_created") {
                     const gameId = messageData.game_id;
                     navigateTo("/play/pong/" + gameId);
                 }
@@ -488,7 +493,6 @@ export default class Chatbox extends Component {
             }
 
             if (channelName) {
-                console.log([this.id, this.chattingWithId]);
                 this.generalWs.send(
                     JSON.stringify({
                         type: "create_game",

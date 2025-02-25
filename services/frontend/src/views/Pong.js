@@ -62,34 +62,13 @@ class BrittleHollowSkin extends TerrainSkin {
      * @param {GLTFLoader} gltfLoader
      * @param {THREE.Scene} scene
      */
-    async init(gltfLoader, exrLoader, scene) {
+    async init(gltfLoader, exrLoader, scene, bhMaterial) {
         let texture = await exrLoader.loadAsync("/models/BrittleHollow/4k.exr");
 
         texture.mapping = THREE.EquirectangularReflectionMapping;
 
         this.piece = (await gltfLoader.loadAsync("/models/BrittleHollow/BrittleHollowTerrainPiece.glb")).scene;
-        this.piece.children[0].material = new THREE.ShaderMaterial({
-            vertexShader: await loadShaderFile("/models/BrittleHollow/TerrainPieceVert.glsl"),
-            fragmentShader: await loadShaderFile("/models/BrittleHollow/TerrainPieceFrag.glsl"),
-            uniforms: {
-                u_emissiveColor: { value: new THREE.Color("#d1718e") },
-                u_emissiveIntensity: { value: 1.0 },
-                u_opacity: { value: 1.0 },
-                u_envMap: { value: texture },
-                t1: { value: 0.1 },
-                t2: { value: 0.99 },
-                crystalColor: { value: new THREE.Color("#FFA500") },
-                u_time: { value: 1.0 },
-                u_bFactor: { value: 2.0 },
-                u_pcurveHandle: { value: 1.0 },
-                u_scale: { value: 0.8 },
-                u_roughness: { value: 1.0 },
-                u_detail: { value: 1.0 },
-                u_randomness: { value: 1.0 },
-                u_lacunarity: { value: 1.0 },
-            },
-            side: THREE.DoubleSide,
-        });
+        this.piece.children[0].material = bhMaterial;
 
         const envTexture = texture.clone();
         const bgTexture = texture.clone();
@@ -239,7 +218,7 @@ class BarSkin {
      * @param {THREE.Scene} scene
      * @returns {Promise<THREE.Object3D>}
      */
-    async init(gltfLoader, scene) {}
+    async init(gltfLoader, exrLoader, scene) {}
 }
 
 class ColorfulBarSkin extends BarSkin {
@@ -252,7 +231,7 @@ class ColorfulBarSkin extends BarSkin {
      * @param {THREE.Scene} scene
      * @returns {THREE.Object3D}
      */
-    async init(gltfLoader, scene) {
+    async init(gltfLoader, exrLoader, scene) {
         return createCube(0, 0, 1.0, 1.0, 5.0, "#cd1c18");
     }
 }
@@ -267,8 +246,18 @@ class BrittleHollowBarSkin extends BarSkin {
      * @param {THREE.Scene} scene
      * @returns {THREE.Object3D}
      */
-    async init(gltfLoader, scene) {
-        return await gltfLoader.loadAsync("/models/BrittleHollow/BrittleHollowPlayer.glb").scene;
+    async init(gltfLoader, exrLoader, scene, bhMaterial) {
+        /** @type {THREE.Object3D} */
+        const object = (await gltfLoader.loadAsync("/models/BrittleHollow/BrittleHollowPlayer.glb")).scene;
+        
+        object.rotation.x = Math.PI / 2;
+        object.rotation.z = -Math.PI / 2;
+
+        object.traverse((obj) => {
+            obj.material = bhMaterial;
+        });
+
+        return object;
     }
 }
 
@@ -331,7 +320,7 @@ export function action(subId, actionName, actionType) {
 export default class Pong extends Component {
     async setupGameTerrain() {
         const terrainSkin = terrainSkins.get(this.terrainSkin);
-        await terrainSkin.init(this.gltfLoader, this.exrLoader, this.scene);
+        await terrainSkin.init(this.gltfLoader, this.exrLoader, this.scene, this.brittleHollowMaterial);
 
         let lastKey;
 
@@ -387,7 +376,11 @@ export default class Pong extends Component {
             // body = createCube(position["x"], position["y"], this.playerWidth, this.playerHeight, "#cd1c18");
             const playerSkin = barSkins.get(this.barSkin);
 
-            body = await playerSkin.init(this.gltfLoader, this.scene);
+            body = await playerSkin.init(this.gltfLoader, this.exrLoader, this.scene, this.brittleHollowMaterial);
+
+            if (id == "player2") {
+                body.rotation.z *= -1;
+            }
         } else {
             body = createCube(0, 0, 0, 0, 0, "#000000");
         }
@@ -424,9 +417,11 @@ export default class Pong extends Component {
                 }
             } else {
                 const lbody = await this.createBody(body["type"], body["id"], body["shape"], body["pos"]);
-                if (lbody != undefined) {
+                if (lbody != undefined && !this.bodies.has(body["id"])) {
                     this.bodies.set(body["id"], lbody);
                     this.scene.add(lbody);
+                } else if (lbody == undefined) {
+                    console.error("cannot create body", body);
                 }
             }
         }
@@ -512,12 +507,43 @@ export default class Pong extends Component {
 
         registerAllSkins();
 
+        let brittleHollowTexture = await this.exrLoader.loadAsync("/models/BrittleHollow/4k.exr");
+        brittleHollowTexture.mapping = THREE.EquirectangularReflectionMapping;
+
+        this.brittleHollowMaterial = new THREE.ShaderMaterial({
+            vertexShader: await loadShaderFile("/models/BrittleHollow/TerrainPieceVert.glsl"),
+            fragmentShader: await loadShaderFile("/models/BrittleHollow/TerrainPieceFrag.glsl"),
+            uniforms: {
+                u_emissiveColor: { value: new THREE.Color("#d1718e") },
+                u_emissiveIntensity: { value: 1.0 },
+                u_opacity: { value: 1.0 },
+                u_envMap: { value: brittleHollowTexture },
+                t1: { value: 0.1 },
+                t2: { value: 0.99 },
+                crystalColor: { value: new THREE.Color("#FFA500") },
+                u_time: { value: 1.0 },
+                u_bFactor: { value: 2.0 },
+                u_pcurveHandle: { value: 1.0 },
+                u_scale: { value: 0.8 },
+                u_roughness: { value: 1.0 },
+                u_detail: { value: 1.0 },
+                u_randomness: { value: 1.0 },
+                u_lacunarity: { value: 1.0 },
+            },
+            side: THREE.DoubleSide,
+        });
+        
         this.info = await post("/api/player/c/profile", {}).then((res) => res.json());
 
         this.terrainSkin =
             this.info.skins["terrain"] == "brittle-hollow" ? this.info.skins["terrain"] : "colorful-terrain";
         this.ballSkin = this.info.skins["ball"] == "lava-ball" ? this.info.skins["ball"] : "colorful-ball";
         this.barSkin = this.info.skins["bar"] == "brittle-hollow" ? this.info.skins["bar"] : "colorful-bar";
+
+        if (this.terrainSkin == "brittle-hollow") {
+            this.scene.environment = brittleHollowTexture.clone();
+            this.scene.background = brittleHollowTexture.clone();
+        }
 
         this.onready = async () => {
             const c = document.getElementById("pong");

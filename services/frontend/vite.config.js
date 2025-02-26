@@ -47,6 +47,6 @@ export default defineConfig({
             root: "./src",
             index: "./main.js",
         }),
-        fixSourceMaps(),
+        // fixSourceMaps(),
     ],
 });

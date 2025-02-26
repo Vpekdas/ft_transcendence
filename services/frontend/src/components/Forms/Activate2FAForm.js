@@ -8,6 +8,10 @@ export default class Activate2FAForm extends Component {
         this.isExternal = this.attributes.get("is-external") == "true";
 
         this.onready = () => {
+            if (this.isExternal) {
+                return;
+            }
+
             const switch2FA = document.getElementById("switch two-factor");
 
             if (this.twoFactorStatus === true) {

@@ -262,6 +262,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             {
                 "type": "game_created",
                 "game_id": game.id,
+                "sender" :accepted_user[0]
             }
         ) 
 
@@ -270,6 +271,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             "type": "game_created",
             "game_id": event["game_id"],
+            "sender": event["sender"]
         }))
 
 

@@ -152,7 +152,24 @@ export default class Chatbox extends Component {
 
                             if (messageData.type === "game_created") {
                                 const gameId = messageData.game_id;
-                                navigateTo("/play/pong/" + gameId);
+                                const sender = messageData.sender;
+                                const idToNickname = await getNickname(sender);
+
+                                // Show an invitation to second person. so he is not forced to join.
+                                if (this.id !== sender) {
+                                    showToast(
+                                        "You received an invite for 1v1 from " +
+                                            idToNickname +
+                                            ". You can click on this popup to join him !",
+                                        "bi bi-controller"
+                                    );
+                                    const toast = document.getElementById("toast-container");
+                                    toast.addEventListener("click", () => {
+                                        navigateTo("/play/pong/" + gameId);
+                                    });
+                                } else {
+                                    navigateTo("/play/pong/" + gameId);
+                                }
                             }
                         };
 
@@ -317,7 +334,24 @@ export default class Chatbox extends Component {
 
                 if (messageData.type === "game_created") {
                     const gameId = messageData.game_id;
-                    navigateTo("/play/pong/" + gameId);
+                    const sender = messageData.sender;
+                    const idToNickname = await getNickname(sender);
+
+                    // Show an invitation to second person. so he is not forced to join.
+                    if (this.id !== sender) {
+                        showToast(
+                            "You received an invite for 1v1 from " +
+                                idToNickname +
+                                ". You can click on this popup to join him !",
+                            "bi bi-controller"
+                        );
+                        const toast = document.getElementById("toast-container");
+                        toast.addEventListener("click", () => {
+                            navigateTo("/play/pong/" + gameId);
+                        });
+                    } else {
+                        navigateTo("/play/pong/" + gameId);
+                    }
                 }
             };
         }

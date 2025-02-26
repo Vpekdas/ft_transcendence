@@ -14,8 +14,8 @@ export default class HeatMap extends Component {
         let maxPointsInCell = 0;
         for (let y = 0; y < 24; y++) {
             for (let x = 0; x < 36; x++) {
-                let x2 = x - 18;
-                let y2 = y - 12;
+                let x2 = 36 - x - 18;
+                let y2 = 24 - y - 12;
                 let pointCount = points.filter((p) => p.x > x2 && p.x <= x2 + 1 && p.y > y2 && p.y <= y2 + 1).length;
                 if (pointCount > maxPointsInCell) {
                     maxPointsInCell = pointCount;
@@ -25,8 +25,8 @@ export default class HeatMap extends Component {
 
         for (let y = 0; y < 24; y++) {
             for (let x = 0; x < 36; x++) {
-                let x2 = x - 18;
-                let y2 = y - 12;
+                let x2 = 36 - x - 18;
+                let y2 = 24 - y - 12;
                 let pointCount = points.filter((p) => p.x > x2 && p.x <= x2 + 1 && p.y > y2 && p.y <= y2 + 1).length;
 
                 // Normalize and ensure value is not greater than 1.

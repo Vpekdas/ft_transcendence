@@ -928,7 +928,9 @@ export function defineRouter(settings) {
             }
         });
 
-        await router();
+        try {
+            await router();
+        } catch (ex) {}
     });
 
     // TODO: This only works when saving this file for some reason
@@ -957,7 +959,7 @@ export function navigateTo(url) {
  * Force the refresh of the DOM.
  */
 export async function dirty() {
-    // try {
-    await router();
-    // } catch (e) {}
+    try {
+        await router();
+    } catch (e) {}
 }

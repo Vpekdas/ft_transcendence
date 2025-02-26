@@ -24,7 +24,7 @@ export default class OtherProfile extends Component {
             return tr("Tournament");
         } else if (gamemode == "1v1local") {
             return tr("Local");
-        } else if (gamemode == "1v1") {
+        } else if (gamemode == "1v1" || gamemode == "1v1invite") {
             return tr("Remote");
         }
     }

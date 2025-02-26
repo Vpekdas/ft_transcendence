@@ -2,10 +2,10 @@ import { tr } from "../../i18n";
 import { fetchApi, post, showToast } from "../../utils";
 import { Component } from "../../micro";
 
-/** @type {import("../../micro").Component} */
 export default class ChangeNicknameForm extends Component {
     async init() {
-        this.info = await post("/api/player/c/nickname").then((res) => res.json());
+        this.isExternal = this.attributes.get("is-external") == "true";
+        this.nickname = this.attributes.get("nickname");
 
         this.onready = () => {
             document
@@ -42,11 +42,15 @@ export default class ChangeNicknameForm extends Component {
                         id="new-nickname"
                         class="form-control settings"
                         aria-describedby="passwordHelpBlock"
-                        value="${this.info["nickname"]}"
+                        value="${this.nickname}"
                         autocomplete="off"
                         required
                     />
-                    <button type="submit" class="btn btn-primary settings change-nickname-button">
+                    <button
+                        type="submit"
+                        class="btn btn-primary settings change-nickname-button"
+                        ${this.isExternal ? "disabled" : ""}
+                    >
                         ${tr("Change")}
                     </button>
                 </div>

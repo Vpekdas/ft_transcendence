@@ -9,7 +9,6 @@ import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPa
 import { getOriginNoProtocol, post } from "../utils";
 import { Component, dirty, params, navigateTo } from "../micro";
 import { tr } from "../i18n";
-import BrittleHollow from "./Test";
 
 async function loadShaderFile(url) {
     const response = await fetch(url);
@@ -249,7 +248,7 @@ class BrittleHollowBarSkin extends BarSkin {
     async init(gltfLoader, exrLoader, scene, bhMaterial) {
         /** @type {THREE.Object3D} */
         const object = (await gltfLoader.loadAsync("/models/BrittleHollow/BrittleHollowPlayer.glb")).scene;
-        
+
         object.rotation.x = Math.PI / 2;
         object.rotation.z = -Math.PI / 2;
 
@@ -532,7 +531,7 @@ export default class Pong extends Component {
             },
             side: THREE.DoubleSide,
         });
-        
+
         this.info = await post("/api/player/c/profile", {}).then((res) => res.json());
 
         this.terrainSkin =

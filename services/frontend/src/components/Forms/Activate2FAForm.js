@@ -2,13 +2,10 @@ import { tr } from "../../i18n";
 import { Component } from "../../micro";
 import { post, fetchApi, showToast } from "../../utils";
 
-/** @type {import("../../micro").Component} */
-
 export default class Activate2FAForm extends Component {
     async init() {
-        this.info = await post("/api/player/c/profile").then((res) => res.json());
-        this.twoFactorStatus = this.info.two_factor;
-        this.isExternal = this.info.external;
+        this.twoFactorStatus = this.attributes.get("two-factor");
+        this.isExternal = this.attributes.get("is-external") == "true";
 
         this.onready = () => {
             const switch2FA = document.getElementById("switch two-factor");

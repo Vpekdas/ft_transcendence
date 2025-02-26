@@ -5,10 +5,7 @@ import { api, fetchApi, post } from "../../utils";
 /** @type {import("../../micro").Component} */
 export default class ChangeProfilePictureForm extends Component {
     async init() {
-        // TODO: fileName could be a local store
-
-        this.fileName = tr("No files selected");
-        this.playerInfo = await post("/api/player/c/profile").then((res) => res.json());
+        this.isExternal = this.attributes.get("is-external") == "true";
 
         this.onready = () => {
             document.querySelector("#inputGroupFile04").addEventListener("change", async () => {
@@ -53,10 +50,16 @@ export default class ChangeProfilePictureForm extends Component {
                             aria-describedby="profilePictureUpload"
                             aria-label="Upload"
                             style="display: none;"
+                            ${this.isExternal ? "disabled" : ""}
                         />
                         <label for="inputGroupFile04" class="btn btn-primary settings">${tr("Browse")} </label>
                         <span id="file-name" class="file-name">${tr("No files selected")}</span>
-                        <button class="btn btn-primary settings" type="button" id="profilePictureUpload">
+                        <button
+                            class="btn btn-primary settings"
+                            type="button"
+                            id="profilePictureUpload"
+                            ${this.isExternal ? "disabled" : ""}
+                        >
                             ${tr("Upload")}
                         </button>
                     </div>

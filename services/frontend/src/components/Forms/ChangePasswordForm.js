@@ -4,6 +4,8 @@ import { Component } from "../../micro";
 
 export default class ChangePasswordForm extends Component {
     async init() {
+        this.isExternal = this.attributes.get("is-external") == "true";
+
         this.onready = () => {
             document.querySelector(".btn.btn-primary.settings").addEventListener("click", async () => {
                 const oldPassword = document.querySelector("#old-password").value;
@@ -34,6 +36,9 @@ export default class ChangePasswordForm extends Component {
         };
     }
     render() {
+        if (this.isExternal) {
+            return "";
+        }
         return /* HTML */ `<div class="container-fluid settings">
             <div class="card settings">
                 <h5 class="card-title settings" data-text="${tr("Password")}">${tr("Password")}</h5>

@@ -17,7 +17,7 @@ export default class Tournament extends Component {
             brackets.forEach((bracket) => {
                 // Display all brackets.
                 bracket.style.display = "flex";
-                // ! I will remove magic percent.
+                // If there is 2 players, I just need to divide height per 2
                 bracket.style.height = "50%";
             });
             // Remove the additional brackets on second column.
@@ -34,7 +34,7 @@ export default class Tournament extends Component {
 
             newBracket.className = "bracket";
             newBracket.setAttribute("row", "1");
-            // ! I will remove magic percent.
+            // If there is 4 players, I just need to divide height per 4.
             newBracket.style.height = "25%";
             bracketContainer.appendChild(newBracket);
 
@@ -179,11 +179,10 @@ export default class Tournament extends Component {
 
                     document.getElementById("match-container").innerHTML = roundsHtml;
 
-                    // setRounds(data["rounds"]);
                     this.createBracket(data["rounds"]);
                     this.createRoundTier();
-                    // createBinaryParticle(15);
-                    // createDotParticle(15);
+                    createBinaryParticle(15);
+                    createDotParticle(15);
                 } else if (data["type"] == "match") {
                     navigateTo(`/play/pong/${data["id"]}`);
                 }
@@ -200,24 +199,6 @@ export default class Tournament extends Component {
     render() {
         const [rounds, _] = this.usePersistent("rounds", []);
         const [players, setPlayers] = this.usePersistent("tplayers", []);
-
-        // let roundsHtml = "";
-
-        // for (let round of rounds()) {
-        //     let games = round["games"];
-        //     // prettier-ignore
-        //     roundsHtml += /* HTML */ ` <div class="container-fluid round-container">
-        //         <TournamentRound roundCount="${games.length}" data='${JSON.stringify(games)}' />
-        //         <div class="container-fluid bracket-container">
-        //             <div class="bracket" row="1">
-        //                 <div class="dot"></div>
-        //                 <div class="dot"></div>
-        //                 <div class="dot"></div>
-        //             </div>
-        //             <span class="round-tier"></span>
-        //         </div>
-        //     </div>`;
-        // }
 
         return /* HTML */ ` <HomeNavBar />
             <div class="container-fluid dashboard-container tournament-container" id="tournament-container">

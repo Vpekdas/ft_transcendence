@@ -1,19 +1,21 @@
-import { getOriginNoProtocol, showToast } from "../utils";
+import { getOriginNoProtocol, showToast, api, getNickname, post } from "../utils";
 import { Component, navigateTo } from "../micro";
 import { tr } from "../i18n";
 
 export default class PongMatchmake extends Component {
-    timeInMinutes() {
-        const [time, setTime] = this.usePersistent("matchmakeTimer", 0);
-
-        const minutes = Math.floor(time() / 60);
-        let seconds = Math.floor(time() % 60);
+    timeInMinutes(time) {
+        const minutes = Math.floor(time / 60);
+        let seconds = Math.floor(time % 60);
 
         if (seconds < 10) {
             seconds = "0" + seconds;
         }
 
         return minutes + ":" + seconds;
+    }
+
+    clean() {
+        clearInterval(this.chronometer.timerId);
     }
 
     async init() {
@@ -27,6 +29,18 @@ export default class PongMatchmake extends Component {
             navigateTo("/");
         }
 
+        this.chronometer = { timerId: 0, seconds: 0 };
+
+        this.onready = () => {
+            const timer = document.querySelector(".timer");
+
+            setInterval(() => {
+                this.chronometer.seconds++;
+                const formattedTime = this.timeInMinutes(this.chronometer.seconds);
+                timer.innerHTML = formattedTime;
+            }, 1000);
+        };
+
         this.ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/matchmake/pong`);
         this.ws.onopen = (event) => {
             this.ws.send(
@@ -37,65 +51,67 @@ export default class PongMatchmake extends Component {
                 })
             );
         };
-        this.ws.onmessage = (event) => {
+        this.ws.onmessage = async (event) => {
             const data = JSON.parse(event.data);
-
-            console.log(data);
 
             if (data["type"] == "matchFound") {
                 // Do not wait if we are playing against ourself.
                 if (GET["gamemode"].endsWith("local")) {
                     navigateTo("/play/pong/" + data["id"]);
                 } else {
-                    document.querySelector(".match-found-container").classList.remove("hidden");
-                    document.querySelector(".matchmake-container").classList.add("hidden");
+                    this.opponentNickname = await getNickname(data.opponent);
+                    this.opponentProfilePicture = api("/api/player/" + data.opponent + "/picture");
 
+                    this.info = await post("/api/player/c/profile").then((res) => res.json());
+                    this.nickname = this.info.nickname;
+                    this.profilePicture = api("/api/player/" + this.info.id + "/picture");
+
+                    this.elo = await post("/api/player/" + this.info.id + "/profile").then((res) => res.json());
+                    this.opponentElo = await post("/api/player/" + data.opponent + "/profile").then((res) =>
+                        res.json()
+                    );
+
+                    // Display 2 players cards with their info.
+                    const vsContainer = document.querySelector(".container-fluid.vs-container");
+                    vsContainer.innerHTML =
+                        /* HTML */
+                        `<div class="card settings other-profile matchmake">
+                                <h5 class="card-title settings" data-text="Name">${this.nickname}</h5>
+                                <img src="${this.profilePicture}" class="card-img-top profile" id="profile-picture" />
+                                <div class="card-body settings other-profile">
+                                    <div class="elo-container">
+                                        <i class="bi bi-trophy"></i> ${tr("Elo: ")} ${this.elo.pongElo}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="glitch-wrapper vs">
+                                <div class="glitch vs" data-glitch="VS">VS</div>
+                            </div>
+                            <div class="card settings other-profile matchmake">
+                                <h5 class="card-title settings" data-text="Name">${this.opponentNickname}</h5>
+                                <img
+                                    src="${this.opponentProfilePicture}"
+                                    class="card-img-top profile"
+                                    id="profile-picture"
+                                />
+                                <div class="card-body settings other-profile">
+                                    <div class="elo-container">
+                                        <i class="bi bi-trophy"></i> ${tr("Elo: ")} ${this.opponentElo.pongElo}
+                                    </div>
+                                </div>
+                            </div>`;
                     setTimeout(() => navigateTo("/play/pong/" + data["id"]), 5000);
                 }
             }
         };
     }
 
-    //     <li>
-    //     <Duck />
-    // </li>
-
     render() {
         return /* HTML */ `<HomeNavBar />
-            <div class="matchmake-container">
-                <ul>
-                    <li>
-                        <span class="searching-for-game">${tr("Searching for a game")}</span>
-                    </li>
-                    <li>
-                        <span>
-                            <span class="timer">00:00</span>
-                        </span>
-                    </li>
-                </ul>
-                <div class="match-found-container hidden">
-                    <div class="player-card">
-                        <ul>
-                            <li>
-                                <img src="/favicon.svg" alt="" />
-                            </li>
-                            <li>
-                                <span>test</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="vs-card">VS</div>
-                    <div class="player-card">
-                        <ul>
-                            <li>
-                                <img src="/favicon.svg" alt="" />
-                            </li>
-                            <li>
-                                <span>test</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+            <div class="container-fluid matchmaking-container">
+                <span class="searching-matchmake">Searching for a game...</span>
+                <div class="timer">0:00</div>
+                <div class="container-fluid vs-container"></div>
             </div>`;
     }
 }

@@ -308,8 +308,8 @@ class PongManager(GameManager):
                 # await game.on_join(p1.player_id)
                 # await game.on_join(p2.player_id)
 
-                await p1.conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": "1v1" }))
-                await p2.conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": "1v1" }))
+                await p1.conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": "1v1", "opponent": p2.player_id }))
+                await p2.conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": "1v1", "opponent": p1.player_id }))
 
             await asyncio.sleep(1.0)
 

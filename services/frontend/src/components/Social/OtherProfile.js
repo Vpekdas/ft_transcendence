@@ -127,54 +127,9 @@ export default class OtherProfile extends Component {
                     date: this.timeAsDate(result["timeEnded"]),
                 };
 
-                if (result["stats"]["p1"]["up_count"] > result["stats"]["p2"]["up_count"]) {
-                    player1Class = "bar-chart-rectangle-higher";
-                    player2Class = "bar-chart-rectangle-lower";
-                } else {
-                    player1Class = "bar-chart-rectangle-lower";
-                    player2Class = "bar-chart-rectangle-higher";
-                }
-
-                const barChartConfig1 = {
-                    width: "180",
-                    height: "80",
-                    title: "Up Count",
-                    player1Class: player1Class,
-                    player1Name: player1Name,
-                    firstElementWidth: result["stats"]["p1"]["up_count"],
-                    player2Class: player2Class,
-                    player2Name: player2Name,
-                    secondElementWidth: result["stats"]["p2"]["up_count"],
-                };
-
-                if (result["stats"]["p1"]["down_count"] > result["stats"]["p2"]["down_count"]) {
-                    player1Class = "bar-chart-rectangle-higher";
-                    player2Class = "bar-chart-rectangle-lower";
-                } else {
-                    player1Class = "bar-chart-rectangle-lower";
-                    player2Class = "bar-chart-rectangle-higher";
-                }
-
-                const barChartConfig2 = {
-                    width: "180",
-                    height: "80",
-                    title: "Down Count",
-                    player1Class: player1Class,
-                    player1Name: player1Name,
-                    firstElementWidth: result["stats"]["p1"]["down_count"],
-                    player2Class: player2Class,
-                    player2Name: player2Name,
-                    secondElementWidth: result["stats"]["p2"]["down_count"],
-                };
-
-                const heatMapConfig = result["stats"]["heatmap"];
-
                 // prettier-ignore
                 this.matchHistoryHTML += `<Accordion config='${JSON.stringify({
-                    config: config, 
-                    barChart1: barChartConfig1, 
-                    barChart2: barChartConfig2,
-                    heatMap: heatMapConfig})}' />`;
+                    config: config})}' match-id="${result["id"]}" player1="${player1Name}" player2="${player2Name}" />`;
             }
             this.matchHistoryHTML += /* HTML */ `</div>`;
         }

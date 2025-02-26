@@ -27,8 +27,6 @@ export default class PongMatchmake extends Component {
             navigateTo("/");
         }
 
-        const [time, setTime] = this.usePersistent("matchmakeTimer", 0); // TODO: No need to store the value in localStorage here.
-
         this.ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/matchmake/pong`);
         this.ws.onopen = (event) => {
             this.ws.send(
@@ -56,12 +54,6 @@ export default class PongMatchmake extends Component {
                 }
             }
         };
-
-        // setTime(0);
-
-        // let timer = setInterval(() => {
-        //     setTime(time() + 1);
-        // }, 1000);
     }
 
     //     <li>
@@ -77,7 +69,7 @@ export default class PongMatchmake extends Component {
                     </li>
                     <li>
                         <span>
-                            <span class="timer">${this.timeInMinutes()}</span>
+                            <span class="timer">00:00</span>
                         </span>
                     </li>
                 </ul>

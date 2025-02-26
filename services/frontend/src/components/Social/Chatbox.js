@@ -97,8 +97,6 @@ export default class Chatbox extends Component {
                 const data = JSON.parse(event.data);
                 const messageData = JSON.parse(event.data);
 
-                console.log(data);
-
                 if (data.type === "channel_list") {
                     for (let i = 0; i < data.channelList.length; i++) {
                         const channelInfo = { channelUrl: data.channelList[i], personId: data.discussingWith[i] };

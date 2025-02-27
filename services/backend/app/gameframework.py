@@ -533,7 +533,7 @@ class TournamentState(enum.Enum):
     DEAD = 4,
 
 class Tournament:
-    def __init__(self, gameManager, manager, tid: str, playerCount: int, privacy: str, password: str, game: str, host: int, gameSettings, fillWithAI: bool):
+    def __init__(self, gameManager, manager, tid: str, playerCount: int, privacy: str, password: str, game: str, host: int, gameSettings, fillWithAI: bool, name: str):
         self.manager = manager
         self.gameManager = gameManager
         self.tid = tid
@@ -544,6 +544,7 @@ class Tournament:
         self.host = host
         self.gameSettings = gameSettings
         self.fillWithAI = fillWithAI
+        self.name = name
 
         self.invited: list[int] = []
 
@@ -663,7 +664,7 @@ class Tournament:
             if player.id not in self.players:
                 self.players.append(player.id)
 
-        await self.broadcast(json.dumps({ "type": "players", "players": self.players, "host": self.host }))
+        await self.broadcast(json.dumps({ "type": "players", "players": self.players, "host": self.host, "name": self.name }))
         await self.send_tree()
 
     async def disconnect(self, player):
@@ -711,7 +712,7 @@ class TournamentManager:
         self.tournaments: dict[str, Tournament] = {}
         self.consumers = []
 
-    def create(self, *, gameManager, name: str, playerCount: int, privacy: str, password: str = None, fillWithAI: bool, host: int, gameSettings) -> str:
+    def create(self, *, gameManager, name: str, playerCount: int, privacy: str, password: str = None, fillWithAI: bool, host: int, gameSettings, name: str) -> str:
         """
         Create a new tournament
         """
@@ -721,7 +722,7 @@ class TournamentManager:
         # t = sync(lambda: Tournament(name=name, tid=tid, playerCount=playerCount, openType=privacy, password=hashed_password, game=self.game, gameSettings=gameSettings, fillWithAI=fillWithAI, state="lobby"))
         # sync(lambda: t.save())
 
-        t2 = Tournament(gameManager=gameManager, manager=self, tid=tid, playerCount=playerCount, privacy=privacy, password=None, game=self.game, host=host, gameSettings=gameSettings, fillWithAI=fillWithAI)
+        t2 = Tournament(gameManager=gameManager, manager=self, tid=tid, playerCount=playerCount, privacy=privacy, password=None, game=self.game, host=host, gameSettings=gameSettings, fillWithAI=fillWithAI, name=name)
         self.tournaments[tid] = t2
 
         return tid

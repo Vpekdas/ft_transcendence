@@ -119,9 +119,6 @@ export default class Tournament extends Component {
         this.host = undefined;
         this.roundsHtml = "";
 
-        const [_, setRounds] = this.usePersistent("rounds", []);
-        const [players, setPlayers] = this.usePersistent("tplayers", []);
-
         this.onready = () => {
             this.ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/tournament/${this.id}`);
 
@@ -143,7 +140,6 @@ export default class Tournament extends Component {
 
                     document.getElementById("player-list").innerHTML = playersHTML;
 
-                    // setPlayers(playersList);
                     this.host = data["host"];
 
                     if (this.host != this.playerInfo.id) {

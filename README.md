@@ -8,18 +8,17 @@
 - [x] User: Remote Authentication (42) (major) by [@FirePh0enix]
 
 - [x] Gameplay: Remote players (major) [@FirePh0enix]
-- [ ] Gameplay: Game customization (minor)
-- [ ] Gameplay: Live Chat (major) by [@Lebronen]
+- [x] Gameplay: Game customization (minor)
+- [x] Gameplay: Live Chat (major) by [@Lebronen] and [@Vpekdas]
 
-- [ ] AI: User stats (minor)
+- [x] AI: User stats (minor) by [@FirePh0enix]
 
-- [ ] Cybersec: GPDR (minor)
-- [ ] Cybersec: 2FA (major) by [@Lebronen]
+- [x] Cybersec: 2FA (major) by [@Lebronen]
 
 - [x] Graphics: ThreeJS (major) by [@Vpekdas]
 
-- [ ] Accessibility: Expanding Browser Compatibility (minor) by [@Vpekdas]
-- [ ] Accessibility: Multiple language (minor) by [@Vpekdas]
+- [x] Accessibility: Expanding Browser Compatibility (minor) by [@Vpekdas]
+- [x] Accessibility: Multiple language (minor) by [@Vpekdas]
 
 ## Missing modules
 
@@ -30,6 +29,7 @@
 
 - AI: AI Opponent (major)
 
+- Cybersec: GPDR (minor)
 - Cybersec: Implement WAF/ModSecurity with Hardened Configuration and HashiCorp Vault for Secrets Management (major)
 
 - Devops: Microservices (major)
@@ -46,9 +46,3 @@
 [@FirePh0enix]: https://github.com/FirePh0enix
 [@Vpekdas]: https://github.com/Vpekdas
 [@Lebronen]: https://github.com/Lebronen
-
-[#9]: https://github.com/FirePh0enix/ft_transcendence/issues/9
-[#10]: https://github.com/FirePh0enix/ft_transcendence/issues/10
-[#11]: https://github.com/FirePh0enix/ft_transcendence/issues/11
-[#12]: https://github.com/FirePh0enix/ft_transcendence/issues/12
-[#13]: https://github.com/FirePh0enix/ft_transcendence/issues/13

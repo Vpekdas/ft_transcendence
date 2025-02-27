@@ -716,7 +716,7 @@ class TournamentManager:
         self.tournaments: dict[str, Tournament] = {}
         self.consumers = []
 
-    def create(self, *, gameManager, name: str, playerCount: int, privacy: str, password: str = None, fillWithAI: bool, host: int, gameSettings, name: str) -> str:
+    def create(self, *, gameManager, name: str, playerCount: int, privacy: str, password: str = None, fillWithAI: bool, host: int, gameSettings) -> str:
         """
         Create a new tournament
         """

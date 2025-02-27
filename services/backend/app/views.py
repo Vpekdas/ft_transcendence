@@ -521,7 +521,7 @@ def tournament_create(request: HttpRequest):
     game_settings = data["gameSettings"]
     manager = pong_manager
 
-    tid = tournaments.create(gameManager=pong_manager, host=player.id, name=data["name"], playerCount=data["playerCount"], privacy=data["openType"], password=None, fillWithAI=False, gameSettings=data["gameSettings"], name=data["name"])
+    tid = tournaments.create(gameManager=pong_manager, host=player.id, name=data["name"], playerCount=data["playerCount"], privacy=data["openType"], password=None, fillWithAI=False, gameSettings=data["gameSettings"])
 
     return JsonResponse({ "id": tid })
 

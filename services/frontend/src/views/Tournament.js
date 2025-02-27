@@ -128,6 +128,8 @@ export default class Tournament extends Component {
             this.ws.onmessage = async (event) => {
                 const data = JSON.parse(event.data);
 
+                console.log(data);
+
                 if (data["type"] == "players") {
                     let playersHTML = "";
                     for (let p of data["players"]) {
@@ -182,8 +184,6 @@ export default class Tournament extends Component {
                 } else if (data["type"] == "match") {
                     navigateTo(`/play/pong/${data["id"]}`);
                 }
-
-                console.log(data);
             };
 
             document.querySelector("#start-tournament").addEventListener("click", () => {

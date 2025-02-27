@@ -38,7 +38,7 @@ function fixSourceMaps() {
 
 export default defineConfig({
     base: "/",
-    root: "src/",
+    root: "./src/",
     build: {
         minify: "terser",
     },
@@ -49,4 +49,9 @@ export default defineConfig({
         }),
         // fixSourceMaps(),
     ],
+    server: {
+        host: "0.0.0.0",
+        // TODO: When pushing before pushing to vogsphere
+        // hmr: false,
+    },
 });

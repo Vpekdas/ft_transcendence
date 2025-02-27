@@ -2,9 +2,6 @@ services:
   frontend:
     container_name: frontend
     build: services/frontend
-      # context: services/frontend/
-      # dockerfile: ./prod.Dockerfile
-      # dockerfile: ./Dockerfile
     develop:
       watch:
         - action: sync

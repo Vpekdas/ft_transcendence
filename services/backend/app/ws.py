@@ -248,6 +248,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.send_message(data)
         elif message_type == "create_game":
             await self.create_game(data)
+        elif message_type =="invite_tournament":
+            await self.invite_tournament(data)
+
+    async def invite_tournament(self, data):
+        channel_name = data.get("channel_name")
+        tournament_id = data.get("tournament_id")
+        sender = data.get("sender")
+
+        await self.channel_layer.group_send(
+            channel_name,
+            {
+                "type": "tournament_invitation_sent",
+                "tournament_id": tournament_id,
+                "sender": sender,
+            }
+        ) 
 
     async def create_game(self, data):
         accepted_user = data.get("user_list")
@@ -274,8 +290,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
             "sender": event["sender"]
         }))
 
-
-
+    async def tournament_invitation_sent(self, event):
+        tournament_id = event["tournament_id"]
+        sender = event["sender"]
+        await self.send(text_data=json.dumps({
+                "type": "tournament_invitation_sent",
+                "tournament_id": tournament_id,
+                "sender": sender,
+            }))
+        
     async def create_channel(self, data):
         # Generate a unique channel name.
         new_channel_name = str(uuid.uuid4())

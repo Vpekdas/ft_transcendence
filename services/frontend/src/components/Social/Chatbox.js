@@ -169,6 +169,26 @@ export default class Chatbox extends Component {
                                     navigateTo("/play/pong/" + gameId);
                                 }
                             }
+
+                            if (messageData.type === "tournament_invitation_sent") {
+                                const tournamentId = messageData.tournament_id;
+                                const sender = messageData.sender;
+                                const idToNickname = await getNickname(sender);
+
+                                // Show an invitation to second person. so he is not forced to join.
+                                if (this.id !== sender) {
+                                    showToast(
+                                        "You received an tournament invite from " +
+                                            idToNickname +
+                                            ". You can click on this popup to join him !",
+                                        "bi bi-controller"
+                                    );
+                                    const toast = document.getElementById("toast-container");
+                                    toast.addEventListener("click", () => {
+                                        navigateTo("/tournament/" + tournamentId);
+                                    });
+                                }
+                            }
                         };
 
                         newWs.onerror = (event) => {};
@@ -351,6 +371,26 @@ export default class Chatbox extends Component {
                         navigateTo("/play/pong/" + gameId);
                     }
                 }
+
+                if (messageData.type === "tournament_invitation_sent") {
+                    const tournamentId = messageData.tournament_id;
+                    const sender = messageData.sender;
+                    const idToNickname = await getNickname(sender);
+
+                    // Show an invitation to second person. so he is not forced to join.
+                    if (this.id !== sender) {
+                        showToast(
+                            "You received an tournament invite from " +
+                                idToNickname +
+                                ". You can click on this popup to join him !",
+                            "bi bi-controller"
+                        );
+                        const toast = document.getElementById("toast-container");
+                        toast.addEventListener("click", () => {
+                            navigateTo("/tournament/" + tournamentId);
+                        });
+                    }
+                }
             };
         }
     }
@@ -525,13 +565,26 @@ export default class Chatbox extends Component {
             }
 
             if (channelName) {
-                this.generalWs.send(
-                    JSON.stringify({
-                        type: "create_game",
-                        user_list: [this.id, this.chattingWithId],
-                        channel_name: channelName,
-                    })
-                );
+                if (location.pathname.includes("tournament")) {
+                    const tournamentId = location.pathname.split("/").pop();
+
+                    this.generalWs.send(
+                        JSON.stringify({
+                            type: "invite_tournament",
+                            tournament_id: tournamentId,
+                            channel_name: channelName,
+                            sender: this.id,
+                        })
+                    );
+                } else {
+                    this.generalWs.send(
+                        JSON.stringify({
+                            type: "create_game",
+                            user_list: [this.id, this.chattingWithId],
+                            channel_name: channelName,
+                        })
+                    );
+                }
             }
         });
 

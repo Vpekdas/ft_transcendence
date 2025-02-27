@@ -181,8 +181,8 @@ export default class Tournament extends Component {
 
                     this.createBracket(data["rounds"]);
                     this.createRoundTier();
-                    createBinaryParticle(15);
-                    createDotParticle(15);
+                    this.createBinaryParticle(15);
+                    this.createDotParticle(15);
                 } else if (data["type"] == "match") {
                     navigateTo(`/play/pong/${data["id"]}`);
                 }
@@ -200,7 +200,8 @@ export default class Tournament extends Component {
         const [rounds, _] = this.usePersistent("rounds", []);
         const [players, setPlayers] = this.usePersistent("tplayers", []);
 
-        return /* HTML */ ` <HomeNavBar />
+        return /* HTML */ `
+            <HomeNavBar />
             <div class="container-fluid dashboard-container tournament-container" id="tournament-container">
                 <div class="particle-container"></div>
                 <div class="container-fluid dashboard-container match-container" id="match-container"></div>
@@ -210,10 +211,12 @@ export default class Tournament extends Component {
                         <span>${tr("Tournament")}</span>
                     </h2>
                     <div id="player-list"></div>
-                    <button id="start-tournament">
-                        <i class="bi bi-rocket-takeoff"></i> <span>${tr("Start !")}</span>
+                    <button id="start-tournament" class="tournament-btn start-btn">
+                        <i class="bi bi-rocket"></i> <span>${tr("Start !")}</span>
                     </button>
                 </div>
-            </div>`;
+            </div>
+            <Chatbox />
+        `;
     }
 }

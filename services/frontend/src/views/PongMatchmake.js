@@ -109,7 +109,12 @@ export default class PongMatchmake extends Component {
     render() {
         return /* HTML */ `<HomeNavBar />
             <div class="container-fluid matchmaking-container">
-                <span class="searching-matchmake">Searching for a game...</span>
+                <div class="searching-matchmake">
+                    <div class="spinner-border text-warning" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <span>Searching for a match...</span>
+                </div>
                 <div class="timer">0:00</div>
                 <div class="container-fluid vs-container"></div>
             </div>`;

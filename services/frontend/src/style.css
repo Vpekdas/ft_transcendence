@@ -2620,13 +2620,6 @@ ow-system[labels="false"] ow-name {
     box-shadow: 0 0 10px #00bcd4;
 }
 
-/* #player-list span::before {
-    content: "\F2D4";
-    font-family: "Bootstrap-icons";
-    margin-right: 10px;
-    color: #00bcd4;
-} */
-
 #start-tournament {
     background-color: #00bcd4;
     color: #ffffff;
@@ -2913,9 +2906,24 @@ ow-system[labels="false"] ow-name {
     position: relative;
     width: 100%;
     height: 10%;
-    justify-content: space-around;
+    justify-content: center;
     align-items: center;
     color: white;
+    background: linear-gradient(135deg, #1a1a1a, #000000);
+    border: 2px solid #d89123;
+    box-shadow:
+        0 0 10px #d89123,
+        0 0 20px #d89123;
+    animation:
+        pulsing-glow 2s infinite alternate,
+        fadeIn 1s forwards,
+        glitch 1s infinite;
+    font-family: "Courier New", monospace;
+    text-shadow:
+        0 0 5px #d89123,
+        0 0 10px #d89123;
+    gap: 10px;
+    --glow-color: #d89123;
 }
 
 .timer {
@@ -2923,9 +2931,14 @@ ow-system[labels="false"] ow-name {
     position: relative;
     height: 10%;
     width: 100%;
-    color: white;
-    justify-content: space-around;
+    color: #d89123;
+    justify-content: center;
     align-items: center;
+    font-family: "Courier New", monospace;
+    font-size: 2rem;
+    text-shadow:
+        0 0 5px #d89123,
+        0 0 10px #d89123;
 }
 
 .container-fluid.vs-container {
@@ -3496,7 +3509,7 @@ ow-system[labels="false"] ow-name {
     cursor: pointer;
     align-items: center;
     bottom: 1%;
-    right: 1%;
+    left: 1%;
     transition:
         box-shadow 0.3s ease,
         background-color 0.3s ease;

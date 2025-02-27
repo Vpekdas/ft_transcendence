@@ -659,18 +659,22 @@ class Tournament:
 
         self.state = TournamentState.LOBBY
 
-    async def on_join(self, player):
+    async def on_join(self, player) -> bool:
         if self.state == TournamentState.LOBBY_BEFORE and (player.id != self.host or player.id not in self.players):
             if player.id not in self.players:
                 self.players.append(player.id)
+        elif len(self.players) >= self.playerCount and player.id not in self.players:
+            return False
 
         await self.broadcast(json.dumps({ "type": "players", "players": self.players, "host": self.host, "name": self.name }))
         await self.send_tree()
 
+        return True
+
     async def disconnect(self, player):
         if self.state == TournamentState.LOBBY_BEFORE and player.id != self.host:
             self.players.remove(player.id)
-            await self.broadcast(json.dumps({ "type": "players", "players": self.players, "host": self.host }))
+            await self.broadcast(json.dumps({ "type": "players", "players": self.players, "host": self.host, "name": self.name }))
 
     async def send_tree(self):
         await self.broadcast(json.dumps({ "type": "rounds", "rounds": [round.to_dict() for round in self.rounds], "winner": self.winner }))
@@ -733,12 +737,7 @@ class TournamentManager:
 
         t = self.tournaments[tid]
 
-        if t.privacy == "invite" and player.id in t.invited:
-            await t.on_join(player)
-            return True
-        elif t.privacy == "open":
-            await t.on_join(player)
-            return True
+        return await t.on_join(player)
 
     async def connect(self, consumer):
         self.consumers.append(consumer)

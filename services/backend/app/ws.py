@@ -4,7 +4,6 @@ import sys
 from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
 from .gameframework import log, sync, GameManager, TournamentManager, Client
 from .pong import PongManager
-from .chess import ChessGame
 from .models import Player, Tournament, Chat, Message
 from .utils import hash_weak_password
 from .errors import *
@@ -90,27 +89,6 @@ class PongClientConsumer(AsyncWebsocketConsumer):
         except json.JSONDecodeError:
             pass
 
-chess_game = ChessGame()
-
-class ChessClientConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        await self.accept()
-        await chess_game.on_join(self)
-
-    async def disconnect(self, close_code):
-        await chess_game.on_quit(self)
-
-    async def receive(self, text_data):
-        try:
-            data = json.loads(text_data)
-
-            if "type" not in data:
-                return
-
-            await chess_game.on_message(self, data)
-        except json.JSONDecodeError:
-            pass
-
 class TournamentConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user = self.scope["user"]
@@ -127,10 +105,12 @@ class TournamentConsumer(AsyncWebsocketConsumer):
             return
 
         self.tournament = tournaments.tournaments[self.tid]
-        self.is_connected = False
 
-        await tournaments.connect(self)
-        await self.accept()
+        if await tournaments.on_join(self.player, self.tid, None):
+            await tournaments.connect(self)
+            await self.accept()
+        else:
+            await self.close()
 
     async def disconnect(self, close_code):
         await tournaments.disconnect(self.tid, self)
@@ -142,12 +122,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
             if "type" not in data:
                 return
 
-            if data["type"] == "join":
-                if await tournaments.on_join(self.player, self.tid, data["password"] if "password" in data else None):
-                    self.is_connected = True
-                else:
-                    await self.send(json.dumps({ "error": BAD_PASSWORD }))
-            elif data["type"] == "start" and self.player.id == self.tournament.host:
+            if data["type"] == "start" and self.player.id == self.tournament.host:
                 await tournaments.start(self.tid)
         except json.JSONDecodeError:
             pass

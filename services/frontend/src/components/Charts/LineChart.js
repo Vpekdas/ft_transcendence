@@ -68,7 +68,7 @@ export default class LineChart extends Component {
                 } else {
                     duration = point.y;
                 }
-                return `<circle cx="${x}" cy="${y + this.paddingTop}" data-bs-toggle="tooltip" title="${duration}" r="4" fill="${this.config.lineChartConfig.circleColor}"></circle>`;
+                return `<circle cx="${x}" cy="${y + this.paddingTop}" data-bs-toggle="tooltip" title="${duration}" r="8" fill="${this.config.lineChartConfig.circleColor}"></circle>`;
             })
             .join(" ");
     }
@@ -82,27 +82,10 @@ export default class LineChart extends Component {
                 y2="${this.viewHeight}"
                 stroke="black"
             />
-            ${this.config.lineChartConfig.points
-                .map((point, index) => {
-                    const x =
-                        this.padding +
-                        (index * (this.viewWidth - 2 * this.padding)) / (this.config.lineChartConfig.points.length - 1);
-                    return `<text x="${x}" y="${this.viewHeight + this.padding}" text-anchor="middle">${index}</text>`;
-                })
-                .join("")}
         `;
 
         const yAxis = /* HTML */ `
             <line x1="${this.padding}" y1="0" x2="${this.padding}" y2="${this.viewHeight}" stroke="black" />
-            ${[0, ...this.config.lineChartConfig.points.map((point) => point.y)]
-                .map((yValue, index) => {
-                    const y =
-                        this.viewHeight -
-                        (yValue * this.viewHeight) /
-                            Math.max(...this.config.lineChartConfig.points.map((point) => point.y));
-                    return `<text x="${this.padding - this.paddingTop}" y="${y + this.paddingTop}" text-anchor="end">${yValue}</text>`;
-                })
-                .join("")}
         `;
 
         return /* HTML */ ` <svg

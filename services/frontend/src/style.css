@@ -1434,9 +1434,10 @@ canvas {
     text-shadow:
         0 0 5px #d89123,
         0 0 10px #d89123;
-    animation: fadeIn 1s ease-in-out;
+    animation:
+        fadeInOut 5s ease-in-out,
+        glow 1.5s infinite alternate;
 }
-
 
 /* CHESS GAME */
 

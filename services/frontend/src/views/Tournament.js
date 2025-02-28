@@ -120,6 +120,9 @@ export default class Tournament extends Component {
         this.roundsHtml = "";
 
         this.onready = () => {
+            this.createBinaryParticle(21);
+            this.createDotParticle(21);
+
             this.ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/tournament/${this.id}`);
 
             this.ws.onopen = (event) => {
@@ -179,10 +182,12 @@ export default class Tournament extends Component {
 
                     this.createBracket(data["rounds"]);
                     this.createRoundTier();
-                    this.createBinaryParticle(15);
-                    this.createDotParticle(15);
-                } else if (data["type"] == "match") {
-                    navigateTo(`/play/pong/${data["id"]}`);
+                }
+                if (data["type"] == "match") {
+                    console.log("hello, game will start soon !");
+                    setTimeout(() => {
+                        navigateTo(`/play/pong/${data["id"]}`);
+                    }, 5000);
                 }
             };
 

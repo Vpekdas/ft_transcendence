@@ -471,7 +471,10 @@ export default class Pong extends Component {
                 </div>
             </div>`;
 
-            document.querySelector(".container-fluid.end-game").innerHTML += gameover;
+            const endGameText = document.querySelector(".container-fluid.end-game");
+            if (endGameText) {
+                endGameText.innerHTML += gameover;
+            }
         } else if (data["type"] == "redirectTournament") {
             navigateTo(`/tournament/${data["id"]}`);
         } else if (data["type"] == "countdown") {

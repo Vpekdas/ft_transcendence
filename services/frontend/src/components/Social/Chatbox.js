@@ -111,8 +111,9 @@ export default class Chatbox extends Component {
                                     let sender = this.id == message.sender ? message.receiver : message.sender;
 
                                     const discussion = document.getElementById("private-discussion-" + sender);
-
-                                    this.addNewMessage(discussion, message.sender, message.content);
+                                    if (discussion) {
+                                        this.addNewMessage(discussion, message.sender, message.content);
+                                    }
                                 });
                             })
                             .catch((err) => {
@@ -599,7 +600,9 @@ export default class Chatbox extends Component {
 
     clean() {
         for (const [key, channelInfo] of this.wsChannelMap.entries()) {
-            key.close();
+            if (key.readyState === WebSocket.OPEN) {
+                key.close();
+            }
         }
     }
 

@@ -1,4 +1,4 @@
-import { getOriginNoProtocol, getNickname, post, api } from "../utils";
+import { getOriginNoProtocol, getNickname, post, api, showToast } from "../utils";
 import { tr } from "../i18n";
 import { Component, params, navigateTo } from "../micro";
 import TournamentRound from "../components/Tournament/TournamentRound";
@@ -108,7 +108,9 @@ export default class Tournament extends Component {
     }
 
     async clean() {
-        if (this.ws) this.ws.close();
+        if (this.ws === WebSocket.OPEN) {
+            this.ws.close();
+        }
     }
 
     async init() {
@@ -144,6 +146,7 @@ export default class Tournament extends Component {
                     }
 
                     document.getElementById("player-list").innerHTML = playersHTML;
+                    document.getElementById("tournament-title").innerHTML = data.name;
 
                     this.host = data["host"];
 
@@ -184,7 +187,7 @@ export default class Tournament extends Component {
                     this.createRoundTier();
                 }
                 if (data["type"] == "match") {
-                    console.log("hello, game will start soon !");
+                    showToast("Next game will start in 5 sec !", "bi bi-stopwatch-fill");
                     setTimeout(() => {
                         navigateTo(`/play/pong/${data["id"]}`);
                     }, 5000);
@@ -209,11 +212,12 @@ export default class Tournament extends Component {
                 <div class="container-fluid dashboard-container player-container">
                     <h2 id="tournament-title">
                         <i class="bi bi-clock"></i>
-                        <span>${tr("Tournament")}</span>
+                        <span id="tournament-title">${tr("Tournament")}</span>
                     </h2>
                     <div id="player-list"></div>
                     <button id="start-tournament" class="tournament-btn start-btn">
-                        <i class="bi bi-rocket"></i> <span>${tr("Start !")}</span>
+                        <i class="bi bi-rocket"></i>
+                        <span>${tr("Start !")}</span>
                     </button>
                 </div>
             </div>

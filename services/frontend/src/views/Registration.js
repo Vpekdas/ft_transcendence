@@ -5,8 +5,27 @@ import { Component, navigateTo } from "../micro";
 
 /** @type {import("../micro").Component} */
 export default class Registration extends Component {
+    createGlitchRectangle(particleNumber) {
+        const container = document.querySelector(".particle-container");
+
+        for (let i = 0; i < particleNumber; i++) {
+            const particle = document.createElement("div");
+
+            particle.classList.add("glitch-rectangle");
+
+            particle.style.setProperty("--startY", `${Math.random() * 100}vh`);
+            particle.style.setProperty("--startX", `${Math.random() * 100}vw`);
+            particle.style.setProperty("--endY", `${Math.random() * 100}vh`);
+            particle.style.setProperty("--endX", `${Math.random() * 100}vw`);
+
+            container.appendChild(particle);
+        }
+    }
+
     async init() {
         this.onready = () => {
+            this.createGlitchRectangle(42);
+
             document.querySelector(".login-form").addEventListener("submit", async (event) => {
                 const form = event.target;
                 const data = new FormData(form);
@@ -55,7 +74,8 @@ export default class Registration extends Component {
         };
     }
     render() {
-        return /* HTML */ ` <div>
+        return /* HTML */ `
+            <div class="particle-container"></div>
             <div class="container-fluid login-container">
                 <form class="login-form was-validated" action="javascript:void(0)">
                     <img src="/img/login/Amadeus-Logo.webp" class="login-logo" />
@@ -119,6 +139,6 @@ export default class Registration extends Component {
                     <a class="login-redirect" href="javascript:void(0)">${tr("Already have an account ?")}</a>
                 </form>
             </div>
-        </div>`;
+        `;
     }
 }

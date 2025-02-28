@@ -462,14 +462,16 @@ export default class Pong extends Component {
                 winnerText = tr("You loose :(");
             }
 
-            let gameover = /* HTML */ ` <li>
+            let gameover = /* HTML */ ` <div class="container-fluid end-game-text">
+                <div>
                     <span>${winnerText}</span>
-                </li>
-                <li>
+                </div>
+                <div>
                     <a href="/">${tr("Back to home")}</a>
-                </li>`;
+                </div>
+            </div>`;
 
-            document.querySelector(".ui-list").innerHTML += gameover;
+            document.querySelector(".container-fluid.end-game").innerHTML += gameover;
         } else if (data["type"] == "redirectTournament") {
             navigateTo(`/tournament/${data["id"]}`);
         } else if (data["type"] == "countdown") {
@@ -646,19 +648,22 @@ export default class Pong extends Component {
     async clean() {}
 
     render() {
-        let ui = /* HTML */ `<div class="ui">
-            <ul class="ui-list">
-                <li>
-                    <span class="score" id="score1">0</span>
-                    <span class="vs"> - </span>
-                    <span class="score" id="score2">0</span>
-                </li>
-            </ul>
-        </div>`;
+        let ui = /* HTML */ `
+            <div class="container-fluid tournament-match-container pong">
+                <div class="player-info game">
+                    <span class="player-score" id="score1">0</span>
+                </div>
+                <div class="glitch-wrapper vs">
+                    <div class="glitch vs" data-glitch="VS">VS</div>
+                </div>
+                <div class="player-info game">
+                    <span class="player-score" id="score2">0</span>
+                </div>
+            </div>
+            <div class="container-fluid end-game"></div>
+        `;
 
         return /* HTML */ ` <HomeNavBar />
-            <div id="pong">
-                <div id="pong-overlay">${ui}</div>
-            </div>`;
+            <div id="pong">${ui}</div>`;
     }
 }

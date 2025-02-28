@@ -108,7 +108,7 @@ export default class Tournament extends Component {
     }
 
     async clean() {
-        if (this.ws === WebSocket.OPEN) {
+        if (this.ws.readyState === WebSocket.OPEN) {
             this.ws.close();
         }
     }

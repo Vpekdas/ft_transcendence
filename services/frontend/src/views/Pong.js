@@ -860,9 +860,6 @@ export default class Pong extends Component {
             let camera = new THREE.PerspectiveCamera(70, c.clientWidth / c.clientHeight, 0.1, 1000);
             let renderer = new THREE.WebGLRenderer();
 
-            this.start = Date.now();
-            this.previousTime = performance.now();
-
             renderer.setSize(c.clientWidth, c.clientHeight);
 
             window.addEventListener(
@@ -909,9 +906,14 @@ export default class Pong extends Component {
 
             // await this.setupGameTerrain();
 
-            setInterval(() => {
-                this.generateMeteorite(this.meteorites);
-            }, 4200);
+            if (this.terrainSkin == "brittle-hollow") {
+                this.start = Date.now();
+                this.previousTime = performance.now();
+                
+                setInterval(() => {
+                    this.generateMeteorite(this.meteorites);
+                }, 4200);
+            }
 
             renderer.setAnimationLoop(() => {
                 for (let [key, value] of this.boxes) {

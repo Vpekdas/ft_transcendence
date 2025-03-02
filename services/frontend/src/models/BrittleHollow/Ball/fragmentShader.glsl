@@ -102,10 +102,10 @@ float fbm(vec3 p, vec3 rep, float scale, int detail, float roughness) {
 
 void main() {
     // Parameters for FBM noise
-    float scale = 3.0;
-    int detail = 10;
-    float roughness = 0.7;
-    vec3 rep = vec3(10.0, 10.0, 10.0); 
+    float scale = 5.0;
+    int detail = 15;
+    float roughness = 0.5;
+    vec3 rep = vec3(5.0, 5.0, 5.0); 
 
     // Apply FBM noise to the fragment color
     float noise = fbm(vWorldPosition, rep, scale, detail, roughness);

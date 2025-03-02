@@ -46,7 +46,7 @@ class ParticleSystem {
         this.particles = [];
         this.geometry = new THREE.BufferGeometry();
 
-        const { vertexShader, fragmentShader, texture } = this.params;
+        const { vertexShader, fragmentShader, texture, uniforms, blendingMode = THREE.AdditiveBlending } = this.params;
 
         this.material = new THREE.ShaderMaterial({
             vertexShader: vertexShader,
@@ -54,8 +54,9 @@ class ParticleSystem {
             uniforms: {
                 diffuseTexture: { value: new THREE.TextureLoader().load(texture) },
                 pointMultiplier: { value: window.innerHeight / (2.0 * Math.tan((0.5 * 75.0 * Math.PI) / 180.0)) },
+                ...uniforms,
             },
-            blending: THREE.AdditiveBlending,
+            blending: blendingMode,
             depthTest: true,
             depthWrite: false,
             transparent: true,
@@ -86,7 +87,7 @@ class ParticleSystem {
         this.updateGeometry();
     }
 
-    createParticle(basePosition) {
+    createParticle(basePosition, direction) {
         const life = (Math.random() * 0.75 + 0.25) * 5.0;
 
         return {
@@ -106,7 +107,7 @@ class ParticleSystem {
             maxLife: life,
             rotation: Math.random() * 2.0 * Math.PI * 2,
             // Modify as you wish the "direction" of particles.
-            velocity: new THREE.Vector3(0, 0, 10),
+            velocity: direction.clone().multiplyScalar(10),
         };
     }
 
@@ -135,7 +136,7 @@ class ParticleSystem {
         this.geometry.attributes.angle.needsUpdate = true;
     }
 
-    updateParticles(timeElapsed, basePosition) {
+    updateParticles(timeElapsed, basePosition, direction) {
         for (let p of this.particles) {
             p.life -= timeElapsed;
         }
@@ -156,14 +157,14 @@ class ParticleSystem {
         }
 
         while (this.particles.length < 100) {
-            this.particles.push(this.createParticle(basePosition));
+            this.particles.push(this.createParticle(basePosition, direction));
         }
 
         this.updateGeometry();
     }
 
-    step(timeElapsed, basePosition) {
-        this.updateParticles(timeElapsed, basePosition);
+    step(timeElapsed, basePosition, direction) {
+        this.updateParticles(timeElapsed, basePosition, direction);
     }
 }
 

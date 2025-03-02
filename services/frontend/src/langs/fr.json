@@ -77,5 +77,8 @@
     "Right side won !": "Le joueur de droite a gagne !",
     "Email": "Email",
     "One time code is invalid": "Le code a usage unique est invalid",
-    "One Time Code": "Code a usage unique"
+    "One Time Code": "Code a usage unique",
+    "Play Pong Locally": "Jouer à Pong en local",
+    "Challenge a Friend Online": "Défier un ami en ligne",
+    "Host a Pong Tournament": "Organiser un tournoi de Pong"
 }

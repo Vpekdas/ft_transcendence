@@ -152,34 +152,30 @@ export default class Home extends Component {
             <HomeNavBar />
             <div class="container-fluid home-container">
                 <div class="container-fluid game-container">
-                    <div class="card pong-game">
-                        <h5 class="card-title pong-game">Pong</h5>
-                        <img src="/favicon.svg" class="card-img-top pong-game" alt="..." />
-                        <div class="card-body pong-game">
-                            <p class="card-text pong-game">${tr("Play 1v1 Local Pong.")}</p>
-                            <button type="button" class="btn btn-success play" id="play-pong-1v1local">
-                                ${tr("Play")}
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card pong-game">
-                        <h5 class="card-title pong-game">Pong</h5>
-                        <img src="/favicon.svg" class="card-img-top pong-game" alt="..." />
-                        <div class="card-body pong-game">
-                            <p class="card-text pong-game">${tr("Play 1v1 Online Pong.")}</p>
-                            <button type="button" class="btn btn-success play" id="play-pong-1v1">${tr("Play")}</button>
-                        </div>
-                    </div>
-                    <div class="card pong-game">
-                        <h5 class="card-title pong-game">Pong</h5>
-                        <img src="/favicon.svg" class="card-img-top pong-game" alt="..." />
-                        <div class="card-body pong-game">
-                            <p class="card-text pong-game">${tr("Create a Pong Tournament.")}</p>
-                            <button type="button" class="btn btn-success play" id="play-pong-tournament">
-                                ${tr("Create")}
-                            </button>
-                        </div>
-                    </div>
+                    <GameCard
+                        title="Play Pong Locally"
+                        img="/img/pong-icon.svg"
+                        id="play-pong-1v1local"
+                        alt=""
+                        description="Play 1v1 Local Pong."
+                        btnName="Play"
+                    />
+                    <GameCard
+                        title="Challenge a Friend Online"
+                        img="/img/online-icon.svg"
+                        id="play-pong-1v1"
+                        alt=""
+                        description="Play 1v1 Online Pong."
+                        btnName="Play"
+                    />
+                    <GameCard
+                        title="Host a Pong Tournament"
+                        img="/img/trophy-icon.svg"
+                        id="play-pong-tournament"
+                        alt=""
+                        description="Create a Pong Tournament."
+                        btnName="Create"
+                    />
                 </div>
                 <div class="container-fluid intro-container" id="intro-container-1">
                     <span class="decoded-intro" id="intro1"></span>

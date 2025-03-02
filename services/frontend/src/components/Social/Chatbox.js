@@ -120,7 +120,7 @@ export default class Chatbox extends Component {
                                 console.error("Error fetching history:", err);
                             });
 
-                        // Set event handlers for the new WebSocket
+                        // Set event handlers for the new WebSocket.
                         newWs.onopen = () => {};
 
                         newWs.onmessage = async (event) => {
@@ -157,9 +157,9 @@ export default class Chatbox extends Component {
                                 // Show an invitation to second person. so he is not forced to join.
                                 if (this.id !== sender) {
                                     showToast(
-                                        "You received an invite for 1v1 from " +
+                                        tr("You received an invite for a 1v1 match from ") +
                                             idToNickname +
-                                            ". You can click on this popup to join him !",
+                                            tr(". Click this popup to join!"),
                                         "bi bi-controller"
                                     );
                                     const toast = document.getElementById("toast-container");
@@ -179,9 +179,9 @@ export default class Chatbox extends Component {
                                 // Show an invitation to second person. so he is not forced to join.
                                 if (this.id !== sender) {
                                     showToast(
-                                        "You received an tournament invite from " +
+                                        tr("You received a tournament invite from ") +
                                             idToNickname +
-                                            ". You can click on this popup to join him !",
+                                            tr(". Click this popup to join!"),
                                         "bi bi-controller"
                                     );
                                     const toast = document.getElementById("toast-container");
@@ -191,10 +191,6 @@ export default class Chatbox extends Component {
                                 }
                             }
                         };
-
-                        newWs.onerror = (event) => {};
-
-                        newWs.onclose = (event) => {};
 
                         this.wsChannelMap.set(newWs, channelInfo);
                     }
@@ -241,10 +237,6 @@ export default class Chatbox extends Component {
                                     this.addNewMessage(discussion, sender, message);
                                 }
                             };
-
-                            newWs.onerror = (event) => {};
-
-                            newWs.onclose = (event) => {};
 
                             this.wsChannelMap.set(newWs, channelInfo);
                         }
@@ -359,9 +351,9 @@ export default class Chatbox extends Component {
                     // Show an invitation to second person. so he is not forced to join.
                     if (this.id !== sender) {
                         showToast(
-                            "You received an invite for 1v1 from " +
+                            tr("You received an invite for a 1v1 match from ") +
                                 idToNickname +
-                                ". You can click on this popup to join him !",
+                                tr(". Click this popup to join!"),
                             "bi bi-controller"
                         );
                         const toast = document.getElementById("toast-container");
@@ -381,9 +373,9 @@ export default class Chatbox extends Component {
                     // Show an invitation to second person. so he is not forced to join.
                     if (this.id !== sender) {
                         showToast(
-                            "You received an tournament invite from " +
+                            tr("You received a tournament invite from ") +
                                 idToNickname +
-                                ". You can click on this popup to join him !",
+                                tr(". Click this popup to join!"),
                             "bi bi-controller"
                         );
                         const toast = document.getElementById("toast-container");
@@ -507,9 +499,9 @@ export default class Chatbox extends Component {
                     showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
                 });
             if (response.error) {
-                showToast(response.error, "bi bi-exclamation-triangle-fill");
+                showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
             } else {
-                showToast("Friend added successfully.", "bi bi-check-circle-fill");
+                showToast(tr("Friend added successfully."), "bi bi-check-circle-fill");
             }
         });
 
@@ -528,24 +520,24 @@ export default class Chatbox extends Component {
                 const response = await post("/api/block-user/" + fullname, {})
                     .then((res) => res.json())
                     .catch((err) => {
-                        showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
+                        showToast(tr("An error occurred. Please try again."), "bi bi-exclamation-triangle-fill");
                     });
                 if (response.error) {
-                    showToast(response.error, "bi bi-exclamation-triangle-fill");
+                    showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
                 } else {
-                    showToast("User blocked successfully.", "bi bi-check-circle-fill");
+                    showToast(tr("User blocked successfully."), "bi bi-check-circle-fill");
                 }
             } else if (blockBtn.innerHTML === "UNBLOCK") {
                 blockBtn.innerHTML = "BLOCK";
                 const response = await post("/api/unblock-user/" + fullname, {})
                     .then((res) => res.json())
                     .catch((err) => {
-                        showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
+                        showToast(tr("An error occurred. Please try again."), "bi bi-exclamation-triangle-fill");
                     });
                 if (response.error) {
-                    showToast(response.error, "bi bi-exclamation-triangle-fill");
+                    showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
                 } else {
-                    showToast("User unblocked successfully.", "bi bi-check-circle-fill");
+                    showToast(tr("User unblocked successfully."), "bi bi-check-circle-fill");
                 }
             }
         });
@@ -607,7 +599,6 @@ export default class Chatbox extends Component {
     }
 
     async init() {
-        // Each user will add different channels to their map if they are included in the userlist.
         this.wsChannelMap = new Map();
         this.personMap = new Map();
         this.searchingArray = [];
@@ -701,8 +692,6 @@ export default class Chatbox extends Component {
                 await this.listenToWebSocketChannels();
             };
 
-            this.generalWs.onmessage = (event) => {};
-
             const sendBtn = document.getElementById("send-btn");
 
             sendBtn.addEventListener("click", async () => {
@@ -788,7 +777,7 @@ export default class Chatbox extends Component {
                             class="form-control"
                             id="search-bar"
                             rows="3"
-                            placeholder="Search a person..."
+                            placeholder=${tr("Search a person...")}
                         ></textarea>
                     </ul>
                     <div class="container-fluid chat-container" id="chat-container">
@@ -797,7 +786,7 @@ export default class Chatbox extends Component {
                             class="form-control"
                             id="messageArea"
                             rows="3"
-                            placeholder="Write your message..."
+                            placeholder=${tr("Write your message...")}
                         ></textarea>
                     </div>
                 </div>
@@ -1109,7 +1098,7 @@ export default class Chatbox extends Component {
             </div>
             <div id="d-mail-button">
                 <img src="/img/SG-001/phonewave.png" alt="D-Mail Icon" />
-                <span>Send a d-mail here !</span>
+                <span>${tr("Send a d-mail here !")}</span>
             </div>
             <audio id="notification-sound" src="/music/Tuturu.mp3"></audio>
             ${otherProfileNickname().length > 0 ? `<OtherProfile nickname="${otherProfileNickname()}" />` : ""}

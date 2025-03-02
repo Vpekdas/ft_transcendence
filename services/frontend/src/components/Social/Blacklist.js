@@ -39,13 +39,14 @@ export default class Blacklist extends Component {
 
                 const removeBlockBtn = profile.querySelector(".btn.btn-primary.settings.remove-friend");
                 removeBlockBtn.addEventListener("click", async () => {
-                    const response = await post("/api/unblock-user/" + nicknameToId).then((res) => res.json());
+                    const response = await post("/api/unblock-user/" + nicknameToId)
+                        .then((res) => res.json())
+                        .catch((err) => {});
 
                     if (response.error) {
-                        showToast(response.error, "bi bi-exclamation-triangle-fill");
+                        showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
                     } else {
-                        showToast("User removed from blocked list successfully", "bi bi-bell");
-                        // Little trick to update dynamically friend list. Force a new render.
+                        showToast(tr("User removed from blocked list successfully"), "bi bi-check-circle-fill");
                         setOtherProfileNickname("");
                     }
                 });

@@ -39,13 +39,14 @@ export default class Friends extends Component {
 
                 const removeFriendBtn = profile.querySelector(".btn.btn-primary.settings.remove-friend");
                 removeFriendBtn.addEventListener("click", async () => {
-                    const response = await post("/api/remove-friend/" + nicknameToId).then((res) => res.json());
+                    const response = await post("/api/remove-friend/" + nicknameToId)
+                        .then((res) => res.json())
+                        .catch((err) => {});
 
                     if (response.error) {
-                        showToast(response.error, "bi bi-exclamation-triangle-fill");
+                        showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
                     } else {
-                        showToast("User removed from friend list successfully", "bi bi-bell");
-                        // Little trick to update dynamically friend list. Force a new render.
+                        showToast(tr("User removed from friend list successfully."), "bi bi-check-circle-fill");
                         setOtherProfileNickname("");
                     }
                 });

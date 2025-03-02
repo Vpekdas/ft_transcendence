@@ -1,6 +1,6 @@
 import { tr } from "../../i18n";
 import { Component } from "../../micro";
-import { api, fetchApi, post } from "../../utils";
+import { api, post, showToast } from "../../utils";
 
 /** @type {import("../../micro").Component} */
 export default class ChangeProfilePictureForm extends Component {
@@ -27,10 +27,14 @@ export default class ChangeProfilePictureForm extends Component {
                         body: JSON.stringify({ type: picture.type, image: content }),
                     })
                         .then((res) => res.json())
-                        .catch((err) => {
-                            error: "Bad input";
-                        });
+                        .catch((err) => {});
+                    if (response.error) {
+                        showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
+                    } else {
+                        showToast(tr("Profile picture updated successfully."), "bi bi-check-circle-fill");
+                    }
                 };
+
                 reader.readAsDataURL(picture);
             });
         };

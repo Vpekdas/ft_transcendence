@@ -1,4 +1,5 @@
 import { Component } from "../../micro";
+import { tr } from "../../i18n";
 
 /** @type {import("../../micro").Component} */
 
@@ -55,7 +56,7 @@ export default class HeatMap extends Component {
                 </filter>
             </svg>
             <div class="container-fluid heatmap-container">
-                <h5 class="heatmap-title">Heatmap</h5>
+                <h5 class="heatmap-title">${tr("Heatmap")}</h5>
                 <div class="heatmap">${this.pixels}</div>
             </div>`;
     }

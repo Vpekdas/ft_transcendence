@@ -1,6 +1,5 @@
 import { tr } from "../../i18n";
 import { Component } from "../../micro";
-import { post } from "../../utils";
 
 /** @type {import("../../micro").Component} */
 

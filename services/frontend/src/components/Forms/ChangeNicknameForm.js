@@ -1,5 +1,5 @@
 import { tr } from "../../i18n";
-import { fetchApi, post, showToast } from "../../utils";
+import { fetchApi, showToast } from "../../utils";
 import { Component } from "../../micro";
 
 export default class ChangeNicknameForm extends Component {
@@ -26,6 +26,8 @@ export default class ChangeNicknameForm extends Component {
 
                     if (response.error) {
                         showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
+                    } else {
+                        showToast(tr("Nickname updated successfully."), "bi bi-check-circle-fill");
                     }
                 });
         };

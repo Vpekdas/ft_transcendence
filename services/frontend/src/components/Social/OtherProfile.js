@@ -1,6 +1,6 @@
 import { tr } from "../../i18n";
 import { Component } from "../../micro";
-import { api, fetchApi, post, getNickname, getUserIdByNickname } from "../../utils";
+import { api, post, getNickname, getUserIdByNickname } from "../../utils";
 export default class OtherProfile extends Component {
     timeInMinutes(s) {
         if (s < 10) {
@@ -155,6 +155,8 @@ export default class OtherProfile extends Component {
         this.gameDurationSum = 0;
         this.averageGameDuration = "0:00";
 
+        // TODO: Add this stats somewhere.
+
         if (this.matchCount !== 0) {
             this.winRatio = ((this.winCount / this.matchCount) * 100).toFixed(2);
             this.loseRatio = (100 - this.winRatio).toFixed(2);
@@ -180,7 +182,7 @@ export default class OtherProfile extends Component {
             color2: "#FF0000",
             fillPercent1: this.winRatio,
             fillPercent2: this.loseRatio,
-            title: "Win / Lose ratio",
+            title: tr("Win/Loss Ratio"),
             titleColor: "#d89123",
         };
 
@@ -196,7 +198,7 @@ export default class OtherProfile extends Component {
             fillPercent1: this.localRatio,
             fillPercent2: this.remoteRatio,
             fillPercent3: this.tournamentRatio,
-            title: "Gamemode Distrib",
+            title: tr("Game Mode Distribution"),
             titleColor: "#d89123",
         };
 
@@ -212,7 +214,7 @@ export default class OtherProfile extends Component {
             points: lineChartPoints,
             lineColor: "#00FF00",
             circleColor: "#00FFFF",
-            title: "Game Duration",
+            title: tr("Match Duration"),
             duration: true,
         };
 
@@ -228,7 +230,7 @@ export default class OtherProfile extends Component {
             points: lineChartPoints2,
             lineColor: "#00FF00",
             circleColor: "#00FFFF",
-            title: "Average Point in Game",
+            title: tr("Average Points per Game"),
             duration: false,
         };
 
@@ -257,8 +259,12 @@ export default class OtherProfile extends Component {
 
         const actualName = this.attributes.get("nickname");
         const actualId = await getUserIdByNickname(actualName);
-        this.results = await post("/api/player/" + actualId + "/matches").then((res) => res.json());
-        this.elo = await post("/api/player/" + actualId + "/profile").then((res) => res.json());
+        this.results = await post("/api/player/" + actualId + "/matches")
+            .then((res) => res.json())
+            .catch((err) => {});
+        this.elo = await post("/api/player/" + actualId + "/profile")
+            .then((res) => res.json())
+            .catch((err) => {});
 
         await this.showProfile();
         await this.showMatchHistory();
@@ -291,7 +297,7 @@ export default class OtherProfile extends Component {
 
     render() {
         const [otherProfileTab, setOtherProfileTab] = this.usePersistent("otherProfileTab", "");
-
+        this.dataHTML = this.profileHTML;
         if (otherProfileTab() === "Profile") {
             this.dataHTML = this.profileHTML;
         } else if (otherProfileTab() === "Match History") {

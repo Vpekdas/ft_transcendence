@@ -17,12 +17,15 @@ export default class DeleteAccountForm extends Component {
                     body: JSON.stringify({ access_token: localStorage.getItem("accessToken") }),
                 })
                     .then((res) => res.json())
-                    .catch((err) => {
-                        error: "Bad input"; // TODO: Toast ?
-                    });
+                    .catch((err) => {});
 
                 if (response["error"] == undefined) {
                     localStorage.removeItem("accessToken");
+                }
+                if (response.error) {
+                    showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
+                } else {
+                    showToast(tr("Account deleted successfully."), "bi bi-check-circle-fill");
                 }
 
                 document.querySelector(".delete-modal-overlay").style.display = "none";
@@ -35,7 +38,7 @@ export default class DeleteAccountForm extends Component {
     }
 
     render() {
-        return /* HTML */ ` <div>
+        return /* HTML */ `
             <div class="container-fluid settings">
                 <div class="card settings">
                     <h5 class="card-title settings" data-text="${tr("Delete your account")}">
@@ -63,6 +66,6 @@ export default class DeleteAccountForm extends Component {
                     </div>
                 </div>
             </div>
-        </div>`;
+        `;
     }
 }

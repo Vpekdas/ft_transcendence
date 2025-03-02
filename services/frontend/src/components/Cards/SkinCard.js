@@ -1,5 +1,5 @@
 import { tr } from "../../i18n";
-import { Component, navigateTo } from "../../micro";
+import { Component } from "../../micro";
 import { post, showToast } from "../../utils";
 
 export default class SkinCard extends Component {
@@ -7,18 +7,18 @@ export default class SkinCard extends Component {
         const response = await post("/api/player/c/skins/select-" + this.type + "/" + skin, {})
             .then((res) => res.json())
             .catch((err) => {
-                showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
+                showToast(tr("An error occurred. Please try again."), "bi bi-exclamation-triangle-fill");
             });
         if (response.error) {
-            showToast(response.error, "bi bi-exclamation-triangle-fill");
+            showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
         } else {
-            showToast(skin + " " + this.type + " chosen successfully.", "bi bi-check-circle-fill");
+            showToast(skin + " " + this.type + " " + tr("chosen successfully."), "bi bi-check-circle-fill");
         }
     }
 
     async init() {
-        this.title = this.attributes.get("title");
-        this.type = this.attributes.get("type");
+        this.title = tr(this.attributes.get("title"));
+        this.type = tr(this.attributes.get("type"));
 
         this.onready = async () => {
             const defaultButton = document.getElementById("btnradio default-" + this.type);
@@ -56,7 +56,7 @@ export default class SkinCard extends Component {
                     id="btnradio default-${this.type}"
                     autocomplete="off"
                 />
-                <label class="btn btn-outline-primary skin" for="btnradio default-${this.type}">Default</label>
+                <label class="btn btn-outline-primary skin" for="btnradio default-${this.type}">${tr("Default")}</label>
                 <input
                     type="radio"
                     class="btn-check"

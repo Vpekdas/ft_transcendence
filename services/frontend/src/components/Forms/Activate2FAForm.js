@@ -1,6 +1,6 @@
 import { tr } from "../../i18n";
 import { Component } from "../../micro";
-import { post, fetchApi, showToast } from "../../utils";
+import { post, showToast } from "../../utils";
 
 export default class Activate2FAForm extends Component {
     async init() {
@@ -34,9 +34,9 @@ export default class Activate2FAForm extends Component {
                         });
 
                     if (response.error) {
-                        showToast(response.error, "bi bi-exclamation-triangle-fill");
+                        showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
                     } else {
-                        showToast("2FA has been successfully enabled", "bi bi-exclamation-triangle-fill");
+                        showToast(tr("2FA has been successfully enabled"), "bi bi-exclamation-triangle-fill");
                     }
 
                     // Send a request to disable 2FA.
@@ -48,9 +48,9 @@ export default class Activate2FAForm extends Component {
                         });
 
                     if (response.error) {
-                        showToast(response.error, "bi bi-exclamation-triangle-fill");
+                        showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
                     } else {
-                        showToast("2FA has been successfully disabled", "bi bi-exclamation-triangle-fill");
+                        showToast(tr("2FA has been successfully disabled"), "bi bi-exclamation-triangle-fill");
                     }
                 }
             });
@@ -77,7 +77,9 @@ export default class Activate2FAForm extends Component {
                                 id="switch two-factor"
                                 state="${this.twoFactorStatus}"
                             />
-                            <label class="form-check-label two-factor" for="switchTwo-factor">2FA</label>
+                            <label class="form-check-label two-factor" for="switchTwo-factor"
+                                >${tr("Two-Factor Authentication (2FA)")}</label
+                            >
                         </div>
                     </div>
                 </div>

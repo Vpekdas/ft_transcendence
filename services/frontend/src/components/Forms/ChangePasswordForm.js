@@ -30,7 +30,9 @@ export default class ChangePasswordForm extends Component {
                     });
 
                 if (response.error) {
-                    showToast(response.error, "bi bi-exclamation-triangle-fill");
+                    showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
+                } else {
+                    showToast(tr("Password updated successfully."), "bi bi-check-circle-fill");
                 }
             });
         };

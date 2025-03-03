@@ -835,7 +835,7 @@ async function updateDOM(oldNode, newNode, oldElement, parentElement) {
 let rootNode;
 let initialPageLoad = true;
 
-async function router() {
+async function router(recreateDom) {
     let app = document.getElementById("micro-app");
 
     if (routerSettings == undefined) {
@@ -883,6 +883,12 @@ async function router() {
 
     // let element = await createTree(newNode);
     // app.replaceChild(element, app.firstElementChild);
+
+    if (recreateDom) {
+        app.replaceChildren([]);
+        rootNode = null;
+        // TODO: Call clean functions for each component
+    }
 
     await updateDOM(rootNode, newNode, app.firstElementChild, app);
     // console.log(document.querySelector(".container-fluid.round-container"));
@@ -947,21 +953,21 @@ export function defineRouter(settings) {
  *
  * @param {string} url
  */
-export function navigateTo(url) {
+export function navigateTo(url, recreateDom) {
     try {
         history.pushState({}, "", url);
     } catch (ex) {}
 
     initialPageLoad = true;
-    setTimeout(async () => await dirty());
+    setTimeout(async () => await dirty(recreateDom));
 }
 
 /**
  * Force the refresh of the DOM.
  */
-export async function dirty() {
+export async function dirty(recreateDom) {
     //TODO: Add this back
     // try {
-    await router();
+    await router(recreateDom);
     // } catch (e) {}
 }

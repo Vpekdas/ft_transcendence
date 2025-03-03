@@ -147,5 +147,8 @@
     "Blocked user already in list": "Utilisateur bloqué déjà dans la liste",
     "BLOCK": "BLOQUER",
     "UNBLOCK": "DEBLOQUER",
-    "INVITE": "INVITER"
+    "INVITE": "INVITER",
+    "Reload Page": "Recharger la page",
+    "Language changed. Please reload the page to apply changes.": "Langue changée. Veuillez recharger la page pour appliquer les modifications.",
+    "Reload": "Recharger"
 }

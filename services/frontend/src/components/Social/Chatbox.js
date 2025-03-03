@@ -70,7 +70,9 @@ export default class Chatbox extends Component {
 
         messageContainer.appendChild(messageContent);
 
-        discussionContainer.appendChild(messageContainer);
+        if (discussionContainer) {
+            discussionContainer.appendChild(messageContainer);
+        }
     }
 
     findSender(userlist, actualId) {
@@ -117,9 +119,7 @@ export default class Chatbox extends Component {
                                     }
                                 });
                             })
-                            .catch((err) => {
-                                console.error("Error fetching history:", err);
-                            });
+                            .catch((err) => {});
 
                         // Set event handlers for the new WebSocket.
                         newWs.onopen = () => {};
@@ -408,8 +408,9 @@ export default class Chatbox extends Component {
         });
 
         const discussionToShow = document.getElementById("private-discussion-" + this.chattingWithId);
-
-        discussionToShow.style.display = "flex";
+        if (discussionToShow) {
+            discussionToShow.style.display = "flex";
+        }
     }
 
     async showSearchBarResult() {
@@ -607,16 +608,16 @@ export default class Chatbox extends Component {
         this.chattingWithId = "";
         this.userInteracted = false;
 
+        this.info = await post("/api/player/c/nickname")
+            .then((res) => res.json())
+            .catch((err) => {});
+
+        // Load userlist.
+        this.usersList = await fetchApi("/api/usersList", {})
+            .then((res) => res.json())
+            .catch((err) => {});
+
         this.onready = async () => {
-            this.info = await post("/api/player/c/nickname")
-                .then((res) => res.json())
-                .catch((err) => {});
-
-            // Load userlist.
-            this.usersList = await fetchApi("/api/usersList", {})
-                .then((res) => res.json())
-                .catch((err) => {});
-
             this.chatContainer = document.getElementById("chat-container");
             this.writeArea = document.getElementById("messageArea");
             this.chatHeader = document.getElementById("actual-chat-header");

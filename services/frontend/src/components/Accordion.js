@@ -1,5 +1,6 @@
 import { Component } from "../micro";
 import { post } from "../utils";
+import { tr } from "../i18n";
 
 export default class Accordion extends Component {
     async init() {
@@ -29,7 +30,7 @@ export default class Accordion extends Component {
             const barChartConfig1 = {
                 width: "180",
                 height: "80",
-                title: "Up Count",
+                title: tr("Up Key Press Count"),
                 player1Class: player1Class,
                 player1Name: player1Name,
                 firstElementWidth: this.stats["p1"]["up_count"],
@@ -49,7 +50,7 @@ export default class Accordion extends Component {
             const barChartConfig2 = {
                 width: "180",
                 height: "80",
-                title: "Down Count",
+                title: tr("Down Key Press Count"),
                 player1Class: player1Class,
                 player1Name: player1Name,
                 firstElementWidth: this.stats["p1"]["down_count"],

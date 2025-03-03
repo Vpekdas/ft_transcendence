@@ -134,7 +134,7 @@ export default class Chatbox extends Component {
 
                                 if (this.id != sender) {
                                     this.chattingWithId = sender;
-                                    showToast("You received a message from " + idToNickname, "bi bi-bell");
+                                    showToast(`${tr("You received a message from ")}${idToNickname}`, "bi bi-bell");
                                     const senderLi = document.querySelector(`.person[data-sender="${sender}"]`);
                                     if (senderLi) {
                                         senderLi.classList.add("new-message");
@@ -222,7 +222,7 @@ export default class Chatbox extends Component {
 
                                     if (this.id != sender) {
                                         this.chattingWithId = sender;
-                                        showToast("You received a message from " + idToNickname, "bi bi-bell");
+                                        showToast(`${tr("You received a message from ")}${idToNickname}`, "bi bi-bell");
                                         const senderLi = document.querySelector(`.person[data-sender="${sender}"]`);
                                         if (senderLi) {
                                             senderLi.classList.add("new-message");
@@ -325,7 +325,7 @@ export default class Chatbox extends Component {
                     if (this.id != sender) {
                         this.chattingWithId = sender;
                         const idToNickname = await getNickname(sender);
-                        showToast("You received a message from " + idToNickname, "bi bi-bell");
+                        showToast(`${tr("You received a message from ")}${idToNickname}`, "bi bi-bell");
                         const senderLi = document.querySelector(`.person[data-sender="${sender}"]`);
                         if (senderLi) {
                             senderLi.classList.add("new-message");
@@ -341,7 +341,7 @@ export default class Chatbox extends Component {
 
                 if (messageData.type === "error") {
                     const message = messageData.message;
-                    showToast(message, "bi bi-bell");
+                    showToast(tr(message), "bi bi-bell");
                 }
 
                 if (messageData.type === "game_created") {
@@ -497,7 +497,7 @@ export default class Chatbox extends Component {
             const response = await post("/api/add-friend/" + fullname, {})
                 .then((res) => res.json())
                 .catch((err) => {
-                    showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
+                    showToast(tr("An error occurred. Please try again."), "bi bi-exclamation-triangle-fill");
                 });
             if (response.error) {
                 showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
@@ -512,12 +512,12 @@ export default class Chatbox extends Component {
 
         const blockBtn = document.createElement("button");
         blockBtn.classList.add("btn", "btn-danger", "block");
-        blockBtn.innerHTML = "BLOCK";
+        blockBtn.innerHTML = tr("BLOCK");
 
         blockBtn.addEventListener("click", async () => {
             this.userInteracted = true;
-            if (blockBtn.innerHTML === "BLOCK") {
-                blockBtn.innerHTML = "UNBLOCK";
+            if (blockBtn.innerHTML === tr("BLOCK")) {
+                blockBtn.innerHTML = tr("UNBLOCK");
                 const response = await post("/api/block-user/" + fullname, {})
                     .then((res) => res.json())
                     .catch((err) => {
@@ -528,8 +528,8 @@ export default class Chatbox extends Component {
                 } else {
                     showToast(tr("User blocked successfully."), "bi bi-check-circle-fill");
                 }
-            } else if (blockBtn.innerHTML === "UNBLOCK") {
-                blockBtn.innerHTML = "BLOCK";
+            } else if (blockBtn.innerHTML === tr("UNBLOCK")) {
+                blockBtn.innerHTML = tr("BLOCK");
                 const response = await post("/api/unblock-user/" + fullname, {})
                     .then((res) => res.json())
                     .catch((err) => {
@@ -545,7 +545,7 @@ export default class Chatbox extends Component {
 
         const inviteBtn = document.createElement("button");
         inviteBtn.classList.add("btn", "btn-success", "invite");
-        inviteBtn.innerHTML = "INVITE";
+        inviteBtn.innerHTML = tr("INVITE");
 
         inviteBtn.addEventListener("click", () => {
             let channelName = "";

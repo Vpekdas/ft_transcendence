@@ -2,18 +2,6 @@ import { tr } from "../../i18n";
 import { Component } from "../../micro";
 import { api, post, getNickname, getUserIdByNickname } from "../../utils";
 export default class OtherProfile extends Component {
-    timeInMinutes(s) {
-        if (s < 10) {
-            return "0:0" + s;
-        } else if (s < 60) {
-            return "0:" + s;
-        } else {
-            let r = s % 60;
-            if (r < 10) return s / 60 + ":";
-            else return s / 60 + ":0" + r;
-        }
-    }
-
     timeAsDate(s) {
         const date = new Date(s * 1000);
         return date.getUTCFullYear() + "-" + (date.getUTCMonth() + 1) + "-" + date.getUTCDate();
@@ -112,7 +100,7 @@ export default class OtherProfile extends Component {
                     this.tournamentCount++;
                 }
 
-                const time = this.timeInMinutes(result["timeEnded"] - result["timeStarted"]);
+                const time = this.convertToMinutesAndSeconds(result["timeEnded"] - result["timeStarted"]);
                 this.gameDurationArray.push(time);
 
                 const config = {

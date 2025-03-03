@@ -127,9 +127,14 @@ export default class Tournament extends Component {
 
             this.ws = new WebSocket(`wss://${getOriginNoProtocol()}/ws/tournament/${this.id}`);
 
+            this.ws.onerror = (event) => {
+                navigateTo("/404");
+            };
+
             this.ws.onopen = (event) => {
                 this.ws.send(JSON.stringify({ type: "join" }));
             };
+
             this.ws.onmessage = async (event) => {
                 const data = JSON.parse(event.data);
 
@@ -187,7 +192,7 @@ export default class Tournament extends Component {
                     this.createRoundTier();
                 }
                 if (data["type"] == "match") {
-                    showToast("Next game will start in 5 sec !", "bi bi-stopwatch-fill");
+                    showToast(tr("Next game will start in 5 sec!"), "bi bi-stopwatch-fill");
                     setTimeout(() => {
                         navigateTo(`/play/pong/${data["id"]}`);
                     }, 5000);

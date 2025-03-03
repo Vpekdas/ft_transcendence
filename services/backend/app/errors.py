@@ -17,6 +17,8 @@ IMAGE_TOO_BIG = "Profile picture exceed max size"
 NICKNAME_ALREADY_USED = "Nickname is already used"
 OTP_INVALID = "One time code is invalid"
 EMAIL_ALREADY_USED = "Email is already used by another account"
+USER_NOT_FOUND = "User not found"
+
 
 INVALID_SKIN = "Invalid skin"
 FRIEND_NOT_FOUND = "Friend not found."

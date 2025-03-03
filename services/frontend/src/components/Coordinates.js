@@ -15,7 +15,6 @@ export default class Coordinates extends Component {
             var click = 0,
                 skip = 0,
                 topSkip = 0,
-                validatedStep = 0,
                 x,
                 y,
                 xp,
@@ -245,7 +244,6 @@ export default class Coordinates extends Component {
         </svg>`;
     }
 }
-
 
 // ! Little polygons inside big polygons as in the game.
 //     <polygon

@@ -45,12 +45,6 @@ export default class LanguagePicker extends Component {
                         <span>TÜRKÇE</span>
                     </button>
                 </li>
-                <li>
-                    <button type="button" lang="hu" class="btn btn-outline-info language-picker">
-                        <img src="/img/lang/hu.png" />
-                        <span>MAGYAR</span>
-                    </button>
-                </li>
             </ul>
         </div>`;
     }

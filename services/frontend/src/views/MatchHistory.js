@@ -9,21 +9,20 @@ export default class MatchHistory extends Component {
         await this.showMatchHistory();
     }
 
-    timeInMinutes(s) {
-        if (s < 10) {
-            return "0:0" + s;
-        } else if (s < 60) {
-            return "0:" + s;
-        } else {
-            let r = Math.floor(s) % 60;
-            if (r < 10) return s / 60 + ":";
-            else return s / 60 + ":0" + r;
-        }
-    }
-
     timeAsDate(s) {
         const date = new Date(s * 1000);
         return date.getUTCFullYear() + "-" + (date.getUTCMonth() + 1) + "-" + date.getUTCDate();
+    }
+
+    convertToSeconds(duration) {
+        const [minutes, seconds] = duration.split(":").map(Number);
+        return minutes * 60 + seconds;
+    }
+
+    convertToMinutesAndSeconds(totalSeconds) {
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
     }
 
     gamemodeName(tid, gamemode) {
@@ -98,7 +97,7 @@ export default class MatchHistory extends Component {
                     this.tournamentCount++;
                 }
 
-                const time = this.timeInMinutes(result["timeEnded"] - result["timeStarted"]);
+                const time = this.convertToMinutesAndSeconds(result["timeEnded"] - result["timeStarted"]);
                 this.gameDurationArray.push(time);
 
                 const config = {

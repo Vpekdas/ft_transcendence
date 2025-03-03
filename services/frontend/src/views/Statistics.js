@@ -117,6 +117,8 @@ export default class Statistics extends Component {
         this.gameDurationSum = 0;
         this.averageGameDuration = "0:00";
 
+        // TODO: Add this stats somewhere.
+
         if (this.matchCount !== 0) {
             this.winRatio = ((this.winCount / this.matchCount) * 100).toFixed(2);
             this.loseRatio = (100 - this.winRatio).toFixed(2);
@@ -141,7 +143,7 @@ export default class Statistics extends Component {
                 color2: "#FF0000",
                 fillPercent1: this.winRatio,
                 fillPercent2: this.loseRatio,
-                title: "Win / Lose ratio",
+                title: tr("Win/Loss Ratio"),
                 titleColor: "#d89123",
             };
 
@@ -157,7 +159,7 @@ export default class Statistics extends Component {
                 fillPercent1: this.localRatio,
                 fillPercent2: this.remoteRatio,
                 fillPercent3: this.tournamentRatio,
-                title: "Gamemode Distrib",
+                title: tr("Game Mode Distribution"),
                 titleColor: "#d89123",
             };
 
@@ -173,7 +175,7 @@ export default class Statistics extends Component {
                 points: lineChartPoints,
                 lineColor: "#00FF00",
                 circleColor: "#00FFFF",
-                title: "Game Duration",
+                title: tr("Match Duration"),
                 duration: true,
             };
 
@@ -189,7 +191,7 @@ export default class Statistics extends Component {
                 points: lineChartPoints2,
                 lineColor: "#00FF00",
                 circleColor: "#00FFFF",
-                title: "Average Point in Game",
+                title: tr("Average Points per Game"),
                 duration: false,
             };
 

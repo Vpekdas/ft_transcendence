@@ -1,5 +1,4 @@
 import { fetchApi, getOrigin, showToast } from "../utils";
-import { sanitizeInput } from "../validateInput";
 import { tr } from "../i18n";
 import { Component, navigateTo } from "../micro";
 
@@ -35,10 +34,10 @@ export default class TwoFactor extends Component {
                 })
                     .then((res) => res.json())
                     .catch((err) => {
-                        showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
+                        showToast(tr("An error occurred. Please try again."), "bi bi-exclamation-triangle-fill");
                     });
                 if (response.error) {
-                    showToast(response.error, "bi bi-exclamation-triangle-fill");
+                    showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
                 } else {
                     if (window.location.search.length == 0) {
                         navigateTo("/");

@@ -531,7 +531,7 @@ def tournamentInvite(request: HttpRequest, tid):
         return JsonResponse({ "error": NOT_AUTHENTICATED })
 
     data = json.loads(request.body)
-    player = Player.objects.filter(user=request.user).first()\
+    player = Player.objects.filter(user=request.user).first()
 
     if not "pid" in data:
         return HttpResponseServerError()
@@ -697,7 +697,7 @@ def get_user_id_by_nickname(request: HttpRequest):
         user = User.objects.get(username=nickname)
         return JsonResponse({"user_id": user.id})
     except User.DoesNotExist:
-        return JsonResponse({"error": "User not found"}, status=404)
+        return JsonResponse({"error": USER_NOT_FOUND}, status=404)
 
 @require_POST
 def get_friends(request: HttpRequest):

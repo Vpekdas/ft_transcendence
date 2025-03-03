@@ -20,13 +20,27 @@ export function getLanguage() {
     return localStorage.getItem("lang");
 }
 
+const availableLanguages = ["en", "fr", "tr"];
+
 export async function setLanguage(l) {
+    if (!availableLanguages.includes(l)) {
+        l = "en";
+    }
     localStorage.setItem("lang", l);
-    languageDb = await fetch(`/langs/${l}.json`).then((res) => res.json());
+    await loadLang();
 }
 
 export var languageDb = undefined;
 
+async function loadLang() {
+    const l = localStorage.getItem("lang");
+    if (l == undefined) {
+        l = "en";
+        localStorage.setItem("lang", l);
+    }
+    languageDb = await fetch(`/langs/${l}.json`).then((res) => res.json());
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
-    if (languageDb == undefined) await setLanguage(getLanguage());
+    if (languageDb == undefined) await loadLang();
 });

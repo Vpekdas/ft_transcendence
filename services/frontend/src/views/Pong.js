@@ -6,7 +6,7 @@ import { EXRLoader } from "three/addons/loaders/EXRLoader.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
-import { getOriginNoProtocol, post } from "../utils";
+import { getOriginNoProtocol, post, showToast } from "../utils";
 import { Component, dirty, params, navigateTo } from "../micro";
 import { tr } from "../i18n";
 import { ParticleSystem } from "../ParticleSystem";
@@ -909,7 +909,7 @@ export default class Pong extends Component {
             if (this.terrainSkin == "brittle-hollow") {
                 this.start = Date.now();
                 this.previousTime = performance.now();
-                
+
                 setInterval(() => {
                     this.generateMeteorite(this.meteorites);
                 }, 4200);
@@ -962,9 +962,10 @@ export default class Pong extends Component {
             this.ws.onopen = async (event) => {
                 await this.setupGameTerrain();
             };
-            // ws.onerror = (event) => {
-            //     showToast(tr("Cannot connect to the game"), "bi bi-exclamation-triangle-fill");
-            // };
+            this.ws.onerror = (event) => {
+                // showToast(tr("Cannot connect to the game"), "bi bi-exclamation-triangle-fill");
+                navigateTo("/404");
+            };
             this.ws.onmessage = async (event) => {
                 const data = JSON.parse(event.data);
                 await this.onMessage(data);

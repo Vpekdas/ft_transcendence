@@ -119,7 +119,7 @@ export default class PongMatchmake extends Component {
                     <div class="spinner-border text-warning" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
-                    <span>Searching for a match...</span>
+                    <span>${tr("Searching for a match...")}</span>
                 </div>
                 <div class="timer">0:00</div>
                 <div class="container-fluid vs-container"></div>

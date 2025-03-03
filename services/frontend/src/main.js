@@ -14,7 +14,6 @@ import NotFound from "./views/NotFound";
 import { isLoggedIn } from "./utils";
 import { navigateTo } from "./micro";
 import Profile from "./views/Profile";
-import Test from "./views/Test";
 import { registerAll } from "./micro.generated";
 import Social from "./views/Social";
 import Callback from "./views/Callback";
@@ -25,6 +24,7 @@ window.bootstrap = bootstrap;
 defineRouter({
     routes: [
         { path: "/", view: Home },
+        { path: "/404", view: NotFound },
         { path: "/register", view: Registration },
         { path: "/login", view: Login },
         { path: "/2fa", view: TwoFactor },
@@ -35,7 +35,6 @@ defineRouter({
         { path: "/matchmake/pong", view: PongMatchmake },
         { path: "/tournament/[id=$[a-zA-Z0-9]+$]", view: Tournament },
         { path: "/create-tournament", view: CreateTournament },
-        { path: "/test", view: Test },
         { path: "/callback", view: Callback },
     ],
     hook: async (route, url) => {

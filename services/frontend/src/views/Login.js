@@ -16,7 +16,7 @@ export default class Login extends Component {
             navigateTo("/callback");
         }
     }
-    
+
     createGlitchRectangle(particleNumber) {
         const container = document.querySelector(".particle-container");
 
@@ -47,7 +47,7 @@ export default class Login extends Component {
 
                 if (!sanitizeInput(username) || !sanitizeInput(password)) {
                     showToast(
-                        "Invalid input detected. Please fill out all fields correctly.",
+                        tr("Invalid input detected. Please fill out all fields correctly."),
                         "bi bi-exclamation-triangle-fill"
                     );
                     return;
@@ -62,7 +62,7 @@ export default class Login extends Component {
                 })
                     .then((res) => res.json())
                     .catch((err) => {
-                        showToast("An error occurred. Please try again.", "bi bi-exclamation-triangle-fill");
+                        showToast(tr("An error occurred. Please try again."), "bi bi-exclamation-triangle-fill");
                     });
                 if (response.error) {
                     showToast(response.error, "bi bi-exclamation-triangle-fill");

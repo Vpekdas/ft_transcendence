@@ -106,6 +106,12 @@ export default class PongMatchmake extends Component {
         };
     }
 
+    async clean() {
+        if (this.ws) {
+            this.ws.close();
+        }
+    }
+
     render() {
         return /* HTML */ `<HomeNavBar />
             <div class="container-fluid matchmaking-container">

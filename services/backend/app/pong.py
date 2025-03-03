@@ -127,7 +127,7 @@ class Pong(Game):
         self.countdown_timer = Timer(time=3.0)
 
         ## Global stats
-        
+
         # stores the position of the ball every X seconds
         self.heatmap = []
 
@@ -272,7 +272,7 @@ class PongManager(GameManager):
     def __init__(self):
         super().__init__(ty=Pong)
 
-        self.players = []
+        self.players: list[Player] = []
 
         self.loop_running = False
 
@@ -329,30 +329,11 @@ class PongManager(GameManager):
         elif gamemode == "1v1":
             self.players.append(MatchmakePlayer(conn=conn, player_id=player.id, gamemode=gamemode, elo=player.pongElo))
 
-            # try:
-            #     opponent = next(filter(lambda p: p.gamemode == gamemode, self.players))
-
-            #     game = self.start_game(gamemode=gamemode)
-
-            #     await game.on_join(opponent.player_id)
-            #     await game.on_join(player.id)
-
-            #     await conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": gamemode }))
-            #     await opponent.conn.send(json.dumps({ "type": "matchFound", "id": game.id }))
-
-            #     self.players.remove(opponent)
-            # except StopIteration:
-            #     self.players.append(MatchmakePlayer(conn=conn, player_id=player.id, gamemode=gamemode, elo=player.pongElo))
-        elif gamemode == "1v1invite" and opponent is not None:
-            game = self.start_game(gamemode=gamemode)
-            game.accepted_players = [player.id, opponent]
-
-            await conn.send(json.dumps({ "type": "matchFound", "id": game.id, "gamemode": gamemode }))
-            await game.on_join(player.id)
-
     async def on_quit(self, player: Player):
         try:
             mplayer = next(filter(lambda p: player.id == p.player_id, self.players))
             self.players.remove(mplayer)
+
+            print(player.id, " has quit")
         except StopIteration:
             pass

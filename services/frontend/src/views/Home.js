@@ -161,7 +161,7 @@ export default class Home extends Component {
                         btnName="Play"
                     />
                     <GameCard
-                        title="Challenge a Friend Online"
+                        title="Challenge a Player Online"
                         img="/img/online-icon.svg"
                         id="play-pong-1v1"
                         alt=""

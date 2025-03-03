@@ -904,7 +904,6 @@ export default class Pong extends Component {
             );
             this.ballComposer.addPass(this.bloomPass);
 
-            // await this.setupGameTerrain();
 
             if (this.terrainSkin == "brittle-hollow") {
                 this.start = Date.now();
@@ -963,7 +962,6 @@ export default class Pong extends Component {
                 await this.setupGameTerrain();
             };
             this.ws.onerror = (event) => {
-                // showToast(tr("Cannot connect to the game"), "bi bi-exclamation-triangle-fill");
                 navigateTo("/404");
             };
             this.ws.onmessage = async (event) => {

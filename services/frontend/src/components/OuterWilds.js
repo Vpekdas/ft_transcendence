@@ -78,8 +78,6 @@ export default class OuterWilds extends Component {
             const chronometer = { timerId: 0, seconds: 0 };
             let supernova = false;
 
-            // ! If the user does not interact, a Promise is returned by audio.
-            // TODO: The supernova animation will still play, so maybe pause the animation till there is an interaction.
             if (this.userInteracted) {
                 chronometer.timerId = setInterval(() => {
                     chronometer.seconds++;
@@ -131,21 +129,19 @@ export default class OuterWilds extends Component {
                 orbit.addEventListener("mouseover", async () => {
                     const orbitName = orbit.querySelector("ow-name");
                     orbitName.style.animationPlayState = "paused";
-                    this.userInteracted = true;
                 });
                 orbit.addEventListener("mouseleave", async () => {
                     const orbitName = orbit.querySelector("ow-name");
                     orbitName.style.animationPlayState = "running";
-                    this.userInteracted = true;
                 });
 
                 orbit.addEventListener("click", async (event) => {
                     // Ensure that clicking on a child element does not switch to the main element.
                     // For example, clicking on Attlerock should display Attlerock's details, not Timber Hearth's.
 
-                    this.userInteracted = true;
-
                     event.stopPropagation();
+
+                    this.userInteracted = true;
 
                     const planetContainer = document.querySelector(".container-fluid.planet-card-container");
                     const displayedPlanet = document.querySelector(".planet-img");

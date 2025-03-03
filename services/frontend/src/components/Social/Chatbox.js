@@ -1,5 +1,6 @@
 import { Component, navigateTo } from "../../micro";
 import { getOriginNoProtocol, post, fetchApi, showToast, getNickname, getUserIdByNickname, api } from "/utils";
+import { tr } from "../../i18n";
 
 export default class Chatbox extends Component {
     async addNewPerson(personContainer, fullname, picture, colorStatus) {
@@ -777,7 +778,7 @@ export default class Chatbox extends Component {
                             class="form-control"
                             id="search-bar"
                             rows="3"
-                            placeholder=${tr("Search a person...")}
+                            placeholder="${tr("Search a person...")}"
                         ></textarea>
                     </ul>
                     <div class="container-fluid chat-container" id="chat-container">
@@ -786,7 +787,7 @@ export default class Chatbox extends Component {
                             class="form-control"
                             id="messageArea"
                             rows="3"
-                            placeholder=${tr("Write your message...")}
+                            placeholder="${tr("Write your message...")}"
                         ></textarea>
                     </div>
                 </div>

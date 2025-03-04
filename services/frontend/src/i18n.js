@@ -33,7 +33,7 @@ export async function setLanguage(l) {
 export var languageDb = undefined;
 
 async function loadLang() {
-    const l = localStorage.getItem("lang");
+    let l = localStorage.getItem("lang");
     if (l == undefined) {
         l = "en";
         localStorage.setItem("lang", l);

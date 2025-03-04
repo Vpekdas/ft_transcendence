@@ -83,7 +83,7 @@ class ScoreArea(Area):
         self.game.reset()
 
 class Settings:
-    def __init__(self, *, max_score=3):
+    def __init__(self, *, max_score=7):
         self.max_score = max_score
 
 class Pong(Game):

@@ -45,8 +45,8 @@ class ColorfulTerrainSkin extends TerrainSkin {
      * @param {THREE.Scene} scene
      */
     async init(gltfLoader, exrLoader, scene) {
-        const wallTop = createCube(0, -12.4, 36, 0.4, 0.5, "green");
-        const wallBottom = createCube(0, 12.4, 36, 0.4, 0.5, "green");
+        const wallTop = createCube(0, -12.4, 36, 0.4, 0.5, "white");
+        const wallBottom = createCube(0, 12.4, 36, 0.4, 0.5, "white");
 
         scene.add(wallTop);
         scene.add(wallBottom);
@@ -175,7 +175,7 @@ class ColorfulBallSkin extends BallSkin {
      * @returns {THREE.Object3D}
      */
     async init(gltfLoader, scene) {
-        return createSphere(0, 0, 0.5, 32, 16, "#ffde21");
+        return createSphere(0, 0, 0.5, 32, 16, "white");
     }
 }
 
@@ -232,7 +232,7 @@ class ColorfulBarSkin extends BarSkin {
      * @returns {THREE.Object3D}
      */
     async init(gltfLoader, exrLoader, scene) {
-        return createCube(0, 0, 1.0, 1.0, 5.0, "#cd1c18");
+        return createCube(0, 0, 1.0, 1.0, 5.0, "white");
     }
 }
 
@@ -903,7 +903,6 @@ export default class Pong extends Component {
                 0.85 // threshold
             );
             this.ballComposer.addPass(this.bloomPass);
-
 
             if (this.terrainSkin == "brittle-hollow") {
                 this.start = Date.now();

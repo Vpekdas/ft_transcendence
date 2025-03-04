@@ -1,7 +1,6 @@
 import { tr } from "../../i18n";
 import { Component } from "../../micro";
 
-/** @type {import("../../micro").Component} */
 export default class PlayerCountCard extends Component {
     render() {
         return /* HTML */ ` <div class="card settings">

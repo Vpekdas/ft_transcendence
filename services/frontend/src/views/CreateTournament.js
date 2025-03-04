@@ -21,6 +21,7 @@ export default class CreateTournament extends Component {
 
             document.querySelector(".btn.btn-primary.settings").addEventListener("click", async () => {
                 const tournamentName = document.getElementById("tournament-name").value;
+                const tournamentPoints = document.getElementById("tournament-points").value;
 
                 const resp = await post("/api/tournament/create", {
                     body: JSON.stringify({
@@ -30,7 +31,9 @@ export default class CreateTournament extends Component {
                         password: undefined,
                         game: "pong",
                         fillWithAI: false,
-                        gameSettings: {},
+                        gameSettings: {
+                            maxScore: parseInt(tournamentPoints),
+                        },
                     }),
                 }).then((r) => r.json());
 
@@ -47,6 +50,7 @@ export default class CreateTournament extends Component {
             <div class="container-fluid dashboard-container create-tournament-container">
                 <TournamentNameCard />
                 <PlayerCountCard />
+                <PointsCard />
                 <button type="submit" class="btn btn-primary settings">${tr("Create")}</button>
             </div>
         </div>`;

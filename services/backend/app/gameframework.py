@@ -644,7 +644,7 @@ class Tournament:
         r = self.rounds[self.currentRound]
 
         for tgame in r.games:
-            game: Game = self.gameManager.start_game(gamemode="1v1", tid=self.tid, accepted_players=[tgame.player1, tgame.player2])
+            game: Game = self.gameManager.start_game(gamemode="1v1", tid=self.tid, accepted_players=[tgame.player1, tgame.player2], max_score=self.gameSettings.maxScore)
 
             # await game.on_join(tgame.player1)
             # await game.on_join(tgame.player2)

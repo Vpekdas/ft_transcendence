@@ -462,10 +462,10 @@ class GameManager:
     def make_id(self, k=8) -> str:
         return ''.join(random.choices(string.ascii_lowercase + string.digits, k=k))
 
-    def start_game(self, *, gamemode: str, tid: str=None, accepted_players: list[int]=None):
+    def start_game(self, *, gamemode: str, tid: str=None, accepted_players: list[int]=None, max_score: int = 7):
         id = self.make_id()
 
-        game = self.ty(gamemode=gamemode, tid=tid, accepted_players=accepted_players)
+        game = self.ty(gamemode=gamemode, tid=tid, accepted_players=accepted_players, max_score=max_score)
         game.id = id
         game.manager = self
 

@@ -87,12 +87,12 @@ class Settings:
         self.max_score = max_score
 
 class Pong(Game):
-    def __init__(self, *, gamemode: str, tid: str = None, accepted_players: list[int] = None):
+    def __init__(self, *, gamemode: str, tid: str = None, accepted_players: list[int] = None, max_score: int = 7):
         super().__init__(tid=tid, gamemode=gamemode)
 
         # size is 36x24
 
-        self.settings = Settings()
+        self.settings = Settings(max_score=max_score)
         self.service = 0
         self.players_count = 2
         self.master = None

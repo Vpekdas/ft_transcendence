@@ -47,6 +47,9 @@ def signin(request):
         return JsonResponse({"error": INVALID_USERNAME})
     elif remove_unwanted_characters(nickname) != data["nickname"]:
         return JsonResponse({"error": INVALID_NICKNAME})
+    
+    if len(nickname) > 20:
+        return JsonResponse({"error": NICKNAME_TOO_LONG})
 
     if User.objects.filter(username=username).count() > 0:
         return JsonResponse({"error": USERNAME_ALREADY_TAKEN})

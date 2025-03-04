@@ -35,6 +35,14 @@ export default class Registration extends Component {
                 const password = data.get("password");
                 const email = data.get("email");
 
+                if (nickname.length > 20) {
+                    showToast(
+                        tr("The nickname is too long. Please choose another one."),
+                        "bi bi-exclamation-triangle-fill"
+                    );
+                    return;
+                }
+
                 if (!sanitizeInput(username) || !sanitizeInput(nickname) || !sanitizeInput(password)) {
                     showToast(
                         tr("Invalid input detected. Please fill out all fields correctly."),

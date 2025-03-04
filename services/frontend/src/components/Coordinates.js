@@ -1,10 +1,47 @@
-import { SCALE, POLYGON_VERTICES } from "../constant";
+import { SCALE, POLYGON_VERTICES, FIRST_COORDINATES, SECOND_COORDINATES, THIRD_COORDINATES } from "../constant";
 import { Component } from "../micro";
 
 /** @type {import("../micro").Component} */
 export default class Coordinates extends Component {
     calculateDistance(x1, y1, x2, y2) {
         return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    }
+
+    checkSinglePath(coordinates, points) {
+        let matchStep = 0;
+
+        console.log(coordinates, points);
+
+        for (let i = 0; i < coordinates.length; i++) {
+            const rightPath = coordinates[i].split(" ");
+            const userPath = points[i].split(" ");
+
+            for (let i = 0; i < rightPath.length; i++) {
+                if (userPath[i].includes(rightPath[i])) {
+                    matchStep++;
+                }
+            }
+        }
+
+        if (matchStep !== coordinates.length * 4) {
+            console.log("lost");
+            return false;
+        } else {
+            console.log("GG !");
+            return true;
+        }
+    }
+
+    checkAllPath(step, points) {
+        if (step === 1 && points.length === 2) {
+            return this.checkSinglePath(FIRST_COORDINATES, points);
+        } else if (step === 2 && points.length === 3) {
+            return this.checkSinglePath(SECOND_COORDINATES, points);
+        } else if (step === 3 && points.length === 5) {
+            return this.checkSinglePath(THIRD_COORDINATES, points);
+        }
+
+        return false;
     }
 
     async init() {
@@ -15,6 +52,7 @@ export default class Coordinates extends Component {
             var click = 0,
                 skip = 0,
                 topSkip = 0,
+                step = 1,
                 x,
                 y,
                 xp,
@@ -108,7 +146,6 @@ export default class Coordinates extends Component {
 
                         points += closestVertices[0].xp + "," + closestVertices[0].yp;
 
-                        // ! create a function.
                         // Ensure that nothing is drawn if the user double-clicks on the same polygon.
                         const splitPoints = points.split(" ");
                         if (splitPoints[0] === splitPoints[3] && splitPoints[1] === splitPoints[2]) {
@@ -121,7 +158,6 @@ export default class Coordinates extends Component {
                             return;
                         }
 
-                        // ! create a function.
                         // Ensure the same polygon is not drawn twice.
                         for (let i = 0; i < drawnPolygons.length; i++) {
                             if (points === drawnPolygons[i]) {
@@ -135,9 +171,7 @@ export default class Coordinates extends Component {
                             }
                         }
 
-                        // ! create a function.
                         // Ensure the same polygon is not drawn twice in the reverse order.
-
                         for (let i = 0; i < drawnPolygons.length; i++) {
                             if (points === drawnPolygons[i].split(" ").reverse().join(" ")) {
                                 click = 0;
@@ -159,6 +193,21 @@ export default class Coordinates extends Component {
                         newPoly.setAttribute("points", points);
 
                         navigate.append(newPoly);
+
+                        if (this.checkAllPath(step, drawnPolygons)) {
+                            step++;
+                        }
+
+                        if (step === 4) {
+                            const audio = document.getElementById("background-music");
+                            if (audio && audio.duration > 0 && !audio.paused) {
+                                audio.pause();
+                            }
+                            const audioSource = document.getElementById("audio-source");
+                            audioSource.src = "/music/Final Voyage.mp3";
+                            audio.load();
+                            audio.play();
+                        }
 
                         // Reset and clear all arrays.
                         click = 0;

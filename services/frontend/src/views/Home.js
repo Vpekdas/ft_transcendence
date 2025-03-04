@@ -56,7 +56,7 @@ export default class Home extends Component {
                             if (entry.isIntersecting && !intro.animated) {
                                 intro.animated = true;
                                 introContainer.classList.add("appear");
-                                this.decodeEffect(intro.text, intro.e);
+                                this.decodeEffect(tr(intro.text), intro.e);
                             } else if (!entry.isIntersecting && intro.animated) {
                                 intro.animated = false;
                                 introContainer.classList.remove("appear");

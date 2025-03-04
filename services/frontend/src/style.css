@@ -4041,3 +4041,60 @@ ow-system[labels="false"] ow-name {
     background-color: #d89123;
     border-color: #d89123;
 }
+
+/* Music */
+
+#background-music {
+    position: fixed;
+    bottom: 1%;
+    right: 3%;
+    width: 25%;
+    background-color: #1a1a1a;
+    color: #d89123;
+    border: 2px solid #d89123;
+    border-radius: 50px;
+    padding: 10px;
+    box-shadow:
+        0 0 10px #d89123,
+        0 0 20px #d89123;
+    font-family: "Courier New", monospace;
+    z-index: 1000;
+    justify-content: space-around;
+}
+
+#background-music::-webkit-media-controls-panel {
+    background-color: #1a1a1a;
+    border-radius: 10px;
+}
+
+#background-music::-webkit-media-controls-play-button,
+#background-music::-webkit-media-controls-pause-button,
+#background-music::-webkit-media-controls-mute-button,
+#background-music::-webkit-media-controls-volume-slider {
+    background-color: #d89123;
+    border: 1px solid #d89123;
+    border-radius: 5px;
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease;
+}
+
+#background-music::-webkit-media-controls-play-button:hover,
+#background-music::-webkit-media-controls-pause-button:hover,
+#background-music::-webkit-media-controls-mute-button:hover,
+#background-music::-webkit-media-controls-volume-slider:hover {
+    background-color: #ffb347;
+    color: #1a1a1a;
+}
+
+#background-music::-webkit-media-controls-timeline {
+    color: #d89123;
+    background-color: #d89123;
+    border: 1px solid #d89123;
+    border-radius: 5px;
+}
+
+#background-music::-webkit-media-controls-current-time-display,
+#background-music::-webkit-media-controls-time-remaining-display {
+    color: #d89123;
+}

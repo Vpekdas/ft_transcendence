@@ -1,12 +1,13 @@
 import { Component, params } from "../micro";
 import { INTRO } from "../constant";
+import { tr } from "../i18n";
 
 /** @type {import("../micro").Component} */
 export default class Profile extends Component {
     async init() {
         this.onready = () => {
             const introContainer = document.getElementById("intro4");
-            this.decodeEffect(INTRO[3], introContainer);
+            this.decodeEffect(tr(INTRO[3]), introContainer);
 
             const rocket = document.querySelector(".space-rocket");
             const supernova = document.querySelector(".supernova");
@@ -103,7 +104,7 @@ export default class Profile extends Component {
             comp = `<Settings />`;
         } else if (tab == "skins") {
             comp = `<Skins />`;
-        }  
+        }
 
         return /* HTML */ `
             <HomeNavBar />

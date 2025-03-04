@@ -548,7 +548,7 @@ class Tournament:
 
         self.invited: list[int] = []
 
-        self.players = []
+        self.players: list[int] = [self.host]
         self.rounds: list[TournamentRound] = []
         self.currentRound = 0
 
@@ -644,7 +644,7 @@ class Tournament:
         r = self.rounds[self.currentRound]
 
         for tgame in r.games:
-            game: Game = self.gameManager.start_game(gamemode="1v1", tid=self.tid, accepted_players=[tgame.player1, tgame.player2], max_score=self.gameSettings.maxScore)
+            game: Game = self.gameManager.start_game(gamemode="1v1", tid=self.tid, accepted_players=[tgame.player1, tgame.player2], max_score=self.gameSettings["maxScore"])
 
             # await game.on_join(tgame.player1)
             # await game.on_join(tgame.player2)
@@ -659,17 +659,21 @@ class Tournament:
 
         self.state = TournamentState.LOBBY
 
-    async def on_join(self, player) -> bool:
-        if self.state == TournamentState.LOBBY_BEFORE and (player.id != self.host or player.id not in self.players):
-            if player.id not in self.players:
-                self.players.append(player.id)
-        elif len(self.players) >= self.playerCount and player.id not in self.players:
+    async def can_join(self, player) -> bool:
+        if len(self.players) >= self.playerCount and player.id not in self.players:
             return False
+
+        if self.state != TournamentState.LOBBY_BEFORE and player.id not in self.players:
+            return False
+
+        return True
+
+    async def on_join(self, player) :
+        if self.state == TournamentState.LOBBY_BEFORE and (player.id not in self.players and player.id != self.host):
+            self.players.append(player.id)
 
         await self.broadcast(json.dumps({ "type": "players", "players": self.players, "host": self.host, "name": self.name }))
         await self.send_tree()
-
-        return True
 
     async def disconnect(self, player):
         if self.state == TournamentState.LOBBY_BEFORE and player.id != self.host:
@@ -683,6 +687,8 @@ class Tournament:
         """
         Send a message to all clients
         """
+
+        log([ x for x in self.manager.all_players(self.tid) ])
 
         for c in self.manager.all_players(self.tid):
             await c.send(msg)
@@ -731,13 +737,21 @@ class TournamentManager:
 
         return tid
 
-    async def on_join(self, player: Player, tid: str, password: str) -> bool:
+    async def can_join(self, player: Player, tid: str, password: str) -> bool:
         if tid not in self.tournaments:
             return False
 
         t = self.tournaments[tid]
 
-        return await t.on_join(player)
+        return await t.can_join(player)
+
+    async def on_join(self, player: Player, tid: str, password: str):
+        if tid not in self.tournaments:
+            return False
+
+        t = self.tournaments[tid]
+
+        await t.on_join(player)
 
     async def connect(self, consumer):
         self.consumers.append(consumer)

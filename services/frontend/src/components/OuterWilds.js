@@ -300,7 +300,7 @@ export default class OuterWilds extends Component {
                 </ow-system>
             </div>
             <audio id="background-music" controls>
-                <source id="audio-source" src="" type="audio/mpeg" />
+                <source id="audio-source" src="/music/Space.mp3" type="audio/mpeg" />
                 Your browser does not support the audio element.
             </audio>
         `;

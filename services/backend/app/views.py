@@ -221,7 +221,6 @@ def loginExternal(request: HttpRequest):
         return HttpResponseBadRequest()
 
     access_token = data["access_token"]
-    # TODO: Check if the access token is valid
 
     player = Player.objects.filter(accessToken=access_token, external=True).first()
     user = player.user

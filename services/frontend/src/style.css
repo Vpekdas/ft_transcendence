@@ -2402,8 +2402,6 @@ ow-system[labels="false"] ow-name {
     justify-content: space-around;
 }
 
-/* TODO: Find a new animation */
-
 #navigate {
     display: flex;
     position: relative;

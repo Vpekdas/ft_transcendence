@@ -194,8 +194,6 @@ class VirtualNodeComponent extends VirtualNode {
         /** @type {HTMLElement} */
         this.element = undefined;
         this.id = "id" + this.createComponentId();
-
-        // TODO: Add the index of the node to the id.
     }
 
     createComponentId() {
@@ -939,13 +937,6 @@ export function defineRouter(settings) {
         await router();
         // } catch (ex) {}
     });
-
-    // TODO: This only works when saving this file for some reason
-    // if (import.meta.hot) {
-    //     import.meta.hot.accept(async (newModule) => {
-    //         await router();
-    //     });
-    // }
 }
 
 /**

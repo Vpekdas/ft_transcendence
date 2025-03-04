@@ -1,4 +1,4 @@
- import { tr } from "../i18n";
+import { tr } from "../i18n";
 import { Component } from "../micro";
 import { post } from "../utils";
 

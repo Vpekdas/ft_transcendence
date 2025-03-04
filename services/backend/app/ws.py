@@ -106,9 +106,10 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
         self.tournament = tournaments.tournaments[self.tid]
 
-        if await tournaments.on_join(self.player, self.tid, None):
-            await tournaments.connect(self)
+        if await tournaments.can_join(self.player, self.tid, None):
             await self.accept()
+            await tournaments.connect(self)
+            await tournaments.on_join(self.player, self.tid, None)
         else:
             await self.close()
 

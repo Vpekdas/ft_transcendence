@@ -46,7 +46,9 @@ export default class Chatbox extends Component {
             this.userInteracted = true;
         });
 
-        personContainer.appendChild(li);
+        if (personContainer) {
+            personContainer.appendChild(li);
+        }
 
         return li;
     }
@@ -394,7 +396,9 @@ export default class Chatbox extends Component {
         discussionContainer.className = "container-fluid chat-message-container";
         discussionContainer.id = "private-discussion-" + chattingWithId;
 
-        this.chatContainer.insertBefore(discussionContainer, this.writeArea);
+        if (this.chatContainer) {
+            this.chatContainer.insertBefore(discussionContainer, this.writeArea);
+        }
 
         discussionContainer.style.display = "none";
     }

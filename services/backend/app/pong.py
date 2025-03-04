@@ -173,6 +173,7 @@ class Pong(Game):
             if not self.already_saved:
                 # Save the result of the game in the database
                 await self.save_results()
+                self.already_saved = True
         elif self.state == State.IN_LOBBY:
             if len(self.clients) == 2 or self.gamemode == "1v1local":
                 self.state = State.STARTED

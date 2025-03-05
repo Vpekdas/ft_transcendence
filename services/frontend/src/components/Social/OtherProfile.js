@@ -63,7 +63,7 @@ export default class OtherProfile extends Component {
                     player1Class = "history-winner";
                     player2Class = "history-looser";
 
-                    if (gamemode !== tr("Local") && player1Name === this.nicname) {
+                    if (gamemode !== tr("Local") && player1Name === this.nickname) {
                         this.winCount++;
                     }
                 } else {
@@ -213,16 +213,18 @@ export default class OtherProfile extends Component {
         };
 
         // prettier-ignore
-        this.statisticsHTML += /* HTML */ `<div class="container-fluid donut-chart-container">`
 
-        if (!isNaN(this.winRatio)) {
-            this.statisticsHTML += `<DonutChart config='${JSON.stringify({ donutChartConfig: donutChartConfig })}' />`;
-        }
-        this.statisticsHTML += `<DonutChart config='${JSON.stringify({ donutChartConfig: donutChartConfig2 })}' />`;
-        this.statisticsHTML += /* HTML */ `</div>`;
 
         if (this.remoteCount >= 2 || this.tournamentCount >= 2) {
             // prettier-ignore
+
+            this.statisticsHTML += /* HTML */ `<div class="container-fluid donut-chart-container">`
+
+            if (!isNaN(this.winRatio)) {
+                this.statisticsHTML += `<DonutChart config='${JSON.stringify({ donutChartConfig: donutChartConfig })}' />`;
+            }
+            this.statisticsHTML += `<DonutChart config='${JSON.stringify({ donutChartConfig: donutChartConfig2 })}' />`;
+            this.statisticsHTML += /* HTML */ `</div>`;
             this.statisticsHTML += /* HTML */ `<div class="container-fluid line-chart-container">`;
             this.statisticsHTML += `<LineChart config='${JSON.stringify({ lineChartConfig: lineChartConfig })}' />`;
             this.statisticsHTML += `<LineChart config='${JSON.stringify({ lineChartConfig: lineChartConfig2 })}' />`;

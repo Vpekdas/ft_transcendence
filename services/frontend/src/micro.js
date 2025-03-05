@@ -883,9 +883,10 @@ async function router(recreateDom) {
     // app.replaceChild(element, app.firstElementChild);
 
     if (recreateDom) {
+        if (rootNode) await rootNode.unmount();
+
         app.replaceChildren([]);
         rootNode = null;
-        // TODO: Call clean functions for each component
     }
 
     await updateDOM(rootNode, newNode, app.firstElementChild, app);

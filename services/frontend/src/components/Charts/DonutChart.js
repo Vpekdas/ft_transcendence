@@ -106,12 +106,10 @@ export default class DonutChart extends Component {
         }
 
         this.onready = async () => {
-            this.onready = async () => {
-                const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-                const tooltipList = [...tooltipTriggerList].map(
-                    (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
-                );
-            };
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            const tooltipList = [...tooltipTriggerList].map(
+                (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
+            );
         };
     }
 

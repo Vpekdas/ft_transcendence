@@ -107,21 +107,22 @@ export default class OuterWilds extends Component {
 
             const quantumOrbits = Array.from(document.querySelectorAll("[quantum]"));
 
-            quantumMoon.addEventListener("animationiteration", (e) => {
-                if (e.animationName !== "--quantum") {
-                    return;
-                }
-                const currOrbit = quantumMoon.closest("[quantum]");
-                const availableOrbits = quantumOrbits.filter((o) => o !== currOrbit);
-                const newOrbit = availableOrbits[Math.floor(Math.random() * availableOrbits.length)];
-                if (newOrbit) {
-                    const newWanderer = newOrbit.querySelector(":scope > ow-wanderer");
-                    newWanderer.appendChild(quantumMoon);
-                }
-            });
+            if (quantumMoon) {
+                quantumMoon.addEventListener("animationiteration", (e) => {
+                    if (e.animationName !== "--quantum") {
+                        return;
+                    }
+                    const currOrbit = quantumMoon.closest("[quantum]");
+                    const availableOrbits = quantumOrbits.filter((o) => o !== currOrbit);
+                    const newOrbit = availableOrbits[Math.floor(Math.random() * availableOrbits.length)];
+                    if (newOrbit) {
+                        const newWanderer = newOrbit.querySelector(":scope > ow-wanderer");
+                        newWanderer.appendChild(quantumMoon);
+                    }
+                });
+            }
 
             const orbits = document.querySelectorAll("ow-orbit");
-
             const ashTwin = document.querySelector("#ash-twin");
             const emberTwin = document.querySelector("#ember-twin");
 

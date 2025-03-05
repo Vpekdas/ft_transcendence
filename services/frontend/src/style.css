@@ -175,6 +175,8 @@
     animation:
         pulsing-glow 2s infinite,
         fadeInUp 1s forwards;
+    min-width: 800px;
+    min-height: 800px;
 }
 
 @keyframes fadeInUp {
@@ -935,6 +937,7 @@
     position: relative;
     overflow: hidden;
     justify-content: space-evenly;
+    min-width: 400px;
 }
 
 .card.settings:hover {
@@ -1094,6 +1097,8 @@
     --bs-btn-active-bg: #00ffff;
     --bs-btn-active-border-color: #d89123;
     --bs-btn-active-color: #000;
+    --bs-btn-disabled-bg: #d89123;
+    --bs-btn-disabled-border-color: #d89123;
 }
 
 .btn-primary.settings:hover {

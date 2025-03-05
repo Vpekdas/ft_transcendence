@@ -710,21 +710,6 @@ def get_chat_messages_by_channel_name(request: HttpRequest, channel_name):
     return JsonResponse({"error": "Invalid request method"}, status=400)
 
 @require_POST
-def get_user_id_by_nickname(request: HttpRequest):
-    data = json.loads(request.body)
-
-    if "nickname" not in data:
-        return JsonResponse({"error": "Nickname parameter is required"}, status=400)
-
-    nickname = data["nickname"]
-
-    user = User.objects.filter(username=nickname).first()
-    if user:
-        return JsonResponse({"user_id": user.id})
-    else:
-        return JsonResponse({"error": USER_NOT_FOUND}, status=404)
-
-@require_POST
 def get_friends(request: HttpRequest):
     if not request.user.is_authenticated:
         return JsonResponse({ "error": NOT_AUTHENTICATED })

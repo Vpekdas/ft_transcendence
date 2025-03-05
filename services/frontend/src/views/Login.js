@@ -65,7 +65,7 @@ export default class Login extends Component {
                         showToast(tr("An error occurred. Please try again."), "bi bi-exclamation-triangle-fill");
                     });
                 if (response.error) {
-                    showToast(response.error, "bi bi-exclamation-triangle-fill");
+                    showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
                 } else if (response.need_2fa) {
                     localStorage.setItem("username", username);
                     navigateTo("2fa" + window.location.search);

@@ -782,7 +782,7 @@ export default class Chatbox extends Component {
     }
 
     render() {
-        const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", "");
+        const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", -1);
 
         return /* HTML */ `
             <div id="SG-001">

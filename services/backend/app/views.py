@@ -47,7 +47,7 @@ def signin(request):
         return JsonResponse({"error": INVALID_USERNAME})
     elif remove_unwanted_characters(nickname) != data["nickname"]:
         return JsonResponse({"error": INVALID_NICKNAME})
-    
+
     if len(nickname) > 20:
         return JsonResponse({"error": NICKNAME_TOO_LONG})
 
@@ -84,6 +84,9 @@ Create a new user using 42 API
 @require_POST
 def signinExternal(request: HttpRequest):
     data = json.loads(request.body)
+
+    if os.environ.get("API42_SECRET") is None:
+        return JsonResponse({"error": API_UNAVAILABLE})
 
     if "access_token" in data:
         res = requests.get("https://api.intra.42.fr/v2/me", headers={ "Authorization": "Bearer " + data["access_token"] })

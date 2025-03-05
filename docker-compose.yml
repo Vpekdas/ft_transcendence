@@ -29,8 +29,10 @@ services:
     container_name: database
     volumes:
       - ./.data/postgres:/var/lib/postgresql/data
-    environment:
-      - "POSTGRES_HOST_AUTH_METHOD=trust"
+    env_file:
+      - .env
+    # environment:
+    #   - "POSTGRES_HOST_AUTH_METHOD=trust"
   proxy:
     depends_on:
       - frontend

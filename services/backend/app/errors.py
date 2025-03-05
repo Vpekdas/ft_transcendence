@@ -31,3 +31,5 @@ INVALID_FRIEND_ID = "Invalid friend ID"
 INVALID_BLOCKED_USER_ID = "Invalid blocked user ID"
 BLOCKED_USER_NOT_FOUND = "Blocked user not found."
 BLOCKED_USER_ALREADY_IN_LIST = "Blocked user already in list"
+
+API_UNAVAILABLE = "42 API is currently unavailable"

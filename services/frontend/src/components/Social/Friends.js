@@ -1,7 +1,6 @@
-import { Component } from "../../micro";
+import { Component, dirty } from "../../micro";
 import { post, showToast, api } from "../../utils";
 import { tr } from "../../i18n";
-import { getUserIdByNickname } from "../../utils";
 
 export default class Friends extends Component {
     async init() {
@@ -11,7 +10,7 @@ export default class Friends extends Component {
         for (let i = 0; i < this.info.friends.length; i++) {
             this.friendHTML += /* HTML */ `<div class="friend">
                 <img src="${api("/api/player/" + this.info.friends[i].id + "/picture")}" />
-                <span class="friend-name">${this.info.friends[i].nickname}</span>
+                <span class="friend-name" friend-id="${this.info.friends[i].id}">${this.info.friends[i].nickname}</span>
                 ${this.createStatus(this.info.friends[i].is_online)}
                 <div class="btn btn-primary settings view-friend">
                     <i class="bi bi-binoculars-fill"></i>
@@ -29,17 +28,17 @@ export default class Friends extends Component {
             const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", "");
 
             profiles.forEach(async (profile) => {
-                const nickname = profile.querySelector(".friend-name").innerHTML;
-                const nicknameToId = await getUserIdByNickname(nickname);
+                const id = profile.querySelector(".friend-name").getAttribute("friend-id");
+                // const nickname = profile.querySelector(".friend-name").textContent;
 
                 const viewBtn = profile.querySelector(".btn.btn-primary.settings.view-friend");
                 viewBtn.addEventListener("click", async () => {
-                    setOtherProfileNickname(nickname);
+                    setOtherProfileNickname(id);
                 });
 
                 const removeFriendBtn = profile.querySelector(".btn.btn-primary.settings.remove-friend");
                 removeFriendBtn.addEventListener("click", async () => {
-                    const response = await post("/api/remove-friend/" + nicknameToId)
+                    const response = await post("/api/remove-friend/" + id)
                         .then((res) => res.json())
                         .catch((err) => {});
 
@@ -47,7 +46,7 @@ export default class Friends extends Component {
                         showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
                     } else {
                         showToast(tr("User removed from friend list successfully."), "bi bi-check-circle-fill");
-                        setOtherProfileNickname("");
+                        setOtherProfileNickname(-1);
                     }
                 });
             });

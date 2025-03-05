@@ -39,23 +39,6 @@ export async function getNickname(id) {
     return (await post(`/api/player/${id}/nickname`).then((res) => res.json()))["nickname"];
 }
 
-export async function getUserIdByNickname(nickname) {
-    try {
-        const response = await post(`/api/user-id-by-nickname`, { body: JSON.stringify({ nickname: nickname }) });
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        if (!data.user_id) {
-            throw new Error("User ID not found in response");
-        }
-        return data.user_id;
-    } catch (error) {
-        console.error("Error fetching user ID by nickname:", error);
-        return null;
-    }
-}
-
 /**
  * @param {string} message
  * @param {string} iconClass

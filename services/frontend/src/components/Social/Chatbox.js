@@ -1,5 +1,5 @@
 import { Component, navigateTo } from "../../micro";
-import { getOriginNoProtocol, post, fetchApi, showToast, getNickname, getUserIdByNickname, api } from "/utils";
+import { getOriginNoProtocol, post, fetchApi, showToast, getNickname, api } from "/utils";
 import { tr } from "../../i18n";
 
 export default class Chatbox extends Component {
@@ -493,9 +493,9 @@ export default class Chatbox extends Component {
         });
     }
 
-    async updateChatHeader(fullname, picture) {
+    async updateChatHeader(playerId, picture) {
         this.chatHeader.innerHTML = "";
-        const idToNickname = await getNickname(fullname);
+        const idToNickname = await getNickname(playerId);
 
         const img = document.createElement("img");
         img.classList.add("chat-profile-picture");
@@ -504,7 +504,8 @@ export default class Chatbox extends Component {
         const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", "");
 
         img.addEventListener("click", async () => {
-            setOtherProfileNickname(idToNickname);
+            // setOtherProfileNickname(idToNickname);
+            setOtherProfileNickname(playerId);
             this.userInteracted = true;
         });
 
@@ -512,7 +513,7 @@ export default class Chatbox extends Component {
         i.classList.add("bi", "bi-heart-fill");
 
         i.addEventListener("click", async () => {
-            const response = await post("/api/add-friend/" + fullname, {})
+            const response = await post("/api/add-friend/" + playerId, {})
                 .then((res) => res.json())
                 .catch((err) => {
                     showToast(tr("An error occurred. Please try again."), "bi bi-exclamation-triangle-fill");
@@ -536,7 +537,7 @@ export default class Chatbox extends Component {
             this.userInteracted = true;
             if (blockBtn.innerHTML === tr("BLOCK")) {
                 blockBtn.innerHTML = tr("UNBLOCK");
-                const response = await post("/api/block-user/" + fullname, {})
+                const response = await post("/api/block-user/" + playerId, {})
                     .then((res) => res.json())
                     .catch((err) => {
                         showToast(tr("An error occurred. Please try again."), "bi bi-exclamation-triangle-fill");
@@ -548,7 +549,7 @@ export default class Chatbox extends Component {
                 }
             } else if (blockBtn.innerHTML === tr("UNBLOCK")) {
                 blockBtn.innerHTML = tr("BLOCK");
-                const response = await post("/api/unblock-user/" + fullname, {})
+                const response = await post("/api/unblock-user/" + playerId, {})
                     .then((res) => res.json())
                     .catch((err) => {
                         showToast(tr("An error occurred. Please try again."), "bi bi-exclamation-triangle-fill");
@@ -625,7 +626,7 @@ export default class Chatbox extends Component {
         this.chattingWithId = "";
         this.userInteracted = false;
 
-        this.info = await post("/api/player/c/nickname")
+        this.info = await post("/api/player/c/profile")
             .then((res) => res.json())
             .catch((err) => {});
 
@@ -641,7 +642,7 @@ export default class Chatbox extends Component {
             this.phone = document.getElementById("SG-001");
             this.notification = document.getElementById("notification-sound");
 
-            this.id = await getUserIdByNickname(this.info.nickname);
+            this.id = this.info.id;
 
             const personContainer = document.getElementById("person-container");
 
@@ -1120,7 +1121,7 @@ export default class Chatbox extends Component {
                 <span>${tr("Send a d-mail here !")}</span>
             </div>
             <audio id="notification-sound" src="/music/Tuturu.mp3"></audio>
-            ${otherProfileNickname().length > 0 ? `<OtherProfile nickname="${otherProfileNickname()}" />` : ""}
+            ${otherProfileNickname() != -1 ? `<OtherProfile id="${otherProfileNickname()}" />` : ""}
         `;
     }
 }

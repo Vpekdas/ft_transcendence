@@ -1,6 +1,6 @@
 import { tr } from "../../i18n";
 import { Component } from "../../micro";
-import { api, post, getNickname, getUserIdByNickname } from "../../utils";
+import { api, post, getNickname } from "../../utils";
 export default class OtherProfile extends Component {
     timeAsDate(s) {
         const date = new Date(s * 1000);
@@ -18,18 +18,15 @@ export default class OtherProfile extends Component {
     }
 
     async showProfile() {
-        const actualName = this.attributes.get("nickname");
-        const actualId = await getUserIdByNickname(actualName);
-
         this.profileHTML = /* HTML */ `
             <div class="container-fluid card-other-profile-container">
                 <div class="card settings other-profile">
                     <h5 class="card-title settings" data-text="${tr("Profile Picture")}">${tr("Profile Picture")}</h5>
-                    <img class="card-img-top profile" src="${api("/api/player/" + actualId + "/picture")}" />
+                    <img class="card-img-top profile" src="${api("/api/player/" + this.id + "/picture")}" />
                 </div>
                 <div class="card settings other-profile">
                     <h5 class="card-title settings" data-text="${tr("Nickname")}">${tr("Nickname")}</h5>
-                    <div class="card-body settings other-profile">${actualName}</div>
+                    <div class="card-body settings other-profile">${this.nickname}</div>
                 </div>
                 <div class="card settings other-profile">
                     <h5 class="card-title settings" data-text="${tr("Nickname")}">${tr("Elo")}</h5>
@@ -40,12 +37,7 @@ export default class OtherProfile extends Component {
     }
 
     async showMatchHistory() {
-        const actualName = this.attributes.get("nickname");
-        const actualId = await getUserIdByNickname(actualName);
-
-        console.log(actualName, actualId);
-
-        this.results = await post("/api/player/" + actualId + "/matches").then((res) => res.json());
+        this.results = await post("/api/player/" + this.id + "/matches").then((res) => res.json());
         this.matchCount = 0;
         this.winCount = 0;
         this.localCount = 0;
@@ -71,21 +63,21 @@ export default class OtherProfile extends Component {
                     player1Class = "history-winner";
                     player2Class = "history-looser";
 
-                    if (gamemode !== tr("Local") && player1Name === actualName) {
+                    if (gamemode !== tr("Local") && player1Name === this.nicname) {
                         this.winCount++;
                     }
                 } else {
                     player1Class = "history-looser";
                     player2Class = "history-winner";
 
-                    if (gamemode !== tr("Local") && player2Name === actualName) {
+                    if (gamemode !== tr("Local") && player2Name === this.nickname) {
                         this.winCount++;
                     }
                 }
 
-                if (player1Name === actualName) {
+                if (player1Name === this.nickname) {
                     this.averageGamePointArray.push(result["score1"]);
-                } else if (player2Name === actualName) {
+                } else if (player2Name === this.nickname) {
                     this.averageGamePointArray.push(result["score2"]);
                 }
 
@@ -244,13 +236,13 @@ export default class OtherProfile extends Component {
         const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", "");
         const [otherProfileTab, setOtherProfileTab] = this.usePersistent("otherProfileTab", "Profile");
 
-        const actualName = this.attributes.get("nickname");
+        this.id = this.attributes.get("id");
+        this.nickname = await getNickname(this.id);
 
-        const actualId = await getUserIdByNickname(actualName);
-        this.results = await post("/api/player/" + actualId + "/matches")
+        this.results = await post("/api/player/" + this.id + "/matches")
             .then((res) => res.json())
             .catch((err) => {});
-        this.elo = await post("/api/player/" + actualId + "/profile")
+        this.elo = await post("/api/player/" + this.id + "/profile")
             .then((res) => res.json())
             .catch((err) => {});
 
@@ -278,7 +270,7 @@ export default class OtherProfile extends Component {
             const returnBtn = document.getElementById("confirm-button");
 
             returnBtn.addEventListener("click", async () => {
-                setOtherProfileNickname("");
+                setOtherProfileNickname(-1);
             });
         };
     }

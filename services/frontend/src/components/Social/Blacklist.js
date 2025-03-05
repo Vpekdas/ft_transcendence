@@ -1,7 +1,6 @@
 import { Component } from "../../micro";
 import { post, showToast, api } from "../../utils";
 import { tr } from "../../i18n";
-import { getUserIdByNickname } from "../../utils";
 
 export default class Blacklist extends Component {
     async init() {
@@ -11,7 +10,9 @@ export default class Blacklist extends Component {
         for (let i = 0; i < this.info.blocked_users.length; i++) {
             this.blacklistHTML += /* HTML */ `<div class="friend">
                 <img src="${api("/api/player/" + this.info.blocked_users[i].id + "/picture")}" />
-                <span class="friend-name">${this.info.blocked_users[i].nickname}</span>
+                <span class="friend-name" friend-id="${this.info.blocked_users[i].id}"
+                    >${this.info.blocked_users[i].nickname}</span
+                >
                 ${this.createStatus(this.info.blocked_users[i].is_online)}
                 <div class="btn btn-primary settings view-friend">
                     <i class="bi bi-binoculars-fill"></i>
@@ -29,17 +30,16 @@ export default class Blacklist extends Component {
             const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", "");
 
             profiles.forEach(async (profile) => {
-                const nickname = profile.querySelector(".friend-name").innerHTML;
-                const nicknameToId = await getUserIdByNickname(nickname);
+                const id = profile.querySelector(".friend-name").getAttribute("friend-id");
 
                 const viewBtn = profile.querySelector(".btn.btn-primary.settings.view-friend");
                 viewBtn.addEventListener("click", async () => {
-                    setOtherProfileNickname(nickname);
+                    setOtherProfileNickname(id);
                 });
 
                 const removeBlockBtn = profile.querySelector(".btn.btn-primary.settings.remove-friend");
                 removeBlockBtn.addEventListener("click", async () => {
-                    const response = await post("/api/unblock-user/" + nicknameToId)
+                    const response = await post("/api/unblock-user/" + id)
                         .then((res) => res.json())
                         .catch((err) => {});
 
@@ -47,7 +47,7 @@ export default class Blacklist extends Component {
                         showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
                     } else {
                         showToast(tr("User removed from blocked list successfully"), "bi bi-check-circle-fill");
-                        setOtherProfileNickname("");
+                        setOtherProfileNickname(-1);
                     }
                 });
             });

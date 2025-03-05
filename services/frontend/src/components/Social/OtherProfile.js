@@ -214,7 +214,6 @@ export default class OtherProfile extends Component {
 
         // prettier-ignore
 
-
         if (this.remoteCount >= 2 || this.tournamentCount >= 2) {
             // prettier-ignore
 
@@ -235,7 +234,7 @@ export default class OtherProfile extends Component {
     }
 
     async init() {
-        const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", "");
+        const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", -1);
         const [otherProfileTab, setOtherProfileTab] = this.usePersistent("otherProfileTab", "Profile");
 
         this.id = this.attributes.get("id");

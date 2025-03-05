@@ -501,7 +501,7 @@ export default class Chatbox extends Component {
         img.classList.add("chat-profile-picture");
         img.src = picture;
 
-        const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", "");
+        const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", -1);
 
         img.addEventListener("click", async () => {
             // setOtherProfileNickname(idToNickname);

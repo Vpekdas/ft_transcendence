@@ -27,7 +27,7 @@ export default class Blacklist extends Component {
 
         this.onready = async () => {
             const profiles = document.querySelectorAll(".friend");
-            const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", "");
+            const [otherProfileNickname, setOtherProfileNickname] = this.usePersistent("otherProfileNickname", -1);
 
             profiles.forEach(async (profile) => {
                 const id = profile.querySelector(".friend-name").getAttribute("friend-id");

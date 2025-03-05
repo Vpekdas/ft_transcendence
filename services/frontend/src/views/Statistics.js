@@ -114,20 +114,10 @@ export default class Statistics extends Component {
 
         this.winRatio = 0;
         this.loseRatio = 0;
-        this.gameDurationSum = 0;
-        this.averageGameDuration = "0:00";
-
-        // TODO: Add this stats somewhere.
 
         if (this.matchCount !== 0) {
-            this.winRatio = ((this.winCount / this.matchCount) * 100).toFixed(2);
+            this.winRatio = ((this.winCount / (this.remoteCount + this.tournamentCount)) * 100).toFixed(2);
             this.loseRatio = (100 - this.winRatio).toFixed(2);
-
-            this.gameDurationSum = this.gameDurationArray
-                .map(this.convertToSeconds)
-                .reduce((sum, duration) => sum + duration, 0);
-
-            this.averageGameDuration = this.convertToMinutesAndSeconds(this.gameDurationSum / this.matchCount);
 
             this.localRatio = ((this.localCount / this.matchCount) * 100).toFixed(2);
             this.remoteRatio = ((this.remoteCount / this.matchCount) * 100).toFixed(2);
@@ -145,6 +135,8 @@ export default class Statistics extends Component {
                 fillPercent2: this.loseRatio,
                 title: tr("Win/Loss Ratio"),
                 titleColor: "#d89123",
+                segmentTitle1: tr("Win"),
+                segmentTitle2: tr("Loss"),
             };
 
             const donutChartConfig2 = {
@@ -155,12 +147,15 @@ export default class Statistics extends Component {
                 colorNumber: "3",
                 color1: "#00FF00",
                 color2: "#FF0000",
-                color2: "#0000FF",
+                color3: "#0000FF",
                 fillPercent1: this.localRatio,
                 fillPercent2: this.remoteRatio,
                 fillPercent3: this.tournamentRatio,
                 title: tr("Game Mode Distribution"),
                 titleColor: "#d89123",
+                segmentTitle1: tr("Local"),
+                segmentTitle2: tr("Remote"),
+                segmentTitle3: tr("Tournament"),
             };
 
             const lineChartPoints = this.gameDurationArray.map((duration, index) => {
@@ -197,7 +192,9 @@ export default class Statistics extends Component {
 
             // prettier-ignore
             this.statisticsHTML += /* HTML */ `<div class="container-fluid donut-chart-container">`
-            this.statisticsHTML += `<DonutChart config='${JSON.stringify({ donutChartConfig: donutChartConfig })}' />`;
+            if (!isNaN(this.winRatio)) {
+                this.statisticsHTML += `<DonutChart config='${JSON.stringify({ donutChartConfig: donutChartConfig })}' />`;
+            }
             this.statisticsHTML += `<DonutChart config='${JSON.stringify({ donutChartConfig: donutChartConfig2 })}' />`;
             this.statisticsHTML += /* HTML */ `</div>`;
 

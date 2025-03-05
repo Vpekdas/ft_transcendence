@@ -6,8 +6,8 @@ import { tr } from "../i18n";
 export default class Profile extends Component {
     async init() {
         this.onready = () => {
-            const introContainer = document.getElementById("intro4");
-            this.decodeEffect(tr(INTRO[3]), introContainer);
+            const introContainer = document.getElementById("intro5");
+            this.decodeEffect(tr(INTRO[4]), introContainer);
 
             const rocket = document.querySelector(".space-rocket");
             const supernova = document.querySelector(".supernova");
@@ -109,8 +109,8 @@ export default class Profile extends Component {
         return /* HTML */ `
             <HomeNavBar />
             <div class="container-fluid profile-container">
-                <div class="container-fluid intro-container appear" id="intro-container-4">
-                    <span class="decoded-intro" id="intro4"></span>
+                <div class="container-fluid intro-container appear" id="intro-container-5">
+                    <span class="decoded-intro" id="intro5"></span>
                 </div>
                 ${comp}
             </div>

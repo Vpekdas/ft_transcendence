@@ -74,25 +74,33 @@ export default class OuterWilds extends Component {
         this.onready = async () => {
             this.music = { audio: document.getElementById("background-music"), name: "", index: 0 };
 
-            const chronometer = { timerId: 0, seconds: 0 };
+            document.addEventListener("click", async () => {
+                this.userInteracted = true;
+            });
+
+            this.chronometer = { timerId: 0, seconds: 0 };
             let supernova = false;
 
-            if (this.userInteracted) {
-                chronometer.timerId = setInterval(() => {
-                    chronometer.seconds++;
-                    if (chronometer.seconds === 120 && !supernova) {
-                        supernova = true;
-                        if (this.music.audio.duration > 0 && !this.music.audio.paused) {
-                            this.music.audio.pause();
-                        }
-                        const audioSource = document.getElementById("audio-source");
+            this.chronometer.timerId = setInterval(() => {
+                this.chronometer.seconds++;
+                if (this.chronometer.seconds === 37 && !supernova) {
+                    supernova = true;
+                    if (this.music.audio.duration > 0 && !this.music.audio.paused) {
+                        this.music.audio.pause();
+                    }
+                    const audioSource = document.getElementById("audio-source");
+
+                    if (audioSource) {
                         audioSource.src = "/music/End Times.mp3";
                         this.music.audio.load();
-                        this.music.audio.play();
-                        clearInterval(chronometer.timerId);
+                        if (this.userInteracted) {
+                            this.music.audio.play();
+                        }
                     }
-                }, 1000);
-            }
+
+                    clearInterval(this.chronometer.timerId);
+                }
+            }, 1000);
 
             // Make the quantum moon jump around randomly.
             const quantumMoon = document.querySelector("#quantum-moon");
@@ -139,8 +147,6 @@ export default class OuterWilds extends Component {
                     // For example, clicking on Attlerock should display Attlerock's details, not Timber Hearth's.
 
                     event.stopPropagation();
-
-                    this.userInteracted = true;
 
                     const planetContainer = document.querySelector(".container-fluid.planet-card-container");
                     const displayedPlanet = document.querySelector(".planet-img");
@@ -201,7 +207,7 @@ export default class OuterWilds extends Component {
     }
 
     // Ensure that music is stopped when navigating outside homepage.
-    clean() {
+    async clean() {
         if (this.music && this.music.audio && this.music.audio.duration > 0 && !this.music.audio.paused) {
             this.music.audio.pause();
             this.music.audio.currentTime = 0;

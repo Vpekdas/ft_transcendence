@@ -695,10 +695,10 @@ def get_user_id_by_nickname(request: HttpRequest):
 
     nickname = data["nickname"]
 
-    try:
-        user = User.objects.get(username=nickname)
+    user = User.objects.filter(username=nickname).first()
+    if user:
         return JsonResponse({"user_id": user.id})
-    except User.DoesNotExist:
+    else:
         return JsonResponse({"error": USER_NOT_FOUND}, status=404)
 
 @require_POST

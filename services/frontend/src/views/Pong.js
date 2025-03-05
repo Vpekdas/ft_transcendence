@@ -1,13 +1,12 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { EXRLoader } from "three/addons/loaders/EXRLoader.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
-import { getOriginNoProtocol, post, showToast } from "../utils";
-import { Component, dirty, params, navigateTo } from "../micro";
+import { getOriginNoProtocol, post } from "../utils";
+import { Component, params, navigateTo } from "../micro";
 import { tr } from "../i18n";
 import { ParticleSystem } from "../ParticleSystem";
 
@@ -463,18 +462,26 @@ export default class Pong extends Component {
             }
 
             let gameover = /* HTML */ ` <div class="container-fluid end-game-text">
-                <div>
-                    <span>${winnerText}</span>
-                </div>
-                <div>
-                    <a href="/">${tr("Back to home")}</a>
-                </div>
+                <span>${winnerText}</span>
+                <button id="home-btn" type="button" class="btn btn-primary settings">${tr("Back to home")}</button>
             </div>`;
 
             const endGameText = document.querySelector(".container-fluid.end-game");
             if (endGameText) {
                 endGameText.innerHTML += gameover;
             }
+
+            const homeBtn = document.getElementById("home-btn");
+
+            if (homeBtn) {
+                homeBtn.addEventListener("click", () => {
+                    navigateTo("/");
+                });
+            }
+
+            setTimeout(() => {
+                navigateTo("/");
+            }, 5000);
         } else if (data["type"] == "redirectTournament") {
             navigateTo(`/tournament/${data["id"]}`);
         } else if (data["type"] == "countdown") {

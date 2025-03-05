@@ -3,7 +3,11 @@ import { Component } from "../../micro";
 const r = 15.91549430918954;
 /** @type {import("../../micro").Component} */
 export default class DonutChart extends Component {
-    generateSegment(color, dashArray, dashOffset, textPosition, content) {
+    generateSegment(color, dashArray, dashOffset, textPosition, content, title) {
+        if (content === "0.00") {
+            content = "";
+        }
+
         return /* HTML */ `
             <circle
                 class="donut-segment"
@@ -16,6 +20,8 @@ export default class DonutChart extends Component {
                 stroke-dasharray="${dashArray}"
                 stroke-dashoffset="${dashOffset}"
                 style="--neon-color: ${color}; --dasharray: ${dashArray}; --dashoffset: ${dashOffset};"
+                data-bs-toggle="tooltip"
+                title="${title}"
             ></circle>
             <text
                 class="chart-content"
@@ -68,6 +74,7 @@ export default class DonutChart extends Component {
                 fillOffset: "",
                 textPosition: { x: 0, y: 0 },
                 content: "",
+                segmentTitle: "",
             };
             circle.color = this.config.donutChartConfig["color" + (i + 1)];
 
@@ -79,6 +86,10 @@ export default class DonutChart extends Component {
             circle.textPosition = this.calculateTextPosition(fillingPercent, circle.fillOffset);
             circle.content = fillingPercent.toString();
 
+            const segmentTitle = this.config.donutChartConfig["segmentTitle" + (i + 1)];
+
+            circle.segmentTitle = segmentTitle;
+
             circles.push(circle);
         }
 
@@ -89,9 +100,19 @@ export default class DonutChart extends Component {
                 circles[i].fillPercent,
                 circles[i].fillOffset,
                 circles[i].textPosition,
-                circles[i].content
+                circles[i].content,
+                circles[i].segmentTitle
             );
         }
+
+        this.onready = async () => {
+            this.onready = async () => {
+                const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                const tooltipList = [...tooltipTriggerList].map(
+                    (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
+                );
+            };
+        };
     }
 
     render() {

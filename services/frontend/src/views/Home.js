@@ -34,7 +34,7 @@ export default class Home extends Component {
                 this.createParticles(particleContainer, rocket);
             }, 100);
 
-            for (let i = 0; i < 3; i++) {
+            for (let i = 0; i < 4; i++) {
                 this.animatedIntroArray.push({
                     text: INTRO[i],
                     animated: false,
@@ -77,6 +77,41 @@ export default class Home extends Component {
             this.animatedIntroArray.forEach((intro) => {
                 observer.observe(intro.e);
             });
+
+            this.createPloufParticle(21);
+
+            const intro = document.getElementById("intro-container-4");
+            const popupParticleContainer = document.getElementById("popup-intro");
+            const closeBtn = document.getElementById("close-intro");
+
+            const seenIntro = localStorage.getItem("seenIntro");
+
+            if (seenIntro !== "true") {
+                localStorage.setItem("seenIntro", "true");
+
+                closeBtn.addEventListener("click", async () => {
+                    if (intro) {
+                        intro.style.display = "none";
+                        this.audio = document.getElementById("background-music");
+                        this.audio.load();
+                        this.audio.play();
+                    }
+
+                    if (popupParticleContainer) {
+                        popupParticleContainer.innerHTML = "";
+                        popupParticleContainer.style.display = "none";
+                    }
+                });
+            } else {
+                if (intro) {
+                    intro.style.display = "none";
+                }
+
+                if (popupParticleContainer) {
+                    popupParticleContainer.innerHTML = "";
+                    popupParticleContainer.style.display = "none";
+                }
+            }
         };
     }
 
@@ -147,6 +182,32 @@ export default class Home extends Component {
         });
     }
 
+    createPloufParticle(particleNumber) {
+        const container = document.getElementById("popup-intro");
+
+        for (let i = 0; i < particleNumber; i++) {
+            const particle = document.createElement("div");
+
+            particle.textContent = "🤿";
+
+            particle.classList.add("plouf-particle");
+
+            particle.style.setProperty("--startY", `${Math.random() * 100}vh`);
+            particle.style.setProperty("--startX", `${Math.random() * 100}vw`);
+            particle.style.setProperty("--endY", `${Math.random() * 100}vh`);
+            particle.style.setProperty("--endX", `${Math.random() * 100}vw`);
+
+            container.appendChild(particle);
+        }
+    }
+
+    async clean() {
+        if (this.music && this.music.audio && this.music.audio.duration > 0 && !this.music.audio.paused) {
+            this.music.audio.pause();
+            this.music.audio.currentTime = 0;
+        }
+    }
+
     render() {
         return /* HTML */ `
             <HomeNavBar />
@@ -212,6 +273,11 @@ export default class Home extends Component {
                 <div class="particle-container"></div>
             </div>
             <Chatbox />
+            <div class="container-fluid intro-container" id="intro-container-4">
+                <span class="decoded-intro" id="intro4"></span>
+                <button id="close-intro" type="submit" class="btn btn-primary settings">${tr("Dive in !")}</button>
+            </div>
+            <div class="particle-container" id="popup-intro"></div>
         `;
     }
 }

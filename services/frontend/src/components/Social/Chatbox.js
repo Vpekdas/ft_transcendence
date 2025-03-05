@@ -61,8 +61,7 @@ export default class Chatbox extends Component {
         `;
     }
 
-    // TODO: Add the timestamp.
-    addNewMessage(discussionContainer, sender, message) {
+    addNewMessage(discussionContainer, sender, message, timestamp) {
         const messageContainer = document.createElement("div");
         messageContainer.classList.add("container-fluid-message");
         messageContainer.classList.add("sender", sender != this.id ? "sender-other" : "sender-me");
@@ -70,7 +69,13 @@ export default class Chatbox extends Component {
         const messageContent = document.createElement("p");
         messageContent.textContent = message;
 
+        const messageTime = document.createElement("div");
+        messageTime.classList.add("timestamp");
+        const date = new Date(timestamp);
+        messageTime.textContent = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
         messageContainer.appendChild(messageContent);
+        messageContainer.appendChild(messageTime);
 
         if (discussionContainer) {
             discussionContainer.appendChild(messageContainer);
@@ -117,7 +122,12 @@ export default class Chatbox extends Component {
 
                                     const discussion = document.getElementById("private-discussion-" + sender);
                                     if (discussion) {
-                                        this.addNewMessage(discussion, message.sender, message.content);
+                                        this.addNewMessage(
+                                            discussion,
+                                            message.sender,
+                                            message.content,
+                                            message.timestamp
+                                        );
                                     }
                                 });
                             })
@@ -132,6 +142,7 @@ export default class Chatbox extends Component {
                             if (messageData.type === "chat_message") {
                                 const message = messageData.message;
                                 const sender = messageData.sender;
+                                const timestamp = messageData.timestamp;
                                 const idToNickname = await getNickname(sender);
 
                                 if (this.id != sender) {
@@ -148,7 +159,7 @@ export default class Chatbox extends Component {
 
                                 let discussion = document.getElementById("private-discussion-" + this.chattingWithId);
                                 if (discussion) {
-                                    this.addNewMessage(discussion, sender, message);
+                                    this.addNewMessage(discussion, sender, message, timestamp);
                                 }
                             }
 
@@ -221,6 +232,7 @@ export default class Chatbox extends Component {
                                     const message = messageData.message;
                                     const sender = messageData.sender;
                                     const idToNickname = await getNickname(sender);
+                                    const timestamp = messageData.timestamp;
 
                                     if (this.id != sender) {
                                         this.chattingWithId = sender;
@@ -237,7 +249,7 @@ export default class Chatbox extends Component {
                                     let discussion = document.getElementById(
                                         "private-discussion-" + this.chattingWithId
                                     );
-                                    this.addNewMessage(discussion, sender, message);
+                                    this.addNewMessage(discussion, sender, message, timestamp);
                                 }
                             };
 
@@ -323,6 +335,7 @@ export default class Chatbox extends Component {
                 if (messageData.type === "chat_message") {
                     const message = messageData.message;
                     const sender = messageData.sender;
+                    const timestamp = messageData.timestamp;
 
                     if (this.id != sender) {
                         this.chattingWithId = sender;
@@ -338,7 +351,7 @@ export default class Chatbox extends Component {
                     }
 
                     let discussion = document.getElementById("private-discussion-" + this.chattingWithId);
-                    this.addNewMessage(discussion, sender, message);
+                    this.addNewMessage(discussion, sender, message, timestamp);
                 }
 
                 if (messageData.type === "error") {

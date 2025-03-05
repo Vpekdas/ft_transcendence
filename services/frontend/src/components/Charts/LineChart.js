@@ -1,6 +1,5 @@
 import { Component } from "../../micro";
 
-/** @type {import("../../micro").Component} */
 export default class LineChart extends Component {
     async init() {
         this.config = JSON.parse(this.attributes.get("config"));
@@ -12,7 +11,7 @@ export default class LineChart extends Component {
         this.viewHeight = this.config.lineChartConfig.viewHeight;
 
         this.padding = 20;
-        this.paddingTop = 10;
+        this.paddingTop = 40;
 
         this.duration = this.config.lineChartConfig.duration;
 
@@ -28,6 +27,10 @@ export default class LineChart extends Component {
     }
 
     generatePoints(data) {
+        console.log(data);
+        if (data.length <= 1) {
+            return "";
+        }
         // Find an even spacing for each points.
         const xScale = (this.viewWidth - 2 * this.padding) / (data.length - 1);
         const yMax = Math.max(...data.map((point) => point.y));
@@ -52,6 +55,9 @@ export default class LineChart extends Component {
     }
 
     generateCircles(data) {
+        if (data.length <= 1) {
+            return "";
+        }
         // Find an even spacing for each points.
         const xScale = (this.viewWidth - 2 * this.padding) / (data.length - 1);
         const yMax = Math.max(...data.map((point) => point.y));

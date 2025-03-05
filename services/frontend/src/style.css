@@ -353,6 +353,9 @@
     height: 100%;
     width: 100%;
     justify-content: space-around;
+    overflow-y: auto;
+    scrollbar-color: #d89123 #1c1c1c;
+    scrollbar-width: thin;
 }
 
 .list-group.match-history {
@@ -1799,7 +1802,7 @@ canvas {
 }
 
 ow-system {
-    --cycle: 240s;
+    --cycle: 120s;
     --unit: calc(var(--scale, 1) * 95vmin);
     --sun-glow: #ba702f;
     --orbit-border-width: 1px;
@@ -2483,6 +2486,36 @@ ow-system[labels="false"] ow-name {
     display: flex;
     height: 100%;
     width: 100%;
+    justify-content: space-around;
+}
+
+#tournament-points {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80%;
+    height: auto;
+    background-color: transparent;
+    border: 1px solid #d89123;
+    color: #d89123;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    box-shadow: 0 0 10px rgba(216, 145, 35, 0.5);
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease,
+        box-shadow 0.3s ease;
+    text-align: center;
+}
+
+#tournament-points:focus {
+    background-color: #d89123;
+    color: #000;
+    box-shadow:
+        0 0 10px #d89123,
+        0 0 20px #d89123;
+    outline: none;
 }
 
 .btn.btn-outline-primary.player-count {
@@ -2573,6 +2606,12 @@ ow-system[labels="false"] ow-name {
     border-radius: 50%;
     box-shadow: 0 0 10px #00bcd4;
     animation: moveParticle 10s linear infinite;
+}
+
+.plouf-particle {
+    position: absolute;
+    animation: moveParticle 10s linear infinite;
+    font-size: 30px;
 }
 
 @keyframes moveParticle {
@@ -2733,10 +2772,46 @@ ow-system[labels="false"] ow-name {
 
 .winner {
     background-color: green;
+    color: white;
+    padding: 10px;
+    margin: 5px 0;
+    border: 2px solid #00ff00;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    text-shadow:
+        0 0 5px #00ff00,
+        0 0 10px #00ff00;
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.winner:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(0, 255, 0, 1);
 }
 
 .looser {
     background-color: red;
+    color: white;
+    padding: 10px;
+    margin: 5px 0;
+    border: 2px solid #ff0000;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+    text-shadow:
+        0 0 5px #ff0000,
+        0 0 10px #ff0000;
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.looser:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 1);
 }
 
 .tournament-match {
@@ -2991,10 +3066,16 @@ ow-system[labels="false"] ow-name {
     justify-content: space-around;
 }
 
+/* HERE */
+
 .card.settings.other-profile.matchmake {
     display: flex;
     position: relative;
     width: 100%;
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+    animation: appear 1.5s forwards;
 }
 
 /* SKINS */
@@ -3184,6 +3265,15 @@ ow-system[labels="false"] ow-name {
     padding: 10px;
 }
 
+.timestamp {
+    font-size: 0.75em;
+    color: #888;
+    font-style: italic;
+    margin-top: 5px;
+    text-align: right;
+    display: block;
+}
+
 .person {
     position: relative;
     display: flex;
@@ -3267,6 +3357,7 @@ ow-system[labels="false"] ow-name {
     position: fixed;
     height: 100%;
     width: 20%;
+    min-width: 250px;
     border-top: 16px solid #b22222;
     border-bottom: 16px solid #b22222;
     border-left: 8px solid #b22222;
@@ -3822,9 +3913,16 @@ ow-system[labels="false"] ow-name {
     gap: 30px;
 }
 
-#test {
+#intro-container-4 {
     display: flex;
-    height: 1000px;
+    position: fixed;
+    top: 0%;
+    left: 0%;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    justify-content: space-around;
+    flex-direction: column;
 }
 
 /* Scrollbar */

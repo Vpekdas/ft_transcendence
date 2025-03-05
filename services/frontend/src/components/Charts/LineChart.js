@@ -27,7 +27,6 @@ export default class LineChart extends Component {
     }
 
     generatePoints(data) {
-        console.log(data);
         if (data.length <= 1) {
             return "";
         }

@@ -698,6 +698,7 @@
         filter 0.3s ease;
     animation: fillDonut 2s ease-out forwards;
     animation-fill-mode: forwards;
+    cursor: crosshair;
 }
 
 .donut-segment:hover {
@@ -721,6 +722,10 @@
         stroke-width: 9;
         filter: drop-shadow(0 0 5px var(--neon-color, #fff)) drop-shadow(0 0 10px var(--neon-color, #fff));
     }
+}
+
+.micro-LineChart {
+    cursor: crosshair;
 }
 
 .x-axis line,
@@ -846,6 +851,7 @@
     isolation: isolate;
     filter: url(#thermal-vision);
     overflow-x: hidden;
+    cursor: crosshair;
 }
 
 @keyframes popIn {

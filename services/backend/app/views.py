@@ -484,7 +484,12 @@ def getMatches(request: HttpRequest, id):
     if not request.user.is_authenticated:
         return JsonResponse({ "error": NOT_AUTHENTICATED })
 
-    player = Player.objects.filter(id=request.user.id).first()
+    if id == "c":
+        id = request.user.id
+    else:
+        id = int(id)
+
+    player = Player.objects.filter(id=id).first()
     results = PongGameResult.objects.filter(Q(player1=player.id) | Q(player2=player.id))
 
     return JsonResponse({ "results": [{ "id": r.id, "gamemode": r.gamemode, "player1": r.player1, "player2": r.player2, "score1": r.score1, "score2": r.score2, "timeStarted": r.timeStarted, "timeEnded": r.timeEnded, "tid": r.tid } for r in results] })
@@ -499,7 +504,22 @@ def getMatchStats(request: HttpRequest, id):
     if not game:
         return HttpResponseBadRequest()
 
-    return JsonResponse(game.stats)
+    return JsonResponse({
+        "p1": game.stats["p1"],
+        "p2": game.stats["p2"],
+    })
+
+@require_POST
+def getMatchHeatmap(request: HttpRequest, id):
+    if not request.user.is_authenticated:
+        return JsonResponse({ "error": NOT_AUTHENTICATED })
+
+    game = PongGameResult.objects.filter(id=int(id)).first()
+
+    if not game:
+        return HttpResponseBadRequest()
+
+    return JsonResponse({ "points": game.stats["heatmap"] })
 
 # /api/tournament/create
 @require_POST

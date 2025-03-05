@@ -71,13 +71,23 @@ export default class Accordion extends Component {
             const tooltipList = [...tooltipTriggerList].map(
                 (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
             );
+
+            let me = document.querySelector(`button#acc-btn-${this.id}`);
+            me.addEventListener("click", async () => {
+                let points = await post("/api/match/" + this.attributes.get("match-id") + "/heatmap").then((res) =>
+                    res.json()
+                );
+
+                let heatmap = document.getElementById(`heatmap-chart-${this.id}`);
+                heatmap.innerHTML = createHeatmapHTML(points["points"]);
+            });
         };
     }
 
     // Generate random id, It allow to accordion toggle off once at time.
     // if we give the same id for each accordion, well they close all at same time.
     // 36 Ensure it converts in base 36 (from a-z including 0-9).
-    // Substring 2 because we want to skip "0.2" generate by math.random.
+    // Substring 2 because we want to skip "0." generate by math.random.
     generateRandomId() {
         return "accordion-" + Math.random().toString(36).substring(2, 9);
     }
@@ -88,7 +98,11 @@ export default class Accordion extends Component {
             <BarChart config='${JSON.stringify(this.barChart1)}' />
             <BarChart config='${JSON.stringify(this.barChart2)}' />
         </div>
-        <HeatMap config='${JSON.stringify(this.heatMap)}' />`;
+        <div id="heatmap-chart-${this.id}">
+        </div>
+        `;
+
+        // <HeatMap config="${JSON.stringify(this.heatMap)}" />;
 
         return /* HTML */ `
             <div class="accordion-item match-history">
@@ -100,6 +114,7 @@ export default class Accordion extends Component {
                         data-bs-target="#panelsStayOpen-collapse-${this.id}"
                         aria-expanded="false"
                         aria-controls="panelsStayOpen-collapse-${this.id}"
+                        id="acc-btn-${this.id}"
                     >
                         <div class="container-fluid match-history-container">
                             <span class="${this.config.config.player1Class}">
@@ -127,4 +142,57 @@ export default class Accordion extends Component {
             </div>
         `;
     }
+}
+
+function createHeatmapHTML(points) {
+    let html = "";
+
+    // Find the cell with the maximum number of points, which will be used as the max range for normalization.
+    let maxPointsInCell = 0;
+    for (let y = 0; y < 24; y++) {
+        for (let x = 0; x < 36; x++) {
+            let x2 = 36 - x - 18;
+            let y2 = 24 - y - 12;
+            let pointCount = points.filter((p) => p.x > x2 && p.x <= x2 + 1 && p.y > y2 && p.y <= y2 + 1).length;
+            if (pointCount > maxPointsInCell) {
+                maxPointsInCell = pointCount;
+            }
+        }
+    }
+
+    for (let y = 0; y < 24; y++) {
+        for (let x = 0; x < 36; x++) {
+            let x2 = 36 - x - 18;
+            let y2 = 24 - y - 12;
+            let pointCount = points.filter((p) => p.x > x2 && p.x <= x2 + 1 && p.y > y2 && p.y <= y2 + 1).length;
+
+            // Normalize and ensure value is not greater than 1.
+            let intensity = pointCount / maxPointsInCell;
+            intensity = Math.min(intensity, 1);
+
+            html += /* HTML */ `<div
+                class="rainbow"
+                style="--intensity: ${intensity}; --x: ${x}; --y: ${y};"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                title="${intensity}"
+            ></div>`;
+        }
+    }
+
+    return /* HTML */ `
+        <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0">
+            <filter id="thermal-vision" color-interpolation-filters="sRGB">
+                <feComponentTransfer>
+                    <feFuncR type="table" tableValues="0  0.125  0.8    1      1" />
+                    <feFuncG type="table" tableValues="0  0      0      0.843  1" />
+                    <feFuncB type="table" tableValues="0  0.549  0.466  0      1" />
+                </feComponentTransfer>
+            </filter>
+        </svg>
+        <div class="container-fluid heatmap-container">
+            <h5 class="heatmap-title">${tr("Heatmap")}</h5>
+            <div class="heatmap">${html}</div>
+        </div>
+    `;
 }

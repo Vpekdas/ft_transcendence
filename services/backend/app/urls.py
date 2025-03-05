@@ -48,6 +48,7 @@ urlpatterns = [
     path('api/player/<str:id>/skins/select-bar/<str:name>', views.selectBarSkin),
 
     path('api/match/<str:id>/stats', views.getMatchStats),
+    path('api/match/<str:id>/heatmap', views.getMatchHeatmap),
 
     path('api/tournament/create', views.tournament_create),
     path('api/tournament/<str:id>/invite', views.tournamentInvite),

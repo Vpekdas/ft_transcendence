@@ -42,6 +42,9 @@ export default class OtherProfile extends Component {
     async showMatchHistory() {
         const actualName = this.attributes.get("nickname");
         const actualId = await getUserIdByNickname(actualName);
+
+        console.log(actualName, actualId);
+
         this.results = await post("/api/player/" + actualId + "/matches").then((res) => res.json());
         this.matchCount = 0;
         this.winCount = 0;

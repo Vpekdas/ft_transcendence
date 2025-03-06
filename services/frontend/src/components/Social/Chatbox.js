@@ -43,7 +43,6 @@ export default class Chatbox extends Component {
 
         li.addEventListener("click", () => {
             li.classList.remove("new-message");
-            this.userInteracted = true;
         });
 
         if (personContainer) {
@@ -301,7 +300,6 @@ export default class Chatbox extends Component {
 
                         // Ensure that you can directly speak with new registered user.
                         newPersonElement.addEventListener("click", async () => {
-                            this.userInteracted = true;
                             this.chatContainer.style.display = "flex";
                             personContainer.style.display = "none";
                             this.chattingWithId = newPersonElement.getAttribute("data-sender");
@@ -469,7 +467,6 @@ export default class Chatbox extends Component {
 
         newPersons.forEach((person) => {
             person.addEventListener("click", async () => {
-                this.userInteracted = true;
                 this.chatContainer.style.display = "flex";
                 personContainer.style.display = "none";
                 this.chattingWithId = person.getAttribute("data-sender");
@@ -506,7 +503,6 @@ export default class Chatbox extends Component {
         img.addEventListener("click", async () => {
             // setOtherProfileNickname(idToNickname);
             setOtherProfileNickname(playerId);
-            this.userInteracted = true;
         });
 
         const i = document.createElement("i");
@@ -534,7 +530,6 @@ export default class Chatbox extends Component {
         blockBtn.innerHTML = tr("BLOCK");
 
         blockBtn.addEventListener("click", async () => {
-            this.userInteracted = true;
             if (blockBtn.innerHTML === tr("BLOCK")) {
                 blockBtn.innerHTML = tr("UNBLOCK");
                 const response = await post("/api/block-user/" + playerId, {})
@@ -636,6 +631,10 @@ export default class Chatbox extends Component {
             .catch((err) => {});
 
         this.onready = async () => {
+            document.addEventListener("click", () => {
+                this.userInteracted = true;
+            });
+
             this.chatContainer = document.getElementById("chat-container");
             this.writeArea = document.getElementById("messageArea");
             this.chatHeader = document.getElementById("actual-chat-header");
@@ -665,7 +664,6 @@ export default class Chatbox extends Component {
             const persons = document.querySelectorAll(".person");
             persons.forEach((person) => {
                 person.addEventListener("click", async () => {
-                    this.userInteracted = true;
                     this.chatContainer.style.display = "flex";
                     personContainer.style.display = "none";
                     this.chattingWithId = person.getAttribute("data-sender");
@@ -715,7 +713,6 @@ export default class Chatbox extends Component {
             const sendBtn = document.getElementById("send-btn");
 
             sendBtn.addEventListener("click", async () => {
-                this.userInteracted = true;
                 const msg = this.writeArea.value;
 
                 let ws = null;
@@ -751,7 +748,6 @@ export default class Chatbox extends Component {
             const backBtn = document.getElementById("back-btn");
 
             backBtn.addEventListener("click", () => {
-                this.userInteracted = true;
                 this.chatContainer.style.display = "none";
                 personContainer.style.display = "flex";
             });
@@ -768,13 +764,11 @@ export default class Chatbox extends Component {
 
             closeBtn.addEventListener("click", () => {
                 this.phone.classList.add("hide");
-                this.userInteracted = true;
             });
 
             const dMailButton = document.getElementById("d-mail-button");
 
             dMailButton.addEventListener("click", () => {
-                this.userInteracted = true;
                 this.phone.classList.remove("hide");
                 this.phone.style.display = "flex";
             });

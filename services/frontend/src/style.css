@@ -175,8 +175,6 @@
     animation:
         pulsing-glow 2s infinite,
         fadeInUp 1s forwards;
-    min-width: 800px;
-    min-height: 800px;
 }
 
 @keyframes fadeInUp {
@@ -943,7 +941,6 @@
     position: relative;
     overflow: hidden;
     justify-content: space-evenly;
-    min-width: 400px;
 }
 
 .card.settings:hover {
@@ -1630,7 +1627,6 @@ canvas {
     display: flex;
     height: 100%;
     width: 100%;
-    border: solid 1px;
     border-radius: 10px;
     justify-content: space-around;
     gap: 20px;

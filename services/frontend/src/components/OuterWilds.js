@@ -62,7 +62,6 @@ class Wanderer extends HTMLElement {
     }
 }
 
-/** @type {import("../micro").Component} */
 export default class OuterWilds extends Component {
     async init() {
         if (!customElements.get("ow-wanderer")) {
@@ -87,6 +86,7 @@ export default class OuterWilds extends Component {
                     supernova = true;
                     if (this.music.audio.duration > 0 && !this.music.audio.paused) {
                         this.music.audio.pause();
+                        this.music.audio.currentTime = 0;
                     }
                     const audioSource = document.getElementById("audio-source");
 

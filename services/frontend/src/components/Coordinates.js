@@ -1,7 +1,6 @@
 import { SCALE, POLYGON_VERTICES, FIRST_COORDINATES, SECOND_COORDINATES, THIRD_COORDINATES } from "../constant";
 import { Component } from "../micro";
 
-/** @type {import("../micro").Component} */
 export default class Coordinates extends Component {
     calculateDistance(x1, y1, x2, y2) {
         return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
@@ -244,6 +243,14 @@ export default class Coordinates extends Component {
                     stroke-width="20"
                     transform="scale(0.1)"
                 />
+                <polygon
+                    class="poly"
+                    points="${POLYGON_VERTICES}"
+                    fill="#58402A"
+                    stroke="#676158"
+                    stroke-width="30"
+                    transform="scale(0.07) translate(65, 65)"
+                />
             </svg>
             <svg class="coordinates" x="202" y="251">
                 <polygon
@@ -252,6 +259,14 @@ export default class Coordinates extends Component {
                     fill="#58402A"
                     stroke-width="20"
                     transform="scale(0.1)"
+                />
+                <polygon
+                    class="poly"
+                    points="${POLYGON_VERTICES}"
+                    fill="#58402A"
+                    stroke="#676158"
+                    stroke-width="30"
+                    transform="scale(0.07) translate(65, 65)"
                 />
             </svg>
             <svg class="coordinates" x="68" y="251" skip="yes">
@@ -262,6 +277,14 @@ export default class Coordinates extends Component {
                     stroke-width="20"
                     transform="scale(0.1)"
                 />
+                <polygon
+                    class="poly"
+                    points="${POLYGON_VERTICES}"
+                    fill="#58402A"
+                    stroke="#676158"
+                    stroke-width="30"
+                    transform="scale(0.07) translate(65, 65)"
+                />
             </svg>
             <svg class="coordinates" x="1" y="135" skip="yes">
                 <polygon
@@ -270,6 +293,14 @@ export default class Coordinates extends Component {
                     fill="#58402A"
                     stroke-width="20"
                     transform="scale(0.1)"
+                />
+                <polygon
+                    class="poly"
+                    points="${POLYGON_VERTICES}"
+                    fill="#58402A"
+                    stroke="#676158"
+                    stroke-width="30"
+                    transform="scale(0.07) translate(65, 65)"
                 />
             </svg>
             <svg class="coordinates" x="68" y="19" skip="yes" topSkip="yes">
@@ -280,6 +311,14 @@ export default class Coordinates extends Component {
                     stroke-width="20"
                     transform="scale(0.1)"
                 />
+                <polygon
+                    class="poly"
+                    points="${POLYGON_VERTICES}"
+                    fill="#58402A"
+                    stroke="#676158"
+                    stroke-width="30"
+                    transform="scale(0.07) translate(65, 65)"
+                />
             </svg>
             <svg class="coordinates" x="202" y="19" topSkip="yes">
                 <polygon
@@ -289,17 +328,17 @@ export default class Coordinates extends Component {
                     stroke-width="20"
                     transform="scale(0.1)"
                 />
+                <polygon
+                    class="poly"
+                    points="${POLYGON_VERTICES}"
+                    fill="#58402A"
+                    stroke="#676158"
+                    stroke-width="30"
+                    transform="scale(0.07) translate(65, 65)"
+                />
             </svg>
         </svg>`;
     }
 }
 
 // ! Little polygons inside big polygons as in the game.
-//     <polygon
-//     class="poly"
-//     points="${POLYGON_VERTICES}"
-//     fill="#58402A"
-//     stroke="#676158"
-//     stroke-width="30"
-//     transform="scale(0.07) translate(65, 65)"
-// />

@@ -49,8 +49,13 @@ export const THIRD_COORDINATES = [
 
 export const INTRO = [
     "Welcome, Lab Member 042, to the Home Page! Here, you shall engage in the timeless battle of Pong, whether locally, 1v1 online, or in a tournament. Uncover the secrets that lie below, for the future of humanity depends on it! El Psy Kongroo 👀🍌🕰️🥼.",
-    "Nomai Scholar Solanum: We hope you enjoy the view! Feel free to click on the planets or wait a moment for some surprises 👀 🎹.",
+    "Nomai Scholar Solanum: We hope you enjoy the view! Feel free to click on planets 🪐 or wait a moment for some surprises 👀 🎹.",
     "Nomai Explorer Pye: You've made it! This is our final mystery. Solve it if you are a true explorer.",
-    "Welcome everyone! We are proud and excited to welcome you to our ft_transcendence project! It took us approximately 5 months to finish this project. Since it's the last project of the common core, we decided to raise our expectations and try as many new things as we could. We hope you notice what inspired us in designing our single-page application. Have fun! To know more about us, do not hesitate to consult the credits. Thank you very much and have fun! (Headphone 🎧 and being curious 🧐 is recommended)",
+    "Welcome everyone! We are proud and excited to welcome you to our ft_transcendence ! It took us approximately 5 months to finish this project." +
+        " Since it's the last project of 42 common core, we decided to raise our expectations and try as many new things as we could." +
+        " We hope you notice what inspired us in designing our single-page application. Have fun! To know more about us, do not hesitate to consult the credits." +
+        " All UI components, such as buttons, planets, navbar and more have been crafted by customizing 95% of Bootstrap properties. For the game section, all models were created in Blender, and we utilized custom shaders coded in GLSL." +
+        " Thank you very much and have fun! (Headphone 🎧 and being curious 🧐 is recommended)",
+    "Hi there, well played for coming here! This black hole perfectly defines my job in this transcendence project, spending hours and hours on coding something that doesn't give points to this project, haha. Welcome to my infinite loop !",
     "Welcome back, Lab Member 042! Here, you can discover all of our new inventions. Check out the social tab to connect with other lab members. Review match history and statistics to strategize your victory against SERN. Customize your appearance with new skins and explore the settings tab to tweak timelines and more. El Psy Kongroo!",
 ];

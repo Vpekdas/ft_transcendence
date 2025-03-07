@@ -71,7 +71,7 @@ export default class OuterWilds extends Component {
         this.userInteracted = false;
 
         this.onready = async () => {
-            this.music = { audio: document.getElementById("background-music"), name: "", index: 0 };
+            this.music = { audio: document.getElementById("background-music"), index: 0 };
 
             document.addEventListener("click", async () => {
                 this.userInteracted = true;
@@ -79,25 +79,33 @@ export default class OuterWilds extends Component {
 
             this.chronometer = { timerId: 0, seconds: 0 };
             let supernova = false;
+            const audioSource = document.getElementById("audio-source");
 
             this.chronometer.timerId = setInterval(() => {
                 this.chronometer.seconds++;
                 if (this.chronometer.seconds === 37 && !supernova) {
                     supernova = true;
-                    if (this.music.audio.duration > 0 && !this.music.audio.paused) {
+
+                    if (
+                        this.music.audio.duration > 0 &&
+                        !this.music.audio.paused &&
+                        !audioSource.src.includes("Final")
+                    ) {
                         this.music.audio.pause();
                         this.music.audio.currentTime = 0;
                     }
-                    const audioSource = document.getElementById("audio-source");
 
-                    if (audioSource) {
+                    if (!audioSource.src.includes("Final")) {
                         audioSource.src = "/music/End Times.mp3";
                         this.music.audio.load();
                         if (this.userInteracted) {
                             this.music.audio.play();
                         }
                     }
+                }
 
+                if (this.chronometer.seconds >= 120) {
+                    supernova = false;
                     clearInterval(this.chronometer.timerId);
                 }
             }, 1000);
@@ -181,7 +189,7 @@ export default class OuterWilds extends Component {
                     }
 
                     // If there is multiple music, choose one randomly :).
-                    if (PLANETS[displayedPlanetName.textContent].Music.length > 1 && !supernova) {
+                    if (PLANETS[displayedPlanetName.textContent].Music.length > 1) {
                         this.music.index = Math.floor(
                             Math.random() * PLANETS[displayedPlanetName.textContent].Music.length
                         );
@@ -200,7 +208,6 @@ export default class OuterWilds extends Component {
                             "/music/" + PLANETS[displayedPlanetName.textContent].Music[this.music.index] + ".mp3";
                         this.music.audio.load();
                         this.music.audio.play();
-                        this.music.name = PLANETS[displayedPlanetName.textContent].Music[this.music.index];
                     }
                 });
             });

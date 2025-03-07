@@ -1,5 +1,6 @@
 import { SCALE, POLYGON_VERTICES, FIRST_COORDINATES, SECOND_COORDINATES, THIRD_COORDINATES } from "../constant";
 import { Component } from "../micro";
+import { showToast } from "../utils";
 
 export default class Coordinates extends Component {
     calculateDistance(x1, y1, x2, y2) {
@@ -8,8 +9,6 @@ export default class Coordinates extends Component {
 
     checkSinglePath(coordinates, points) {
         let matchStep = 0;
-
-        console.log(coordinates, points);
 
         for (let i = 0; i < coordinates.length; i++) {
             const rightPath = coordinates[i].split(" ");
@@ -23,10 +22,8 @@ export default class Coordinates extends Component {
         }
 
         if (matchStep !== coordinates.length * 4) {
-            console.log("lost");
             return false;
         } else {
-            console.log("GG !");
             return true;
         }
     }
@@ -41,6 +38,22 @@ export default class Coordinates extends Component {
         }
 
         return false;
+    }
+
+    clearPolygon(drawnPolygons) {
+        const coordinate = document.getElementById("navigate");
+        // Remove all glow path.
+        if (coordinate) {
+            const paths = document.querySelectorAll(".path");
+            paths.forEach((path) => path.remove());
+            drawnPolygons.length = 0;
+        }
+        const polygons = coordinate.querySelectorAll(".glow");
+
+        // Remove all glow polygons.
+        polygons.forEach((polygon) => {
+            polygon.classList.remove("glow");
+        });
     }
 
     async init() {
@@ -66,8 +79,9 @@ export default class Coordinates extends Component {
             const vertices = POLYGON_VERTICES.split(" ");
 
             coordinates.forEach((coordinate) => {
-                coordinate.addEventListener("click", async () => {
-                    coordinate.querySelector("polygon").classList.add("glow");
+                coordinate.addEventListener("click", () => {
+                    coordinate.querySelector(".poly").classList.add("glow");
+                    coordinate.querySelector(".small-poly").classList.add("glow");
 
                     // Handling an edge case where 3 polygons on the left create a polygon at the bottom edge instead of the top.
                     // This adjustment improves visual consistency.
@@ -193,7 +207,34 @@ export default class Coordinates extends Component {
 
                         navigate.append(newPoly);
 
+                        const blackHole = document.getElementById("black-hole");
+                        const intro = document.getElementById("intro-container-5");
+                        const introToHide = document.getElementById("intro-container-3");
+
                         if (this.checkAllPath(step, drawnPolygons)) {
+                            if (step === 3) {
+                                introToHide.style.display = "none";
+                                showToast(
+                                    `Coordinates indicate the Eye of the Universe. Arriving in 3 seconds through hyperspace!`,
+                                    "bi bi-compass"
+                                );
+                                setTimeout(() => {
+                                    blackHole.style.display = "flex";
+                                    intro.style.display = "flex";
+                                }, 3000);
+                            } else {
+                                showToast(
+                                    `Coordinates aligned for step ${step}. Proceed to the next step.`,
+                                    "bi bi-compass"
+                                );
+                            }
+
+                            if (step !== 3) {
+                                setTimeout(() => {
+                                    this.clearPolygon(drawnPolygons);
+                                }, 3000);
+                            }
+
                             step++;
                         }
 
@@ -206,6 +247,7 @@ export default class Coordinates extends Component {
                             audioSource.src = "/music/Final Voyage.mp3";
                             audio.load();
                             audio.play();
+                            step++;
                         }
 
                         // Reset and clear all arrays.
@@ -218,12 +260,7 @@ export default class Coordinates extends Component {
 
                         window.addEventListener("keydown", (event) => {
                             if (event.key === "c") {
-                                const coordinate = document.getElementById("navigate");
-                                if (coordinate) {
-                                    const paths = document.querySelectorAll(".path");
-                                    paths.forEach((path) => path.remove());
-                                    drawnPolygons.length = 0;
-                                }
+                                this.clearPolygon(drawnPolygons);
                             }
                         });
                     }
@@ -244,11 +281,11 @@ export default class Coordinates extends Component {
                     transform="scale(0.1)"
                 />
                 <polygon
-                    class="poly"
+                    class="small-poly"
                     points="${POLYGON_VERTICES}"
                     fill="#58402A"
                     stroke="#676158"
-                    stroke-width="30"
+                    stroke-width="50"
                     transform="scale(0.07) translate(65, 65)"
                 />
             </svg>
@@ -261,11 +298,11 @@ export default class Coordinates extends Component {
                     transform="scale(0.1)"
                 />
                 <polygon
-                    class="poly"
+                    class="small-poly"
                     points="${POLYGON_VERTICES}"
                     fill="#58402A"
                     stroke="#676158"
-                    stroke-width="30"
+                    stroke-width="50"
                     transform="scale(0.07) translate(65, 65)"
                 />
             </svg>
@@ -278,11 +315,11 @@ export default class Coordinates extends Component {
                     transform="scale(0.1)"
                 />
                 <polygon
-                    class="poly"
+                    class="small-poly"
                     points="${POLYGON_VERTICES}"
                     fill="#58402A"
                     stroke="#676158"
-                    stroke-width="30"
+                    stroke-width="50"
                     transform="scale(0.07) translate(65, 65)"
                 />
             </svg>
@@ -295,11 +332,11 @@ export default class Coordinates extends Component {
                     transform="scale(0.1)"
                 />
                 <polygon
-                    class="poly"
+                    class="small-poly"
                     points="${POLYGON_VERTICES}"
                     fill="#58402A"
                     stroke="#676158"
-                    stroke-width="30"
+                    stroke-width="50"
                     transform="scale(0.07) translate(65, 65)"
                 />
             </svg>
@@ -312,11 +349,11 @@ export default class Coordinates extends Component {
                     transform="scale(0.1)"
                 />
                 <polygon
-                    class="poly"
+                    class="small-poly"
                     points="${POLYGON_VERTICES}"
                     fill="#58402A"
                     stroke="#676158"
-                    stroke-width="30"
+                    stroke-width="50"
                     transform="scale(0.07) translate(65, 65)"
                 />
             </svg>
@@ -329,16 +366,14 @@ export default class Coordinates extends Component {
                     transform="scale(0.1)"
                 />
                 <polygon
-                    class="poly"
+                    class="small-poly"
                     points="${POLYGON_VERTICES}"
                     fill="#58402A"
                     stroke="#676158"
-                    stroke-width="30"
+                    stroke-width="50"
                     transform="scale(0.07) translate(65, 65)"
                 />
             </svg>
-        </svg>`;
+        </svg> `;
     }
 }
-
-// ! Little polygons inside big polygons as in the game.

@@ -3930,6 +3930,7 @@ ow-system[labels="false"] ow-name {
     background-color: black;
     justify-content: space-around;
     flex-direction: column;
+    z-index: 1000;
 }
 
 /* Scrollbar */
@@ -4200,4 +4201,76 @@ ow-system[labels="false"] ow-name {
 #background-music::-webkit-media-controls-current-time-display,
 #background-music::-webkit-media-controls-time-remaining-display {
     color: #d89123;
+}
+
+@keyframes blackHoleGrowing {
+    0% {
+        transform: scale(1) rotate(0deg) skew(0deg);
+        filter: blur(0px);
+    }
+    100% {
+        transform: scale(9) rotate(360deg) skew(0deg);
+        filter: blur(0px);
+    }
+}
+
+@keyframes flash {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes gradientBorder {
+    0% {
+        border-color: red;
+    }
+    25% {
+        border-color: orange;
+    }
+    50% {
+        border-color: yellow;
+    }
+    75% {
+        border-color: green;
+    }
+    100% {
+        border-color: red;
+    }
+}
+
+#black-hole {
+    display: none;
+    position: fixed;
+    top: 45%;
+    left: 45%;
+    background-color: black;
+    border-radius: 50%;
+    animation:
+        blackHoleGrowing 5s forwards,
+        gradientBorder 5s infinite;
+    z-index: -1;
+    pointer-events: none;
+    height: 15vw;
+    width: 15vw;
+    transform: translate(-50%, -50%);
+    border: 3px solid red;
+}
+
+#flash-effect {
+    animation: flash 0.5s ease-in-out;
+    background: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 10000;
+    pointer-events: none;
+}
+
+#intro-container-5 {
+    display: none;
 }

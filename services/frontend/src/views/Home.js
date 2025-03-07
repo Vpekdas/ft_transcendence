@@ -34,7 +34,7 @@ export default class Home extends Component {
                 this.createParticles(particleContainer, rocket);
             }, 100);
 
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < 5; i++) {
                 this.animatedIntroArray.push({
                     text: INTRO[i],
                     animated: false,
@@ -250,6 +250,9 @@ export default class Home extends Component {
                     <div class="container-fluid intro-container" id="intro-container-3">
                         <span class="decoded-intro" id="intro3"></span>
                     </div>
+                    <div class="container-fluid intro-container" id="intro-container-5">
+                        <span class="decoded-intro" id="intro5"></span>
+                    </div>
                 </div>
             </div>
             <div class="custom-scrollbar">
@@ -278,6 +281,7 @@ export default class Home extends Component {
                 <button id="close-intro" type="submit" class="btn btn-primary settings">${tr("Dive in !")}</button>
             </div>
             <div class="particle-container" id="popup-intro"></div>
+            <BlackHoleComponent />
         `;
     }
 }

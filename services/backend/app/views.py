@@ -32,7 +32,6 @@ Create a new user.
 """
 @require_POST
 def signin(request):
-    """Inscription + OTP pour vérification"""
     data = json.loads(request.body)
 
     if "username" not in data or "password" not in data or "nickname" not in data or "email" not in data:
@@ -60,9 +59,8 @@ def signin(request):
     if Player.objects.filter(nickname=nickname).count() > 0:
         return JsonResponse({ "error": NICKNAME_ALREADY_USED })
 
-    # Création de l'utilisateur et du joueur
     user = User.objects.create(username=username, email=email)
-    player = Player.objects.create(user=user, nickname=remove_unwanted_characters(nickname))
+    player = Player.objects.create(user=user, nickname=nickname)
 
     user.set_password(password)
     user.save()
@@ -171,7 +169,7 @@ def loginRoute(request: HttpRequest):
             f"Votre code de vérification est : {otp_code}",
             "noreply@example.com",
             [user.email],
-            fail_silently=False,
+            fail_silently=True,
         )
 
         return JsonResponse({ "need_2fa": True })
@@ -264,8 +262,8 @@ def updatePassword(request: HttpRequest, id):
 
         user = authenticate(username=request.user.username, password=oldPassword)
 
-        # if user is None:
-        #     return JsonResponse({ "error": "Invalid password" })
+        if user is None:
+            return JsonResponse({ "error": "Invalid password" })
 
         request.user.set_password(newPassword)
         request.user.save()
@@ -378,9 +376,6 @@ def updateProfilePicture(request: HttpRequest, id):
     if data["type"] not in valid_types:
         return JsonResponse({ "error": INVALID_IMAGE_FORMAT })
 
-    # if len(data["image"]) > 250000:
-    #     return JsonResponse({ "error": IMAGE_TOO_BIG })
-
     player = Player.objects.filter(user=request.user).first()
     player.icon = { "type": data["type"], "data": data["image"] }
     player.save()
@@ -408,8 +403,11 @@ def deleteProfile(request: HttpRequest, id):
 
 @require_POST
 def getPongStats(request: HttpRequest, id):
-    if id == "c" and request.user.is_authenticated:
-        id = int(Player.objects.filter(user=request.user).first().id)
+    if not request.user.is_authenticated:
+        return JsonResponse({ "error": NOT_AUTHENTICATED })
+
+    if id == "c":
+        id = int(request.user.id)
     else:
         id = int(id)
 
@@ -614,21 +612,6 @@ def removeFriend(request: HttpRequest, friend_id):
     player.friends.remove(friend)
 
     return JsonResponse({})
-
-# @require_POST
-# def tournament_info(request: HttpRequest, id: str):
-#     t = Tournament.objects.filter(tid=id).first()
-
-#     if t is None:
-#         return JsonResponse({ "error": TOURNAMENT_DOESNT_EXISTS })
-
-#     return JsonResponse({
-#         "game": t.game,
-#         "name": t.name,
-#         "openType": t.name,
-#         "state": t.state,
-#     })
-
 
 @require_POST
 def blockUser(request: HttpRequest, blocked_user_id):

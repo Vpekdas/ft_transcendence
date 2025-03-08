@@ -71,6 +71,9 @@ export default class Registration extends Component {
                         navigateTo("/");
                     } else {
                         const redirect = window.location.search.substring(1).replace("redirect=", "");
+                        if (redirect === undefined) {
+                            navigateTo("/");
+                        }
                         navigateTo(redirect);
                     }
                 }

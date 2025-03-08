@@ -13,6 +13,14 @@ export default class ChangeNicknameForm extends Component {
                 .addEventListener("click", async (event) => {
                     const newNickname = document.getElementById("new-nickname").value;
 
+                    if (newNickname.length > 20) {
+                        showToast(
+                            tr("The nickname is too long. Please choose another one."),
+                            "bi bi-exclamation-triangle-fill"
+                        );
+                        return;
+                    }
+
                     const response = await fetchApi("/api/player/c/nickname/update", {
                         method: "POST",
                         body: JSON.stringify({

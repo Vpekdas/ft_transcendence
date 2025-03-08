@@ -288,6 +288,9 @@ def updateNickname(request: HttpRequest, id):
 
     new_nickname = data["nickname"]
 
+    if len(new_nickname) > 20:
+        return JsonResponse({"error": NICKNAME_TOO_LONG})
+
     if remove_unwanted_characters(new_nickname) != new_nickname:
         return JsonResponse({ "error": INVALID_NICKNAME })
 

@@ -739,8 +739,6 @@ export default class Chatbox extends Component {
                             channel_name: channelName,
                         })
                     );
-                } else {
-                    console.warn("cannot send message, ws and channel name not found.");
                 }
 
                 // Clear the input area.

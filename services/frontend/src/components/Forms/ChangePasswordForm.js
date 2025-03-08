@@ -7,7 +7,7 @@ export default class ChangePasswordForm extends Component {
         this.isExternal = this.attributes.get("is-external") == "true";
 
         this.onready = () => {
-            document.querySelector(".btn.btn-primary.settings").addEventListener("click", async () => {
+            document.getElementById("change-password").addEventListener("click", async () => {
                 const oldPassword = document.querySelector("#old-password").value;
                 const newPassword = document.querySelector("#new-password").value;
                 const newPasswordConfirm = document.querySelector("#new-password-confirm").value;
@@ -70,7 +70,7 @@ export default class ChangePasswordForm extends Component {
                         placeholder="${tr("Confirm new password")}"
                         autocomplete="off"
                     />
-                    <button type="submit" class="btn btn-primary settings">${tr("Change")}</button>
+                    <button type="submit" class="btn btn-primary settings" id="change-password">${tr("Change")}</button>
                 </div>
             </div>
         </div>`;

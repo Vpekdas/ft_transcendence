@@ -7,14 +7,14 @@ export default class ChangeProfilePictureForm extends Component {
     async init() {
         this.isExternal = this.attributes.get("is-external") == "true";
 
-        this.onready = () => {
+        this.onready = async () => {
             document.querySelector("#inputGroupFile04").addEventListener("change", async () => {
                 const target = document.getElementById("inputGroupFile04");
 
                 document.getElementById("file-name").textContent = target.files[0].name;
             });
 
-            document.querySelector("#profilePictureUpload").addEventListener("click", async () => {
+            document.getElementById("profilePictureUpload").addEventListener("click", async () => {
                 const target = document.getElementById("inputGroupFile04");
                 const picture = target.files[0];
 

@@ -19,6 +19,7 @@ import Social from "./views/Social";
 import Callback from "./views/Callback";
 import * as bootstrap from "bootstrap";
 import TwoFactor from "./views/TwoFactor";
+import Credits from "./views/Credits";
 window.bootstrap = bootstrap;
 
 defineRouter({
@@ -36,6 +37,7 @@ defineRouter({
         { path: "/tournament/[id=$[a-zA-Z0-9]+$]", view: Tournament },
         { path: "/create-tournament", view: CreateTournament },
         { path: "/callback", view: Callback },
+        { path: "/credits", view: Credits },
     ],
     hook: async (route, url) => {
         if (

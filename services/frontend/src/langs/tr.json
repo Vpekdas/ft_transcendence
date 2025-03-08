@@ -47,7 +47,7 @@
     "ducks": "ördekler",
     "Searching for a game": "Oyun aranıyor",
     "Cannot connect to the game": "Oyuna bağlanılamıyor",
-    "Login with 42": "42 ile giriş yap",
+    "Sign in with": "Giriş yap",
     "Create Tournament": "Turnuva oluştur",
     "Local": "Yerel",
     "Remote": "Çevrimiçi",
@@ -162,5 +162,12 @@
     "42 API is currently unavailable": "42 API şu anda kullanılamıyor",
     "terrain": "zemin",
     "ball": "top",
-    "bar": "çubuk"
+    "bar": "çubuk",
+    "Credits": "Krediler",
+    "This work is unofficial Fan Content created under permission from the Mobius Digital Fan Content Policy. It includes materials which are the property of Mobius Digital and it is neither approved nor endorsed by Mobius Digital. <a href='https://www.mobiusdigitalgames.com/outer-wilds.html' target='_blank'>Outer Wilds</a>" : "Bu çalışma, Mobius Digital Fan İçerik Politikası izni altında oluşturulmuş resmi olmayan Fan İçeriğidir. Mobius Digital'e ait materyalleri içerir ve Mobius Digital tarafından onaylanmamış veya desteklenmemiştir. <a href='https://www.mobiusdigitalgames.com/outer-wilds.html' target='_blank'>Outer Wilds</a>",
+    "I've used the Outer Wilds soundtrack composed by Andrew Prahlow. You can find the playlist here: <a href='https://www.youtube.com/playlist?list=OLAK5uy_lvIXOLFb_NVEjnyhZNE66G8O_oeF9IRII' target='_blank'>Playlist</a>" : "Outer Wilds soundtrack'ini Andrew Prahlow tarafından bestelenmiştir. Playlist'i burada bulabilirsiniz: <a href='https://www.youtube.com/playlist?list=OLAK5uy_lvIXOLFb_NVEjnyhZNE66G8O_oeF9IRII' target='_blank'>Playlist</a>",
+    "I've been mainly inspired by his CSS skills, so I decided to recode in pure CSS and add my personal touch. You can find his solar system here : <a href='https://codepen.io/chriskirknielsen/pen/YzmxERE' target='_blank'>Codepen</a>": "CSS becerilerinden büyük ölçüde ilham aldım, bu yüzden her şeyi saf CSS ile yeniden kodlamaya ve kişisel dokunuşumu eklemeye karar verdim. Güneş sistemini burada bulabilirsiniz: <a href='https://codepen.io/chriskirknielsen/pen/YzmxERE' target='_blank'>Codepen</a>",
+    "Hi there, I'm the lead front-end dev of this project If we can say so x). I did a little bit of backend work for the chatbox but nothing too fancy to call myself fullstack dev haha.  Thanks to my teammates, I had the freedom to code whatever I wanted (they hate JavaScript, and I think it's the best language after C++). I enjoyed coding this project a lot. Every little feature, cool animation, shader, or model took me so much time, but it was worth it if you ask me! Never learned so much! 🤿 . <a href='https://github.com/Vpekdas' target='_blank'>Github</a>": "Merhaba, bu projenin ön uç geliştiricisiyim, eğer öyle diyebilirsek x). Sohbet kutusu için biraz arka uç çalışması yaptım ama kendime tam yığın geliştirici demek için yeterince havalı değil haha. Takım arkadaşlarıma teşekkürler, istediğim her şeyi kodlama özgürlüğüne sahiptim (JavaScript'ten nefret ediyorlar ve bence C++'dan sonra en iyi dil). Bu projeyi kodlamaktan çok keyif aldım. Her küçük özellik, havalı animasyon, shader veya model bana çok zaman aldı, ama bana sorarsanız buna değdi! Hiç bu kadar çok şey öğrenmemiştim! 🤿 . <a href='https://github.com/Vpekdas' target='_blank'>Github</a>",
+        "... <a href='https://github.com/FirePh0enix' target='_blank'>Github</a>" : "... <a href='https://github.com/FirePh0enix' target='_blank'>Github</a>",
+    "... <a href='https://github.com/Lebronen' target='_blank'>Github</a>" : "... <a href='https://github.com/Lebronen' target='_blank'>Github</a>"
 }

@@ -596,11 +596,13 @@ export default class Chatbox extends Component {
             }
         });
 
-        this.chatHeader.appendChild(img);
-        this.chatHeader.appendChild(i);
-        this.chatHeader.appendChild(span);
-        this.chatHeader.appendChild(blockBtn);
-        this.chatHeader.appendChild(inviteBtn);
+        if (this.chatHeader) {
+            this.chatHeader.appendChild(img);
+            this.chatHeader.appendChild(i);
+            this.chatHeader.appendChild(span);
+            this.chatHeader.appendChild(blockBtn);
+            this.chatHeader.appendChild(inviteBtn);
+        }
 
         await this.listenToWebSocketChannels();
     }

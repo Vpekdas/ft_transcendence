@@ -47,7 +47,7 @@
     "ducks": "canards",
     "Searching for a game": "Recherche d'une partie",
     "Cannot connect to the game": "Impossible de se connecter",
-    "Login with 42": "Se connecter avec 42",
+    "Sign in with": "Se connecter avec",
     "Create Tournament": "Créer un tournoi",
     "Local": "Locale",
     "Remote": "En ligne",
@@ -163,6 +163,13 @@
     "42 API is currently unavailable": "L'api 42 est indisponible",
     "terrain": "terrain",
     "ball": "balle",
-    "bar": "barre"
+    "bar": "barre",
+    "Credits": "Crédits",
+    "This work is unofficial Fan Content created under permission from the Mobius Digital Fan Content Policy. It includes materials which are the property of Mobius Digital and it is neither approved nor endorsed by Mobius Digital. <a href='https://www.mobiusdigitalgames.com/outer-wilds.html' target='_blank'>Outer Wilds</a>" : "Ce travail est un contenu de fan non officiel créé avec l'autorisation de la politique de contenu de fan de Mobius Digital. Il inclut des matériaux qui sont la propriété de Mobius Digital et n'est ni approuvé ni soutenu par Mobius Digital. <a href='https://www.mobiusdigitalgames.com/outer-wilds.html' target='_blank'>Outer Wilds</a>",
+    "I've used the Outer Wilds soundtrack composed by Andrew Prahlow. You can find the playlist here: <a href='https://www.youtube.com/playlist?list=OLAK5uy_lvIXOLFb_NVEjnyhZNE66G8O_oeF9IRII' target='_blank'>Playlist</a>" : "J'ai utilisé la bande sonore d'Outer Wilds composée par Andrew Prahlow. Vous pouvez trouver la playlist ici : <a href='https://www.youtube.com/playlist?list=OLAK5uy_lvIXOLFb_NVEjnyhZNE66G8O_oeF9IRII' target='_blank'>Playlist</a>",
+    "I've been mainly inspired by his CSS skills, so I decided to recode in pure CSS and add my personal touch. You can find his solar system here : <a href='https://codepen.io/chriskirknielsen/pen/YzmxERE' target='_blank'>Codepen</a>": "J'ai été principalement inspiré par ses compétences en CSS, alors j'ai décidé de tout recoder en pur CSS et d'ajouter ma touche personnelle. Vous pouvez trouver son système solaire ici : <a href='https://codepen.io/chriskirknielsen/pen/YzmxERE' target='_blank'>Codepen</a>",
+    "Hi there, I'm the lead front-end dev of this project If we can say so x). I did a little bit of backend work for the chatbox but nothing too fancy to call myself fullstack dev haha.  Thanks to my teammates, I had the freedom to code whatever I wanted (they hate JavaScript, and I think it's the best language after C++). I enjoyed coding this project a lot. Every little feature, cool animation, shader, or model took me so much time, but it was worth it if you ask me! Never learned so much! 🤿 . <a href='https://github.com/Vpekdas' target='_blank'>Github</a>": "Salut, je suis le développeur front-end principal de ce projet, si on peut dire x). J'ai fait un peu de travail backend pour la chatbox, mais rien de trop sophistiqué pour me qualifier de développeur fullstack haha. Merci à mes coéquipiers, j'ai eu la liberté de coder tout ce que je voulais (ils détestent JavaScript, et je pense que c'est le meilleur langage après C++). J'ai beaucoup aimé coder ce projet. Chaque petite fonctionnalité, animation cool, shader ou modèle m'a pris tellement de temps, mais ça en valait la peine si vous me demandez ! Je n'ai jamais autant appris ! 🤿 . <a href='https://github.com/Vpekdas' target='_blank'>Github</a>",
+    "... <a href='https://github.com/FirePh0enix' target='_blank'>Github</a>" : "... <a href='https://github.com/FirePh0enix' target='_blank'>Github</a>",
+    "... <a href='https://github.com/Lebronen' target='_blank'>Github</a>" : "... <a href='https://github.com/Lebronen' target='_blank'>Github</a>"
 
 }

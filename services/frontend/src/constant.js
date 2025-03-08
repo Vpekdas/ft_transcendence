@@ -59,3 +59,12 @@ export const INTRO = [
     "Hi there, well played for coming here! This black hole perfectly defines my job in this transcendence project, spending hours and hours on coding something that doesn't give points to this project, haha. Welcome to my infinite loop !",
     "Welcome back, Lab Member 042! Here, you can discover all of our new inventions. Check out the social tab to connect with other lab members. Review match history and statistics to strategize your victory against SERN. Customize your appearance with new skins and explore the settings tab to tweak timelines and more. El Psy Kongroo!",
 ];
+
+export const CREDITS = [
+    "This work is unofficial Fan Content created under permission from the Mobius Digital Fan Content Policy. It includes materials which are the property of Mobius Digital and it is neither approved nor endorsed by Mobius Digital. <a href='https://www.mobiusdigitalgames.com/outer-wilds.html' target='_blank'>Outer Wilds</a>",
+    "I've used the Outer Wilds soundtrack composed by Andrew Prahlow. You can find the playlist here: <a href='https://www.youtube.com/playlist?list=OLAK5uy_lvIXOLFb_NVEjnyhZNE66G8O_oeF9IRII' target='_blank'>Playlist</a>",
+    "I've been mainly inspired by his CSS skills, so I decided to recode in pure CSS and add my personal touch. You can find his solar system here : <a href='https://codepen.io/chriskirknielsen/pen/YzmxERE' target='_blank'>Codepen</a>",
+    "Hi there, I'm the lead front-end dev of this project If we can say so x). I did a little bit of backend work for the chatbox but nothing too fancy to call myself fullstack dev haha.  Thanks to my teammates, I had the freedom to code whatever I wanted (they hate JavaScript, and I think it's the best language after C++). I enjoyed coding this project a lot. Every little feature, cool animation, shader, or model took me so much time, but it was worth it if you ask me! Never learned so much! 🤿 . <a href='https://github.com/Vpekdas' target='_blank'>Github</a>",
+    "... <a href='https://github.com/FirePh0enix' target='_blank'>Github</a>",
+    "... <a href='https://github.com/Lebronen' target='_blank'>Github</a>",
+];

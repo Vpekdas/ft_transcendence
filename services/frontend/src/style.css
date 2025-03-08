@@ -123,6 +123,106 @@
         moveParticle 0.1s linear infinite;
 }
 
+.container-fluid.login-register-container {
+    display: flex;
+    position: relative;
+    height: auto;
+    width: 100%;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px;
+    gap: 10px;
+}
+
+.sign-forty-two {
+    display: flex;
+    position: relative;
+    height: auto;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background-color: transparent;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    font-family: "Courier New", monospace;
+}
+
+.sign-forty-two:hover {
+    background-color: #d89123;
+    color: black;
+}
+
+.sign-forty-two > svg {
+    margin-left: 10px;
+    width: 32px;
+    height: 32px;
+    fill: white;
+}
+
+.sign-forty-two:hover > svg {
+    fill: black;
+}
+
+.sign-forty-two > span {
+    font-size: 1em;
+    font-weight: bold;
+}
+
+.create-account {
+    display: flex;
+    position: relative;
+    height: auto;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background-color: transparent;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    font-family: "Courier New", monospace;
+}
+
+.create-account:hover {
+    background-color: #d89123;
+    color: black;
+}
+
+.create-account > span {
+    font-size: 1em;
+    font-weight: bold;
+}
+
+.create-account > i {
+    margin-right: 10px;
+}
+
+.login-redirect {
+    display: flex;
+    position: relative;
+    height: auto;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background-color: transparent;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    font-family: "Courier New", monospace;
+}
+
+.login-redirect:hover {
+    background-color: #d89123;
+    color: black;
+}
+
 /* DASHBOARD */
 
 @keyframes pulsing-glow {
@@ -1097,7 +1197,7 @@
         background-color 0.3s ease,
         color 0.3s ease,
         box-shadow 0.3s ease;
-    --bs-btn-active-bg: #00ffff;
+    --bs-btn-active-bg: #d89123;
     --bs-btn-active-border-color: #d89123;
     --bs-btn-active-color: #000;
     --bs-btn-disabled-bg: #d89123;
@@ -2542,7 +2642,7 @@ ow-system[labels="false"] ow-name {
         background-color 0.3s ease,
         color 0.3s ease,
         box-shadow 0.3s ease;
-    --bs-btn-active-bg: #00ffff;
+    --bs-btn-active-bg: #d89123;
     --bs-btn-active-border-color: #d89123;
     --bs-btn-active-color: #000;
 }
@@ -3114,7 +3214,7 @@ ow-system[labels="false"] ow-name {
         background-color 0.3s ease,
         color 0.3s ease,
         box-shadow 0.3s ease;
-    --bs-btn-active-bg: #00ffff;
+    --bs-btn-active-bg: #d89123;
     --bs-btn-active-border-color: #d89123;
     --bs-btn-active-color: #000;
 }
@@ -3907,6 +4007,7 @@ ow-system[labels="false"] ow-name {
     animation: flicker 1.5s infinite;
     align-content: center;
     display: flex;
+    flex-direction: column;
 }
 
 .container-fluid.profile-container {
@@ -4273,4 +4374,18 @@ ow-system[labels="false"] ow-name {
 
 #intro-container-5 {
     display: none;
+}
+
+/* CREDITS */
+
+.text-layer-credits-one {
+    position: absolute;
+    display: flex;
+    font-size: 2em;
+    margin-top: 5%;
+    height: 100%;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    z-index: -1;
 }

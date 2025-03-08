@@ -38,6 +38,12 @@ export default class HomeNavBar extends Component {
                         <span>${tr("Logout")}</span></a
                     >
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link custom-link ${this.activeTabClass("/credits")}" href="/credits">
+                        <i class="bi bi-award"></i>
+                        <span>${tr("Credits")}</span></a
+                    >
+                </li>
                 <div class="language-picker-container">
                     <div class="elo-container"><i class="bi bi-trophy"></i> ${tr("Elo")} ${this.results.pongElo}</div>
                     <LanguagePicker />

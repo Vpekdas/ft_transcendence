@@ -70,10 +70,10 @@ export default class OuterWilds extends Component {
 
         this.userInteracted = false;
 
-        this.onready = async () => {
+        this.onready = () => {
             this.music = { audio: document.getElementById("background-music"), index: 0 };
 
-            document.addEventListener("click", async () => {
+            document.addEventListener("click", () => {
                 this.userInteracted = true;
             });
 
@@ -125,7 +125,9 @@ export default class OuterWilds extends Component {
                     const newOrbit = availableOrbits[Math.floor(Math.random() * availableOrbits.length)];
                     if (newOrbit) {
                         const newWanderer = newOrbit.querySelector(":scope > ow-wanderer");
-                        newWanderer.appendChild(quantumMoon);
+                        if (newWanderer) {
+                            newWanderer.appendChild(quantumMoon);
+                        }
                     }
                 });
             }
@@ -134,24 +136,26 @@ export default class OuterWilds extends Component {
             const ashTwin = document.querySelector("#ash-twin");
             const emberTwin = document.querySelector("#ember-twin");
 
-            ashTwin.addEventListener("click", () => handlePlanetClick(ashTwin, supernova, this.music));
-            emberTwin.addEventListener("click", () => handlePlanetClick(emberTwin, supernova, this.music));
+            if (ashTwin && emberTwin) {
+                ashTwin.addEventListener("click", () => handlePlanetClick(ashTwin, supernova, this.music));
+                emberTwin.addEventListener("click", () => handlePlanetClick(emberTwin, supernova, this.music));
+            }
 
             orbits.forEach((orbit) => {
                 if (orbit.id === "twins" || orbit.id === "hourglass-twins") {
                     return;
                 }
                 // Ensure that names does not move too.
-                orbit.addEventListener("mouseover", async () => {
+                orbit.addEventListener("mouseover", () => {
                     const orbitName = orbit.querySelector("ow-name");
                     orbitName.style.animationPlayState = "paused";
                 });
-                orbit.addEventListener("mouseleave", async () => {
+                orbit.addEventListener("mouseleave", () => {
                     const orbitName = orbit.querySelector("ow-name");
                     orbitName.style.animationPlayState = "running";
                 });
 
-                orbit.addEventListener("click", async (event) => {
+                orbit.addEventListener("click", (event) => {
                     // Ensure that clicking on a child element does not switch to the main element.
                     // For example, clicking on Attlerock should display Attlerock's details, not Timber Hearth's.
 
@@ -189,7 +193,7 @@ export default class OuterWilds extends Component {
                     }
 
                     // If there is multiple music, choose one randomly :).
-                    if (PLANETS[displayedPlanetName.textContent].Music.length > 1) {
+                    if (PLANETS[displayedPlanetName.textContent].Music.length > 1 && !supernova) {
                         this.music.index = Math.floor(
                             Math.random() * PLANETS[displayedPlanetName.textContent].Music.length
                         );
@@ -219,6 +223,10 @@ export default class OuterWilds extends Component {
         if (this.music && this.music.audio && this.music.audio.duration > 0 && !this.music.audio.paused) {
             this.music.audio.pause();
             this.music.audio.currentTime = 0;
+        }
+
+        if (this.chronometer && this.chronometer.seconds > 0 && this.chronometer.timerId) {
+            clearInterval(this.chronometer.timerId);
         }
     }
 

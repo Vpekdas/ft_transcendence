@@ -1,6 +1,7 @@
 import { tr } from "../../i18n";
 import { fetchApi, showToast } from "../../utils";
 import { Component } from "../../micro";
+import { sanitizeInput } from "../../validateInput";
 
 export default class ChangeNicknameForm extends Component {
     async init() {
@@ -12,6 +13,14 @@ export default class ChangeNicknameForm extends Component {
                 .querySelector(".btn.btn-primary.change-nickname-button")
                 .addEventListener("click", async (event) => {
                     const newNickname = document.getElementById("new-nickname").value;
+
+                    if (!sanitizeInput(newNickname)) {
+                        showToast(
+                            tr("Invalid input detected. Please fill out all fields correctly."),
+                            "bi bi-exclamation-triangle-fill"
+                        );
+                        return;
+                    }
 
                     if (newNickname.length > 20) {
                         showToast(

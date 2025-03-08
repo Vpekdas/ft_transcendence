@@ -1,6 +1,7 @@
 import { tr } from "../../i18n";
 import { fetchApi, showToast } from "../../utils";
 import { Component } from "../../micro";
+import { sanitizeInput } from "../../validateInput";
 
 export default class ChangePasswordForm extends Component {
     async init() {
@@ -11,6 +12,14 @@ export default class ChangePasswordForm extends Component {
                 const oldPassword = document.querySelector("#old-password").value;
                 const newPassword = document.querySelector("#new-password").value;
                 const newPasswordConfirm = document.querySelector("#new-password-confirm").value;
+
+                if (!sanitizeInput(oldPassword) || !sanitizeInput(newPassword) || !sanitizeInput(newPasswordConfirm)) {
+                    showToast(
+                        tr("Invalid input detected. Please fill out all fields correctly."),
+                        "bi bi-exclamation-triangle-fill"
+                    );
+                    return;
+                }
 
                 if (newPassword !== newPasswordConfirm) {
                     showToast(tr("Old password and new password are not the same."), "bi bi-exclamation-triangle-fill");

@@ -8,8 +8,16 @@ export const PLANETS = {
         Description: "If you enjoy tobogganing, you've come to the right place!",
         Music: ["Castaways"],
     },
-    "Ash Twin": { Description: "", Music: ["The Ash Twin Project"] },
-    "Ember Twin": { Description: "", Music: ["The Nomai"] },
+    "Ash Twin": {
+        Description:
+            "Be careful where you park your ship; you won't find it where you left it, and I'm not talking about the police.",
+        Music: ["The Ash Twin Project"],
+    },
+    "Ember Twin": {
+        Description:
+            "Be careful where you park your ship; you won't find it where you left it, and I'm not talking about the police.",
+        Music: ["The Nomai"],
+    },
     "Timber Hearth": {
         Description: "Never saw the credits roll so fast in a game, haha...",
         Music: ["Timber Hearth", "The Museum", "Nomai Ruins"],
@@ -18,13 +26,26 @@ export const PLANETS = {
         Description: "Yup, I'm in the top 0.01% of players who started exploring the universe from here.",
         Music: ["Space"],
     },
-    "Brittle Hollow": { Description: "", Music: ["The Search", "The Nomai"] },
-    "Hollows Lantern": { Description: "", Music: ["Space"] },
-    "Giant's Deep": { Description: "", Music: ["The Search", "Giant's Deep"] },
-    "Orbital Probe Cannon": { Description: "", Music: ["Space"] },
-    "Quantum Moon": { Description: "", Music: ["The Uncertainty Principle"] },
+    "Brittle Hollow": {
+        Description:
+            "If you want to play hide and seek, do not hide behind trees, unless you want to be found instantly, eh!",
+        Music: ["The Search", "The Nomai"],
+    },
+    "Hollows Lantern": {
+        Description: "You better park your ship safely; it's raining, and I'm not talking about water.",
+        Music: ["Space"],
+    },
+    "Giant's Deep": { Description: "This is where the chill guy lives.", Music: ["The Search", "Giant's Deep"] },
+    "Orbital Probe Cannon": { Description: "I've seen Legos more solid than this!", Music: ["Space"] },
+    "Quantum Moon": {
+        Description: "Now you see it, now you don't! The ultimate hide and seek champion.",
+        Music: ["The Uncertainty Principle"],
+    },
     "Dark Bramble": { Description: "Cutest fish ever seen here !", Music: ["Castaways", "Dark Bramble"] },
-    "White Hole Station": { Description: "", Music: ["Space"] },
+    "White Hole Station": {
+        Description: "Lost? No worries, we've got you! We'll send you back faster than you arrived.",
+        Music: ["Space"],
+    },
 };
 
 export const SCALE = 10;

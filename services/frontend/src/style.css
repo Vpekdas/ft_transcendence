@@ -2443,6 +2443,7 @@ ow-system[labels="false"] ow-name {
     justify-content: center;
     align-items: center;
     background: transparent;
+    cursor: context-menu;
 }
 
 .container-fluid.planet-card-container {

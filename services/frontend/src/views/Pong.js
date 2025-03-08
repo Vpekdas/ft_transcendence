@@ -973,14 +973,10 @@ export default class Pong extends Component {
             this.ws.onmessage = async (event) => {
                 const data = JSON.parse(event.data);
                 await this.onMessage(data);
+
+                this.ws.send("{ 'type': 'pong' }");
             };
         };
-    }
-
-    async clean() {
-        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            this.ws.close();
-        }
     }
 
     render() {

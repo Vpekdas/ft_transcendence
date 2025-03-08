@@ -283,7 +283,7 @@ def updateNickname(request: HttpRequest, id):
     data = json.loads(request.body)
 
     player = Player.objects.filter(user=request.user).first()
-    if not player:
+    if not player or player.external:
         return JsonResponse({ "error": INTERNAL_ERROR })
 
     new_nickname = data["nickname"]

@@ -977,7 +977,11 @@ export default class Pong extends Component {
         };
     }
 
-    async clean() {}
+    async clean() {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.close();
+        }
+    }
 
     render() {
         let ui = /* HTML */ `

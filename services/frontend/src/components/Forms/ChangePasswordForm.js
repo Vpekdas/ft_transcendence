@@ -8,42 +8,41 @@ export default class ChangePasswordForm extends Component {
         this.isExternal = this.attributes.get("is-external") == "true";
 
         this.onready = () => {
-            document.getElementById("change-password").addEventListener("click", async () => {
-                const oldPassword = document.querySelector("#old-password").value;
-                const newPassword = document.querySelector("#new-password").value;
-                const newPasswordConfirm = document.querySelector("#new-password-confirm").value;
+            const btn = document.getElementById("change-password");
 
-                if (!sanitizeInput(oldPassword) || !sanitizeInput(newPassword) || !sanitizeInput(newPasswordConfirm)) {
-                    showToast(
-                        tr("Invalid input detected. Please fill out all fields correctly."),
-                        "bi bi-exclamation-triangle-fill"
-                    );
-                    return;
-                }
+            if (btn) {
+                btn.addEventListener("click", async () => {
+                    const oldPassword = document.querySelector("#old-password").value;
+                    const newPassword = document.querySelector("#new-password").value;
+                    const newPasswordConfirm = document.querySelector("#new-password-confirm").value;
 
-                if (newPassword !== newPasswordConfirm) {
-                    showToast(tr("Old password and new password are not the same."), "bi bi-exclamation-triangle-fill");
-                    return;
-                }
+                    if (newPassword !== newPasswordConfirm) {
+                        showToast(
+                            tr("Old password and new password are not the same."),
+                            "bi bi-exclamation-triangle-fill"
+                        );
+                        return;
+                    }
 
-                const response = await fetchApi("/api/player/c/password/update", {
-                    method: "POST",
-                    body: JSON.stringify({
-                        oldPassword: oldPassword,
-                        newPassword: newPassword,
-                    }),
-                })
-                    .then((res) => res.json())
-                    .catch((err) => {
-                        showToast(tr("An error occurred. Please try again."), "bi bi-exclamation-triangle-fill");
-                    });
+                    const response = await fetchApi("/api/player/c/password/update", {
+                        method: "POST",
+                        body: JSON.stringify({
+                            oldPassword: oldPassword,
+                            newPassword: newPassword,
+                        }),
+                    })
+                        .then((res) => res.json())
+                        .catch((err) => {
+                            showToast(tr("An error occurred. Please try again."), "bi bi-exclamation-triangle-fill");
+                        });
 
-                if (response.error) {
-                    showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
-                } else {
-                    showToast(tr("Password updated successfully."), "bi bi-check-circle-fill");
-                }
-            });
+                    if (response.error) {
+                        showToast(tr(response.error), "bi bi-exclamation-triangle-fill");
+                    } else {
+                        showToast(tr("Password updated successfully."), "bi bi-check-circle-fill");
+                    }
+                });
+            }
         };
     }
     render() {

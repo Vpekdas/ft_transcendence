@@ -16,6 +16,10 @@ export default class PongMatchmake extends Component {
 
     clean() {
         clearInterval(this.chronometer.timerId);
+
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.close();
+        }
     }
 
     async init() {

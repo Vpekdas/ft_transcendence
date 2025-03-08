@@ -205,20 +205,8 @@ class Pong(Game):
             winner = p1 if self.player1.score > self.player2.score else p2
             looser = p2 if self.player1.score > self.player2.score else p1
 
-            base = 50
-            gain: int = 1
-
-            if winner.pongElo == 0 and looser.pongElo == 0:
-                gain = base / 2
-            elif looser.pongElo == 0:
-                gain = (1 / winner.pongElo / 2) * base
-            else:
-                gain = looser.pongElo / winner.pongElo / 2 * base
-
-            winner.pongElo += gain
-            looser.pongElo -= gain
-
-            if looser.pongElo < 0: looser.pongElo = 0
+            if looser.pongElo > 0: looser.pongElo -= 1
+            winner.pongElo += 1
 
             winner.save()
             looser.save()

@@ -43,7 +43,7 @@ export default class Registration extends Component {
                     return;
                 }
 
-                if (!sanitizeInput(username) || !sanitizeInput(nickname) || !sanitizeInput(password)) {
+                if (!sanitizeInput(username) || !sanitizeInput(nickname)) {
                     showToast(
                         tr("Invalid input detected. Please fill out all fields correctly."),
                         "bi bi-exclamation-triangle-fill"

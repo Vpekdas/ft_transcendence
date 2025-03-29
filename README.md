@@ -14,6 +14,8 @@ Make sure you have Docker installed.
 
 ## Usage
 
+Create a `.env` file with the following structure, as shown in `env.example`
+
 Simply run the following command:
 
 ```bash

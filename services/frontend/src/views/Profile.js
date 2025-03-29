@@ -7,7 +7,7 @@ export default class Profile extends Component {
     async init() {
         this.onready = () => {
             const introContainer = document.getElementById("intro6");
-            this.decodeEffect(tr(INTRO[4]), introContainer);
+            this.decodeEffect(tr(INTRO[5]), introContainer);
 
             const rocket = document.querySelector(".space-rocket");
             const supernova = document.querySelector(".supernova");

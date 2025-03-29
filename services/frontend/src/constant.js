@@ -72,7 +72,7 @@ export const INTRO = [
     "Welcome, Lab Member 042, to the Home Page! Here, you shall engage in the timeless battle of Pong, whether locally, 1v1 online, or in a tournament. Uncover the secrets that lie below, for the future of humanity depends on it! El Psy Kongroo 👀🍌🕰️🥼.",
     "Nomai Scholar Solanum: We hope you enjoy the view! Feel free to click on planets 🪐 or wait a moment for some surprises 👀 🎹.",
     "Nomai Explorer Pye: You've made it! This is our final mystery. Solve it if you are a true explorer.",
-    "Welcome everyone! We are proud and excited to welcome you to our ft_transcendence ! It took us approximately 5 months to finish this project." +
+    "Welcome everyone! We are proud and excited to welcome you to our ft_transcendence ! It took us approximately 4 months to finish this project." +
         " Since it's the last project of 42 common core, we decided to raise our expectations and try as many new things as we could." +
         " We hope you notice what inspired us in designing our single-page application. Have fun! To know more about us, do not hesitate to consult the credits." +
         " All UI components, such as buttons, planets, navbar and more have been crafted by customizing 95% of Bootstrap properties. For the game section, all models were created in Blender, and we utilized custom shaders coded in GLSL." +

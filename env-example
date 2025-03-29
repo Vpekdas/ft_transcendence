@@ -1,0 +1,6 @@
+API42_SECRET=your-api-key
+EMAIL_HOST_USER=your-email@example.com
+EMAIL_HOST_PASSWORD=your-email-password
+
+POSTGRES_USER=your-postgres-user
+POSTGRES_PASSWORD=your-postgres-password

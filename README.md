@@ -1,3 +1,25 @@
+## Presentation
+
+Hello there! Welcome to our final project of the 42 Common Core: **ft_transcendence**.
+
+It is a Single Page Application (SPA) with several exciting features. The main highlights include playing Pong, either locally or in tournaments.
+
+You can find additional modules below:
+
+## Prerequisites
+
+Make sure you have Docker installed.
+
+## Usage
+
+Simply run the following command:
+
+```bash
+docker-compose up
+```
+
+Then, access the application at: https://localhost:8080
+
 ## Modules
 
 - [x] Web: Django (major) by [@FirePh0enix]
@@ -8,40 +30,25 @@
 - [x] User: Remote Authentication (42) (major) by [@FirePh0enix]
 
 - [x] Gameplay: Remote players (major) [@FirePh0enix]
-- [x] Gameplay: Game customization (minor)
+- [x] Gameplay: Game customization (minor) by [@FirePh0enix] and [@Vpekdas]
 - [x] Gameplay: Live Chat (major) by [@Lebronen] and [@Vpekdas]
 
 - [x] AI: User stats (minor) by [@FirePh0enix]
 
-- [x] Cybersec: 2FA (major) by [@Lebronen]
+- [x] Cybersec: 2FA (major) by [@Lebronen] and [@FirePh0enix]
 
 - [x] Graphics: ThreeJS (major) by [@Vpekdas]
 
 - [x] Accessibility: Expanding Browser Compatibility (minor) by [@Vpekdas]
-- [x] Accessibility: Multiple language (minor) by [@Vpekdas]
+- [x] Accessibility: Multiple language (minor) by [@Vpekdas] and [@FirePh0enix]
 
-## Missing modules
+## Contributors
 
-- Web: Blockchain (major)
+Meet the amazing team behind **ft_transcendence**:
 
-- Gameplay: Multiple player (major)
-- Gameplay: Another game (major)
-
-- AI: AI Opponent (major)
-
-- Cybersec: GPDR (minor)
-- Cybersec: Implement WAF/ModSecurity with Hardened Configuration and HashiCorp Vault for Secrets Management (major)
-
-- Devops: Microservices (major)
-- Devops: Infrastructure Setup with ELK (major)
-- Devops: Monitoring system (minor)
-
-- Accessibility: Support on all device (minor)
-- Accessibility: Visually Impaired Users (minor)
-- Accessibility: Server-side rendering (minor)
-
-- Server-Side Pong: API (major)
-- Server-Side Pong: CLI (major)
+- [@FirePh0enix](https://github.com/FirePh0enix): Lead backend developer, contributed to Web (Django, PostgreSQL), User features, Gameplay, AI, and Cybersecurity.
+- [@Vpekdas](https://github.com/Vpekdas): Lead frontend developer, contributed to Graphics (ThreeJS), Accessibility, Gameplay, and Web (Bootstrap).
+- [@Lebronen](https://github.com/Lebronen): Backend developer, contributed to Gameplay (Live Chat) and Cybersecurity (2FA).
 
 [@FirePh0enix]: https://github.com/FirePh0enix
 [@Vpekdas]: https://github.com/Vpekdas

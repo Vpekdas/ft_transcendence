@@ -4,6 +4,8 @@ Hello there! Welcome to our final project of the 42 Common Core: **ft_transcende
 
 It is a Single Page Application (SPA) with several exciting features. The main highlights include playing Pong, either locally or in tournaments.
 
+https://github.com/user-attachments/assets/f4f744f3-2143-43fd-bb6b-bac6e26581ce
+
 You can find additional modules below:
 
 ## Prerequisites

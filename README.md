@@ -39,14 +39,14 @@ To validate the project, some features were considered major, while others were 
 
 The website is locally hosted using Vite. Each required service runs in its own Docker container, making the setup modular and isolated. This allows you to run the full application including the Pong game and all other features directly from your local machine with no external dependencies.
 
-### Technologies used
+## Technologies used
 
-- Django (Python) –> Backend 
-- JavaScript, HTML, CSS (Bootstrap) -> Frontend
-- Docker
-- PostgreSQL
-- Nginx
-- Vite
+- **Django (Python)** – Handles server-side logic, APIs, and database interactions.
+- **JavaScript, HTML, CSS (Bootstrap)** – Builds a responsive and interactive user interface.
+- **Vite** – Provides fast frontend bundling and development tooling.
+- **PostgreSQL** – Stores and manages structured relational data.
+- **Docker** – Containerizes the app for consistent development and deployment.
+- **Nginx** – Serves static files and acts as a reverse proxy to the backend.
 
 ### Challenges and Future Features
 
